@@ -177,6 +177,25 @@ if (!isset($_SESSION['username']) && !isset($_COOKIE['username'])) {
   <script src="js/settings.js"></script>
   <script src="js/todolist.js"></script>
   <!-- endinject -->
+  <!-- SweetAlert2 -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  <script>
+    // 登入成功時呼叫這個
+    function showSuccess() {
+      Swal.fire({
+        icon: 'success',
+        title: '成功',
+        text: '登入成功！',
+        confirmButtonText: '確定',
+        confirmButtonColor: '#4b5563' // 深灰藍色，符合你設計
+      });
+    }
+
+    // 假設登入成功後呼叫
+    // showSuccess();
+  </script>
+
 </body>
 
 </html>
