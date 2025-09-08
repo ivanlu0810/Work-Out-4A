@@ -1,4 +1,4 @@
-<?php
+<?php 
 session_start();
 
 header("Content-Type: application/json; charset=UTF-8");
@@ -11,12 +11,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit;
 }
 
-if (!isset($_SESSION['started'])) {
-    $_SESSION['started'] = true;
-    $isFirstChat = true;
-} else {
-    $isFirstChat = false;
-}
 // ✅ 載入 dotenv
 require __DIR__ . '/vendor/autoload.php';
 $dotenv = Dotenv\Dotenv::createImmutable(dirname(__DIR__));
@@ -42,6 +36,7 @@ try {
 
 // 2️⃣ 查詢最新 inbody 紀錄
 $userDataText = "⚠️ 尚未查到身體數據，請先輸入健康數據。";
+$row = null;
 try {
     $stmt = $pdo->query("SELECT * FROM inbody_records ORDER BY `Date` DESC LIMIT 1");
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
@@ -70,14 +65,13 @@ $input = json_decode(file_get_contents("php://input"), true);
 $userMessage = $input["messages"][0]["content"] ?? "";
 $userId = $input["user_id"] ?? "default_user";
 
-// 4️⃣ 工具函數：儲存訊息到 chat_logs
+// 4️⃣ 工具函數
 function saveMessage($pdo, $userId, $role, $message)
 {
     $stmt = $pdo->prepare("INSERT INTO chat_logs (user_id, role, message) VALUES (?, ?, ?)");
     $stmt->execute([$userId, $role, $message]);
 }
 
-// 5️⃣ 工具函數：取得最近 N 筆對話
 function getChatHistory($pdo, $userId, $limit = 10)
 {
     $stmt = $pdo->prepare("SELECT role, message FROM chat_logs 
@@ -90,36 +84,28 @@ function getChatHistory($pdo, $userId, $limit = 10)
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
-// 6️⃣ 儲存使用者輸入
+// 5️⃣ 先撈歷史紀錄 → 判斷是不是第一次聊天
+$history = getChatHistory($pdo, $userId, 10);
+$isFirstChat = count($history) === 0;
+
+// 6️⃣ 再儲存使用者輸入
 saveMessage($pdo, $userId, "user", $userMessage);
 
-// 7️⃣ 準備歷史紀錄
-$history = getChatHistory($pdo, $userId, 10);
-
+// 7️⃣ system prompt
 $messages = [
     [
         "role" => "system",
-        "content" => "你是一位健身 AI 諮詢助理。系統會自動提供使用者的最新身體數據（資料庫查詢，不是使用者輸入）以及動作資料表的資訊。
-        請根據這些真實數據回答，避免編造。第一次對話要先列出身體數據，如果 inbody 某些欄位是空的，請直接略過，不要特別標註『未知』。
-        在介紹訓練動作時，可以用比較自然、教練跟學員說話的口吻，例如：
-        - 先簡短介紹動作的重點肌群與特色
-        - 再說明建議的組數與次數，讓建議更容易閱讀
-        回答時務必使用繁體中文，語氣專業但親切。"
-
+        "content" => "你是一位健身教練型 AI 助理。系統會自動提供使用者的最新身體數據與相關訓練動作資料（來源於資料庫）。請以這些真實數據為依據，避免額外編造。
+        第一次對話時，請先用條列方式呈現身體數據（若某些欄位沒有資料，就直接省略即可）。後續回覆只需根據前面提供的數據即可。
+        在回答時，請用自然、像教練對學員的口吻，專業但親切。例如：
+        - 先簡短介紹該動作的主要肌群與特色
+        - 再清楚列出建議的組數與次數
+        - 讓使用者感覺建議是可操作、貼心的
+        回覆務必使用繁體中文。"
     ]
 ];
 
-foreach ($history as $msg) {
-    $messages[] = [
-        "role" => $msg["role"],
-        "content" => $msg["message"]
-    ];
-}
-
-// 判斷是否是第一次對話
-$isFirstChat = count($history) === 0;
-
-// 8️⃣ 第一次 API call → 讓 AI 幫忙解析目標肌群
+// 8️⃣ 第一次 API call → 判斷目標肌群
 $classificationPrompt = [
     [
         "role" => "system",
@@ -153,10 +139,9 @@ curl_close($ch);
 $classDecoded = json_decode($classResponse, true);
 $classText = $classDecoded["choices"][0]["message"]["content"] ?? "{}";
 $classJson = json_decode($classText, true);
-
 $targetMuscle = $classJson["target_muscle"] ?? null;
 
-// 9️⃣ 查資料表 (exercises)
+// 9️⃣ 查 exercises 資料表
 $exerciseText = "";
 if ($targetMuscle) {
     $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle = ?");
@@ -171,16 +156,25 @@ if ($targetMuscle) {
     }
 }
 
-// 🔟 組合送給 AI 的 user message (第二次 API call)
+// 🔟 組合送給 AI 的 user message
 $userPrompt = "";
 if ($isFirstChat) {
-    $userPrompt .= "以下是使用者的身體數據：\n" . $userDataText . "\n\n";
+    $userPrompt .= "以下是使用者的最新健康數據：\n" . $userDataText . "\n\n";
 }
 if ($exerciseText) {
     $userPrompt .= $exerciseText . "\n\n";
 }
 $userPrompt .= "使用者的問題：" . $userMessage;
 
+// 加入歷史紀錄
+foreach ($history as $msg) {
+    $messages[] = [
+        "role" => $msg["role"],
+        "content" => $msg["message"]
+    ];
+}
+
+// 加入這次的完整 prompt
 $messages[] = [
     "role" => "user",
     "content" => $userPrompt
@@ -212,9 +206,10 @@ $aiReply = $decoded["choices"][0]["message"]["content"] ?? "⚠️ AI 沒有回�
 // 1️⃣2️⃣ 儲存 AI 回覆
 saveMessage($pdo, $userId, "assistant", $aiReply);
 
-// 1️⃣3️⃣ 回傳給前端 (含 debug 資訊)
+// 1️⃣3️⃣ 回傳給前端
 echo json_encode([
     "reply" => $aiReply,
-    "classified" => $classJson,   // AI 判斷的肌群
-    "exercises_used" => $exerciseText  // 系統真的丟給 AI 的 DB 結果
+    "classified" => $classJson,
+    "exercises_used" => $exerciseText,
+    "user_data" => $row // 直接傳給前端用
 ], JSON_UNESCAPED_UNICODE);
