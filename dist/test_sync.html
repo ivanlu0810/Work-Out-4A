@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試同步功能</title>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h2>測試訓練計畫同步功能</h2>
+        
+        <div class="row">
+            <div class="col-md-6">
+                <h4>當前資料庫資料</h4>
+                <div id="db-data" class="border p-3 mb-3" style="height: 300px; overflow-y: auto;"></div>
+                <button class="btn btn-primary" onclick="loadFromDB()">從資料庫載入</button>
+            </div>
+            
+            <div class="col-md-6">
+                <h4>測試操作</h4>
+                <button class="btn btn-success mb-2" onclick="addTestExercise()">新增測試動作</button>
+                <button class="btn btn-warning mb-2" onclick="removeTestExercise()">移除測試動作</button>
+                <button class="btn btn-info mb-2" onclick="syncToDB()">同步到資料庫</button>
+                <button class="btn btn-danger mb-2" onclick="clearDB()">清空資料庫</button>
+            </div>
+        </div>
+        
+        <div class="mt-4">
+            <h4>操作日誌</h4>
+            <div id="log" class="border p-3" style="height: 200px; overflow-y: auto; background: #f8f9fa;"></div>
+        </div>
+    </div>
+
+    <script>
+        let testPlan = {
+            monday: [],
+            tuesday: [],
+            wednesday: [],
+            thursday: [],
+            friday: [],
+            saturday: [],
+            sunday: []
+        };
+
+        function log(message) {
+            const logDiv = document.getElementById('log');
+            const time = new Date().toLocaleTimeString();
+            logDiv.innerHTML += `[${time}] ${message}<br>`;
+            logDiv.scrollTop = logDiv.scrollHeight;
+        }
+
+        async function loadFromDB() {
+            try {
+                const response = await fetch('save_training_plan.php?week_number=0');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    testPlan = result.data.weeklyPlan;
+                    displayData();
+                    log('從資料庫載入成功');
+                } else {
+                    log('資料庫中沒有資料');
+                }
+            } catch (error) {
+                log('載入失敗: ' + error.message);
+            }
+        }
+
+        function displayData() {
+            const dbDataDiv = document.getElementById('db-data');
+            dbDataDiv.innerHTML = '<pre>' + JSON.stringify(testPlan, null, 2) + '</pre>';
+        }
+
+        function addTestExercise() {
+            const exercise = {
+                id: Math.floor(Math.random() * 100),
+                name: '測試動作' + Date.now(),
+                muscleGroup: '胸',
+                sets: 3,
+                reps: 12,
+                weight: 20,
+                restTime: 60,
+                notes: '測試用'
+            };
+            
+            testPlan.monday.push(exercise);
+            displayData();
+            log('新增測試動作到週一');
+        }
+
+        function removeTestExercise() {
+            if (testPlan.monday.length > 0) {
+                testPlan.monday.pop();
+                displayData();
+                log('移除週一的最後一個動作');
+            } else {
+                log('週一沒有動作可以移除');
+            }
+        }
+
+        async function syncToDB() {
+            try {
+                const today = new Date();
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+                const weekStartDate = startOfWeek.toISOString().split('T')[0];
+                
+                const planData = {
+                    week_start_date: weekStartDate,
+                    week_number: 0,
+                    plan_name: '測試訓練計畫',
+                    exercises: testPlan
+                };
+                
+                const response = await fetch('save_training_plan.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(planData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    log('同步到資料庫成功，計畫ID: ' + result.plan_id);
+                } else {
+                    log('同步失敗: ' + result.error);
+                }
+            } catch (error) {
+                log('同步錯誤: ' + error.message);
+            }
+        }
+
+        async function clearDB() {
+            try {
+                const emptyPlan = {
+                    monday: [],
+                    tuesday: [],
+                    wednesday: [],
+                    thursday: [],
+                    friday: [],
+                    saturday: [],
+                    sunday: []
+                };
+                
+                const today = new Date();
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay() + 1);
+                const weekStartDate = startOfWeek.toISOString().split('T')[0];
+                
+                const planData = {
+                    week_start_date: weekStartDate,
+                    week_number: 0,
+                    plan_name: '清空測試',
+                    exercises: emptyPlan
+                };
+                
+                const response = await fetch('save_training_plan.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(planData)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    testPlan = emptyPlan;
+                    displayData();
+                    log('資料庫已清空');
+                } else {
+                    log('清空失敗: ' + result.error);
+                }
+            } catch (error) {
+                log('清空錯誤: ' + error.message);
+            }
+        }
+
+        // 頁面載入時自動載入資料
+        window.onload = function() {
+            loadFromDB();
+        };
+    </script>
+</body>
+</html>
