@@ -879,15 +879,65 @@
                 const response = await fetch('get_exercises.php');
                 const data = await response.json();
                 
+                console.log('API 回應:', data);
+                
                 if (data.success) {
                     exercises = data.data;
-                    console.log('載入動作資料:', exercises);
+                    console.log('載入動作資料成功，總數:', exercises.length);
+                    console.log('胸部動作數量:', exercises.filter(ex => ex.muscle_group === '胸').length);
+                    console.log('所有肌群:', [...new Set(exercises.map(ex => ex.muscle_group))]);
                 } else {
                     console.error('載入動作失敗:', data.error);
+                    // 如果API失敗，使用備用資料
+                    exercises = getBackupExercises();
+                    console.log('使用備用動作資料，總數:', exercises.length);
                 }
             } catch (error) {
                 console.error('載入動作時發生錯誤:', error);
+                // 如果網路錯誤，使用備用資料
+                exercises = getBackupExercises();
+                console.log('網路錯誤，使用備用動作資料，總數:', exercises.length);
             }
+        }
+
+        // 備用動作資料
+        function getBackupExercises() {
+            return [
+                // 休息選項
+                {id: 0, name: "休息", muscle_group: "休息", description: "今日無訓練，讓身體充分恢復", difficulty_level: "無", equipment_needed: "無"},
+                
+                // 胸部動作
+                {id: 1, name: "伏地挺身", muscle_group: "胸", description: "經典的胸部訓練動作", difficulty_level: "初級", equipment_needed: "無"},
+                {id: 2, name: "臥推", muscle_group: "胸", description: "胸部訓練的經典動作", difficulty_level: "中級", equipment_needed: "槓鈴和臥推椅"},
+                {id: 3, name: "啞鈴飛鳥", muscle_group: "胸", description: "胸部訓練的孤立動作", difficulty_level: "初級", equipment_needed: "啞鈴"},
+                {id: 4, name: "上斜臥推", muscle_group: "胸", description: "針對上胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
+                {id: 5, name: "下斜臥推", muscle_group: "胸", description: "針對下胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
+                {id: 6, name: "啞鈴臥推", muscle_group: "胸", description: "使用啞鈴的臥推動作", difficulty_level: "初級", equipment_needed: "啞鈴"},
+                {id: 7, name: "胸推機", muscle_group: "胸", description: "使用胸推機的訓練動作", difficulty_level: "初級", equipment_needed: "胸推機"},
+                {id: 8, name: "蝴蝶機", muscle_group: "胸", description: "使用蝴蝶機的胸部訓練", difficulty_level: "初級", equipment_needed: "蝴蝶機"},
+                
+                // 背部動作
+                {id: 9, name: "引體向上", muscle_group: "背", description: "背部訓練的黃金動作", difficulty_level: "中級", equipment_needed: "單槓"},
+                {id: 10, name: "硬舉", muscle_group: "背", description: "全身性的複合動作", difficulty_level: "高級", equipment_needed: "槓鈴"},
+                {id: 11, name: "划船", muscle_group: "背", description: "背部訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
+                
+                // 腿部動作
+                {id: 12, name: "深蹲", muscle_group: "腿", description: "腿部訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無"},
+                {id: 13, name: "弓箭步", muscle_group: "腿", description: "單腿訓練動作", difficulty_level: "初級", equipment_needed: "無"},
+                {id: 14, name: "腿舉", muscle_group: "腿", description: "腿部訓練的器械動作", difficulty_level: "初級", equipment_needed: "腿舉機"},
+                
+                // 手臂動作
+                {id: 15, name: "二頭彎舉", muscle_group: "手臂", description: "針對肱二頭肌的訓練", difficulty_level: "初級", equipment_needed: "啞鈴"},
+                {id: 16, name: "三頭撐體", muscle_group: "手臂", description: "鍛鍊肱三頭肌的動作", difficulty_level: "初級", equipment_needed: "椅子或板凳"},
+                
+                // 腹部動作
+                {id: 17, name: "平板支撐", muscle_group: "腹部", description: "核心肌群訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無"},
+                {id: 18, name: "仰臥起坐", muscle_group: "腹部", description: "傳統的腹部訓練動作", difficulty_level: "初級", equipment_needed: "無"},
+                
+                // 肩膀動作
+                {id: 19, name: "肩推", muscle_group: "肩膀", description: "肩膀訓練的主要動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
+                {id: 20, name: "側平舉", muscle_group: "肩膀", description: "針對三角肌中束的訓練", difficulty_level: "初級", equipment_needed: "啞鈴"}
+            ];
         }
 
         // 載入週計畫
@@ -971,8 +1021,15 @@
         }
 
         // 開啟動作選擇視窗
-        function openExerciseModal(day) {
+        async function openExerciseModal(day) {
             selectedDay = day;
+            
+            // 確保動作資料已載入
+            if (exercises.length === 0) {
+                console.log('動作資料未載入，正在載入...');
+                await loadExercises();
+            }
+            
             renderExerciseList();
             const modal = new bootstrap.Modal(document.getElementById('exerciseModal'));
             modal.show();
