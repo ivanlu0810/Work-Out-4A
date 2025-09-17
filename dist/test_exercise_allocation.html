@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>測試動作分配</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-section { margin: 20px 0; padding: 15px; border: 1px solid #ccc; border-radius: 8px; }
+        .exercise-list { margin: 10px 0; }
+        .exercise-item { padding: 5px; margin: 2px 0; background: #f5f5f5; border-radius: 4px; }
+        button { padding: 10px 15px; margin: 5px; background: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+    </style>
+</head>
+<body>
+    <h1>測試動作分配功能</h1>
+    
+    <div class="test-section">
+        <h3>載入動作資料</h3>
+        <button onclick="loadExercises()">載入動作</button>
+        <div id="exerciseCount"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>測試肌群動作分配</h3>
+        <button onclick="testMuscleGroup('胸')">測試胸部動作</button>
+        <button onclick="testMuscleGroup('三頭')">測試三頭動作</button>
+        <button onclick="testMuscleGroup('二頭')">測試二頭動作</button>
+        <button onclick="testMuscleGroup('背')">測試背部動作</button>
+        <button onclick="testMuscleGroup('肩膀')">測試肩膀動作</button>
+        <button onclick="testMuscleGroup('腿')">測試腿部動作</button>
+        <div id="muscleGroupResults"></div>
+    </div>
+    
+    <div class="test-section">
+        <h3>測試三分化模板</h3>
+        <button onclick="testThreeSplit()">測試三分化模板</button>
+        <div id="threeSplitResults"></div>
+    </div>
+
+    <script>
+        let exercises = [];
+        
+        // 載入動作資料
+        async function loadExercises() {
+            try {
+                const response = await fetch('get_exercises.php');
+                const data = await response.json();
+                
+                if (data.success) {
+                    exercises = data.data;
+                    document.getElementById('exerciseCount').innerHTML = 
+                        `載入成功！總共 ${exercises.length} 個動作<br>
+                        肌群分布：${[...new Set(exercises.map(ex => ex.muscle_group))].join(', ')}`;
+                } else {
+                    document.getElementById('exerciseCount').innerHTML = '載入失敗：' + data.error;
+                }
+            } catch (error) {
+                document.getElementById('exerciseCount').innerHTML = '載入錯誤：' + error.message;
+            }
+        }
+        
+        // 獲取隨機動作（複製自 training-plan.html）
+        function getRandomExercise(muscleGroup) {
+            let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
+            
+            // 如果沒有找到對應肌群的動作，嘗試映射到相近的肌群
+            if (availableExercises.length === 0) {
+                const muscleMapping = {
+                    '三頭': '手臂',
+                    '二頭': '手臂',
+                    '胸': '胸',
+                    '背': '背',
+                    '肩膀': '肩膀',
+                    '腿': '腿',
+                    '腹部': '腹部'
+                };
+                
+                const mappedMuscle = muscleMapping[muscleGroup] || muscleGroup;
+                availableExercises = exercises.filter(ex => ex.muscle_group === mappedMuscle);
+                
+                // 如果是三頭或二頭，需要進一步篩選動作名稱
+                if (muscleGroup === '三頭' || muscleGroup === '二頭') {
+                    const targetMuscle = muscleGroup;
+                    availableExercises = availableExercises.filter(ex => {
+                        const name = ex.name.toLowerCase();
+                        if (targetMuscle === '三頭') {
+                            return name.includes('三頭') || name.includes('撐體') || name.includes('下壓') || name.includes('伸展');
+                        } else if (targetMuscle === '二頭') {
+                            return name.includes('二頭') || name.includes('彎舉') || name.includes('錘式');
+                        }
+                        return false;
+                    });
+                }
+                
+                // 如果還是沒有，嘗試所有動作
+                if (availableExercises.length === 0) {
+                    availableExercises = exercises.filter(ex => ex.id !== 0); // 排除休息選項
+                }
+            }
+            
+            if (availableExercises.length === 0) {
+                return null;
+            }
+            return availableExercises[Math.floor(Math.random() * availableExercises.length)];
+        }
+        
+        // 測試特定肌群
+        function testMuscleGroup(muscleGroup) {
+            const results = [];
+            for (let i = 0; i < 5; i++) {
+                const exercise = getRandomExercise(muscleGroup);
+                if (exercise) {
+                    results.push(`${exercise.name} (${exercise.muscle_group})`);
+                } else {
+                    results.push('找不到動作');
+                }
+            }
+            
+            document.getElementById('muscleGroupResults').innerHTML = 
+                `<h4>${muscleGroup} 動作測試結果：</h4>
+                 <div class="exercise-list">
+                     ${results.map(r => `<div class="exercise-item">${r}</div>`).join('')}
+                 </div>`;
+        }
+        
+        // 測試三分化模板
+        function testThreeSplit() {
+            const template = {
+                monday: [
+                    { muscleGroup: '胸', count: 3, sets: 4, reps: 8 },
+                    { muscleGroup: '三頭', count: 2, sets: 4, reps: 10 }
+                ],
+                tuesday: [
+                    { muscleGroup: '背', count: 3, sets: 4, reps: 8 },
+                    { muscleGroup: '二頭', count: 2, sets: 4, reps: 10 }
+                ],
+                wednesday: [
+                    { muscleGroup: '肩膀', count: 3, sets: 4, reps: 10 },
+                    { muscleGroup: '腿', count: 2, sets: 4, reps: 8 }
+                ]
+            };
+            
+            let html = '<h4>三分化模板測試結果：</h4>';
+            
+            Object.keys(template).forEach(day => {
+                const dayExercises = template[day];
+                html += `<h5>${day}:</h5><div class="exercise-list">`;
+                
+                dayExercises.forEach(exerciseGroup => {
+                    html += `<div><strong>${exerciseGroup.muscleGroup} (${exerciseGroup.count}個):</strong></div>`;
+                    for (let i = 0; i < exerciseGroup.count; i++) {
+                        const exercise = getRandomExercise(exerciseGroup.muscleGroup);
+                        if (exercise) {
+                            html += `<div class="exercise-item">${exercise.name} (${exercise.muscle_group})</div>`;
+                        } else {
+                            html += `<div class="exercise-item">找不到 ${exerciseGroup.muscleGroup} 動作</div>`;
+                        }
+                    }
+                });
+                html += '</div>';
+            });
+            
+            document.getElementById('threeSplitResults').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
+

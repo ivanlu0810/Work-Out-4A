@@ -54,6 +54,8 @@
             border: 2px solid #e9ecef;
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
+            min-height: 200px;
         }
 
         .day-card:hover {
@@ -65,6 +67,28 @@
         .day-card.active {
             border-color: #5A628C;
             background: #f8f9ff;
+        }
+
+        .day-card.drag-over {
+            border-color: #28a745;
+            background: #f8fff9;
+            border-style: dashed;
+        }
+
+        .day-card.drag-over::before {
+            content: "拖拽模板到這裡";
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #28a745;
+            font-weight: 600;
+            font-size: 1.1rem;
+            z-index: 10;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: 2px dashed #28a745;
         }
 
         .day-card h5 {
@@ -316,6 +340,96 @@
             background-color: #28a745 !important;
             color: white !important;
         }
+
+        /* 訓練模板樣式 */
+        .template-card {
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            cursor: grab;
+            transition: all 0.3s ease;
+            background: #fff;
+        }
+
+        .template-card:hover {
+            border-color: #5A628C;
+            box-shadow: 0 4px 15px rgba(90, 98, 140, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .template-card:active {
+            cursor: grabbing;
+        }
+
+        .template-card.dragging {
+            opacity: 0.5;
+            transform: rotate(5deg);
+        }
+
+        .template-title {
+            font-weight: 600;
+            color: #5A628C;
+            margin-bottom: 0.5rem;
+        }
+
+        .template-description {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-bottom: 0.75rem;
+        }
+
+        .template-schedule {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.25rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .schedule-day {
+            background: #f8f9fa;
+            color: #495057;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .template-stats {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .template-difficulty {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+
+        .difficulty-beginner {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .difficulty-intermediate {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .difficulty-advanced {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .template-icon {
+            font-size: 1.5rem;
+            color: #5A628C;
+            margin-bottom: 0.5rem;
+        }
     </style>
 </head>
 
@@ -410,6 +524,23 @@
                 </div>
             </div>
 
+            <!-- 訓練模板選擇區 -->
+            <div class="container">
+                <section class="section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-grid-3x3-gap me-2"></i>訓練分化模板</h4>
+                            <p class="text-muted mb-0">選擇適合的訓練分化方式，拖拽到下方時間框框快速建立訓練計畫</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="trainingTemplates">
+                                <!-- 訓練模板將在這裡動態生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
             <!-- 週課表 -->
             <div class="container">
                 <section class="section">
@@ -434,7 +565,12 @@
                         
                         <div class="row">
                             <div class="col-md-6 col-lg-4" id="monday">
-                                <div class="day-card" onclick="selectDay('monday')">
+                                <div class="day-card" 
+                                     onclick="selectDay('monday')" 
+                                     ondrop="dropTemplate(event, 'monday')" 
+                                     ondragover="allowDrop(event)" 
+                                     ondragenter="dragEnter(event)" 
+                                     ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週一</h5>
                                     <small class="text-muted" id="monday-date">12/23</small>
                                     <div id="monday-exercises"></div>
@@ -444,7 +580,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="tuesday">
-                                <div class="day-card" onclick="selectDay('tuesday')">
+                                <div class="day-card" 
+                                     onclick="selectDay('tuesday')" 
+                                     ondrop="dropTemplate(event, 'tuesday')" 
+                                     ondragover="allowDrop(event)" 
+                                     ondragenter="dragEnter(event)" 
+                                     ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週二</h5>
                                     <small class="text-muted" id="tuesday-date">12/24</small>
                                     <div id="tuesday-exercises"></div>
@@ -454,7 +595,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="wednesday">
-                                <div class="day-card" onclick="selectDay('wednesday')">
+                                <div class="day-card" 
+                                     onclick="selectDay('wednesday')" 
+                                     ondrop="dropTemplate(event, 'wednesday')" 
+                                     ondragover="allowDrop(event)" 
+                                     ondragenter="dragEnter(event)" 
+                                     ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週三</h5>
                                     <small class="text-muted" id="wednesday-date">12/25</small>
                                     <div id="wednesday-exercises"></div>
@@ -464,7 +610,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="thursday">
-                                <div class="day-card" onclick="selectDay('thursday')">
+                                <div class="day-card" 
+                                     onclick="selectDay('thursday')" 
+                                     ondrop="dropTemplate(event, 'thursday')" 
+                                     ondragover="allowDrop(event)" 
+                                     ondragenter="dragEnter(event)" 
+                                     ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週四</h5>
                                     <small class="text-muted" id="thursday-date">12/26</small>
                                     <div id="thursday-exercises"></div>
@@ -474,7 +625,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="friday">
-                                <div class="day-card" onclick="selectDay('friday')">
+                                <div class="day-card" 
+                                     onclick="selectDay('friday')" 
+                                     ondrop="dropTemplate(event, 'friday')" 
+                                     ondragover="allowDrop(event)" 
+                                     ondragenter="dragEnter(event)" 
+                                     ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週五</h5>
                                     <small class="text-muted" id="friday-date">12/27</small>
                                     <div id="friday-exercises"></div>
@@ -484,7 +640,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="saturday">
-                                <div class="day-card" onclick="selectDay('saturday')">
+                                <div class="day-card" 
+                                     onclick="selectDay('saturday')" 
+                                     ondrop="dropTemplate(event, 'saturday')" 
+                                     ondragover="allowDrop(event)" 
+                                     ondragenter="dragEnter(event)" 
+                                     ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週六</h5>
                                     <small class="text-muted" id="saturday-date">12/28</small>
                                     <div id="saturday-exercises"></div>
@@ -494,7 +655,12 @@
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="sunday">
-                                <div class="day-card" onclick="selectDay('sunday')">
+                                <div class="day-card" 
+                                     onclick="selectDay('sunday')" 
+                                     ondrop="dropTemplate(event, 'sunday')" 
+                                     ondragover="allowDrop(event)" 
+                                     ondragenter="dragEnter(event)" 
+                                     ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週日</h5>
                                     <small class="text-muted" id="sunday-date">12/29</small>
                                     <div id="sunday-exercises"></div>
@@ -663,6 +829,164 @@
             saturday: [],
             sunday: []
         };
+
+        // 訓練模板資料
+        const trainingTemplates = [
+            {
+                id: 'fullbody',
+                name: '全身訓練',
+                description: '每次訓練所有主要肌群，適合初學者',
+                difficulty: 'beginner',
+                icon: 'bi bi-activity',
+                schedule: ['週一', '週三', '週五'],
+                exercisesPerDay: 6,
+                totalDays: 3,
+                muscleGroups: ['胸', '背', '腿', '肩膀', '手臂', '腹部'],
+                exercises: {
+                    monday: [
+                        { muscleGroup: '胸', count: 2, sets: 3, reps: 12 },
+                        { muscleGroup: '背', count: 2, sets: 3, reps: 12 },
+                        { muscleGroup: '腿', count: 2, sets: 3, reps: 12 }
+                    ],
+                    wednesday: [
+                        { muscleGroup: '肩膀', count: 2, sets: 3, reps: 12 },
+                        { muscleGroup: '手臂', count: 2, sets: 3, reps: 12 },
+                        { muscleGroup: '腹部', count: 2, sets: 3, reps: 15 }
+                    ],
+                    friday: [
+                        { muscleGroup: '胸', count: 2, sets: 3, reps: 12 },
+                        { muscleGroup: '背', count: 2, sets: 3, reps: 12 },
+                        { muscleGroup: '腿', count: 2, sets: 3, reps: 12 }
+                    ]
+                }
+            },
+            {
+                id: 'upperlower',
+                name: '二分化 (上下分離)',
+                description: '上半身和下半身分開訓練',
+                difficulty: 'intermediate',
+                icon: 'bi bi-arrow-up-down',
+                schedule: ['週一', '週二', '週四', '週五'],
+                exercisesPerDay: 5,
+                totalDays: 4,
+                muscleGroups: ['胸', '背', '肩膀', '手臂', '腿'],
+                exercises: {
+                    monday: [
+                        { muscleGroup: '胸', count: 2, sets: 4, reps: 10 },
+                        { muscleGroup: '背', count: 2, sets: 4, reps: 10 },
+                        { muscleGroup: '肩膀', count: 1, sets: 3, reps: 12 }
+                    ],
+                    tuesday: [
+                        { muscleGroup: '腿', count: 4, sets: 4, reps: 10 },
+                        { muscleGroup: '腹部', count: 1, sets: 3, reps: 15 }
+                    ],
+                    thursday: [
+                        { muscleGroup: '胸', count: 2, sets: 4, reps: 10 },
+                        { muscleGroup: '背', count: 2, sets: 4, reps: 10 },
+                        { muscleGroup: '手臂', count: 1, sets: 3, reps: 12 }
+                    ],
+                    friday: [
+                        { muscleGroup: '腿', count: 4, sets: 4, reps: 10 },
+                        { muscleGroup: '腹部', count: 1, sets: 3, reps: 15 }
+                    ]
+                }
+            },
+            {
+                id: 'pushpulllegs',
+                name: '三分化 (推拉腿)',
+                description: '第一天：胸+三頭，第二天：背+二頭，第三天：肩膀+腿，休息一天後循環',
+                difficulty: 'intermediate',
+                icon: 'bi bi-arrow-repeat',
+                schedule: ['週一', '週二', '週三', '週五', '週六', '週日'],
+                exercisesPerDay: 5,
+                totalDays: 6,
+                muscleGroups: ['胸', '三頭', '背', '二頭', '肩膀', '腿'],
+                exercises: {
+                    monday: [
+                        { muscleGroup: '胸', count: 3, sets: 4, reps: 8 },
+                        { muscleGroup: '三頭', count: 2, sets: 4, reps: 10 }
+                    ],
+                    tuesday: [
+                        { muscleGroup: '背', count: 3, sets: 4, reps: 8 },
+                        { muscleGroup: '二頭', count: 2, sets: 4, reps: 10 }
+                    ],
+                    wednesday: [
+                        { muscleGroup: '肩膀', count: 3, sets: 4, reps: 10 },
+                        { muscleGroup: '腿', count: 2, sets: 4, reps: 8 }
+                    ],
+                    friday: [
+                        { muscleGroup: '胸', count: 3, sets: 4, reps: 8 },
+                        { muscleGroup: '三頭', count: 2, sets: 4, reps: 10 }
+                    ],
+                    saturday: [
+                        { muscleGroup: '背', count: 3, sets: 4, reps: 8 },
+                        { muscleGroup: '二頭', count: 2, sets: 4, reps: 10 }
+                    ],
+                    sunday: [
+                        { muscleGroup: '肩膀', count: 3, sets: 4, reps: 10 },
+                        { muscleGroup: '腿', count: 2, sets: 4, reps: 8 }
+                    ]
+                }
+            },
+            {
+                id: 'fourway',
+                name: '四分化',
+                description: '胸、背、腿、肩膀手臂分開訓練',
+                difficulty: 'advanced',
+                icon: 'bi bi-grid-3x3',
+                schedule: ['週一', '週二', '週三', '週四', '週五'],
+                exercisesPerDay: 4,
+                totalDays: 5,
+                muscleGroups: ['胸', '背', '腿', '肩膀', '手臂'],
+                exercises: {
+                    monday: [
+                        { muscleGroup: '胸', count: 4, sets: 4, reps: 8 }
+                    ],
+                    tuesday: [
+                        { muscleGroup: '背', count: 4, sets: 4, reps: 8 }
+                    ],
+                    wednesday: [
+                        { muscleGroup: '腿', count: 4, sets: 4, reps: 8 }
+                    ],
+                    thursday: [
+                        { muscleGroup: '肩膀', count: 3, sets: 4, reps: 10 },
+                        { muscleGroup: '手臂', count: 1, sets: 4, reps: 12 }
+                    ],
+                    friday: [
+                        { muscleGroup: '胸', count: 2, sets: 3, reps: 12 },
+                        { muscleGroup: '背', count: 2, sets: 3, reps: 12 }
+                    ]
+                }
+            },
+            {
+                id: 'fiveway',
+                name: '五分化',
+                description: '每個肌群單獨訓練一天',
+                difficulty: 'advanced',
+                icon: 'bi bi-collection',
+                schedule: ['週一', '週二', '週三', '週四', '週五'],
+                exercisesPerDay: 4,
+                totalDays: 5,
+                muscleGroups: ['胸', '背', '腿', '肩膀', '手臂'],
+                exercises: {
+                    monday: [
+                        { muscleGroup: '胸', count: 4, sets: 4, reps: 8 }
+                    ],
+                    tuesday: [
+                        { muscleGroup: '背', count: 4, sets: 4, reps: 8 }
+                    ],
+                    wednesday: [
+                        { muscleGroup: '腿', count: 4, sets: 4, reps: 8 }
+                    ],
+                    thursday: [
+                        { muscleGroup: '肩膀', count: 4, sets: 4, reps: 10 }
+                    ],
+                    friday: [
+                        { muscleGroup: '手臂', count: 4, sets: 4, reps: 12 }
+                    ]
+                }
+            }
+        ];
 
         // 初始化日期顯示
         function updateWeekDates() {
@@ -871,6 +1195,7 @@
             updateWeekDates();
             renderWeeklyPlan();
             updateStats();
+            renderTrainingTemplates();
         });
 
         // 載入動作資料
@@ -1269,6 +1594,220 @@
                     alert.remove();
                 }
             }, 3000);
+        }
+
+        // 渲染訓練模板
+        function renderTrainingTemplates() {
+            const container = document.getElementById('trainingTemplates');
+            container.innerHTML = '';
+            
+            trainingTemplates.forEach(template => {
+                const templateDiv = document.createElement('div');
+                templateDiv.className = 'col-md-6 col-lg-4 mb-3';
+                
+                const difficultyClass = `difficulty-${template.difficulty}`;
+                const difficultyText = {
+                    'beginner': '初級',
+                    'intermediate': '中級',
+                    'advanced': '高級'
+                }[template.difficulty];
+                
+                templateDiv.innerHTML = `
+                    <div class="template-card" 
+                         draggable="true" 
+                         ondragstart="dragStart(event, '${template.id}')"
+                         ondragend="dragEnd(event)"
+                         onclick="applyTemplate('${template.id}')">
+                        <div class="template-icon">
+                            <i class="${template.icon}"></i>
+                        </div>
+                        <div class="template-title">${template.name}</div>
+                        <div class="template-description">${template.description}</div>
+                        <div class="template-schedule">
+                            ${template.schedule.map(day => `<span class="schedule-day">${day}</span>`).join('')}
+                        </div>
+                        <div class="template-stats">
+                            <span>${template.exercisesPerDay}個動作/天</span>
+                            <span>${template.totalDays}天/週</span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="template-difficulty ${difficultyClass}">${difficultyText}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(templateDiv);
+            });
+        }
+
+        // 拖拽開始
+        function dragStart(event, templateId) {
+            event.dataTransfer.setData('text/plain', templateId);
+            event.target.classList.add('dragging');
+        }
+
+        // 拖拽結束
+        function dragEnd(event) {
+            event.target.classList.remove('dragging');
+        }
+
+        // 允許拖拽
+        function allowDrop(event) {
+            event.preventDefault();
+        }
+
+        // 拖拽進入
+        function dragEnter(event) {
+            event.preventDefault();
+            event.target.classList.add('drag-over');
+        }
+
+        // 拖拽離開
+        function dragLeave(event) {
+            event.target.classList.remove('drag-over');
+        }
+
+        // 拖拽放置
+        function dropTemplate(event, day) {
+            event.preventDefault();
+            event.target.classList.remove('drag-over');
+            
+            const templateId = event.dataTransfer.getData('text/plain');
+            const template = trainingTemplates.find(t => t.id === templateId);
+            
+            if (template) {
+                applyTemplateToDay(template, day);
+                showSuccessMessage(`${template.name} 已應用到 ${getDayName(day)}`);
+            }
+        }
+
+        // 應用整個模板
+        function applyTemplate(templateId) {
+            const template = trainingTemplates.find(t => t.id === templateId);
+            if (template) {
+                if (confirm(`確定要將 ${template.name} 應用到整週嗎？這將覆蓋現有的訓練計畫。`)) {
+                    applyTemplateToWeek(template);
+                    showSuccessMessage(`${template.name} 已應用到整週`);
+                }
+            }
+        }
+
+        // 應用模板到特定日期
+        function applyTemplateToDay(template, day) {
+            if (template.exercises[day]) {
+                weeklyPlan[day] = [];
+                const dayExercises = template.exercises[day];
+                
+                console.log(`應用模板到 ${day}:`, dayExercises);
+                
+                dayExercises.forEach(exerciseGroup => {
+                    console.log(`尋找 ${exerciseGroup.muscleGroup} 動作，需要 ${exerciseGroup.count} 個`);
+                    
+                    for (let i = 0; i < exerciseGroup.count; i++) {
+                        const exercise = getRandomExercise(exerciseGroup.muscleGroup);
+                        if (exercise) {
+                            console.log(`找到動作: ${exercise.name} (${exercise.muscle_group})`);
+                            weeklyPlan[day].push({
+                                id: exercise.id,
+                                name: exercise.name,
+                                muscleGroup: exerciseGroup.muscleGroup,
+                                sets: exerciseGroup.sets,
+                                reps: exerciseGroup.reps,
+                                weight: null,
+                                restTime: 60
+                            });
+                        } else {
+                            console.log(`找不到 ${exerciseGroup.muscleGroup} 動作`);
+                        }
+                    }
+                });
+                
+                console.log(`${day} 最終動作列表:`, weeklyPlan[day]);
+                
+                // 同步到資料庫
+                syncToDatabase().catch(error => {
+                    console.error('同步到資料庫失敗:', error);
+                });
+                
+                saveWeeklyPlan();
+                renderWeeklyPlan();
+            }
+        }
+
+        // 應用模板到整週
+        function applyTemplateToWeek(template) {
+            // 清空現有計畫
+            Object.keys(weeklyPlan).forEach(day => {
+                weeklyPlan[day] = [];
+            });
+            
+            // 應用模板到對應的日期
+            Object.keys(template.exercises).forEach(day => {
+                applyTemplateToDay(template, day);
+            });
+            
+            // 同步到資料庫
+            syncToDatabase().catch(error => {
+                console.error('同步到資料庫失敗:', error);
+            });
+        }
+
+        // 獲取隨機動作
+        function getRandomExercise(muscleGroup) {
+            let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
+            
+            // 如果沒有找到對應肌群的動作，嘗試映射到相近的肌群
+            if (availableExercises.length === 0) {
+                const muscleMapping = {
+                    '三頭': '手臂',
+                    '二頭': '手臂',
+                    '胸': '胸',
+                    '背': '背',
+                    '肩膀': '肩膀',
+                    '腿': '腿',
+                    '腹部': '腹部'
+                };
+                
+                const mappedMuscle = muscleMapping[muscleGroup] || muscleGroup;
+                availableExercises = exercises.filter(ex => ex.muscle_group === mappedMuscle);
+                
+                // 如果是三頭或二頭，需要進一步篩選動作名稱
+                if (muscleGroup === '三頭' || muscleGroup === '二頭') {
+                    const targetMuscle = muscleGroup;
+                    availableExercises = availableExercises.filter(ex => {
+                        const name = ex.name.toLowerCase();
+                        if (targetMuscle === '三頭') {
+                            return name.includes('三頭') || name.includes('撐體') || name.includes('下壓') || name.includes('伸展');
+                        } else if (targetMuscle === '二頭') {
+                            return name.includes('二頭') || name.includes('彎舉') || name.includes('錘式');
+                        }
+                        return false;
+                    });
+                }
+                
+                // 如果還是沒有，嘗試所有動作
+                if (availableExercises.length === 0) {
+                    availableExercises = exercises.filter(ex => ex.id !== 0); // 排除休息選項
+                }
+            }
+            
+            if (availableExercises.length === 0) {
+                return null;
+            }
+            return availableExercises[Math.floor(Math.random() * availableExercises.length)];
+        }
+
+        // 獲取日期名稱
+        function getDayName(day) {
+            const dayNames = {
+                'monday': '週一',
+                'tuesday': '週二',
+                'wednesday': '週三',
+                'thursday': '週四',
+                'friday': '週五',
+                'saturday': '週六',
+                'sunday': '週日'
+            };
+            return dayNames[day] || day;
         }
 
         // 搜尋和篩選事件
