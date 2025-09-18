@@ -10,7 +10,8 @@
     <!-- 字體 & Bootstrap -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/bootstrap.css">
-    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <!-- Bootstrap Icons CDN -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/app.css">
 
     <!-- 自訂樣式 -->
@@ -284,12 +285,14 @@
         }
 
         /* 表單樣式 */
-        .form-control, .form-select {
+        .form-control,
+        .form-select {
             border-radius: 8px;
             border: 1px solid #e9ecef;
         }
 
-        .form-control:focus, .form-select:focus {
+        .form-control:focus,
+        .form-select:focus {
             border-color: #7f90a9;
             box-shadow: 0 0 0 0.2rem rgba(127, 144, 169, 0.25);
         }
@@ -302,42 +305,66 @@
             font-style: italic;
         }
 
-        /* 休息選項特殊樣式 */
+        /* 休息卡片外框與背景 */
         .rest-card {
-            border: 2px solid #28a745 !important;
-            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%) !important;
+            border: 2px solid #7f90a9 !important;
+            background: linear-gradient(135deg, #f9fbfc 0%, #e6eaf0 100%) !important;
+            border-radius: 12px;
+            padding: 1rem;
         }
 
+        /* 卡片標題 */
         .rest-card .card-title {
-            color: #28a745 !important;
+            color: #7f90a9 !important;
             font-weight: 700;
         }
 
+        /* 休息標籤（左邊那顆「休息」） */
         .rest-tag {
-            background-color: #28a745 !important;
+            background-color: #7f90a9 !important;
             color: white !important;
+            border-radius: 20px;
+            padding: 0.25rem 0.75rem;
+            font-weight: 600;
         }
 
-        .rest-card .btn-outline-success:hover {
-            background-color: #28a745;
-            border-color: #28a745;
-            color: white;
+        /* 「無」改成跟「胸」一樣 → 使用 muscle-group-tag 樣式 */
+        .rest-card .btn-success,
+        .rest-card .badge.bg-success,
+        .rest-card .text-bg-success,
+        .rest-card .bg-success,
+        .rest-item .muscle-group-tag {
+            background-color: #e9ecef !important;
+            /* 淺灰底 */
+            color: #495057 !important;
+            /* 深灰文字 */
+            border: none !important;
+        }
+
+        /* hover 效果：略深的灰色 */
+        .rest-card .btn-success:hover,
+        .rest-card .badge.bg-success:hover,
+        .rest-card .text-bg-success:hover,
+        .rest-card .bg-success:hover,
+        .rest-item .muscle-group-tag:hover {
+            background-color: #d6d8db !important;
+            color: #212529 !important;
         }
 
         /* 課表中的休息選項樣式 */
         .rest-item {
-            background: linear-gradient(135deg, #f8fff9 0%, #e8f5e8 100%) !important;
-            border: 1px solid #28a745 !important;
+            background: linear-gradient(135deg, #f9fbfc 0%, #e6eaf0 100%) !important;
+            border: 1px solid #7f90a9 !important;
             border-radius: 12px !important;
         }
 
         .rest-item .exercise-name {
-            color: #28a745 !important;
+            color: #7f90a9 !important;
             font-weight: 600;
         }
 
         .rest-item .muscle-group-tag {
-            background-color: #28a745 !important;
+            background-color: #7f90a9 !important;
             color: white !important;
         }
 
@@ -430,6 +457,241 @@
             color: #5A628C;
             margin-bottom: 0.5rem;
         }
+
+        .mb-4-3 {
+            margin-bottom: 2.1rem !important;
+            /* 40px */
+        }
+
+        .card-header p {
+            margin-top: 0.75rem;
+            /* 或 1rem，看你想要多大間隔 */
+        }
+
+        h4 i {
+            vertical-align: middle;
+            /* 讓 icon 與文字中線對齊 */
+        }
+
+        .card-body {
+            margin-top: 1rem;
+            /* 16px */
+        }
+
+        .template-card {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .template-card .mt-2 {
+            margin-top: auto;
+            /* 讓難度標籤自動跑到最下方 */
+        }
+
+        .template-card {
+            position: relative;
+            padding-bottom: 2.25rem;
+        }
+
+        /* 預留標籤空間 */
+        .template-card .mt-2 {
+            position: absolute;
+            left: 1rem;
+            bottom: 1rem;
+            margin-top: 0;
+            /* 取消原先 auto 推擠 */
+        }
+
+        .template-footer {
+            margin-top: auto;
+            /* 推到底部 */
+        }
+
+        .template-footer .template-stats {
+            margin-bottom: 1.25rem;
+            /* 底下留 8px 空間 */
+        }
+
+        /* 🔔 自訂提示框樣式 */
+        .custom-alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            min-width: 320px;
+            padding: 1rem 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            z-index: 9999;
+        }
+
+        .custom-alert-success {
+            background: #e6f4ea;
+            /* 淺綠 */
+            color: #1e4620;
+            border-left: 6px solid #718d79;
+        }
+
+        .custom-alert-danger {
+            background: #fdecea;
+            /* 淺紅 */
+            color: #611a15;
+            border-left: 6px solid #d93025;
+        }
+
+        .custom-alert i {
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+            line-height: 1;
+            /* 避免多餘高度 */
+            display: flex;
+            align-items: center;
+            /* 垂直置中 */
+            justify-content: center;
+            /* 水平置中 */
+        }
+
+        .custom-alert .btn-close {
+            margin-left: 1rem;
+            background: none;
+            border: none;
+        }
+
+        .icon-wrapper {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-add-exercise {
+            display: block;
+            width: 100%;
+            min-height: 50px;
+            padding: 0.75rem 1rem;
+            line-height: 1.2;
+            border-radius: 999px !important;
+            font-weight: 600;
+            text-align: center;
+
+            background-color: #5a618d !important;
+            /* ✅ 跟右邊一致 */
+            border: none !important;
+            color: #fff !important;
+        }
+
+        .btn-add-exercise:hover {
+            background-color: #4a5175 !important;
+            /* ✅ 跟右邊一致 */
+            color: #fff !important;
+        }
+
+        /* 休息卡片中的主按鈕 → 與 .rest-tag 同色 (#7f90a9) */
+        .rest-card .btn-add-exercise {
+            background-color: #7f90a9 !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        .rest-card .btn-add-exercise:hover {
+            background-color: #6e7f96 !important;
+            /* 同系微暗的 hover 色 */
+            color: #fff !important;
+        }
+
+
+        /* 也順手關掉聚焦時的外框 */
+        .exercise-card:focus,
+        .exercise-card:focus-within,
+        .day-card:focus,
+        .day-card:focus-within,
+        .template-card:focus,
+        .template-card:focus-within {
+            border-color: transparent !important;
+            /* 或 #e9ecef */
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        /* 移除一開始的外框 */
+        .exercise-card {
+            background: linear-gradient(135deg, #f9fbfc 0%, #e6eaf0 100%) !important;
+            border: none !important;
+            /* ✅ 一開始不要外框 */
+            border-radius: 12px !important;
+            box-shadow: none !important;
+        }
+
+        /* ✅ 每個卡片都帶陰影 */
+        .rest-card,
+        .exercise-card,
+        .day-card,
+        .template-card,
+        .stats-card {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+            /* 預設陰影 */
+            border: none !important;
+            /* 如果不想要邊框 */
+            border-radius: 12px !important;
+        }
+
+        /* 停用 hover 額外陰影（避免變深） */
+        .rest-card:hover,
+        .exercise-card:hover,
+        .day-card:hover,
+        .template-card:hover,
+        .stats-card:hover {
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08) !important;
+            transform: none !important;
+            border: none !important;
+        }
+
+        /* ✅ 統一 modal 標題列顏色 */
+        .modal-header {
+            background-color: #f8f9fa !important;
+            /* 跟分化模板的標題列一致 */
+            color: #333 !important;
+            /* 調整字色避免太淡 */
+            border-bottom: 1px solid #e9ecef;
+            /* 底線同樣保持淡灰 */
+        }
+
+        /* ✅ 僅針對「訓練分化模板」卡片開啟 hover 動畫 */
+        #trainingTemplates .template-card {
+            transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease !important;
+            border-radius: 12px !important;
+            background: #fff !important;
+        }
+
+        #trainingTemplates .template-card:hover {
+            transform: translateY(-6px) scale(1.02) !important;
+            /* 上浮 + 微放大 */
+            box-shadow: 0 8px 25px rgba(0, 0, 0, .15) !important;
+            /* 陰影加深 */
+            border-color: #7f90a9 !important;
+            /* 莫蘭迪紫灰 */
+        }
+
+        .week-schedule .row {
+            display: flex;
+            flex-wrap: nowrap;
+            /* 不換行 */
+            overflow-x: auto;
+            /* 橫向捲動 */
+            gap: 1rem;
+            /* 卡片間距 */
+            padding-bottom: 1rem;
+        }
+
+        .week-schedule .col-md-6,
+        .week-schedule .col-lg-4 {
+            flex: 0 0 auto;
+            /* 卡片固定寬度，不壓縮 */
+            width: 280px;
+            /* 每個卡片固定寬度，可依需求調整 */
+        }
     </style>
 </head>
 
@@ -466,6 +728,12 @@
                                 <span>訓練探索</span>
                             </a>
                         </li>
+                        <li class="sidebar-item active">
+                            <a href="training-plan.html" class='sidebar-link'>
+                                <i class="bi bi-calendar-check-fill"></i>
+                                <span>訓練計畫</span>
+                            </a>
+                        </li>
                         <li class="sidebar-item">
                             <a href="food.html" class='sidebar-link'>
                                 <i class="bi bi-basket-fill"></i>
@@ -476,12 +744,6 @@
                             <a href="favorite.html" class='sidebar-link'>
                                 <i class="bi bi-grid-1x2-fill"></i>
                                 <span>我的最愛</span>
-                            </a>
-                        </li>
-                        <li class="sidebar-item active">
-                            <a href="training-plan.html" class='sidebar-link'>
-                                <i class="bi bi-calendar-check-fill"></i>
-                                <span>訓練計畫</span>
                             </a>
                         </li>
                         <li class="sidebar-title">更多選項</li>
@@ -533,8 +795,9 @@
                             <p class="text-muted mb-0">選擇適合的訓練分化方式，拖拽到下方時間框框快速建立訓練計畫</p>
                         </div>
                         <div class="card-body">
-                            <div class="row" id="trainingTemplates">
-                                <!-- 訓練模板將在這裡動態生成 -->
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-3"
+                                id="trainingTemplates">
+                                <!-- 卡片 -->
                             </div>
                         </div>
                     </div>
@@ -562,109 +825,88 @@
                                 </button>
                             </div>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6 col-lg-4" id="monday">
-                                <div class="day-card" 
-                                     onclick="selectDay('monday')" 
-                                     ondrop="dropTemplate(event, 'monday')" 
-                                     ondragover="allowDrop(event)" 
-                                     ondragenter="dragEnter(event)" 
-                                     ondragleave="dragLeave(event)">
+                                <div class="day-card" onclick="selectDay('monday')"
+                                    ondrop="dropTemplate(event, 'monday')" ondragover="allowDrop(event)"
+                                    ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週一</h5>
                                     <small class="text-muted" id="monday-date">12/23</small>
                                     <div id="monday-exercises"></div>
-                                    <button class="btn add-exercise-btn w-100" onclick="openExerciseModal('monday')">
+                                    <button class="btn btn-add-exercise w-100" onclick="openExerciseModal('monday')">
                                         <i class="bi bi-plus-circle me-2"></i>新增動作
                                     </button>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="tuesday">
-                                <div class="day-card" 
-                                     onclick="selectDay('tuesday')" 
-                                     ondrop="dropTemplate(event, 'tuesday')" 
-                                     ondragover="allowDrop(event)" 
-                                     ondragenter="dragEnter(event)" 
-                                     ondragleave="dragLeave(event)">
+                                <div class="day-card" onclick="selectDay('tuesday')"
+                                    ondrop="dropTemplate(event, 'tuesday')" ondragover="allowDrop(event)"
+                                    ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週二</h5>
                                     <small class="text-muted" id="tuesday-date">12/24</small>
                                     <div id="tuesday-exercises"></div>
-                                    <button class="btn add-exercise-btn w-100" onclick="openExerciseModal('tuesday')">
+                                    <button class="btn btn-add-exercise w-100" onclick="openExerciseModal('tuesday')">
                                         <i class="bi bi-plus-circle me-2"></i>新增動作
                                     </button>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="wednesday">
-                                <div class="day-card" 
-                                     onclick="selectDay('wednesday')" 
-                                     ondrop="dropTemplate(event, 'wednesday')" 
-                                     ondragover="allowDrop(event)" 
-                                     ondragenter="dragEnter(event)" 
-                                     ondragleave="dragLeave(event)">
+                                <div class="day-card" onclick="selectDay('wednesday')"
+                                    ondrop="dropTemplate(event, 'wednesday')" ondragover="allowDrop(event)"
+                                    ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週三</h5>
                                     <small class="text-muted" id="wednesday-date">12/25</small>
                                     <div id="wednesday-exercises"></div>
-                                    <button class="btn add-exercise-btn w-100" onclick="openExerciseModal('wednesday')">
+                                    <button class="btn btn-add-exercise w-100" onclick="openExerciseModal('wednesday')">
                                         <i class="bi bi-plus-circle me-2"></i>新增動作
                                     </button>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="thursday">
-                                <div class="day-card" 
-                                     onclick="selectDay('thursday')" 
-                                     ondrop="dropTemplate(event, 'thursday')" 
-                                     ondragover="allowDrop(event)" 
-                                     ondragenter="dragEnter(event)" 
-                                     ondragleave="dragLeave(event)">
+                                <div class="day-card" onclick="selectDay('thursday')"
+                                    ondrop="dropTemplate(event, 'thursday')" ondragover="allowDrop(event)"
+                                    ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週四</h5>
                                     <small class="text-muted" id="thursday-date">12/26</small>
                                     <div id="thursday-exercises"></div>
-                                    <button class="btn add-exercise-btn w-100" onclick="openExerciseModal('thursday')">
+                                    <button class="btn btn-add-exercise w-100" onclick="openExerciseModal('thursday')">
                                         <i class="bi bi-plus-circle me-2"></i>新增動作
                                     </button>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="friday">
-                                <div class="day-card" 
-                                     onclick="selectDay('friday')" 
-                                     ondrop="dropTemplate(event, 'friday')" 
-                                     ondragover="allowDrop(event)" 
-                                     ondragenter="dragEnter(event)" 
-                                     ondragleave="dragLeave(event)">
+                                <div class="day-card" onclick="selectDay('friday')"
+                                    ondrop="dropTemplate(event, 'friday')" ondragover="allowDrop(event)"
+                                    ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週五</h5>
                                     <small class="text-muted" id="friday-date">12/27</small>
                                     <div id="friday-exercises"></div>
-                                    <button class="btn add-exercise-btn w-100" onclick="openExerciseModal('friday')">
+                                    <button class="btn btn-add-exercise w-100" onclick="openExerciseModal('friday')">
                                         <i class="bi bi-plus-circle me-2"></i>新增動作
                                     </button>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="saturday">
-                                <div class="day-card" 
-                                     onclick="selectDay('saturday')" 
-                                     ondrop="dropTemplate(event, 'saturday')" 
-                                     ondragover="allowDrop(event)" 
-                                     ondragenter="dragEnter(event)" 
-                                     ondragleave="dragLeave(event)">
+                                <div class="day-card" onclick="selectDay('saturday')"
+                                    ondrop="dropTemplate(event, 'saturday')" ondragover="allowDrop(event)"
+                                    ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週六</h5>
                                     <small class="text-muted" id="saturday-date">12/28</small>
                                     <div id="saturday-exercises"></div>
-                                    <button class="btn add-exercise-btn w-100" onclick="openExerciseModal('saturday')">
+                                    <button class="btn btn-add-exercise w-100" onclick="openExerciseModal('saturday')">
                                         <i class="bi bi-plus-circle me-2"></i>新增動作
                                     </button>
                                 </div>
                             </div>
                             <div class="col-md-6 col-lg-4" id="sunday">
-                                <div class="day-card" 
-                                     onclick="selectDay('sunday')" 
-                                     ondrop="dropTemplate(event, 'sunday')" 
-                                     ondragover="allowDrop(event)" 
-                                     ondragenter="dragEnter(event)" 
-                                     ondragleave="dragLeave(event)">
+                                <div class="day-card" onclick="selectDay('sunday')"
+                                    ondrop="dropTemplate(event, 'sunday')" ondragover="allowDrop(event)"
+                                    ondragenter="dragEnter(event)" ondragleave="dragLeave(event)">
                                     <h5 class="mb-1">週日</h5>
                                     <small class="text-muted" id="sunday-date">12/29</small>
                                     <div id="sunday-exercises"></div>
-                                    <button class="btn add-exercise-btn w-100" onclick="openExerciseModal('sunday')">
+                                    <button class="btn btn-add-exercise w-100" onclick="openExerciseModal('sunday')">
                                         <i class="bi bi-plus-circle me-2"></i>新增動作
                                     </button>
                                 </div>
@@ -720,7 +962,8 @@
     </div>
 
     <!-- 選擇動作彈出視窗 -->
-    <div class="modal fade exercise-modal" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+    <div class="modal fade exercise-modal" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel"
+        aria-hidden="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -766,17 +1009,17 @@
                     <form id="setRepsForm">
                         <input type="hidden" id="selectedExerciseId">
                         <input type="hidden" id="selectedDay">
-                        
+
                         <div class="mb-3">
                             <label class="form-label">動作名稱</label>
                             <input type="text" class="form-control" id="exerciseName" readonly>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">目標肌群</label>
                             <input type="text" class="form-control" id="muscleGroup" readonly>
                         </div>
-                        
+
                         <div class="row">
                             <div class="col-md-6">
                                 <label class="form-label">組數</label>
@@ -787,17 +1030,17 @@
                                 <input type="number" class="form-control" id="reps" min="1" max="100" value="12">
                             </div>
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">重量 (kg) - 可選</label>
                             <input type="number" class="form-control" id="weight" min="0" step="0.5">
                         </div>
-                        
+
                         <div class="mb-3">
                             <label class="form-label">休息時間 (秒) - 可選</label>
                             <input type="number" class="form-control" id="restTime" min="0" value="60">
                         </div>
-                        
+
                         <div class="alert alert-info">
                             <h6>建議設定：</h6>
                             <div id="recommendations"></div>
@@ -993,9 +1236,9 @@
             const today = new Date();
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7)); // 週一開始
-            
+
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            
+
             days.forEach((day, index) => {
                 const date = new Date(startOfWeek);
                 date.setDate(startOfWeek.getDate() + index);
@@ -1003,7 +1246,7 @@
                 const dayNum = date.getDate();
                 document.getElementById(`${day}-date`).textContent = `${month}/${dayNum}`;
             });
-            
+
             // 更新週範圍顯示
             const endOfWeek = new Date(startOfWeek);
             endOfWeek.setDate(startOfWeek.getDate() + 6);
@@ -1016,14 +1259,14 @@
         async function savePlan() {
             const btn = event.target;
             const originalText = btn.innerHTML;
-            
+
             try {
                 // 計算週開始日期
                 const today = new Date();
                 const startOfWeek = new Date(today);
                 startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
                 const weekStartDate = startOfWeek.toISOString().split('T')[0];
-                
+
                 // 準備資料
                 const planData = {
                     week_start_date: weekStartDate,
@@ -1031,11 +1274,11 @@
                     plan_name: `第${currentWeek + 1}週訓練計畫`,
                     exercises: weeklyPlan
                 };
-                
+
                 // 顯示載入狀態
                 btn.innerHTML = '<i class="bi bi-hourglass-split"></i> 儲存中...';
                 btn.disabled = true;
-                
+
                 // 發送請求到伺服器
                 const response = await fetch('save_training_plan.php', {
                     method: 'POST',
@@ -1044,9 +1287,9 @@
                     },
                     body: JSON.stringify(planData)
                 });
-                
+
                 const result = await response.json();
-                
+
                 if (result.success) {
                     // 同時儲存到localStorage作為備份
                     let allPlans = {};
@@ -1058,45 +1301,45 @@
                             console.log('載入現有計畫失敗:', e);
                         }
                     }
-                    
+
                     allPlans[currentWeek] = {
                         plan: weeklyPlan,
                         lastSaved: new Date().toISOString(),
                         planId: result.plan_id
                     };
-                    
+
                     localStorage.setItem('allTrainingPlans', JSON.stringify(allPlans));
-                    
+
                     // 顯示成功訊息
                     btn.innerHTML = '<i class="bi bi-check-circle"></i> 已儲存';
                     btn.classList.remove('btn-success');
                     btn.classList.add('btn-outline-success');
-                    
+
                     setTimeout(() => {
                         btn.innerHTML = originalText;
                         btn.classList.remove('btn-outline-success');
                         btn.classList.add('btn-success');
                         btn.disabled = false;
                     }, 2000);
-                    
+
                     showSuccessMessage(`訓練計畫已儲存到資料庫！(ID: ${result.plan_id})`);
                 } else {
                     throw new Error(result.error || '儲存失敗');
                 }
-                
+
             } catch (error) {
                 console.error('儲存失敗:', error);
                 btn.innerHTML = '<i class="bi bi-exclamation-triangle"></i> 儲存失敗';
                 btn.classList.remove('btn-success');
                 btn.classList.add('btn-outline-danger');
-                
+
                 setTimeout(() => {
                     btn.innerHTML = originalText;
                     btn.classList.remove('btn-outline-danger');
                     btn.classList.add('btn-success');
                     btn.disabled = false;
                 }, 3000);
-                
+
                 showSuccessMessage('儲存失敗: ' + error.message, 'danger');
             }
         }
@@ -1106,7 +1349,7 @@
             try {
                 const response = await fetch(`save_training_plan.php?week_number=${currentWeek}`);
                 const result = await response.json();
-                
+
                 if (result.success && result.data) {
                     weeklyPlan = result.data.weeklyPlan;
                     console.log('從資料庫載入計畫成功:', weeklyPlan);
@@ -1161,7 +1404,7 @@
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
             const weekStartDate = startOfWeek.toISOString().split('T')[0];
-            
+
             // 準備資料
             const planData = {
                 week_start_date: weekStartDate,
@@ -1169,7 +1412,7 @@
                 plan_name: `第${currentWeek + 1}週訓練計畫`,
                 exercises: weeklyPlan
             };
-            
+
             // 發送請求到伺服器
             const response = await fetch('save_training_plan.php', {
                 method: 'POST',
@@ -1178,18 +1421,18 @@
                 },
                 body: JSON.stringify(planData)
             });
-            
+
             const result = await response.json();
-            
+
             if (!result.success) {
                 throw new Error(result.error || '同步失敗');
             }
-            
+
             return result;
         }
 
         // 頁面載入時初始化
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadExercises();
             loadPlan();
             updateWeekDates();
@@ -1203,9 +1446,9 @@
             try {
                 const response = await fetch('get_exercises.php');
                 const data = await response.json();
-                
+
                 console.log('API 回應:', data);
-                
+
                 if (data.success) {
                     exercises = data.data;
                     console.log('載入動作資料成功，總數:', exercises.length);
@@ -1229,39 +1472,39 @@
         function getBackupExercises() {
             return [
                 // 休息選項
-                {id: 0, name: "休息", muscle_group: "休息", description: "今日無訓練，讓身體充分恢復", difficulty_level: "無", equipment_needed: "無"},
-                
+                { id: 0, name: "休息", muscle_group: "休息", description: "今日無訓練，讓身體充分恢復", difficulty_level: "無", equipment_needed: "無" },
+
                 // 胸部動作
-                {id: 1, name: "伏地挺身", muscle_group: "胸", description: "經典的胸部訓練動作", difficulty_level: "初級", equipment_needed: "無"},
-                {id: 2, name: "臥推", muscle_group: "胸", description: "胸部訓練的經典動作", difficulty_level: "中級", equipment_needed: "槓鈴和臥推椅"},
-                {id: 3, name: "啞鈴飛鳥", muscle_group: "胸", description: "胸部訓練的孤立動作", difficulty_level: "初級", equipment_needed: "啞鈴"},
-                {id: 4, name: "上斜臥推", muscle_group: "胸", description: "針對上胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
-                {id: 5, name: "下斜臥推", muscle_group: "胸", description: "針對下胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
-                {id: 6, name: "啞鈴臥推", muscle_group: "胸", description: "使用啞鈴的臥推動作", difficulty_level: "初級", equipment_needed: "啞鈴"},
-                {id: 7, name: "胸推機", muscle_group: "胸", description: "使用胸推機的訓練動作", difficulty_level: "初級", equipment_needed: "胸推機"},
-                {id: 8, name: "蝴蝶機", muscle_group: "胸", description: "使用蝴蝶機的胸部訓練", difficulty_level: "初級", equipment_needed: "蝴蝶機"},
-                
+                { id: 1, name: "伏地挺身", muscle_group: "胸", description: "經典的胸部訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 2, name: "臥推", muscle_group: "胸", description: "胸部訓練的經典動作", difficulty_level: "中級", equipment_needed: "槓鈴和臥推椅" },
+                { id: 3, name: "啞鈴飛鳥", muscle_group: "胸", description: "胸部訓練的孤立動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 4, name: "上斜臥推", muscle_group: "胸", description: "針對上胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
+                { id: 5, name: "下斜臥推", muscle_group: "胸", description: "針對下胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
+                { id: 6, name: "啞鈴臥推", muscle_group: "胸", description: "使用啞鈴的臥推動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 7, name: "胸推機", muscle_group: "胸", description: "使用胸推機的訓練動作", difficulty_level: "初級", equipment_needed: "胸推機" },
+                { id: 8, name: "蝴蝶機", muscle_group: "胸", description: "使用蝴蝶機的胸部訓練", difficulty_level: "初級", equipment_needed: "蝴蝶機" },
+
                 // 背部動作
-                {id: 9, name: "引體向上", muscle_group: "背", description: "背部訓練的黃金動作", difficulty_level: "中級", equipment_needed: "單槓"},
-                {id: 10, name: "硬舉", muscle_group: "背", description: "全身性的複合動作", difficulty_level: "高級", equipment_needed: "槓鈴"},
-                {id: 11, name: "划船", muscle_group: "背", description: "背部訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
-                
+                { id: 9, name: "引體向上", muscle_group: "背", description: "背部訓練的黃金動作", difficulty_level: "中級", equipment_needed: "單槓" },
+                { id: 10, name: "硬舉", muscle_group: "背", description: "全身性的複合動作", difficulty_level: "高級", equipment_needed: "槓鈴" },
+                { id: 11, name: "划船", muscle_group: "背", description: "背部訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
+
                 // 腿部動作
-                {id: 12, name: "深蹲", muscle_group: "腿", description: "腿部訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無"},
-                {id: 13, name: "弓箭步", muscle_group: "腿", description: "單腿訓練動作", difficulty_level: "初級", equipment_needed: "無"},
-                {id: 14, name: "腿舉", muscle_group: "腿", description: "腿部訓練的器械動作", difficulty_level: "初級", equipment_needed: "腿舉機"},
-                
+                { id: 12, name: "深蹲", muscle_group: "腿", description: "腿部訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 13, name: "弓箭步", muscle_group: "腿", description: "單腿訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 14, name: "腿舉", muscle_group: "腿", description: "腿部訓練的器械動作", difficulty_level: "初級", equipment_needed: "腿舉機" },
+
                 // 手臂動作
-                {id: 15, name: "二頭彎舉", muscle_group: "手臂", description: "針對肱二頭肌的訓練", difficulty_level: "初級", equipment_needed: "啞鈴"},
-                {id: 16, name: "三頭撐體", muscle_group: "手臂", description: "鍛鍊肱三頭肌的動作", difficulty_level: "初級", equipment_needed: "椅子或板凳"},
-                
+                { id: 15, name: "二頭彎舉", muscle_group: "手臂", description: "針對肱二頭肌的訓練", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 16, name: "三頭撐體", muscle_group: "手臂", description: "鍛鍊肱三頭肌的動作", difficulty_level: "初級", equipment_needed: "椅子或板凳" },
+
                 // 腹部動作
-                {id: 17, name: "平板支撐", muscle_group: "腹部", description: "核心肌群訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無"},
-                {id: 18, name: "仰臥起坐", muscle_group: "腹部", description: "傳統的腹部訓練動作", difficulty_level: "初級", equipment_needed: "無"},
-                
+                { id: 17, name: "平板支撐", muscle_group: "腹部", description: "核心肌群訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 18, name: "仰臥起坐", muscle_group: "腹部", description: "傳統的腹部訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+
                 // 肩膀動作
-                {id: 19, name: "肩推", muscle_group: "肩膀", description: "肩膀訓練的主要動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴"},
-                {id: 20, name: "側平舉", muscle_group: "肩膀", description: "針對三角肌中束的訓練", difficulty_level: "初級", equipment_needed: "啞鈴"}
+                { id: 19, name: "肩推", muscle_group: "肩膀", description: "肩膀訓練的主要動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
+                { id: 20, name: "側平舉", muscle_group: "肩膀", description: "針對三角肌中束的訓練", difficulty_level: "初級", equipment_needed: "啞鈴" }
             ];
         }
 
@@ -1283,11 +1526,11 @@
         // 渲染週計畫
         function renderWeeklyPlan() {
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-            
+
             days.forEach(day => {
                 const container = document.getElementById(day + '-exercises');
                 container.innerHTML = '';
-                
+
                 if (weeklyPlan[day].length === 0) {
                     container.innerHTML = '<div class="empty-state">暫無動作</div>';
                 } else {
@@ -1295,7 +1538,7 @@
                         const exerciseDiv = document.createElement('div');
                         const isRest = exercise.id === 0;
                         exerciseDiv.className = isRest ? 'exercise-item rest-item' : 'exercise-item';
-                        
+
                         let detailsHtml = '';
                         if (isRest) {
                             detailsHtml = '<div class="exercise-details text-success"><i class="bi bi-moon me-1"></i>今日休息，讓身體恢復</div>';
@@ -1308,7 +1551,7 @@
                                 </div>
                             `;
                         }
-                        
+
                         exerciseDiv.innerHTML = `
                             <div class="d-flex justify-content-between align-items-start">
                                 <div class="flex-grow-1">
@@ -1329,7 +1572,7 @@
                     });
                 }
             });
-            
+
             updateStats();
         }
 
@@ -1339,7 +1582,7 @@
             document.querySelectorAll('.day-card').forEach(card => {
                 card.classList.remove('active');
             });
-            
+
             // 添加 active 狀態到選中的日期
             document.getElementById(day).querySelector('.day-card').classList.add('active');
             selectedDay = day;
@@ -1348,13 +1591,13 @@
         // 開啟動作選擇視窗
         async function openExerciseModal(day) {
             selectedDay = day;
-            
+
             // 確保動作資料已載入
             if (exercises.length === 0) {
                 console.log('動作資料未載入，正在載入...');
                 await loadExercises();
             }
-            
+
             renderExerciseList();
             const modal = new bootstrap.Modal(document.getElementById('exerciseModal'));
             modal.show();
@@ -1365,33 +1608,33 @@
             const container = document.getElementById('exerciseList');
             const searchTerm = document.getElementById('exerciseSearch').value.toLowerCase();
             const muscleFilter = document.getElementById('muscleGroupFilter').value;
-            
+
             let filteredExercises = exercises.filter(exercise => {
                 const matchesSearch = exercise.name.toLowerCase().includes(searchTerm);
                 const matchesMuscle = !muscleFilter || exercise.muscle_group === muscleFilter;
                 return matchesSearch && matchesMuscle;
             });
-            
+
             container.innerHTML = '';
-            
+
             if (filteredExercises.length === 0) {
                 container.innerHTML = '<div class="col-12 text-center empty-state">沒有找到符合條件的動作</div>';
                 return;
             }
-            
+
             filteredExercises.forEach(exercise => {
                 const exerciseDiv = document.createElement('div');
                 exerciseDiv.className = 'col-md-6 mb-3';
-                
+
                 // 休息選項的特殊樣式
                 const isRest = exercise.id === 0;
                 const cardClass = isRest ? 'card exercise-card rest-card h-100' : 'card exercise-card h-100';
-                const buttonClass = isRest ? 'btn btn-outline-success btn-sm w-100' : 'btn btn-primary btn-sm w-100';
+                const buttonClass = 'btn btn-add-exercise w-100'; // ✅ 統一使用一樣的樣式
                 const buttonIcon = isRest ? 'bi bi-moon' : 'bi bi-plus-circle';
                 const buttonText = isRest ? '選擇休息日' : '選擇此動作';
                 const badgeClass = isRest ? 'badge bg-success' : 'badge bg-secondary';
                 const tagClass = isRest ? 'muscle-group-tag rest-tag' : 'muscle-group-tag';
-                
+
                 exerciseDiv.innerHTML = `
                     <div class="${cardClass}">
                         <div class="card-body">
@@ -1417,17 +1660,17 @@
             document.getElementById('selectedDay').value = selectedDay;
             document.getElementById('exerciseName').value = exerciseName;
             document.getElementById('muscleGroup').value = muscleGroup;
-            
+
             // 如果是休息選項，直接加入而不顯示設定表單
             if (exerciseId === 0) {
                 addExerciseToDay(exerciseId, exerciseName, muscleGroup, 0, 0, '休息日');
                 bootstrap.Modal.getInstance(document.getElementById('exerciseModal')).hide();
                 return;
             }
-            
+
             // 生成建議
             generateRecommendations(muscleGroup);
-            
+
             // 關閉動作選擇視窗，開啟設定視窗
             bootstrap.Modal.getInstance(document.getElementById('exerciseModal')).hide();
             const setRepsModal = new bootstrap.Modal(document.getElementById('setRepsModal'));
@@ -1438,7 +1681,7 @@
         function generateRecommendations(muscleGroup) {
             const recommendations = document.getElementById('recommendations');
             let content = '';
-            
+
             // 根據肌群和目標提供建議
             if (muscleGroup === '胸' || muscleGroup === '背' || muscleGroup === '腿') {
                 content += '<div class="mb-2"><strong>增肌建議：</strong> 3-4組 × 8-12次，重量選擇能完成8-12次的重量</div>';
@@ -1450,9 +1693,9 @@
                 content += '<div class="mb-2"><strong>增肌建議：</strong> 3-4組 × 15-25次</div>';
                 content += '<div class="mb-2"><strong>減脂建議：</strong> 3-4組 × 20-30次</div>';
             }
-            
+
             content += '<div><strong>休息時間：</strong> 增肌 60-90秒，減脂 30-60秒</div>';
-            
+
             recommendations.innerHTML = content;
         }
 
@@ -1468,7 +1711,7 @@
                 const restTime = document.getElementById('restTime').value;
                 exerciseName = document.getElementById('exerciseName').value;
                 muscleGroup = document.getElementById('muscleGroup').value;
-                
+
                 const exercise = {
                     id: exerciseId,
                     name: exerciseName,
@@ -1478,9 +1721,9 @@
                     weight: weight || null,
                     restTime: restTime || null
                 };
-                
+
                 weeklyPlan[day].push(exercise);
-                
+
                 // 關閉設定視窗
                 bootstrap.Modal.getInstance(document.getElementById('setRepsModal')).hide();
             } else {
@@ -1494,13 +1737,13 @@
                     weight: weight || null,
                     restTime: null
                 };
-                
+
                 weeklyPlan[selectedDay].push(exercise);
             }
-            
+
             saveWeeklyPlan();
             renderWeeklyPlan();
-            
+
             // 同步到資料庫
             try {
                 await syncToDatabase();
@@ -1517,7 +1760,7 @@
         async function removeExercise(day, index) {
             // 從本地計畫中移除
             weeklyPlan[day].splice(index, 1);
-            
+
             // 同步到資料庫
             try {
                 await syncToDatabase();
@@ -1526,7 +1769,7 @@
                 console.error('同步到資料庫失敗:', error);
                 showSuccessMessage('動作已移除，但同步到資料庫失敗', 'danger');
             }
-            
+
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
@@ -1538,7 +1781,7 @@
             let trainingDays = 0;
             let totalSets = 0;
             let totalReps = 0;
-            
+
             Object.values(weeklyPlan).forEach(dayExercises => {
                 if (dayExercises.length > 0) {
                     trainingDays++;
@@ -1549,7 +1792,7 @@
                     });
                 }
             });
-            
+
             document.getElementById('total-exercises').textContent = totalExercises;
             document.getElementById('training-days').textContent = trainingDays;
             document.getElementById('total-sets').textContent = totalSets;
@@ -1576,19 +1819,23 @@
         }
 
         // 顯示訊息
+        // 顯示訊息
         function showSuccessMessage(message, type = 'success') {
             const alert = document.createElement('div');
-            const alertClass = type === 'danger' ? 'alert-danger' : 'alert-success';
-            const iconClass = type === 'danger' ? 'bi-exclamation-triangle' : 'bi-check-circle';
-            
-            alert.className = `alert ${alertClass} position-fixed`;
-            alert.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            const alertClass = type === 'danger' ? 'custom-alert-danger' : 'custom-alert-success';
+            const iconClass = type === 'danger' ? 'bi-exclamation-triangle-fill' : 'bi-check-circle-fill';
+
+            alert.className = `custom-alert ${alertClass}`;
             alert.innerHTML = `
-                <i class="bi ${iconClass} me-2"></i>${message}
-                <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-            `;
+        <div class="d-flex align-items-center flex-grow-1">
+            <span class="icon-wrapper"><i class="bi ${iconClass}"></i></span>
+            <span>${message}</span>
+        </div>
+        <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
+    `;
+
             document.body.appendChild(alert);
-            
+
             setTimeout(() => {
                 if (alert.parentElement) {
                     alert.remove();
@@ -1597,45 +1844,50 @@
         }
 
         // 渲染訓練模板
+        // 渲染訓練模板
+        // 渲染訓練模板（支援一列 5 張卡）
         function renderTrainingTemplates() {
             const container = document.getElementById('trainingTemplates');
+            // 確保容器有 row-cols 設定（防止忘了改 HTML）
+            container.className = 'row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-3';
             container.innerHTML = '';
-            
+
             trainingTemplates.forEach(template => {
-                const templateDiv = document.createElement('div');
-                templateDiv.className = 'col-md-6 col-lg-4 mb-3';
-                
+                const col = document.createElement('div');
+                col.className = 'col'; // 讓 row-cols 決定每列幾張
+
                 const difficultyClass = `difficulty-${template.difficulty}`;
-                const difficultyText = {
-                    'beginner': '初級',
-                    'intermediate': '中級',
-                    'advanced': '高級'
-                }[template.difficulty];
-                
-                templateDiv.innerHTML = `
-                    <div class="template-card" 
-                         draggable="true" 
-                         ondragstart="dragStart(event, '${template.id}')"
-                         ondragend="dragEnd(event)"
-                         onclick="applyTemplate('${template.id}')">
-                        <div class="template-icon">
-                            <i class="${template.icon}"></i>
-                        </div>
-                        <div class="template-title">${template.name}</div>
-                        <div class="template-description">${template.description}</div>
-                        <div class="template-schedule">
-                            ${template.schedule.map(day => `<span class="schedule-day">${day}</span>`).join('')}
-                        </div>
-                        <div class="template-stats">
-                            <span>${template.exercisesPerDay}個動作/天</span>
-                            <span>${template.totalDays}天/週</span>
-                        </div>
-                        <div class="mt-2">
-                            <span class="template-difficulty ${difficultyClass}">${difficultyText}</span>
-                        </div>
-                    </div>
-                `;
-                container.appendChild(templateDiv);
+                const difficultyText = { beginner: '初級', intermediate: '中級', advanced: '高級' }[template.difficulty];
+
+                // ✅ 後備 icon：若使用了部分版本沒有的 `bi-arrow-up-down`，自動改用 `bi-arrow-down-up`
+                const safeIcon = (template.icon === 'bi bi-arrow-up-down') ? 'bi bi-arrow-down-up' : template.icon;
+
+                col.innerHTML = `
+      <div class="template-card h-100"
+           draggable="true"
+           ondragstart="dragStart(event, '${template.id}')"
+           ondragend="dragEnd(event)"
+           onclick="applyTemplate('${template.id}')">
+        <div class="template-icon">
+          <i class="${safeIcon}"></i>
+        </div>
+        <div class="template-title">${template.name}</div>
+        <div class="template-description">${template.description}</div>
+        <div class="template-schedule">
+          ${template.schedule.map(day => `<span class="schedule-day">${day}</span>`).join('')}
+        </div>
+        <div class="template-footer mt-auto">
+  <div class="template-stats">
+    <span>${template.exercisesPerDay}個動作/天</span>
+    <span>${template.totalDays}天/週</span>
+  </div>
+  <div class="mt-2">
+    <span class="template-difficulty ${difficultyClass}">${difficultyText}</span>
+  </div>
+</div>
+      </div>
+    `;
+                container.appendChild(col);
             });
         }
 
@@ -1670,10 +1922,10 @@
         function dropTemplate(event, day) {
             event.preventDefault();
             event.target.classList.remove('drag-over');
-            
+
             const templateId = event.dataTransfer.getData('text/plain');
             const template = trainingTemplates.find(t => t.id === templateId);
-            
+
             if (template) {
                 applyTemplateToDay(template, day);
                 showSuccessMessage(`${template.name} 已應用到 ${getDayName(day)}`);
@@ -1696,12 +1948,12 @@
             if (template.exercises[day]) {
                 weeklyPlan[day] = [];
                 const dayExercises = template.exercises[day];
-                
+
                 console.log(`應用模板到 ${day}:`, dayExercises);
-                
+
                 dayExercises.forEach(exerciseGroup => {
                     console.log(`尋找 ${exerciseGroup.muscleGroup} 動作，需要 ${exerciseGroup.count} 個`);
-                    
+
                     for (let i = 0; i < exerciseGroup.count; i++) {
                         const exercise = getRandomExercise(exerciseGroup.muscleGroup);
                         if (exercise) {
@@ -1720,14 +1972,14 @@
                         }
                     }
                 });
-                
+
                 console.log(`${day} 最終動作列表:`, weeklyPlan[day]);
-                
+
                 // 同步到資料庫
                 syncToDatabase().catch(error => {
                     console.error('同步到資料庫失敗:', error);
                 });
-                
+
                 saveWeeklyPlan();
                 renderWeeklyPlan();
             }
@@ -1739,12 +1991,12 @@
             Object.keys(weeklyPlan).forEach(day => {
                 weeklyPlan[day] = [];
             });
-            
+
             // 應用模板到對應的日期
             Object.keys(template.exercises).forEach(day => {
                 applyTemplateToDay(template, day);
             });
-            
+
             // 同步到資料庫
             syncToDatabase().catch(error => {
                 console.error('同步到資料庫失敗:', error);
@@ -1754,7 +2006,7 @@
         // 獲取隨機動作
         function getRandomExercise(muscleGroup) {
             let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
-            
+
             // 如果沒有找到對應肌群的動作，嘗試映射到相近的肌群
             if (availableExercises.length === 0) {
                 const muscleMapping = {
@@ -1766,10 +2018,10 @@
                     '腿': '腿',
                     '腹部': '腹部'
                 };
-                
+
                 const mappedMuscle = muscleMapping[muscleGroup] || muscleGroup;
                 availableExercises = exercises.filter(ex => ex.muscle_group === mappedMuscle);
-                
+
                 // 如果是三頭或二頭，需要進一步篩選動作名稱
                 if (muscleGroup === '三頭' || muscleGroup === '二頭') {
                     const targetMuscle = muscleGroup;
@@ -1783,13 +2035,13 @@
                         return false;
                     });
                 }
-                
+
                 // 如果還是沒有，嘗試所有動作
                 if (availableExercises.length === 0) {
                     availableExercises = exercises.filter(ex => ex.id !== 0); // 排除休息選項
                 }
             }
-            
+
             if (availableExercises.length === 0) {
                 return null;
             }
