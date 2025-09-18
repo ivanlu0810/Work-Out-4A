@@ -542,6 +542,7 @@
 
     <!-- 自定義 JavaScript 邏輯 -->
     <script>
+        const API_FAVORITES = 'api/favorites.php';
 
         let selectedMuscle = null;
 
@@ -858,13 +859,8 @@
                 display.style.display = 'block';
                 display.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                // ✅ 在這裡綁定事件，確保卡片已經存在
-                document.querySelectorAll(".favorite-btn").forEach(btn => {
-                    btn.addEventListener("click", function () {
-                        const exercise = JSON.parse(this.getAttribute("data-exercise"));
-                        toggleFavorite(exercise);
-                    });
-                });
+                // 原本這裡會再次為 .favorite-btn 綁定事件，造成與內聯 onclick 重複觸發，
+                // 並因缺少 data-exercise 導致傳入 null。已移除以避免錯誤。
 
             } else {
                 showError(`沒有找到 ${muscleName} 的訓練資料`);
@@ -931,22 +927,53 @@
         }
 
         // 收藏功能
-        function toggleFavorite(exercise, btn) {
-            let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        async function toggleFavorite(exercise, btn) {
+            try {
+                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                const exists = favorites.some(item => item.name === exercise.name);
 
-            const exists = favorites.some(item => item.name === exercise.name);
+                if (exists) {
+                    await fetch(API_FAVORITES + '?name=' + encodeURIComponent(exercise.name), {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        credentials: 'include',
+                        body: 'name=' + encodeURIComponent(exercise.name)
+                    });
+                    alert(`已取消收藏：${exercise.name}`);
+                    if (btn) btn.querySelector('i').classList.replace('bi-star-fill', 'bi-star');
+                } else {
+                    const res = await fetch(API_FAVORITES, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name: exercise.name, exercise })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(()=>({}));
+                        throw new Error(err.error || `HTTP ${res.status}`);
+                    }
+                    alert(`已加入收藏：${exercise.name}`);
+                    if (btn) btn.querySelector('i').classList.replace('bi-star', 'bi-star-fill');
+                }
 
-            if (exists) {
-                favorites = favorites.filter(item => item.name !== exercise.name);
-                alert(`已取消收藏：${exercise.name}`);
-                btn.querySelector("i").classList.replace("bi-star-fill", "bi-star"); // 變空心
-            } else {
-                favorites.push(exercise);
-                alert(`已加入收藏：${exercise.name}`);
-                btn.querySelector("i").classList.replace("bi-star", "bi-star-fill"); // 變實心
+                // 重新同步快取
+                const updated = await fetchFavoritesFromServer();
+                localStorage.setItem('favorites', JSON.stringify(updated));
+            } catch (e) {
+                console.error(e);
+                alert('操作失敗：' + (e?.message || '請先登入或稍後再試'));
             }
+        }
 
-            localStorage.setItem("favorites", JSON.stringify(favorites));
+        async function fetchFavoritesFromServer() {
+            try {
+                const res = await fetch(API_FAVORITES, { credentials: 'include' });
+                if (!res.ok) return [];
+                const data = await res.json();
+                return data.data || [];
+            } catch (e) {
+                return [];
+            }
         }
 
         // ✅ 彈窗控制：可嵌入胸部第 1 個器械的 mp4
@@ -1019,13 +1046,6 @@
         function hideLoading() {
             // 載入完成後，顯示狀態由 displayTrainingData 控制
         }
-
-        document.querySelectorAll(".favorite-btn").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const exercise = JSON.parse(this.getAttribute("data-exercise"));
-                toggleFavorite(exercise);
-            });
-        });
 
         // 顯示錯誤訊息
         function showError(message) {

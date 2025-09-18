@@ -103,6 +103,120 @@
             margin-bottom: 2.1rem !important;
             /* 40px */
         }
+
+        /* 手風琴卡片：莫蘭迪風格 */
+        .accordion .card {
+            border: 2px solid #e6ddd9;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+            margin-bottom: 14px;
+        }
+
+        .accordion .card-header {
+            background: linear-gradient(135deg, #f9fbfc 0%, #e6eaf0 100%);
+            padding: 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .accordion .btn-toggle {
+            width: 100%;
+            text-align: left;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .accordion .btn-toggle:focus {
+            box-shadow: none;
+        }
+
+        .acc-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-left: auto;
+            font-weight: 600;
+        }
+
+        .badge-soft {
+            border: 1px solid rgba(0, 0, 0, .06);
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: .85rem;
+            background: #fff;
+            color: #6c757d;
+        }
+
+        .badge-hyper {
+            background: #c8d5db;
+        }
+
+        .badge-fat {
+            background: #e6ddd9;
+        }
+
+        .badge-muscle {
+            background: #b0bccf;
+        }
+
+        .acc-body {
+            background: #fff;
+            padding: 14px 16px;
+        }
+
+        .acc-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 576px) {
+            .acc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .acc-stat {
+            border: 2px dashed #e9ecef;
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        .acc-stat strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #2c3e50;
+        }
+
+        .acc-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        /* 展開區塊的段落樣式 */
+        .acc-section {
+            margin-top: 10px;
+        }
+
+        .acc-section h6 {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .acc-section p {
+            color: #6c757d;
+            line-height: 1.6;
+            margin: 0;
+        }
     </style>
 </head>
 
@@ -242,86 +356,187 @@
 
     <!-- 收藏頁面邏輯 -->
     <script>
-        document.addEventListener("DOMContentLoaded", function () {
-            const list = document.getElementById("favorite-list");
-            const favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        const API_FAVORITES = 'api/favorites.php';
 
-            if (favorites.length === 0) {
+        document.addEventListener("DOMContentLoaded", async function () {
+            const list = document.getElementById("favorite-list");
+            list.innerHTML = `<div class="d-flex justify-content-center align-items-center" style="height:200px;"><p class="fs-6 text-muted">載入中…</p></div>`;
+
+            // 將舊的 localStorage 收藏遷移到資料庫（只做一次）
+            try { await migrateLocalFavoritesOnce(); } catch (e) { }
+
+            // 從後端載入收藏
+            const serverFavorites = await fetchFavoritesFromServer();
+            if (!serverFavorites || serverFavorites.length === 0) {
                 list.innerHTML = `
           <div class="d-flex justify-content-center align-items-center" style="height:200px;">
             <p class="fs-5" style="color:#58474d;">目前沒有收藏任何器材。</p>
           </div>
         `;
+                // 清空快取
+                localStorage.setItem("favorites", JSON.stringify([]));
                 return;
             }
 
-            let tableHTML = `
-        <table class="table text-center align-middle">
-          <thead class="table-light">
-            <tr>
-              <th>#</th>
-              <th>名稱</th>
-              <th>目標肌群</th>
-              <th>增肌訓練</th>
-              <th>減脂訓練</th>
-              <th>操作</th>
-            </tr>
-          </thead>
-          <tbody>
-      `;
+            // 同步快取
+            localStorage.setItem("favorites", JSON.stringify(serverFavorites));
+            renderFavorites(serverFavorites);
+        });
 
-            favorites.forEach((exercise, index) => {
-                const hypertrophyWeightMin = Math.round(parseFloat(exercise.hypertrophy_load_min_pct) || 0);
+        async function fetchFavoritesFromServer() {
+            try {
+                const res = await fetch(API_FAVORITES, { credentials: 'include' });
+                if (!res.ok) throw new Error('無法載入收藏');
+                const data = await res.json();
+                return data.data || [];
+            } catch (e) {
+                console.error(e);
+                return [];
+            }
+        }
+
+        async function migrateLocalFavoritesOnce() {
+            const migrated = localStorage.getItem('favorites_migrated');
+            if (migrated === '1') return;
+            const local = JSON.parse(localStorage.getItem('favorites') || '[]');
+            if (!Array.isArray(local) || local.length === 0) { localStorage.setItem('favorites_migrated', '1'); return; }
+
+            for (const exercise of local) {
+                const name = exercise.name || '';
+                if (!name) continue;
+                try {
+                    await fetch(API_FAVORITES, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name, exercise })
+                    });
+                } catch (e) { console.warn('上傳收藏失敗', name); }
+            }
+            localStorage.setItem('favorites_migrated', '1');
+            // 舊資料可清空避免重複
+            localStorage.setItem('favorites', JSON.stringify([]));
+        }
+
+        function renderFavorites(favorites) {
+            const list = document.getElementById("favorite-list");
+            if (!favorites?.length) {
+                list.innerHTML = `
+      <div class="d-flex justify-content-center align-items-center" style="height:200px;">
+        <p class="fs-5" style="color:#58474d;">目前沒有收藏任何器材。</p>
+      </div>`;
+                return;
+            }
+
+            let html = `<div class="accordion" id="favAccordion">`;
+            favorites.forEach((ex, i) => {
+                const id = `favItem${i}`;
+                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
                 const hypertrophyWeightMax = hypertrophyWeightMin + 15;
                 const fatlossWeightMin = hypertrophyWeightMin - 20;
                 const fatlossWeightMax = hypertrophyWeightMin - 5;
 
-                tableHTML += `
-          <tr>
-            <td>${index + 1}</td>
-            <td>${exercise.name}</td>
-            <td>${exercise.target_muscle}</td>
-            <td>
-              <div class="training-details">
-                <div><strong>組數</strong>${exercise.hypertrophy_sets_min}-${exercise.hypertrophy_sets_max}</div>
-                <div><strong>次數</strong>${exercise.hypertrophy_reps_min}-${exercise.hypertrophy_reps_max}</div>
-                <div><strong>重量</strong>${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
+                html += `
+      <div class="card">
+        <div class="card-header" id="heading-${id}">
+          <button class="btn btn-toggle" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapse-${id}" aria-expanded="false" aria-controls="collapse-${id}">
+            <i class="bi bi-caret-right-fill me-1"></i>
+            <span>${ex.name || '未命名動作'}</span>
+            <div class="acc-meta">
+              <span class="badge-soft badge-muscle"><i class="bi bi-person-arms-up me-1"></i>${ex.target_muscle || '—'}</span>
+              <span class="badge-soft badge-hyper">💪 增肌：${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max} 組 / ${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max} 次 / ${hypertrophyWeightMin}-${hypertrophyWeightMax}%</span>
+              <span class="badge-soft badge-fat">🔥 減脂：${ex.fatloss_sets_min}-${ex.fatloss_sets_max} 組 / ${ex.fatloss_reps_min}-${ex.fatloss_reps_max} 次 / ${fatlossWeightMin}-${fatlossWeightMax}%</span>
+            </div>
+          </button>
+        </div>
+
+        <div id="collapse-${id}" class="collapse" aria-labelledby="heading-${id}" data-bs-parent="#favAccordion">
+          <div class="acc-body">
+            <div class="row g-3">
+              <!-- 示範影片 -->
+              <div class="col-12 col-md-6">
+                <div class="acc-section">
+                  <div class="ratio ratio-16x9">
+                    <video controls playsinline preload="metadata">
+                      <source src="${ex.video_url || ''}" type="video/mp4">
+                      您的瀏覽器不支援影片播放。
+                    </video>
+                  </div>
+                </div>
               </div>
-            </td>
-            <td>
-              <div class="training-details">
-                <div><strong>組數</strong>${exercise.fatloss_sets_min}-${exercise.fatloss_sets_max}</div>
-                <div><strong>次數</strong>${exercise.fatloss_reps_min}-${exercise.fatloss_reps_max}</div>
-                <div><strong>重量</strong>${fatlossWeightMin}-${fatlossWeightMax}%</div>
+
+              <!-- 指標與文字說明 -->
+              <div class="col-12 col-md-6">
+                <div class="acc-grid mb-2">
+                  <div class="acc-stat"><strong>增肌 組數</strong>${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</div>
+                  <div class="acc-stat"><strong>增肌 次數</strong>${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</div>
+                  <div class="acc-stat"><strong>增肌 重量</strong>${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
+                  <div class="acc-stat"><strong>減脂 組數</strong>${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</div>
+                  <div class="acc-stat"><strong>減脂 次數</strong>${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</div>
+                  <div class="acc-stat"><strong>減脂 重量</strong>${fatlossWeightMin}-${fatlossWeightMax}%</div>
+                </div>
+
+                <!-- 動作解說 -->
+                <div class="acc-section">
+                  <h6>動作解說：</h6>
+                  <p>${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
+                </div>
+
+                <!-- 適用對象 -->
+                <div class="acc-section">
+                  <h6>適用對象：</h6>
+                  <p>${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
+                </div>
+
+                <!-- 注意事項 -->
+                <div class="acc-section">
+                  <h6>注意事項：</h6>
+                  <p>${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
+                </div>
+
+                <div class="acc-actions">                  
+                  <button class="btn btn-remove btn-sm"
+                          onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
+                    移除
+                  </button>
+                </div>
               </div>
-            </td>
-            <td>
-              <button class="btn btn-detail btn-sm me-1" 
-                      data-bs-toggle="modal" 
-                      data-bs-target="#exerciseModal"
-                      onclick='openExerciseModal(${JSON.stringify(exercise)}, ${index})'>
-                詳細說明
-              </button>
-              <button class="btn btn-remove btn-sm" onclick="removeFavorite('${exercise.name}')">
-                移除
-              </button>
-            </td>
-          </tr>
-        `;
+            </div>
+          </div>
+        </div>
+      </div>`;
             });
 
-            tableHTML += "</tbody></table>";
-            list.innerHTML = tableHTML;
-        });
+            html += `</div>`;
+            list.innerHTML = html;
 
-        // 移除收藏
-        function removeFavorite(name) {
-            if (confirm(`確定要移除收藏：${name} 嗎？`)) {
-                let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
-                favorites = favorites.filter(item => item.name !== name);
-                localStorage.setItem("favorites", JSON.stringify(favorites));
-                alert(`已移除收藏：${name}`);
-                location.reload();
+            // 展開時換箭頭
+            list.querySelectorAll('.btn-toggle').forEach(btn => {
+                const icon = btn.querySelector('.bi');
+                const target = btn.getAttribute('data-bs-target');
+                const el = document.querySelector(target);
+                el?.addEventListener('show.bs.collapse', () => { icon.classList.replace('bi-caret-right-fill', 'bi-caret-down-fill'); });
+                el?.addEventListener('hide.bs.collapse', () => { icon.classList.replace('bi-caret-down-fill', 'bi-caret-right-fill'); });
+            });
+        }
+
+        // 移除收藏（改為呼叫 API）
+        async function removeFavorite(name) {
+            if (!confirm(`確定要移除收藏：${name}嗎？`)) return;
+            try {
+                await fetch(API_FAVORITES + '?name=' + encodeURIComponent(name), {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'include',
+                    body: 'name=' + encodeURIComponent(name)
+                });
+                // 重新載入列表
+                const serverFavorites = await fetchFavoritesFromServer();
+                localStorage.setItem('favorites', JSON.stringify(serverFavorites));
+                renderFavorites(serverFavorites);
+            } catch (e) {
+                alert('移除失敗，請稍後再試');
             }
         }
 
@@ -370,7 +585,9 @@
             const modalEl = document.getElementById('exerciseModal');
             modalEl.addEventListener("hidden.bs.modal", () => {
                 const v = document.getElementById("exerciseVideo");
-                if (v) { v.pause(); try { v.currentTime = 0; } catch (e) { } }
+                if (v) {
+                    v.pause(); try { v.currentTime = 0; } catch (e) { }
+                }
             }, { once: true });
         }
     </script>

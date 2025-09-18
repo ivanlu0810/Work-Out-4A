@@ -135,10 +135,12 @@
             box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15) !important;
         }
 
-        /* 卡片 header → 深莫蘭迪綠灰 */
+        /* 卡片 header（日期區塊 → 淺藍灰） */
         .card-header.bg-gradient-primary {
-            background-color: #edf0ed !important;
-            color: #ffffff !important;
+            background-color: #d9dee6 !important;
+            /* 淺藍灰，襯底 */
+            color: #333 !important;
+            /* 深灰字體清晰 */
         }
 
         /* 響應式調整 */
@@ -157,12 +159,21 @@
             }
         }
 
-        /* 統計卡片 (統一深莫蘭迪綠灰) */
+        /* 三小卡背景（統一莫蘭迪藍灰） */
         .card.bg-primary,
         .card.bg-success,
         .card.bg-info {
-            background-color: #bbc2bd !important;
+            background-color: #d6e3ed !important;
+            /* 深藍灰，主色 */
             color: #fff !important;
+        }
+
+        /* 卡片標題統一莫蘭迪灰 */
+        .card.bg-primary p,
+        .card.bg-success p,
+        .card.bg-info p {
+            color: #6c757d !important;
+            font-weight: 600;
         }
 
         /* 統一卡片內標題顏色 */
@@ -171,14 +182,21 @@
             /* 跟 header 一樣的深莫蘭迪綠灰 */
         }
 
-        /* 卡片內容置中對齊 */
+        /* 卡片內容下移 */
         .card.shadow-lg .card-body {
             display: flex;
             flex-direction: column;
-            justify-content: center;
-            /* 垂直置中 */
-            height: 100%;
-            /* 填滿卡片高度 */
+            justify-content: flex-start;
+            /* 從上方開始排 */
+            padding-top: 2rem;
+            /* 往下移 */
+            padding-bottom: 0.2rem;
+            /* 保持底部留白 */
+        }
+
+        /* ✅ footer 與卡片群組之間留白統一 */
+        #history-list {
+            margin-bottom: 60px;
         }
     </style>
 </head>
@@ -332,7 +350,7 @@
                     return;
                 }
 
-                updateStats(result.stats);
+                updateStats(result.stats, result.data);
                 renderData(result.data);
 
             } catch (err) {
@@ -345,22 +363,69 @@
             }
         }
 
-        function updateStats(stats) {
+        function updateStats(stats, data = []) {
             const statsContainer = document.getElementById("stats-container");
-            if (statsContainer) {
-                statsContainer.innerHTML = `
-                    <div class="row mb-4">
-                        <div class="col-md-12">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h4 class="card-title">${stats.total_records}</h4>
-                                    <p class="card-text">您的健康記錄總數</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
+            if (!statsContainer) return;
+
+            // 1️⃣ 總數
+            const total = (stats && typeof stats.total_records === 'number')
+                ? stats.total_records
+                : (Array.isArray(data) ? data.length : 0);
+
+            // 2️⃣ 本月新增紀錄數
+            let monthlyCount = 0;
+            if (Array.isArray(data) && data.length) {
+                const now = new Date();
+                const currentYear = now.getFullYear();
+                const currentMonth = now.getMonth(); // 0 ~ 11
+
+                monthlyCount = data.filter(r => {
+                    if (!r?.Date) return false;
+                    const d = new Date(r.Date);
+                    return d.getFullYear() === currentYear && d.getMonth() === currentMonth;
+                }).length;
             }
+
+            // 3️⃣ 平均 BMI
+            let avgBMI = '-';
+            if (Array.isArray(data) && data.length) {
+                const bmis = data
+                    .map(r => parseFloat(r?.bmi))
+                    .filter(v => Number.isFinite(v));
+                if (bmis.length) {
+                    avgBMI = (bmis.reduce((a, b) => a + b, 0) / bmis.length).toFixed(2);
+                }
+            }
+
+            // 4️⃣ 三小卡佈局
+            statsContainer.innerHTML = `
+    <div class="row mb-4 text-center">
+      <div class="col-md-4 mb-3 mb-md-0">
+        <div class="card bg-primary text-white shadow-sm h-100">
+          <div class="card-body d-flex flex-column justify-content-center">
+            <h4 class="mb-1">${total}</h4>
+            <p class="mb-0">健康記錄總數</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4 mb-3 mb-md-0">
+        <div class="card bg-success text-white shadow-sm h-100">
+          <div class="card-body d-flex flex-column justify-content-center">
+            <h4 class="mb-1">${monthlyCount}</h4>
+            <p class="mb-0">本月新增紀錄數</p>
+          </div>
+        </div>
+      </div>
+      <div class="col-md-4">
+        <div class="card bg-info text-white shadow-sm h-100">
+          <div class="card-body d-flex flex-column justify-content-center">
+            <h4 class="mb-1">${avgBMI}</h4>
+            <p class="mb-0">平均 BMI</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
         }
 
         function renderData(data) {
