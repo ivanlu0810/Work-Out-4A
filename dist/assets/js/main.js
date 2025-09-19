@@ -30,13 +30,20 @@ window.addEventListener('resize', (event) => {
     }
 });
 
-document.querySelector('.burger-btn').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('active');
-})
-document.querySelector('.sidebar-hide').addEventListener('click', () => {
-    document.getElementById('sidebar').classList.toggle('active');
+// 安全地添加事件監聽器
+const burgerBtn = document.querySelector('.burger-btn');
+if (burgerBtn) {
+    burgerBtn.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('active');
+    });
+}
 
-})
+const sidebarHide = document.querySelector('.sidebar-hide');
+if (sidebarHide) {
+    sidebarHide.addEventListener('click', () => {
+        document.getElementById('sidebar').classList.toggle('active');
+    });
+}
 
 
 // Perfect Scrollbar Init

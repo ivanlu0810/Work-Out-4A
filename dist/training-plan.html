@@ -2018,7 +2018,11 @@
 
         // 獲取隨機動作
         function getRandomExercise(muscleGroup) {
+            console.log(`尋找 ${muscleGroup} 動作，總動作數: ${exercises.length}`);
+            
+            // 先嘗試直接匹配
             let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
+            console.log(`直接匹配找到 ${availableExercises.length} 個動作`);
 
             // 如果沒有找到對應肌群的動作，嘗試映射到相近的肌群
             if (availableExercises.length === 0) {
@@ -2033,11 +2037,14 @@
                 };
 
                 const mappedMuscle = muscleMapping[muscleGroup] || muscleGroup;
+                console.log(`映射 ${muscleGroup} 到 ${mappedMuscle}`);
                 availableExercises = exercises.filter(ex => ex.muscle_group === mappedMuscle);
+                console.log(`映射後找到 ${availableExercises.length} 個動作`);
 
                 // 如果是三頭或二頭，需要進一步篩選動作名稱
                 if (muscleGroup === '三頭' || muscleGroup === '二頭') {
                     const targetMuscle = muscleGroup;
+                    const originalCount = availableExercises.length;
                     availableExercises = availableExercises.filter(ex => {
                         const name = ex.name.toLowerCase();
                         if (targetMuscle === '三頭') {
@@ -2047,18 +2054,24 @@
                         }
                         return false;
                     });
+                    console.log(`篩選後從 ${originalCount} 個減少到 ${availableExercises.length} 個動作`);
                 }
 
                 // 如果還是沒有，嘗試所有動作
                 if (availableExercises.length === 0) {
+                    console.log('沒有找到匹配的動作，使用所有動作');
                     availableExercises = exercises.filter(ex => ex.id !== 0); // 排除休息選項
                 }
             }
 
             if (availableExercises.length === 0) {
+                console.log(`最終沒有找到任何 ${muscleGroup} 動作`);
                 return null;
             }
-            return availableExercises[Math.floor(Math.random() * availableExercises.length)];
+            
+            const selectedExercise = availableExercises[Math.floor(Math.random() * availableExercises.length)];
+            console.log(`選擇了動作: ${selectedExercise.name} (${selectedExercise.muscle_group})`);
+            return selectedExercise;
         }
 
         // 獲取日期名稱
