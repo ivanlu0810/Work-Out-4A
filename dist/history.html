@@ -198,6 +198,15 @@
         #history-list {
             margin-bottom: 60px;
         }
+
+        .alert-morandi {
+            background-color: #c8d5db !important;
+            /* 背景 */
+            color: #333 !important;
+            /* 文字顏色 */
+            border: none !important;
+            /* 移除邊框 */
+        }
     </style>
 </head>
 
@@ -435,7 +444,7 @@
             if (data.length === 0) {
                 container.innerHTML = `
                     <div class="col-12">
-                        <div class="alert alert-info text-center" role="alert">
+                        <div class="alert alert-morandi text-center" role="alert">
                             <i class="bi bi-info-circle-fill me-2"></i>
                             目前沒有歷史紀錄，請先新增健康數據
                         </div>
