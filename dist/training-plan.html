@@ -934,19 +934,19 @@
                         <div class="col-md-3">
                             <div class="stats-card">
                                 <div class="stats-number" id="training-days">0</div>
-                                <div class="stats-label">訓練天數</div>
+                                <div class="stats-label">本週訓練天數</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stats-card">
                                 <div class="stats-number" id="total-sets">0</div>
-                                <div class="stats-label">總組數</div>
+                                <div class="stats-label">本週總組數</div>
                             </div>
                         </div>
                         <div class="col-md-3">
                             <div class="stats-card">
                                 <div class="stats-number" id="total-reps">0</div>
-                                <div class="stats-label">總次數</div>
+                                <div class="stats-label">本週總次數</div>
                             </div>
                         </div>
                     </div>
@@ -1095,31 +1095,46 @@
                 difficulty: 'beginner',
                 icon: 'bi bi-activity',
                 schedule: ['週一', '週三', '週五'],
-                exercisesPerDay: 6,
+                exercisesPerDay: 8,
                 totalDays: 3,
                 muscleGroups: ['胸', '背', '腿', '肩膀', '手臂', '腹部'],
                 exercises: {
                     monday: [
-                        { muscleGroup: '中胸', count: 1, sets: 3, reps: 12 },
+                        // 胸部：上中下各一個動作
                         { muscleGroup: '上胸', count: 1, sets: 3, reps: 12 },
-                        { muscleGroup: '中背', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '中胸', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '下胸', count: 1, sets: 3, reps: 12 },
+                        // 背部：上中下各一個動作
                         { muscleGroup: '上背', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '中背', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '下背', count: 1, sets: 3, reps: 12 },
+                        // 腿部：股四頭肌和臀肌
                         { muscleGroup: '股四頭肌', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '臀肌', count: 1, sets: 3, reps: 12 }
                     ],
                     wednesday: [
+                        // 肩膀：前中後束各一個動作
                         { muscleGroup: '肩膀前束', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '肩膀中束', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '肩膀後束', count: 1, sets: 3, reps: 12 },
+                        // 手臂：二頭和三頭
                         { muscleGroup: '二頭肌', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '三頭肌', count: 1, sets: 3, reps: 12 },
-                        { muscleGroup: '核心', count: 1, sets: 3, reps: 15 },
-                        { muscleGroup: '上腹', count: 1, sets: 3, reps: 15 }
+                        // 核心：上腹、下腹、側腹
+                        { muscleGroup: '上腹', count: 1, sets: 3, reps: 15 },
+                        { muscleGroup: '下腹', count: 1, sets: 3, reps: 15 },
+                        { muscleGroup: '側腹', count: 1, sets: 3, reps: 15 }
                     ],
                     friday: [
+                        // 胸部：上中下各一個動作（不同於週一）
+                        { muscleGroup: '上胸', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '中胸', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '下胸', count: 1, sets: 3, reps: 12 },
+                        // 背部：上中下各一個動作（不同於週一）
+                        { muscleGroup: '上背', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '中背', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '下背', count: 1, sets: 3, reps: 12 },
+                        // 腿部：股四頭肌和股二頭肌
                         { muscleGroup: '股四頭肌', count: 1, sets: 3, reps: 12 },
                         { muscleGroup: '股二頭肌', count: 1, sets: 3, reps: 12 }
                     ]
@@ -1132,35 +1147,49 @@
                 difficulty: 'intermediate',
                 icon: 'bi bi-arrow-up-down',
                 schedule: ['週一', '週二', '週四', '週五'],
-                exercisesPerDay: 5,
+                exercisesPerDay: 6,
                 totalDays: 4,
                 muscleGroups: ['胸', '背', '肩膀', '手臂', '腿'],
                 exercises: {
                     monday: [
+                        // 胸部：上中下各一個動作
                         { muscleGroup: '上胸', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '中胸', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '下胸', count: 1, sets: 4, reps: 10 },
+                        // 背部：上中下各一個動作
                         { muscleGroup: '上背', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '中背', count: 1, sets: 4, reps: 10 },
-                        { muscleGroup: '肩膀前束', count: 1, sets: 3, reps: 12 }
+                        { muscleGroup: '下背', count: 1, sets: 4, reps: 10 }
                     ],
                     tuesday: [
+                        // 腿部：股四頭肌、股二頭肌、臀肌
                         { muscleGroup: '股四頭肌', count: 2, sets: 4, reps: 10 },
                         { muscleGroup: '股二頭肌', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '臀肌', count: 1, sets: 4, reps: 10 },
-                        { muscleGroup: '核心', count: 1, sets: 3, reps: 15 }
+                        // 核心：上腹、下腹、側腹
+                        { muscleGroup: '上腹', count: 1, sets: 3, reps: 15 },
+                        { muscleGroup: '下腹', count: 1, sets: 3, reps: 15 },
+                        { muscleGroup: '側腹', count: 1, sets: 3, reps: 15 }
                     ],
                     thursday: [
-                        { muscleGroup: '下胸', count: 1, sets: 4, reps: 10 },
+                        // 胸部：上中下各一個動作（不同於週一）
+                        { muscleGroup: '上胸', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '中胸', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '下胸', count: 1, sets: 4, reps: 10 },
+                        // 背部：上中下各一個動作（不同於週一）
+                        { muscleGroup: '上背', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '中背', count: 1, sets: 4, reps: 10 },
-                        { muscleGroup: '下背', count: 1, sets: 4, reps: 10 },
-                        { muscleGroup: '二頭肌', count: 1, sets: 3, reps: 12 }
+                        { muscleGroup: '下背', count: 1, sets: 4, reps: 10 }
                     ],
                     friday: [
+                        // 腿部：股四頭肌、股二頭肌、臀肌（不同於週二）
                         { muscleGroup: '股四頭肌', count: 2, sets: 4, reps: 10 },
                         { muscleGroup: '股二頭肌', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '臀肌', count: 1, sets: 4, reps: 10 },
-                        { muscleGroup: '核心', count: 1, sets: 3, reps: 15 }
+                        // 核心：上腹、下腹、側腹（不同於週二）
+                        { muscleGroup: '上腹', count: 1, sets: 3, reps: 15 },
+                        { muscleGroup: '下腹', count: 1, sets: 3, reps: 15 },
+                        { muscleGroup: '側腹', count: 1, sets: 3, reps: 15 }
                     ]
                 }
             },
@@ -1171,46 +1200,60 @@
                 difficulty: 'intermediate',
                 icon: 'bi bi-arrow-repeat',
                 schedule: ['週一', '週二', '週三', '週五', '週六', '週日'],
-                exercisesPerDay: 5,
+                exercisesPerDay: 6,
                 totalDays: 6,
                 muscleGroups: ['胸', '三頭', '背', '二頭', '肩膀', '腿'],
                 exercises: {
                     monday: [
+                        // 胸部：上中下各一個動作
                         { muscleGroup: '上胸', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '中胸', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '下胸', count: 1, sets: 4, reps: 8 },
+                        // 三頭肌：兩個不同動作
                         { muscleGroup: '三頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     tuesday: [
+                        // 背部：上中下各一個動作
                         { muscleGroup: '上背', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '中背', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '下背', count: 1, sets: 4, reps: 8 },
+                        // 二頭肌：兩個不同動作
                         { muscleGroup: '二頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     wednesday: [
+                        // 肩膀：前中後束各一個動作
                         { muscleGroup: '肩膀前束', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '肩膀中束', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '肩膀後束', count: 1, sets: 4, reps: 10 },
+                        // 腿部：股四頭肌、股二頭肌、臀肌
                         { muscleGroup: '股四頭肌', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '股二頭肌', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '臀肌', count: 1, sets: 4, reps: 8 }
                     ],
                     friday: [
+                        // 胸部：上中下各一個動作（不同於週一）
                         { muscleGroup: '上胸', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '中胸', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '下胸', count: 1, sets: 4, reps: 8 },
+                        // 三頭肌：兩個不同動作（不同於週一）
                         { muscleGroup: '三頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     saturday: [
+                        // 背部：上中下各一個動作（不同於週二）
                         { muscleGroup: '上背', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '中背', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '下背', count: 1, sets: 4, reps: 8 },
+                        // 二頭肌：兩個不同動作（不同於週二）
                         { muscleGroup: '二頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     sunday: [
+                        // 肩膀：前中後束各一個動作（不同於週三）
                         { muscleGroup: '肩膀前束', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '肩膀中束', count: 1, sets: 4, reps: 10 },
                         { muscleGroup: '肩膀後束', count: 1, sets: 4, reps: 10 },
+                        // 腿部：股四頭肌、股二頭肌、臀肌（不同於週三）
                         { muscleGroup: '股四頭肌', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '股二頭肌', count: 1, sets: 4, reps: 8 },
                         { muscleGroup: '臀肌', count: 1, sets: 4, reps: 8 }
                     ]
                 }
@@ -2121,6 +2164,11 @@
         // 應用模板到整週
         function applyTemplateToWeek(template) {
             console.log('開始應用模板到整週:', template.name);
+            console.log('模板包含的日期:', Object.keys(template.exercises));
+            
+            // 重置已使用動作追蹤（確保每次應用模板都從乾淨狀態開始）
+            usedExercises.clear();
+            console.log('已重置已使用動作追蹤');
             
             // 清空現有計畫
             Object.keys(weeklyPlan).forEach(day => {
@@ -2129,7 +2177,9 @@
 
             // 應用模板到對應的日期
             Object.keys(template.exercises).forEach(day => {
+                console.log(`正在處理 ${day}...`);
                 applyTemplateToDay(template, day);
+                console.log(`${day} 完成，動作數量: ${weeklyPlan[day].length}`);
             });
 
             // 更新顯示
@@ -2143,9 +2193,20 @@
             });
             
             console.log('模板應用完成，週計畫:', weeklyPlan);
+            
+            // 顯示最終統計
+            let totalExercises = 0;
+            Object.keys(weeklyPlan).forEach(day => {
+                totalExercises += weeklyPlan[day].length;
+                console.log(`${day}: ${weeklyPlan[day].length} 個動作`);
+            });
+            console.log(`總共生成了 ${totalExercises} 個動作`);
         }
 
-        // 獲取隨機動作（只使用資料庫中的動作，找不到就跳過）
+        // 已使用的動作追蹤（避免重複）
+        let usedExercises = new Set();
+
+        // 獲取隨機動作（只使用資料庫中的動作，找不到就跳過，避免重複）
         function getRandomExercise(muscleGroup) {
             console.log(`尋找 ${muscleGroup} 動作，總動作數: ${exercises.length}`);
             
@@ -2224,6 +2285,53 @@
                     console.log(`篩選後從 ${originalCount} 個減少到 ${availableExercises.length} 個動作`);
                 }
 
+                // 如果還是沒有找到，嘗試更寬鬆的搜尋
+                if (availableExercises.length === 0) {
+                    console.log(`嘗試更寬鬆的搜尋 ${muscleGroup}`);
+                    if (muscleGroup === '三頭肌') {
+                        availableExercises = exercises.filter(ex => {
+                            const name = ex.name.toLowerCase();
+                            return name.includes('三頭') || name.includes('撐體') || name.includes('下壓') || name.includes('伸展');
+                        });
+                    } else if (muscleGroup === '二頭肌') {
+                        availableExercises = exercises.filter(ex => {
+                            const name = ex.name.toLowerCase();
+                            return name.includes('二頭') || name.includes('彎舉') || name.includes('錘式');
+                        });
+                    }
+                    console.log(`寬鬆搜尋後找到 ${availableExercises.length} 個動作`);
+                }
+
+                // 如果還是沒有找到，嘗試使用相近肌群
+                if (availableExercises.length === 0) {
+                    console.log(`嘗試相近肌群搜尋 ${muscleGroup}`);
+                    const fallbackMapping = {
+                        '上胸': '中胸',
+                        '中胸': '上胸',
+                        '下胸': '中胸',
+                        '上背': '中背',
+                        '中背': '上背',
+                        '下背': '中背',
+                        '肩膀前束': '肩膀中束',
+                        '肩膀中束': '肩膀前束',
+                        '肩膀後束': '肩膀中束',
+                        '三頭肌': '二頭肌',
+                        '二頭肌': '三頭肌',
+                        '股四頭肌': '股二頭肌',
+                        '股二頭肌': '股四頭肌',
+                        '上腹': '下腹',
+                        '下腹': '上腹',
+                        '側腹': '上腹'
+                    };
+                    
+                    const fallbackMuscle = fallbackMapping[muscleGroup];
+                    if (fallbackMuscle) {
+                        console.log(`嘗試相近肌群: ${fallbackMuscle}`);
+                        availableExercises = exercises.filter(ex => ex.muscle_group === fallbackMuscle);
+                        console.log(`相近肌群找到 ${availableExercises.length} 個動作`);
+                    }
+                }
+
                 // 如果還是沒有找到，就跳過（不使用備用動作）
                 if (availableExercises.length === 0) {
                     console.log(`資料庫中沒有找到 ${muscleGroup} 的動作，跳過此肌群`);
@@ -2245,12 +2353,35 @@
                 console.log('沒有找到適合新手/有基礎的動作，使用所有可用動作');
             }
 
+            // 過濾掉已經使用過的動作
+            const unusedExercises = availableExercises.filter(ex => !usedExercises.has(ex.id));
+            console.log(`過濾已使用動作後剩餘 ${unusedExercises.length} 個動作`);
+
+            // 如果沒有未使用的動作，重置已使用列表（允許重複）
+            if (unusedExercises.length === 0) {
+                console.log('所有動作都已使用，重置已使用列表');
+                usedExercises.clear();
+                // 重新過濾
+                const freshUnusedExercises = availableExercises.filter(ex => !usedExercises.has(ex.id));
+                if (freshUnusedExercises.length > 0) {
+                    availableExercises = freshUnusedExercises;
+                } else {
+                    availableExercises = availableExercises; // 使用所有可用動作
+                }
+            } else {
+                availableExercises = unusedExercises;
+            }
+
             if (availableExercises.length === 0) {
                 console.log(`最終沒有找到任何 ${muscleGroup} 動作`);
                 return null;
             }
             
             const selectedExercise = availableExercises[Math.floor(Math.random() * availableExercises.length)];
+            
+            // 記錄已使用的動作
+            usedExercises.add(selectedExercise.id);
+            
             console.log(`選擇了動作: ${selectedExercise.name} (${selectedExercise.muscle_group}, ${selectedExercise.difficulty_level})`);
             return selectedExercise;
         }

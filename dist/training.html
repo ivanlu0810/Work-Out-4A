@@ -788,7 +788,60 @@
             }
         }
 
-        // 從資料庫獲取訓練資料
+        // 依據大肌群名稱，解析出實際要查詢的目標肌群陣列（對應資料庫 target_muscle 細分）
+        function resolveMuscles(muscleName) {
+            const mapping = {
+                // 胸部細分與別名
+                '胸部': ['上胸', '中胸', '下胸', '胸', '胸肌', '胸大肌'],
+
+                // 背部細分：常見的功能與解剖名稱
+                '背部': [
+                    '上背', '中背', '下背', '背', '背肌',
+                    '背闊肌', '闊背肌',
+                    '斜方肌上束', '斜方肌中束', '斜方肌下束', '斜方肌',
+                    '菱形肌', '豎脊肌',
+                    '圓大肌', '圓小肌',
+                    '岡下肌', '岡上肌'
+                ],
+
+                // 肩膀：三角肌前/中/後束與命名變體
+                '肩膀': [
+                    '肩膀前束', '肩膀中束', '肩膀後束', '肩膀',
+                    '三角肌前束', '三角肌中束', '三角肌後束', '三角肌'
+                ],
+
+                // 手臂
+                '二頭': ['二頭', '二頭肌', '肱二頭肌'],
+                '三頭': ['三頭', '三頭肌', '肱三頭肌'],
+
+                // 下肢
+                '大腿': ['股四頭肌', '股二頭肌', '臀肌', '大腿', '內收肌群'],
+                '小腿': ['小腿', '腓腸肌', '比目魚肌'],
+
+                // 核心/腹
+                '腹部': ['上腹', '下腹', '側腹', '核心', '腹部', '腹斜肌', '腹直肌']
+            };
+            // 若傳入已是陣列，直接回傳
+            if (Array.isArray(muscleName)) return muscleName;
+            // 回傳映射或預設單一查詢
+            return mapping[muscleName] || [muscleName];
+        }
+
+        // 合併多筆查詢結果並依名稱去重
+        function mergeExercisesUnique(resultsArrays) {
+            const merged = [];
+            const seen = new Set();
+            resultsArrays.flat().forEach(ex => {
+                const key = ex.name || `${ex.id || ''}-${ex.target_muscle || ''}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    merged.push(ex);
+                }
+            });
+            return merged;
+        }
+
+        // 從資料庫獲取訓練資料（支援一次查多個細分肌群並合併）
         async function fetchTrainingData(muscleName) {
             try {
                 // 顯示載入狀態
@@ -796,6 +849,10 @@
 
                 // 除錯資訊
                 console.log(`正在查詢肌群：${muscleName}`);
+
+                // 解析出要查詢的實際目標肌群陣列
+                const musclesToQuery = resolveMuscles(muscleName);
+                console.log('解析後要查詢的目標肌群：', musclesToQuery);
 
                 // 呼叫 PHP 後端 API
                 // 判斷是否本機
@@ -806,25 +863,28 @@
                     ? location.origin
                     : "https://jianshen.ngrok.app/健習生/dist";
 
-                // 用這一條就涵蓋你的兩種寫法
-                const response = await fetch(
-                    `${baseURL}/api/get_exercises.php?muscle=${encodeURIComponent(muscleName)}`
+                // 並行查詢多個目標肌群
+                const fetches = musclesToQuery.map(m =>
+                    fetch(`${baseURL}/api/get_exercises.php?muscle=${encodeURIComponent(m)}`)
+                        .then(r => {
+                            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                            return r.json();
+                        })
+                        .then(j => (j && j.success && Array.isArray(j.data)) ? j.data : [])
+                        .catch(err => {
+                            console.warn('查詢失敗：', m, err.message);
+                            return [];
+                        })
                 );
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const resultsArrays = await Promise.all(fetches);
+                const merged = mergeExercisesUnique(resultsArrays);
 
-                const result = await response.json();
+                console.log(`合併後總共找到 ${merged.length} 個訓練動作`);
 
-                // 除錯資訊
-                console.log('API 回應結果：', result);
-
-                if (result.success && result.data && result.data.length > 0) {
-                    console.log(`找到 ${result.data.length} 個訓練動作`);
-                    displayTrainingData(muscleName, result.data);
+                if (merged.length > 0) {
+                    displayTrainingData(muscleName, merged);
                 } else {
-                    console.log('沒有找到訓練資料');
                     showError(`抱歉，目前沒有找到針對 ${muscleName} 的訓練資料。`);
                 }
 
