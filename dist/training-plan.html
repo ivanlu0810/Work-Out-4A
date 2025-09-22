@@ -800,7 +800,7 @@
                             <p class="text-muted mb-0">選擇適合的訓練分化方式，拖拽到下方時間框框快速建立訓練計畫</p>
                         </div>
                         <div class="card-body">
-                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-3"
+                            <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"
                                 id="trainingTemplates">
                                 <!-- 卡片 -->
                             </div>
@@ -1100,19 +1100,28 @@
                 muscleGroups: ['胸', '背', '腿', '肩膀', '手臂', '腹部'],
                 exercises: {
                     monday: [
-                        { muscleGroup: '胸', count: 2, sets: 3, reps: 12 },
-                        { muscleGroup: '背', count: 2, sets: 3, reps: 12 },
-                        { muscleGroup: '腿', count: 2, sets: 3, reps: 12 }
+                        { muscleGroup: '中胸', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '上胸', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '中背', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '上背', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '股四頭肌', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '臀肌', count: 1, sets: 3, reps: 12 }
                     ],
                     wednesday: [
-                        { muscleGroup: '肩膀', count: 2, sets: 3, reps: 12 },
-                        { muscleGroup: '手臂', count: 2, sets: 3, reps: 12 },
-                        { muscleGroup: '腹部', count: 2, sets: 3, reps: 15 }
+                        { muscleGroup: '肩膀前束', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '肩膀中束', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '二頭肌', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '三頭肌', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '核心', count: 1, sets: 3, reps: 15 },
+                        { muscleGroup: '上腹', count: 1, sets: 3, reps: 15 }
                     ],
                     friday: [
-                        { muscleGroup: '胸', count: 2, sets: 3, reps: 12 },
-                        { muscleGroup: '背', count: 2, sets: 3, reps: 12 },
-                        { muscleGroup: '腿', count: 2, sets: 3, reps: 12 }
+                        { muscleGroup: '中胸', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '下胸', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '中背', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '下背', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '股四頭肌', count: 1, sets: 3, reps: 12 },
+                        { muscleGroup: '股二頭肌', count: 1, sets: 3, reps: 12 }
                     ]
                 }
             },
@@ -1128,28 +1137,36 @@
                 muscleGroups: ['胸', '背', '肩膀', '手臂', '腿'],
                 exercises: {
                     monday: [
-                        { muscleGroup: '胸', count: 2, sets: 4, reps: 10 },
-                        { muscleGroup: '背', count: 2, sets: 4, reps: 10 },
-                        { muscleGroup: '肩膀', count: 1, sets: 3, reps: 12 }
+                        { muscleGroup: '上胸', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '中胸', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '上背', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '中背', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '肩膀前束', count: 1, sets: 3, reps: 12 }
                     ],
                     tuesday: [
-                        { muscleGroup: '腿', count: 4, sets: 4, reps: 10 },
-                        { muscleGroup: '腹部', count: 1, sets: 3, reps: 15 }
+                        { muscleGroup: '股四頭肌', count: 2, sets: 4, reps: 10 },
+                        { muscleGroup: '股二頭肌', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '臀肌', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '核心', count: 1, sets: 3, reps: 15 }
                     ],
                     thursday: [
-                        { muscleGroup: '胸', count: 2, sets: 4, reps: 10 },
-                        { muscleGroup: '背', count: 2, sets: 4, reps: 10 },
-                        { muscleGroup: '手臂', count: 1, sets: 3, reps: 12 }
+                        { muscleGroup: '下胸', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '中胸', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '中背', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '下背', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '二頭肌', count: 1, sets: 3, reps: 12 }
                     ],
                     friday: [
-                        { muscleGroup: '腿', count: 4, sets: 4, reps: 10 },
-                        { muscleGroup: '腹部', count: 1, sets: 3, reps: 15 }
+                        { muscleGroup: '股四頭肌', count: 2, sets: 4, reps: 10 },
+                        { muscleGroup: '股二頭肌', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '臀肌', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '核心', count: 1, sets: 3, reps: 15 }
                     ]
                 }
             },
             {
                 id: 'pushpulllegs',
-                name: '三分化 (推拉腿)',
+                name: '三分化',
                 description: '第一天：胸+三頭，第二天：背+二頭，第三天：肩膀+腿，休息一天後循環',
                 difficulty: 'intermediate',
                 icon: 'bi bi-arrow-repeat',
@@ -1159,86 +1176,42 @@
                 muscleGroups: ['胸', '三頭', '背', '二頭', '肩膀', '腿'],
                 exercises: {
                     monday: [
-                        { muscleGroup: '胸', count: 3, sets: 4, reps: 8 },
-                        { muscleGroup: '三頭', count: 2, sets: 4, reps: 10 }
+                        { muscleGroup: '上胸', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '中胸', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '下胸', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '三頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     tuesday: [
-                        { muscleGroup: '背', count: 3, sets: 4, reps: 8 },
-                        { muscleGroup: '二頭', count: 2, sets: 4, reps: 10 }
+                        { muscleGroup: '上背', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '中背', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '下背', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '二頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     wednesday: [
-                        { muscleGroup: '肩膀', count: 3, sets: 4, reps: 10 },
-                        { muscleGroup: '腿', count: 2, sets: 4, reps: 8 }
+                        { muscleGroup: '肩膀前束', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '肩膀中束', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '肩膀後束', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '股四頭肌', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '臀肌', count: 1, sets: 4, reps: 8 }
                     ],
                     friday: [
-                        { muscleGroup: '胸', count: 3, sets: 4, reps: 8 },
-                        { muscleGroup: '三頭', count: 2, sets: 4, reps: 10 }
+                        { muscleGroup: '上胸', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '中胸', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '下胸', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '三頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     saturday: [
-                        { muscleGroup: '背', count: 3, sets: 4, reps: 8 },
-                        { muscleGroup: '二頭', count: 2, sets: 4, reps: 10 }
+                        { muscleGroup: '上背', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '中背', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '下背', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '二頭肌', count: 2, sets: 4, reps: 10 }
                     ],
                     sunday: [
-                        { muscleGroup: '肩膀', count: 3, sets: 4, reps: 10 },
-                        { muscleGroup: '腿', count: 2, sets: 4, reps: 8 }
-                    ]
-                }
-            },
-            {
-                id: 'fourway',
-                name: '四分化',
-                description: '胸、背、腿、肩膀手臂分開訓練',
-                difficulty: 'advanced',
-                icon: 'bi bi-grid-3x3',
-                schedule: ['週一', '週二', '週三', '週四', '週五'],
-                exercisesPerDay: 4,
-                totalDays: 5,
-                muscleGroups: ['胸', '背', '腿', '肩膀', '手臂'],
-                exercises: {
-                    monday: [
-                        { muscleGroup: '胸', count: 4, sets: 4, reps: 8 }
-                    ],
-                    tuesday: [
-                        { muscleGroup: '背', count: 4, sets: 4, reps: 8 }
-                    ],
-                    wednesday: [
-                        { muscleGroup: '腿', count: 4, sets: 4, reps: 8 }
-                    ],
-                    thursday: [
-                        { muscleGroup: '肩膀', count: 3, sets: 4, reps: 10 },
-                        { muscleGroup: '手臂', count: 1, sets: 4, reps: 12 }
-                    ],
-                    friday: [
-                        { muscleGroup: '胸', count: 2, sets: 3, reps: 12 },
-                        { muscleGroup: '背', count: 2, sets: 3, reps: 12 }
-                    ]
-                }
-            },
-            {
-                id: 'fiveway',
-                name: '五分化',
-                description: '每個肌群單獨訓練一天',
-                difficulty: 'advanced',
-                icon: 'bi bi-collection',
-                schedule: ['週一', '週二', '週三', '週四', '週五'],
-                exercisesPerDay: 4,
-                totalDays: 5,
-                muscleGroups: ['胸', '背', '腿', '肩膀', '手臂'],
-                exercises: {
-                    monday: [
-                        { muscleGroup: '胸', count: 4, sets: 4, reps: 8 }
-                    ],
-                    tuesday: [
-                        { muscleGroup: '背', count: 4, sets: 4, reps: 8 }
-                    ],
-                    wednesday: [
-                        { muscleGroup: '腿', count: 4, sets: 4, reps: 8 }
-                    ],
-                    thursday: [
-                        { muscleGroup: '肩膀', count: 4, sets: 4, reps: 10 }
-                    ],
-                    friday: [
-                        { muscleGroup: '手臂', count: 4, sets: 4, reps: 12 }
+                        { muscleGroup: '肩膀前束', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '肩膀中束', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '肩膀後束', count: 1, sets: 4, reps: 10 },
+                        { muscleGroup: '股四頭肌', count: 1, sets: 4, reps: 8 },
+                        { muscleGroup: '臀肌', count: 1, sets: 4, reps: 8 }
                     ]
                 }
             }
@@ -1445,40 +1418,113 @@
         }
 
         // 頁面載入時初始化
-        document.addEventListener('DOMContentLoaded', function () {
-            loadExercises();
+        document.addEventListener('DOMContentLoaded', async function () {
+            console.log('頁面載入完成，開始初始化...');
+            
+            // 顯示載入指示器
+            showLoadingIndicator();
+            
+            try {
+                // 先載入動作資料
+                await loadExercises();
+                
+                // 然後載入其他資料
             loadPlan();
             updateWeekDates();
             renderWeeklyPlan();
             updateStats();
             renderTrainingTemplates();
+                
+                console.log('初始化完成');
+            } catch (error) {
+                console.error('初始化失敗:', error);
+                showErrorMessage('頁面載入失敗，請重新整理頁面');
+            } finally {
+                // 隱藏載入指示器
+                hideLoadingIndicator();
+            }
         });
 
-        // 載入動作資料
+        // 顯示載入指示器
+        function showLoadingIndicator() {
+            const loadingDiv = document.createElement('div');
+            loadingDiv.id = 'loading-indicator';
+            loadingDiv.innerHTML = `
+                <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.8); z-index: 9999; display: flex; justify-content: center; align-items: center;">
+                    <div style="text-align: center;">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">載入中...</span>
+                        </div>
+                        <p class="mt-2">正在載入訓練資料...</p>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(loadingDiv);
+        }
+
+        // 隱藏載入指示器
+        function hideLoadingIndicator() {
+            const loadingDiv = document.getElementById('loading-indicator');
+            if (loadingDiv) {
+                loadingDiv.remove();
+            }
+        }
+
+        // 顯示錯誤訊息
+        function showErrorMessage(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.innerHTML = `
+                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 10000;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.appendChild(errorDiv);
+            
+            // 5秒後自動移除
+            setTimeout(() => {
+                if (errorDiv.parentNode) {
+                    errorDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // 載入動作資料（只使用資料庫中的動作）
         async function loadExercises() {
             try {
+                console.log('開始載入動作資料...');
                 const response = await fetch('get_exercises.php');
-                const data = await response.json();
 
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const data = await response.json();
                 console.log('API 回應:', data);
 
-                if (data.success) {
+                if (data.success && data.data && data.data.length > 0) {
                     exercises = data.data;
                     console.log('載入動作資料成功，總數:', exercises.length);
                     console.log('胸部動作數量:', exercises.filter(ex => ex.muscle_group === '胸').length);
                     console.log('所有肌群:', [...new Set(exercises.map(ex => ex.muscle_group))]);
                 } else {
-                    console.error('載入動作失敗:', data.error);
-                    // 如果API失敗，使用備用資料
-                    exercises = getBackupExercises();
-                    console.log('使用備用動作資料，總數:', exercises.length);
+                    console.warn('API 回應無效或無資料，清空動作列表');
+                    exercises = [];
+                    console.log('沒有可用的動作資料');
                 }
             } catch (error) {
                 console.error('載入動作時發生錯誤:', error);
-                // 如果網路錯誤，使用備用資料
-                exercises = getBackupExercises();
-                console.log('網路錯誤，使用備用動作資料，總數:', exercises.length);
+                // 如果網路錯誤，清空動作列表
+                exercises = [];
+                console.log('網路錯誤，清空動作列表');
             }
+            
+            // 確保 exercises 陣列存在（即使為空）
+            if (!exercises) {
+                exercises = [];
+            }
+            
+            console.log('最終動作資料載入完成，總數:', exercises.length);
         }
 
         // 備用動作資料
@@ -1487,37 +1533,104 @@
                 // 休息選項
                 { id: 0, name: "休息", muscle_group: "休息", description: "今日無訓練，讓身體充分恢復", difficulty_level: "無", equipment_needed: "無" },
 
-                // 胸部動作
-                { id: 1, name: "伏地挺身", muscle_group: "胸", description: "經典的胸部訓練動作", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 2, name: "臥推", muscle_group: "胸", description: "胸部訓練的經典動作", difficulty_level: "中級", equipment_needed: "槓鈴和臥推椅" },
-                { id: 3, name: "啞鈴飛鳥", muscle_group: "胸", description: "胸部訓練的孤立動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 4, name: "上斜臥推", muscle_group: "胸", description: "針對上胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
-                { id: 5, name: "下斜臥推", muscle_group: "胸", description: "針對下胸部的訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
-                { id: 6, name: "啞鈴臥推", muscle_group: "胸", description: "使用啞鈴的臥推動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 7, name: "胸推機", muscle_group: "胸", description: "使用胸推機的訓練動作", difficulty_level: "初級", equipment_needed: "胸推機" },
-                { id: 8, name: "蝴蝶機", muscle_group: "胸", description: "使用蝴蝶機的胸部訓練", difficulty_level: "初級", equipment_needed: "蝴蝶機" },
+                // 胸部動作 - 按上中下胸分類，適合新手和有基礎使用者
+                
+                // 上胸部動作
+                { id: 1, name: "上斜啞鈴臥推", muscle_group: "上胸", description: "針對上胸部的啞鈴臥推，角度30-45度", difficulty_level: "初級", equipment_needed: "啞鈴和上斜椅" },
+                { id: 2, name: "上斜槓鈴臥推", muscle_group: "上胸", description: "針對上胸部的槓鈴臥推，角度30-45度", difficulty_level: "中級", equipment_needed: "槓鈴和上斜椅" },
+                { id: 3, name: "上斜啞鈴飛鳥", muscle_group: "上胸", description: "上斜角度的啞鈴飛鳥，專注上胸拉伸", difficulty_level: "初級", equipment_needed: "啞鈴和上斜椅" },
+                { id: 4, name: "上斜胸推機", muscle_group: "上胸", description: "使用上斜胸推機的訓練，安全且有效", difficulty_level: "初級", equipment_needed: "上斜胸推機" },
+                { id: 5, name: "上斜纜繩夾胸", muscle_group: "上胸", description: "上斜角度的纜繩夾胸，鍛鍊上胸", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                
+                // 中胸部動作
+                { id: 6, name: "平板啞鈴臥推", muscle_group: "中胸", description: "平板啞鈴臥推，鍛鍊中胸部", difficulty_level: "初級", equipment_needed: "啞鈴和臥推椅" },
+                { id: 7, name: "平板槓鈴臥推", muscle_group: "中胸", description: "經典的平板槓鈴臥推，鍛鍊中胸部", difficulty_level: "中級", equipment_needed: "槓鈴和臥推椅" },
+                { id: 8, name: "平板啞鈴飛鳥", muscle_group: "中胸", description: "平板啞鈴飛鳥，專注中胸拉伸", difficulty_level: "初級", equipment_needed: "啞鈴和臥推椅" },
+                { id: 9, name: "胸推機", muscle_group: "中胸", description: "使用胸推機的訓練，安全且容易上手", difficulty_level: "初級", equipment_needed: "胸推機" },
+                { id: 10, name: "蝴蝶機", muscle_group: "中胸", description: "使用蝴蝶機的胸部訓練，專注中胸", difficulty_level: "初級", equipment_needed: "蝴蝶機" },
+                { id: 11, name: "伏地挺身", muscle_group: "中胸", description: "經典的伏地挺身，鍛鍊中胸部", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 12, name: "史密斯機臥推", muscle_group: "中胸", description: "使用史密斯機的臥推，安全且穩定", difficulty_level: "初級", equipment_needed: "史密斯機" },
+                { id: 13, name: "平板纜繩夾胸", muscle_group: "中胸", description: "平板角度的纜繩夾胸，鍛鍊中胸", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                
+                // 下胸部動作
+                { id: 14, name: "下斜啞鈴臥推", muscle_group: "下胸", description: "針對下胸部的啞鈴臥推，角度15-30度", difficulty_level: "初級", equipment_needed: "啞鈴和下斜椅" },
+                { id: 15, name: "下斜槓鈴臥推", muscle_group: "下胸", description: "針對下胸部的槓鈴臥推，角度15-30度", difficulty_level: "中級", equipment_needed: "槓鈴和下斜椅" },
+                { id: 16, name: "下斜啞鈴飛鳥", muscle_group: "下胸", description: "下斜角度的啞鈴飛鳥，專注下胸拉伸", difficulty_level: "初級", equipment_needed: "啞鈴和下斜椅" },
+                { id: 17, name: "下斜胸推機", muscle_group: "下胸", description: "使用下斜胸推機的訓練，鍛鍊下胸", difficulty_level: "初級", equipment_needed: "下斜胸推機" },
+                { id: 18, name: "雙槓撐體", muscle_group: "下胸", description: "雙槓撐體，鍛鍊下胸部和三頭肌", difficulty_level: "中級", equipment_needed: "雙槓" },
+                { id: 19, name: "下斜纜繩夾胸", muscle_group: "下胸", description: "下斜角度的纜繩夾胸，鍛鍊下胸", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                
+                // 特殊胸部動作
+                { id: 20, name: "窄握臥推", muscle_group: "胸", description: "窄握距的臥推，主要鍛鍊胸肌內側和三頭肌", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 21, name: "寬握臥推", muscle_group: "胸", description: "寬握距的臥推，主要鍛鍊胸肌外側", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 22, name: "啞鈴擠壓推", muscle_group: "胸", description: "啞鈴擠壓推，鍛鍊胸肌內側", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 23, name: "單臂啞鈴臥推", muscle_group: "胸", description: "單臂啞鈴臥推，改善肌肉不平衡", difficulty_level: "中級", equipment_needed: "啞鈴" },
+                { id: 24, name: "啞鈴地板臥推", muscle_group: "胸", description: "在地板上進行的啞鈴臥推，限制動作範圍", difficulty_level: "初級", equipment_needed: "啞鈴" },
 
-                // 背部動作
-                { id: 9, name: "引體向上", muscle_group: "背", description: "背部訓練的黃金動作", difficulty_level: "中級", equipment_needed: "單槓" },
-                { id: 10, name: "硬舉", muscle_group: "背", description: "全身性的複合動作", difficulty_level: "高級", equipment_needed: "槓鈴" },
-                { id: 11, name: "划船", muscle_group: "背", description: "背部訓練動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
+                // 背部動作 - 適合新手和有基礎使用者
+                { id: 16, name: "反向划船", muscle_group: "背", description: "背部訓練動作，適合初學者", difficulty_level: "初級", equipment_needed: "槓鈴或TRX" },
+                { id: 17, name: "啞鈴划船", muscle_group: "背", description: "使用啞鈴的划船動作，適合初學者", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 18, name: "纜繩划船", muscle_group: "背", description: "使用纜繩機的划船動作", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 19, name: "高位下拉", muscle_group: "背", description: "背部訓練動作，類似引體向上但更容易", difficulty_level: "初級", equipment_needed: "高位下拉機" },
+                { id: 20, name: "坐姿划船", muscle_group: "背", description: "坐姿的划船動作，安全且容易上手", difficulty_level: "初級", equipment_needed: "划船機" },
+                { id: 21, name: "反向飛鳥", muscle_group: "背", description: "針對後三角肌和菱形肌的訓練", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 22, name: "引體向上", muscle_group: "背", description: "背部訓練的黃金動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "單槓" },
+                { id: 23, name: "槓鈴划船", muscle_group: "背", description: "使用槓鈴的划船動作", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 24, name: "單臂划船", muscle_group: "背", description: "單側背部訓練動作，改善肌肉不平衡", difficulty_level: "中級", equipment_needed: "啞鈴" },
+                { id: 25, name: "T槓划船", muscle_group: "背", description: "使用T槓的划船動作", difficulty_level: "中級", equipment_needed: "T槓" },
 
-                // 腿部動作
-                { id: 12, name: "深蹲", muscle_group: "腿", description: "腿部訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 13, name: "弓箭步", muscle_group: "腿", description: "單腿訓練動作", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 14, name: "腿舉", muscle_group: "腿", description: "腿部訓練的器械動作", difficulty_level: "初級", equipment_needed: "腿舉機" },
+                // 腿部動作 - 適合新手和有基礎使用者
+                { id: 26, name: "深蹲", muscle_group: "腿", description: "腿部訓練的基礎動作，鍛鍊股四頭肌、臀肌和核心肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 27, name: "弓箭步", muscle_group: "腿", description: "單腿訓練動作，鍛鍊股四頭肌、臀肌和平衡感", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 28, name: "啞鈴深蹲", muscle_group: "腿", description: "使用啞鈴的深蹲動作，適合初學者", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 29, name: "腿舉", muscle_group: "腿", description: "腿部訓練的器械動作，安全且容易上手", difficulty_level: "初級", equipment_needed: "腿舉機" },
+                { id: 30, name: "側蹲", muscle_group: "腿", description: "側向的深蹲動作，鍛鍊內收肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 31, name: "登階", muscle_group: "腿", description: "登階動作，鍛鍊股四頭肌和臀肌", difficulty_level: "初級", equipment_needed: "階梯或平台" },
+                { id: 32, name: "相撲深蹲", muscle_group: "腿", description: "寬站距的深蹲，主要鍛鍊內收肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 33, name: "腿推機", muscle_group: "腿", description: "使用腿推機的訓練動作", difficulty_level: "初級", equipment_needed: "腿推機" },
+                { id: 34, name: "腿彎舉", muscle_group: "腿", description: "針對後腿肌群的孤立訓練", difficulty_level: "初級", equipment_needed: "腿彎舉機" },
+                { id: 35, name: "槓鈴深蹲", muscle_group: "腿", description: "使用槓鈴的深蹲動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 36, name: "保加利亞分腿蹲", muscle_group: "腿", description: "單腿訓練動作，鍛鍊股四頭肌和臀肌", difficulty_level: "中級", equipment_needed: "椅子或平台" },
+                { id: 37, name: "羅馬尼亞硬舉", muscle_group: "腿", description: "針對後腿肌群的訓練動作", difficulty_level: "中級", equipment_needed: "槓鈴或啞鈴" },
 
-                // 手臂動作
-                { id: 15, name: "二頭彎舉", muscle_group: "手臂", description: "針對肱二頭肌的訓練", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 16, name: "三頭撐體", muscle_group: "手臂", description: "鍛鍊肱三頭肌的動作", difficulty_level: "初級", equipment_needed: "椅子或板凳" },
+                // 手臂動作 - 適合新手和有基礎使用者
+                { id: 38, name: "二頭彎舉", muscle_group: "手臂", description: "針對肱二頭肌的孤立訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 39, name: "三頭撐體", muscle_group: "手臂", description: "鍛鍊肱三頭肌的經典動作", difficulty_level: "初級", equipment_needed: "椅子或板凳" },
+                { id: 40, name: "三頭下壓", muscle_group: "手臂", description: "三頭肌訓練的孤立動作", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 41, name: "錘式彎舉", muscle_group: "手臂", description: "針對前臂和二頭肌的訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 42, name: "過頭三頭伸展", muscle_group: "手臂", description: "過頭的三頭肌伸展動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 43, name: "纜繩彎舉", muscle_group: "手臂", description: "使用纜繩機的二頭肌訓練", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 44, name: "啞鈴三頭伸展", muscle_group: "手臂", description: "使用啞鈴的三頭肌伸展", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 45, name: "纜繩三頭下壓", muscle_group: "手臂", description: "使用纜繩機的三頭肌下壓", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 46, name: "槓鈴彎舉", muscle_group: "手臂", description: "二頭肌訓練的複合動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 47, name: "窄握臥推", muscle_group: "手臂", description: "窄握距的臥推，主要鍛鍊三頭肌", difficulty_level: "中級", equipment_needed: "槓鈴" },
 
-                // 腹部動作
-                { id: 17, name: "平板支撐", muscle_group: "腹部", description: "核心肌群訓練的基礎動作", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 18, name: "仰臥起坐", muscle_group: "腹部", description: "傳統的腹部訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+                // 腹部動作 - 適合新手和有基礎使用者
+                { id: 48, name: "平板支撐", muscle_group: "腹部", description: "核心肌群訓練的基礎動作，鍛鍊腹肌和背部肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 49, name: "仰臥起坐", muscle_group: "腹部", description: "傳統的腹部訓練動作，主要鍛鍊腹直肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 50, name: "捲腹", muscle_group: "腹部", description: "腹部訓練動作，主要鍛鍊腹直肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 51, name: "俄羅斯轉體", muscle_group: "腹部", description: "腹部訓練動作，鍛鍊腹斜肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 52, name: "死蟲式", muscle_group: "腹部", description: "核心肌群訓練動作，改善穩定性", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 53, name: "自行車捲腹", muscle_group: "腹部", description: "腹部訓練動作，鍛鍊腹斜肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 54, name: "仰臥抬腿", muscle_group: "腹部", description: "針對下腹部的訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 55, name: "側捲腹", muscle_group: "腹部", description: "針對腹斜肌的訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 56, name: "側平板支撐", muscle_group: "腹部", description: "核心肌群訓練動作，鍛鍊腹斜肌", difficulty_level: "中級", equipment_needed: "無" },
+                { id: 57, name: "登山者", muscle_group: "腹部", description: "全身性的有氧動作，鍛鍊核心肌群", difficulty_level: "中級", equipment_needed: "無" },
+                { id: 58, name: "V字支撐", muscle_group: "腹部", description: "核心肌群訓練動作，鍛鍊腹直肌", difficulty_level: "中級", equipment_needed: "無" },
 
-                // 肩膀動作
-                { id: 19, name: "肩推", muscle_group: "肩膀", description: "肩膀訓練的主要動作", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
-                { id: 20, name: "側平舉", muscle_group: "肩膀", description: "針對三角肌中束的訓練", difficulty_level: "初級", equipment_needed: "啞鈴" }
+                // 肩膀動作 - 適合新手和有基礎使用者
+                { id: 59, name: "側平舉", muscle_group: "肩膀", description: "針對三角肌中束的孤立訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 60, name: "前平舉", muscle_group: "肩膀", description: "針對三角肌前束的訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 61, name: "後平舉", muscle_group: "肩膀", description: "針對三角肌後束的訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 62, name: "啞鈴肩推", muscle_group: "肩膀", description: "使用啞鈴的肩推動作，適合初學者", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 63, name: "聳肩", muscle_group: "肩膀", description: "針對斜方肌的訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴或槓鈴" },
+                { id: 64, name: "纜繩側平舉", muscle_group: "肩膀", description: "使用纜繩機的側平舉", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 65, name: "纜繩前平舉", muscle_group: "肩膀", description: "使用纜繩機的前平舉", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 66, name: "纜繩後平舉", muscle_group: "肩膀", description: "使用纜繩機的後平舉", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 67, name: "肩推", muscle_group: "肩膀", description: "肩膀訓練的主要動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "啞鈴或槓鈴" },
+                { id: 68, name: "槓鈴肩推", muscle_group: "肩膀", description: "使用槓鈴的肩推動作", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 69, name: "阿諾推舉", muscle_group: "肩膀", description: "啞鈴肩推的變化動作", difficulty_level: "中級", equipment_needed: "啞鈴" },
+                { id: 70, name: "直立划船", muscle_group: "肩膀", description: "針對三角肌前束和中束的訓練", difficulty_level: "中級", equipment_needed: "槓鈴" }
             ];
         }
 
@@ -1856,13 +1969,11 @@
             }, 3000);
         }
 
-        // 渲染訓練模板
-        // 渲染訓練模板
-        // 渲染訓練模板（支援一列 5 張卡）
+        // 渲染訓練模板（支援一列 3 張卡）
         function renderTrainingTemplates() {
             const container = document.getElementById('trainingTemplates');
             // 確保容器有 row-cols 設定（防止忘了改 HTML）
-            container.className = 'row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-5 g-3';
+            container.className = 'row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3';
             container.innerHTML = '';
 
             trainingTemplates.forEach(template => {
@@ -1967,6 +2078,7 @@
                 dayExercises.forEach(exerciseGroup => {
                     console.log(`尋找 ${exerciseGroup.muscleGroup} 動作，需要 ${exerciseGroup.count} 個`);
 
+                    let addedCount = 0;
                     for (let i = 0; i < exerciseGroup.count; i++) {
                         const exercise = getRandomExercise(exerciseGroup.muscleGroup);
                         if (exercise) {
@@ -1980,9 +2092,17 @@
                                 weight: null,
                                 restTime: 60
                             });
+                            addedCount++;
                         } else {
-                            console.log(`找不到 ${exerciseGroup.muscleGroup} 動作`);
+                            console.log(`找不到 ${exerciseGroup.muscleGroup} 動作，跳過`);
+                            break; // 如果找不到動作，就停止嘗試該肌群
                         }
+                    }
+                    
+                    if (addedCount === 0) {
+                        console.log(`完全沒有找到 ${exerciseGroup.muscleGroup} 的動作，跳過此肌群`);
+                    } else {
+                        console.log(`成功添加 ${addedCount} 個 ${exerciseGroup.muscleGroup} 動作`);
                     }
                 });
 
@@ -2000,6 +2120,8 @@
 
         // 應用模板到整週
         function applyTemplateToWeek(template) {
+            console.log('開始應用模板到整週:', template.name);
+            
             // 清空現有計畫
             Object.keys(weeklyPlan).forEach(day => {
                 weeklyPlan[day] = [];
@@ -2010,15 +2132,27 @@
                 applyTemplateToDay(template, day);
             });
 
+            // 更新顯示
+            saveWeeklyPlan();
+            renderWeeklyPlan();
+            updateStats();
+
             // 同步到資料庫
             syncToDatabase().catch(error => {
                 console.error('同步到資料庫失敗:', error);
             });
+            
+            console.log('模板應用完成，週計畫:', weeklyPlan);
         }
 
-        // 獲取隨機動作
+        // 獲取隨機動作（只使用資料庫中的動作，找不到就跳過）
         function getRandomExercise(muscleGroup) {
             console.log(`尋找 ${muscleGroup} 動作，總動作數: ${exercises.length}`);
+            
+            if (!exercises || exercises.length === 0) {
+                console.error('動作資料未載入！');
+                return null;
+            }
             
             // 先嘗試直接匹配
             let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
@@ -2027,13 +2161,46 @@
             // 如果沒有找到對應肌群的動作，嘗試映射到相近的肌群
             if (availableExercises.length === 0) {
                 const muscleMapping = {
-                    '三頭': '手臂',
-                    '二頭': '手臂',
-                    '胸': '胸',
-                    '背': '背',
-                    '肩膀': '肩膀',
-                    '腿': '腿',
-                    '腹部': '腹部'
+                    // 胸部細分
+                    '胸': '中胸',  // 預設映射到中胸
+                    '上胸': '上胸',
+                    '中胸': '中胸',
+                    '下胸': '下胸',
+                    
+                    // 肩膀細分
+                    '肩膀': '肩膀前束',  // 預設映射到肩膀前束
+                    '前束': '肩膀前束',
+                    '中束': '肩膀中束',
+                    '後束': '肩膀後束',
+                    '肩膀前束': '肩膀前束',
+                    '肩膀中束': '肩膀中束',
+                    '肩膀後束': '肩膀後束',
+                    
+                    // 背部細分
+                    '背': '中背',  // 預設映射到中背
+                    '上背': '上背',
+                    '中背': '中背',
+                    '下背': '下背',
+                    
+                    // 手臂細分
+                    '三頭': '三頭肌',
+                    '二頭': '二頭肌',
+                    '三頭肌': '三頭肌',
+                    '二頭肌': '二頭肌',
+                    
+                    // 腿部細分
+                    '腿': '股四頭肌',  // 預設映射到股四頭肌
+                    '股四頭肌': '股四頭肌',
+                    '股二頭肌': '股二頭肌',
+                    '臀肌': '臀肌',
+                    '小腿': '小腿',
+                    
+                    // 腹部細分
+                    '腹部': '核心',  // 預設映射到核心
+                    '上腹': '上腹',
+                    '下腹': '下腹',
+                    '側腹': '側腹',
+                    '核心': '核心'
                 };
 
                 const mappedMuscle = muscleMapping[muscleGroup] || muscleGroup;
@@ -2057,11 +2224,25 @@
                     console.log(`篩選後從 ${originalCount} 個減少到 ${availableExercises.length} 個動作`);
                 }
 
-                // 如果還是沒有，嘗試所有動作
+                // 如果還是沒有找到，就跳過（不使用備用動作）
                 if (availableExercises.length === 0) {
-                    console.log('沒有找到匹配的動作，使用所有動作');
-                    availableExercises = exercises.filter(ex => ex.id !== 0); // 排除休息選項
+                    console.log(`資料庫中沒有找到 ${muscleGroup} 的動作，跳過此肌群`);
+                    return null;
                 }
+            }
+
+            // 優先選擇適合新手和有基礎使用者的動作（初級和中級）
+            const beginnerFriendlyExercises = availableExercises.filter(ex => {
+                const difficulty = ex.difficulty_level || '初級';
+                return difficulty === '初級' || difficulty === '中級';
+            });
+
+            // 如果找到適合的動作，優先使用
+            if (beginnerFriendlyExercises.length > 0) {
+                availableExercises = beginnerFriendlyExercises;
+                console.log(`篩選出 ${availableExercises.length} 個適合新手/有基礎的動作`);
+            } else {
+                console.log('沒有找到適合新手/有基礎的動作，使用所有可用動作');
             }
 
             if (availableExercises.length === 0) {
@@ -2070,7 +2251,7 @@
             }
             
             const selectedExercise = availableExercises[Math.floor(Math.random() * availableExercises.length)];
-            console.log(`選擇了動作: ${selectedExercise.name} (${selectedExercise.muscle_group})`);
+            console.log(`選擇了動作: ${selectedExercise.name} (${selectedExercise.muscle_group}, ${selectedExercise.difficulty_level})`);
             return selectedExercise;
         }
 

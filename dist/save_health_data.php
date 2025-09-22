@@ -84,7 +84,7 @@ try {
             ]);
     
     if ($result) {
-        echo json_encode(['success' => true, 'message' => '數據保存成功']);
+        echo json_encode(['success' => true, 'message' => '健康數據已保存！']);
     } else {
         http_response_code(500);
         echo json_encode(['error' => '數據保存失敗']);

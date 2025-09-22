@@ -223,7 +223,19 @@
             background-color: #4e567d !important;
             border-color: #4e567d !important;
         }
-                
+
+        #weight-chart,
+        #body-composition-chart,
+        #fat-percentage-chart,
+        #bmi-chart {
+            min-height: 390px;
+        }
+
+        /* 讓空圖時的提示字不要太醒目但仍可見 */
+        .apexcharts-annotation-text {
+            opacity: .7;
+            letter-spacing: .5px;
+        }
     </style>
 </head>
 
@@ -538,7 +550,7 @@
                             <div class="col-12 col-lg-6">
                                 <div class="card">
                                     <div class="card-header">
-                                        <h4 class="card text-center">BMI變化趨勢</h4>
+                                        <h4 class="card text-center">BMI數值變化趨勢</h4>
                                     </div>
                                     <div class="card-body">
                                         <div id="bmi-chart"></div>
@@ -581,7 +593,7 @@
                                                     id="current-weight" class="fw-semibold">0.0</span> kg</div>
                                             <i class="bi bi-arrow-right text-muted mx-2"></i>
                                             <div class="text-primary fw-semibold">目標：<span id="goal-weight-display"
-                                                    class="fw-bold">70.0</span> kg</div>
+                                                    class="fw-bold"></span> kg</div>
                                         </div>
                                     </div>
                                 </div>
@@ -599,7 +611,7 @@
                                                     id="current-fat-percentage" class="fw-semibold">0.0</span>%</div>
                                             <i class="bi bi-arrow-right text-muted mx-2"></i>
                                             <div class="text-primary fw-semibold">目標：<span
-                                                    id="goal-fat-percentage-display" class="fw-bold">15.0</span>%</div>
+                                                    id="goal-fat-percentage-display" class="fw-bold"></span>%</div>
                                         </div>
                                     </div>
                                 </div>
@@ -616,8 +628,8 @@
                                             <div class="text-muted fw-normal" style="min-width: 80px;">目前: <span
                                                     id="current-muscle" class="fw-semibold">0.0</span> kg</div>
                                             <i class="bi bi-arrow-right text-muted mx-2"></i>
-                                            <div class="text-primary fw-semibold">目標: <span id="goal-muscle-display"
-                                                    class="fw-bold">35.0</span> kg</div>
+                                            <div class="text-primary fw-semibold">目標：<span id="goal-muscle-display"
+                                                    class="fw-bold"></span> kg</div>
                                         </div>
                                     </div>
                                 </div>
@@ -777,15 +789,17 @@
     </div>
 
     <!-- 成功提示視窗 -->
+    <!-- 成功提示視窗 -->
     <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title">成功</h5>
+                    <!-- 原本是 <h5 class="modal-title">提示！</h5> -->
+                    <h5 class="modal-title" id="successTitle">提示！</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <p id="successMessage">數據保存成功！</p>
+                    <p id="successMessage">健康數據已保存！</p>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-primary" data-bs-dismiss="modal">確定</button>
@@ -887,6 +901,7 @@
             });
 
         // 載入圖表數據
+        // 載入圖表數據（無論有沒有資料，都會渲染四張圖/占位）
         function loadChartData(startDate = null, endDate = null) {
             let url = 'get_chart_data.php';
             const params = new URLSearchParams();
@@ -895,292 +910,250 @@
                 params.append('start_date', startDate);
                 params.append('end_date', endDate);
                 url += '?' + params.toString();
-                console.log('Loading chart data with date range:', startDate, 'to', endDate);
-            } else {
-                console.log('Loading all chart data (no date filter)');
             }
-
-            console.log('Loading chart data from:', url);
 
             fetch(url)
                 .then(response => {
-                    if (response.ok) {
-                        return response.json();
-                    } else {
-                        throw new Error('Failed to load chart data');
-                    }
+                    if (!response.ok) throw new Error('Failed to load chart data');
+                    return response.json();
                 })
                 .then(data => {
-                    console.log('Chart data received:', data);
-                    console.log('Total records:', data.total_records);
-                    console.log('Date filter applied:', data.date_filter_applied);
-                    console.log('Filter start date:', data.filter_start_date);
-                    console.log('Filter end date:', data.filter_end_date);
-                    console.log('Dates:', data.dates);
-                    console.log('Weight data:', data.weight);
+                    // ✅ 安全預設：就算後端沒資料，也給空陣列，確保 create*Chart 能被呼叫並顯示占位
+                    const safe = {
+                        dates: Array.isArray(data.dates) ? data.dates : [],
+                        weight: Array.isArray(data.weight) ? data.weight : [],
+                        skeletal_muscle: Array.isArray(data.skeletal_muscle) ? data.skeletal_muscle : [],
+                        body_fat: Array.isArray(data.body_fat) ? data.body_fat : [],
+                        fat_percentage: Array.isArray(data.fat_percentage) ? data.fat_percentage : [],
+                        bmi: Array.isArray(data.bmi) ? data.bmi : []
+                    };
 
-                    if (data.dates && data.dates.length > 0) {
-                        createWeightChart(data);
-                        createBodyCompositionChart(data);
-                        createFatPercentageChart(data);
-                        createBMIChart(data);
-                    } else {
-                        console.warn('No chart data available');
-                    }
+                    // 不再用 length 判斷；直接交給各圖表函式自行決定要畫折線還是顯示占位
+                    createWeightChart(safe);
+                    createBodyCompositionChart(safe);
+                    createFatPercentageChart(safe);
+                    createBMIChart(safe);
                 })
                 .catch(error => {
                     console.error('Error loading chart data:', error);
+                    // 後端掛掉或網路錯誤時，也顯示占位，避免整塊塌陷
+                    showPlaceholder("#weight-chart", 390);
+                    showPlaceholder("#body-composition-chart", 390);
+                    showPlaceholder("#fat-percentage-chart", 390);
+                    showPlaceholder("#bmi-chart", 390);
                 });
         }
 
-        // 創建體重變化圖表
+        // ============ 共用：無資料時也畫出有軸/網格的空圖 ============
+        function renderEmptyApexLine(containerSelector, {
+            title = '',
+            yMin = 0,
+            yMax = 100,
+            xStart = null,
+            xEnd = null,
+            color = '#2c3e50'
+        } = {}) {
+            const el = document.querySelector(containerSelector);
+            el.innerHTML = '';
+
+            let start, end;
+            if (xStart && xEnd) { start = new Date(xStart); end = new Date(xEnd); }
+            else { end = new Date(); start = new Date(); start.setDate(end.getDate() - 30); }
+
+            const xCategories = [];
+            const steps = 4; // → 5 個刻度
+            const span = end.getTime() - start.getTime();
+            for (let i = 0; i <= steps; i++) {
+                const t = new Date(start.getTime() + (span * i / steps));
+                xCategories.push(t.toISOString().split('T')[0]);
+            }
+
+            const options = {
+                series: [{ name: '', data: new Array(xCategories.length).fill(null) }],
+                chart: { type: 'line', height: 390, toolbar: { show: false }, animations: { enabled: false } },
+                stroke: { curve: 'smooth', width: 3 },
+                grid: { strokeDashArray: 3 },
+                xaxis: {
+                    categories: xCategories,
+                    tickAmount: 5,
+                    labels: {
+                        rotate: 0,
+                        formatter: (value) => {
+                            const d = new Date(value);
+                            return d.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' });
+                        }
+                    }
+                },
+                yaxis: {
+                    min: yMin, max: yMax, tickAmount: 6,
+                    title: { text: title, style: { color, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: color, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                annotations: {
+                    texts: [{
+                        x: '50%', y: '50%', text: '暫無數據', textAnchor: 'middle',
+                        style: { fontSize: '14px', color: '#94a3b8', fontWeight: 600 }
+                    }]
+                },
+                colors: ['#d0d4dc']
+            };
+            new ApexCharts(el, options).render();
+        }
+
+        // ============ 1) 體重變化趨勢 ============
         function createWeightChart(data) {
-            // 清除舊的圖表
-            const chartContainer = document.querySelector("#weight-chart");
-            chartContainer.innerHTML = '';
+            const el = document.querySelector("#weight-chart");
+            el.innerHTML = '';
 
-            const weightData = data.weight.filter(val => val !== null);
-            const dates = data.dates.filter((_, index) => data.weight[index] !== null);
+            const colorY = '#2c3e50';
+            const seriesData = data.weight.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.weight[i] !== null);
 
-            if (weightData.length === 0) return;
+            if (seriesData.length === 0) {
+                renderEmptyApexLine("#weight-chart", {
+                    title: '體重 (kg)', yMin: 40, yMax: 120,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
 
             const options = {
-                series: [{
-                    name: '體重 (kg)',
-                    data: weightData
-                }],
-                chart: {
-                    type: 'line',
-                    height: 390,
-                    toolbar: {
-                        show: false
-                    }
-                },
+                series: [{ name: '體重 (kg)', data: seriesData }],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
                 colors: ['#AB8B8B'],
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val) {
-                        return val.toFixed(1);
-                    }
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 3
-                },
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
                 xaxis: {
-                    categories: dates,
-                    labels: {
-                        formatter: function (value) {
-                            return new Date(value).toLocaleDateString('zh-TW', {
-                                month: 'short',
-                                day: 'numeric'
-                            });
-                        }
-                    }
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
                 },
                 yaxis: {
-                    title: {
-                        text: '體重 (kg)'
-                    }
+                    title: { text: '體重 (kg)', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
                 },
-                tooltip: {
-                    x: {
-                        format: 'dd/MM/yyyy'
-                    }
-                }
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-
-            const chart = new ApexCharts(chartContainer, options);
-            chart.render();
+            new ApexCharts(el, options).render();
         }
 
-        // 創建身體組成圖表
+        // ============ 2) 身體組成變化 ============
         function createBodyCompositionChart(data) {
-            // 清除舊的圖表
-            const chartContainer = document.querySelector("#body-composition-chart");
-            chartContainer.innerHTML = '';
+            const el = document.querySelector("#body-composition-chart");
+            el.innerHTML = '';
 
-            const skeletalData = data.skeletal_muscle.filter(val => val !== null);
-            const bodyFatData = data.body_fat.filter(val => val !== null);
-            const dates = data.dates.filter((_, index) =>
-                data.skeletal_muscle[index] !== null || data.body_fat[index] !== null
-            );
+            const colorY = '#2c3e50';
+            const skeletal = data.skeletal_muscle.filter(v => v !== null);
+            const fat = data.body_fat.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.skeletal_muscle[i] !== null || data.body_fat[i] !== null);
 
-            if (skeletalData.length === 0 && bodyFatData.length === 0) return;
+            if (skeletal.length === 0 && fat.length === 0) {
+                renderEmptyApexLine("#body-composition-chart", {
+                    title: '重量 (kg)', yMin: 0, yMax: 60,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
 
             const options = {
-                series: [{
-                    name: '骨骼肌重 (kg)',
-                    data: skeletalData
-                }, {
-                    name: '體脂肪重 (kg)',
-                    data: bodyFatData
-                }],
-                chart: {
-                    type: 'line',
-                    height: 390,
-                    toolbar: {
-                        show: false
-                    }
-                },
+                series: [
+                    { name: '骨骼肌重 (kg)', data: skeletal },
+                    { name: '體脂肪重 (kg)', data: fat }
+                ],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
                 colors: ['#99898C', '#60575A'],
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val) {
-                        return val.toFixed(1);
-                    }
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 3
-                },
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
                 xaxis: {
-                    categories: dates,
-                    labels: {
-                        formatter: function (value) {
-                            return new Date(value).toLocaleDateString('zh-TW', {
-                                month: 'short',
-                                day: 'numeric'
-                            });
-                        }
-                    }
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
                 },
                 yaxis: {
-                    title: {
-                        text: '重量 (kg)'
-                    }
+                    title: { text: '重量 (kg)', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
                 },
-                tooltip: {
-                    x: {
-                        format: 'dd/MM/yyyy'
-                    }
-                }
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-
-            const chart = new ApexCharts(chartContainer, options);
-            chart.render();
+            new ApexCharts(el, options).render();
         }
 
-        // 創建體脂率變化圖表
+        // ============ 3) 體脂率變化趨勢 ============
         function createFatPercentageChart(data) {
-            // 清除舊的圖表
-            const chartContainer = document.querySelector("#fat-percentage-chart");
-            chartContainer.innerHTML = '';
+            const el = document.querySelector("#fat-percentage-chart");
+            el.innerHTML = '';
 
-            const fatPercentageData = data.fat_percentage.filter(val => val !== null);
-            const dates = data.dates.filter((_, index) => data.fat_percentage[index] !== null);
+            const colorY = '#2c3e50';
+            const seriesData = data.fat_percentage.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.fat_percentage[i] !== null);
 
-            if (fatPercentageData.length === 0) return;
+            if (seriesData.length === 0) {
+                renderEmptyApexLine("#fat-percentage-chart", {
+                    title: '體脂率 (%)', yMin: 0, yMax: 50,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
 
             const options = {
-                series: [{
-                    name: '體脂率 (%)',
-                    data: fatPercentageData
-                }],
-                chart: {
-                    type: 'line',
-                    height: 390,
-                    toolbar: {
-                        show: false
-                    }
-                },
+                series: [{ name: '體脂率 (%)', data: seriesData }],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
                 colors: ['#745E60'],
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val) {
-                        return val.toFixed(1);
-                    }
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 3
-                },
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
                 xaxis: {
-                    categories: dates,
-                    labels: {
-                        formatter: function (value) {
-                            return new Date(value).toLocaleDateString('zh-TW', {
-                                month: 'short',
-                                day: 'numeric'
-                            });
-                        }
-                    }
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
                 },
                 yaxis: {
-                    title: {
-                        text: '體脂率 (%)'
-                    }
+                    title: { text: '體脂率 (%)', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
                 },
-                tooltip: {
-                    x: {
-                        format: 'dd/MM/yyyy'
-                    }
-                }
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-
-            const chart = new ApexCharts(chartContainer, options);
-            chart.render();
+            new ApexCharts(el, options).render();
         }
 
-        // 創建BMI變化圖表
+        // ============ 4) BMI 變化趨勢 ============
         function createBMIChart(data) {
-            // 清除舊的圖表
-            const chartContainer = document.querySelector("#bmi-chart");
-            chartContainer.innerHTML = '';
+            const el = document.querySelector("#bmi-chart");
+            el.innerHTML = '';
 
-            const bmiData = data.bmi.filter(val => val !== null);
-            const dates = data.dates.filter((_, index) => data.bmi[index] !== null);
+            const colorY = '#2c3e50';
+            const seriesData = data.bmi.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.bmi[i] !== null);
 
-            if (bmiData.length === 0) return;
+            if (seriesData.length === 0) {
+                renderEmptyApexLine("#bmi-chart", {
+                    title: 'BMI', yMin: 10, yMax: 40,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
 
             const options = {
-                series: [{
-                    name: 'BMI',
-                    data: bmiData
-                }],
-                chart: {
-                    type: 'line',
-                    height: 390,
-                    toolbar: {
-                        show: false
-                    }
-                },
+                series: [{ name: 'BMI', data: seriesData }],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
                 colors: ['#9C7178'],
-                dataLabels: {
-                    enabled: true,
-                    formatter: function (val) {
-                        return val.toFixed(1);
-                    }
-                },
-                stroke: {
-                    curve: 'smooth',
-                    width: 3
-                },
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
                 xaxis: {
-                    categories: dates,
-                    labels: {
-                        formatter: function (value) {
-                            return new Date(value).toLocaleDateString('zh-TW', {
-                                month: 'short',
-                                day: 'numeric'
-                            });
-                        }
-                    }
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
                 },
                 yaxis: {
-                    title: {
-                        text: 'BMI'
-                    }
+                    title: { text: 'BMI', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
                 },
-                tooltip: {
-                    x: {
-                        format: 'dd/MM/yyyy'
-                    }
-                }
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-
-            const chart = new ApexCharts(chartContainer, options);
-            chart.render();
+            new ApexCharts(el, options).render();
         }
 
         // 初始化時間範圍選擇器
@@ -1196,13 +1169,12 @@
 
             if (startDate && endDate) {
                 if (startDate > endDate) {
-                    alert('開始日期不能晚於結束日期！');
+                    showModal('開始日期不能晚於結束日期！', '提示！');
                     return;
                 }
-                console.log('Applying date range:', startDate, 'to', endDate);
                 loadChartData(startDate, endDate);
             } else {
-                alert('請選擇開始和結束日期！');
+                showModal('請先挑選日期再套用！', '提示！');
             }
         });
 
@@ -1242,9 +1214,14 @@
                 const currentFatPercentage = parseFloat(document.getElementById('current-fat-percentage').textContent) || 0;
                 const currentMuscle = parseFloat(document.getElementById('current-muscle').textContent) || 0;
 
-                const goalWeight = parseFloat(document.getElementById('goal-weight-display').textContent) || 70;
-                const goalFatPercentage = parseFloat(document.getElementById('goal-fat-percentage-display').textContent) || 15;
-                const goalMuscle = parseFloat(document.getElementById('goal-muscle-display').textContent) || 35;
+                const gwText = document.getElementById('goal-weight-display').textContent.trim();
+                const gfText = document.getElementById('goal-fat-percentage-display').textContent.trim();
+                const gmText = document.getElementById('goal-muscle-display').textContent.trim();
+
+                const goalWeight = gwText ? parseFloat(gwText) : 0;
+                const goalFatPercentage = gfText ? parseFloat(gfText) : 0;
+                const goalMuscle = gmText ? parseFloat(gmText) : 0;
+
 
                 // 計算各項指標的達成率 (0-100%)
                 let weightProgress = 0;
@@ -1447,9 +1424,8 @@
             }
 
             // 顯示成功提示
-            document.getElementById('successMessage').textContent = '目標設定成功！';
-            const successModal = new bootstrap.Modal(document.getElementById('successModal'));
-            successModal.show();
+            // 顯示成功提示
+            showModal('目標設定成功！', '提示！');
         });
 
         // 保存數據按鈕點擊事件
@@ -1576,6 +1552,32 @@
                 locale: "zh"
             });
         });
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get("login") === "success") {
+                showModal('歡迎回來！', '提示！');  // 若想標題是「成功」，第二個參數改成 '成功'
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        });
+
+        // 顯示「暫無數據」的占位畫面（維持高度避免排版縮掉）
+        function showPlaceholder(containerSelector, heightPx = 390) {
+            const el = document.querySelector(containerSelector);
+            el.innerHTML = '';
+            el.style.height = heightPx + 'px';
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.innerHTML = "<p class='text-muted m-0'>暫無數據</p>";
+        }
+        function showModal(message, title = '提示！') {
+            const titleEl = document.getElementById('successTitle');
+            const msgEl = document.getElementById('successMessage');
+            if (titleEl) titleEl.textContent = title;
+            if (msgEl) msgEl.textContent = message;
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+        }
     </script>
 </body>
 

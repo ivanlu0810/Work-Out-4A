@@ -49,7 +49,7 @@ if (password_verify($password, $password_hash)) {
     $_SESSION['role'] = $role;
     $_SESSION['logged_in'] = true;
     
-    echo "<script>alert('登入成功！'); window.location.href='index.html';</script>";
+    echo "<script>window.location.href='index.html?login=success';</script>";
 } else {
     // 密碼錯誤
     echo "<script>alert('密碼錯誤'); window.location.href='auth-login.html';</script>";
