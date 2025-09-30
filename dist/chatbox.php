@@ -144,17 +144,18 @@ $targetMuscle = $classJson["target_muscle"] ?? null;
 // 9️⃣ 查 exercises 資料表
 $exerciseText = "";
 if ($targetMuscle) {
-    $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle = ?");
-    $stmt->execute([$targetMuscle]);
+    $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle = ? AND user_level = ?");
+    $stmt->execute([$targetMuscle, "新手"]);
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($rows) {
-        $exerciseText .= "以下是資料庫查到的【{$targetMuscle}】相關訓練動作：\n";
+        $exerciseText .= "以下是資料庫查到的【{$targetMuscle}】新手訓練動作：\n";
         foreach ($rows as $row) {
             $exerciseText .= "- {$row['name']}：建議次數 {$row['hypertrophy_reps_min']}–{$row['hypertrophy_reps_max']}，組數 {$row['hypertrophy_sets_min']}–{$row['hypertrophy_sets_max']}，備註：{$row['notes']}\n";
         }
     }
 }
+
 
 // 🔟 組合送給 AI 的 user message
 $userPrompt = "";
