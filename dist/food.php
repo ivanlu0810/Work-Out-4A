@@ -7,8 +7,6 @@ if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     header('Location: auth-login.html');
     exit;
 }
-$username = $_SESSION['username'] ?? 'Unknown User';
-$email = $_SESSION['email'] ?? 'No email';
 ?>
 <!DOCTYPE html>
 <html lang="zh-Hant">
@@ -289,7 +287,7 @@ $email = $_SESSION['email'] ?? 'No email';
                     <ul class="menu">
                         <li class="sidebar-title">我的檔案</li>
                         <li class="sidebar-item">
-                            <a href="index.html" class='sidebar-link'>
+                            <a href="index.php" class='sidebar-link'>
                                 <i class="bi bi-file-earmark-medical-fill"></i>
                                 <span>健康儀表板</span>
                             </a>
@@ -372,44 +370,8 @@ $email = $_SESSION['email'] ?? 'No email';
                 </div>
             </div>
 
-            <!-- 資料引導提示 -->
+            <!-- 營養需求計算器 -->
             <div class="container">
-                <section class="section" id="dataGuideSection" style="display: none;">
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
-                            <div>
-                                <h5 class="alert-heading mb-2">需要您的身體資料</h5>
-                                <p class="mb-2">為了提供更精確的營養建議，請先填寫您的基本身體資料。</p>
-                                <div class="d-flex gap-2">
-                                    <button class="btn btn-warning btn-sm" onclick="loadUserData()">
-                                        <i class="bi bi-arrow-clockwise me-1"></i>重新載入資料
-                                    </button>
-                                    <a href="index.php" class="btn btn-primary btn-sm">
-                                        <i class="bi bi-plus-circle me-1"></i>前往新增資料
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉"></button>
-                    </div>
-                </section>
-
-                <!-- 資料載入成功提示 -->
-                <section class="section" id="dataSuccessSection" style="display: none;">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <div class="d-flex align-items-center">
-                            <i class="bi bi-check-circle-fill me-3" style="font-size: 1.5rem;"></i>
-                            <div>
-                                <h5 class="alert-heading mb-2">資料載入成功！</h5>
-                                <p class="mb-0" id="dataSourceInfo">已從資料庫載入您的身體資料，系統將自動填入表單。</p>
-                            </div>
-                        </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉"></button>
-                    </div>
-                </section>
-
-                <!-- 營養需求計算器 -->
                 <section class="section">
                     <div class="card">
                         <div class="card-header">
@@ -573,12 +535,42 @@ $email = $_SESSION['email'] ?? 'No email';
                     </div>
                 </section>
 
-                <!-- 三餐客製化 -->
+                <!-- 簡化版餐食建議（備用） -->
+                <section class="section" id="simpleMealSuggestions" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-egg-fried me-2"></i>餐食建議</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <h6>建議餐點分配：</h6>
+                                <ul class="mb-0">
+                                    <li><strong>早餐：</strong>25% 的總熱量</li>
+                                    <li><strong>午餐：</strong>35% 的總熱量</li>
+                                    <li><strong>晚餐：</strong>30% 的總熱量</li>
+                                    <li><strong>點心：</strong>10% 的總熱量</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 每日菜單規劃 -->
                 <section class="section" id="mealPlannerSection" style="display: none;">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>三餐客製化</h4>
-                            <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
+                            <div>
+                                <h4 class="mb-0"><i class="bi bi-calendar-week me-2"></i>每日菜單規劃</h4>
+                                <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button class="btn btn-outline-primary btn-sm" onclick="showWeekView()">
+                                    <i class="bi bi-calendar-week me-1"></i>週檢視
+                                </button>
+                                <button class="btn btn-primary btn-sm" onclick="saveMealPlan()">
+                                    <i class="bi bi-save me-1"></i>儲存菜單
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="row g-3">
@@ -608,8 +600,42 @@ $email = $_SESSION['email'] ?? 'No email';
                                 </div>
                             </div>
 
-                            <div class="row mt-4" id="plannerMeals">
-                                <!-- 各餐區塊渲染 -->
+                            <!-- 週檢視 -->
+                            <div class="row mt-4" id="weekView" style="display: none;">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">本週菜單</h5>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="previousWeek()">
+                                                <i class="bi bi-chevron-left"></i> 上週
+                                            </button>
+                                            <span class="btn btn-outline-secondary btn-sm" id="weekRange">9/15 - 9/21</span>
+                                            <button class="btn btn-outline-secondary btn-sm" onclick="nextWeek()">
+                                                下週 <i class="bi bi-chevron-right"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="weekDays">
+                                        <!-- 週間日期卡片將在這裡動態生成 -->
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <!-- 日檢視 -->
+                            <div class="row mt-4" id="dayView">
+                                <div class="col-12">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <h5 class="mb-0">今日菜單</h5>
+                                        <div class="d-flex gap-2">
+                                            <button class="btn btn-outline-primary btn-sm" onclick="showDayView()">
+                                                <i class="bi bi-calendar-day me-1"></i>日檢視
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="row" id="plannerMeals">
+                                        <!-- 各餐區塊渲染 -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -621,7 +647,7 @@ $email = $_SESSION['email'] ?? 'No email';
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">新增食材</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                <button type="button" class="btn-close" onclick="closeFoodPickerModal()"
                                     aria-label="關閉"></button>
                             </div>
                             <div class="modal-body">
@@ -695,86 +721,8 @@ $email = $_SESSION['email'] ?? 'No email';
         document.addEventListener('DOMContentLoaded', function () {
             loadFoods();
             setupEventListeners();
-            loadUserData(); // 載入用戶資料
+            loadUserData(); // 自動載入用戶資料
         });
-
-        // 載入用戶資料
-        async function loadUserData() {
-            try {
-                const response = await fetch('get_user_info.php', { 
-                    credentials: 'include',
-                    method: 'GET'
-                });
-                
-                console.log('Response status:', response.status);
-                
-                if (!response.ok) {
-                    console.log('未登入或無法取得用戶資料，顯示引導');
-                    showDataInputGuide();
-                    return;
-                }
-                
-                const userData = await response.json();
-                console.log('載入用戶資料:', userData);
-                
-                // 檢查是否有完整的用戶資料
-                const hasCompleteData = userData.age && userData.gender && userData.height && userData.weight;
-                
-                if (hasCompleteData) {
-                    // 有完整資料，自動填入表單
-                    document.getElementById('age').value = userData.age;
-                    document.getElementById('gender').value = userData.gender;
-                    document.getElementById('height').value = userData.height;
-                    document.getElementById('weight').value = userData.weight;
-                    
-                    // 設定預設活動強度（可讓用戶修改）
-                    if (!document.getElementById('activityLevel').value) {
-                        document.getElementById('activityLevel').value = '中度活動';
-                    }
-                    
-                    // 設定預設健身目標（可讓用戶修改）
-                    if (!document.getElementById('goal').value) {
-                        document.getElementById('goal').value = '維持';
-                    }
-                    
-                    // 顯示資料來源提示
-                    if (userData.has_inbody_data) {
-                        showInbodyDataInfo(userData);
-                    } else {
-                        showUserDataInfo(userData);
-                    }
-                } else {
-                    // 資料不完整，顯示引導
-                    showDataInputGuide();
-                }
-                
-            } catch (error) {
-                console.log('載入用戶資料失敗，顯示引導:', error);
-                showDataInputGuide();
-            }
-        }
-
-        // 顯示資料輸入引導
-        function showDataInputGuide() {
-            document.getElementById('dataGuideSection').style.display = 'block';
-            document.getElementById('dataSuccessSection').style.display = 'none';
-        }
-
-        // 顯示 InBody 資料資訊
-        function showInbodyDataInfo(userData) {
-            document.getElementById('dataGuideSection').style.display = 'none';
-            document.getElementById('dataSuccessSection').style.display = 'block';
-            document.getElementById('dataSourceInfo').textContent = 
-                `已從 InBody 資料載入您的身體資料（${userData.last_inbody_date}），系統將自動填入表單。`;
-        }
-
-        // 顯示一般用戶資料資訊
-        function showUserDataInfo(userData) {
-            document.getElementById('dataGuideSection').style.display = 'none';
-            document.getElementById('dataSuccessSection').style.display = 'block';
-            document.getElementById('dataSourceInfo').textContent = 
-                `已從基本資料載入您的身體資料，系統將自動填入表單。`;
-        }
 
         // 載入食物資料
         async function loadFoods() {
@@ -814,6 +762,163 @@ $email = $_SESSION['email'] ?? 'No email';
             ];
         }
 
+        // 載入用戶資料並自動填入表單
+        async function loadUserData() {
+            try {
+                const response = await fetch('get_user_info.php', { 
+                    credentials: 'include',
+                    method: 'GET'
+                });
+                
+                console.log('Response status:', response.status);
+                console.log('Response headers:', response.headers);
+                
+                if (!response.ok) {
+                    console.log('未登入或無法取得用戶資料，顯示引導');
+                    showDataInputGuide();
+                    return;
+                }
+                
+                const userData = await response.json();
+                console.log('載入用戶資料:', userData);
+                console.log('has_inbody_data:', userData.has_inbody_data);
+                console.log('age:', userData.age, 'gender:', userData.gender, 'height:', userData.height, 'weight:', userData.weight);
+                
+                // 檢查是否有完整的用戶資料
+                const hasCompleteData = userData.age && userData.gender && userData.height && userData.weight;
+                
+                if (hasCompleteData) {
+                    // 有完整資料，自動填入表單
+                    document.getElementById('age').value = userData.age;
+                    
+                    // 處理性別資料格式轉換
+                    let genderValue = userData.gender;
+                    console.log('原始性別資料:', genderValue, '類型:', typeof genderValue);
+                    
+                    if (genderValue === 'male' || genderValue === '男') {
+                        genderValue = '男';
+                    } else if (genderValue === 'female' || genderValue === '女') {
+                        genderValue = '女';
+                    }
+                    
+                    console.log('轉換後性別資料:', genderValue);
+                    
+                    // 設定性別欄位
+                    const genderSelect = document.getElementById('gender');
+                    if (genderSelect) {
+                        genderSelect.value = genderValue;
+                        console.log('性別欄位設定後的值:', genderSelect.value);
+                        
+                        // 如果設定失敗，嘗試觸發 change 事件
+                        if (genderSelect.value !== genderValue) {
+                            console.log('性別欄位設定失敗，嘗試其他方法');
+                            // 尋找匹配的選項
+                            for (let option of genderSelect.options) {
+                                if (option.value === genderValue) {
+                                    option.selected = true;
+                                    console.log('找到匹配的選項:', option.value);
+                                    break;
+                                }
+                            }
+                        }
+                    } else {
+                        console.error('找不到性別欄位元素');
+                    }
+                    
+                    document.getElementById('height').value = userData.height;
+                    document.getElementById('weight').value = userData.weight;
+                    
+                    // 設定預設活動強度（可讓用戶修改）
+                    if (!document.getElementById('activityLevel').value) {
+                        document.getElementById('activityLevel').value = '中度活動';
+                    }
+                    
+                    // 設定預設健身目標（可讓用戶修改）
+                    if (!document.getElementById('goal').value) {
+                        document.getElementById('goal').value = '維持';
+                    }
+                    
+                    // 顯示資料來源提示
+                    if (userData.has_inbody_data) {
+                        showInbodyDataInfo(userData);
+                    } else {
+                        showUserDataInfo(userData);
+                    }
+                } else {
+                    // 資料不完整，顯示引導
+                    showDataInputGuide();
+                }
+                
+            } catch (error) {
+                console.log('載入用戶資料失敗，顯示引導:', error);
+                showDataInputGuide();
+            }
+        }
+
+        // 顯示 inbody 資料來源提示
+        function showInbodyDataInfo(userData) {
+            const infoHtml = `
+                <div class="alert alert-info d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-info-circle-fill me-2"></i>
+                    <div>
+                        <strong>已載入最新的身體數據</strong><br>
+                        <small>資料來源：InBody 測量記錄 (${userData.last_inbody_date || '最近一次'})</small>
+                        ${userData.bmi ? `<br><small>BMI: ${userData.bmi.toFixed(1)} | 體脂率: ${userData.fat_percentage ? userData.fat_percentage.toFixed(1) + '%' : '未記錄'}</small>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            const nutritionCard = document.querySelector('.card:first-of-type');
+            if (nutritionCard) {
+                nutritionCard.insertAdjacentHTML('afterbegin', infoHtml);
+            }
+        }
+
+        // 顯示一般用戶資料提示
+        function showUserDataInfo(userData) {
+            const infoHtml = `
+                <div class="alert alert-success d-flex align-items-center mb-3" role="alert">
+                    <i class="bi bi-check-circle-fill me-2"></i>
+                    <div>
+                        <strong>已載入您的個人資料</strong><br>
+                        <small>資料來源：用戶基本資料</small>
+                        ${userData.bmi ? `<br><small>BMI: ${userData.bmi.toFixed(1)}</small>` : ''}
+                    </div>
+                </div>
+            `;
+            
+            const nutritionCard = document.querySelector('.card:first-of-type');
+            if (nutritionCard) {
+                nutritionCard.insertAdjacentHTML('afterbegin', infoHtml);
+            }
+        }
+
+        // 顯示資料輸入引導
+        function showDataInputGuide() {
+            const guideHtml = `
+                <div class="alert alert-warning d-flex align-items-start mb-3" role="alert">
+                    <i class="bi bi-exclamation-triangle-fill me-2 mt-1"></i>
+                    <div>
+                        <strong>建議先輸入身體數據</strong><br>
+                        <small>為了提供更精確的營養建議，建議您先到「健康數據」頁面輸入最新的身體測量數據。</small>
+                        <div class="mt-2">
+                            <a href="history.html" class="btn btn-sm btn-outline-primary me-2">
+                                <i class="bi bi-graph-up"></i> 前往健康數據
+                            </a>
+                            <button type="button" class="btn btn-sm btn-outline-secondary" onclick="this.parentElement.parentElement.parentElement.style.display='none'">
+                                <i class="bi bi-x"></i> 稍後再說
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            const nutritionCard = document.querySelector('.card:first-of-type');
+            if (nutritionCard) {
+                nutritionCard.insertAdjacentHTML('afterbegin', guideHtml);
+            }
+        }
+
         // 設定事件監聽器
         function setupEventListeners() {
             // 營養計算表單
@@ -837,6 +942,12 @@ $email = $_SESSION['email'] ?? 'No email';
                 goal: document.getElementById('goal').value
             };
 
+            // 檢查必要欄位是否已填寫
+            if (!formData.age || !formData.gender || !formData.height || !formData.weight || !formData.activity_level || !formData.goal) {
+                alert('請填寫所有必要欄位！');
+                return;
+            }
+
             try {
                 // 計算 BMR
                 const bmr = calculateBMR(formData);
@@ -849,10 +960,49 @@ $email = $_SESSION['email'] ?? 'No email';
 
                 // 顯示結果
                 displayNutritionResults(nutritionResult);
-                await loadMealSuggestions(nutritionResult);
+                
+                // 確保 currentNutritionResult 已設置
+                currentNutritionResult = nutritionResult;
+                
+                // 顯示三餐客製化區塊（不依賴餐食建議）
+                showMealPlanner();
 
             } catch (error) {
+                console.error('計算營養需求錯誤:', error);
                 alert('計算失敗: ' + error.message);
+            }
+        }
+        
+        // 顯示餐食規劃器
+        function showMealPlanner() {
+            console.log('showMealPlanner called with currentNutritionResult:', currentNutritionResult);
+            
+            try {
+                // 顯示菜單規劃區塊
+                const mealPlannerSection = document.getElementById('mealPlannerSection');
+                if (mealPlannerSection) {
+                    mealPlannerSection.style.display = 'block';
+                    console.log('顯示菜單規劃區塊');
+                } else {
+                    console.error('找不到 mealPlannerSection 元素');
+                    return;
+                }
+
+                if (currentNutritionResult) {
+                    console.log('初始化菜單規劃器，營養結果:', currentNutritionResult);
+                    initMealPlanner(currentNutritionResult);
+                } else {
+                    console.log('沒有營養結果，顯示空的規劃器');
+                }
+            } catch (error) {
+                console.error('顯示餐食規劃器失敗:', error);
+                console.error('錯誤詳情:', error.stack);
+                
+                // 強制顯示區塊
+                const mealPlannerSection = document.getElementById('mealPlannerSection');
+                if (mealPlannerSection) {
+                    mealPlannerSection.style.display = 'block';
+                }
             }
         }
 
@@ -886,6 +1036,8 @@ $email = $_SESSION['email'] ?? 'No email';
 
         // 計算營養目標
         function calculateNutritionGoals(tdee, goal) {
+            console.log('calculateNutritionGoals called with tdee:', tdee, 'goal:', goal);
+            
             const adjustments = {
                 '減脂': -500,
                 '增肌': 300,
@@ -907,7 +1059,7 @@ $email = $_SESSION['email'] ?? 'No email';
             const carbGrams = Math.round((targetCalories * ratios.carbs) / 4);
             const fatGrams = Math.round((targetCalories * ratios.fat) / 9);
 
-            return {
+            const result = {
                 goal: goal,
                 target_calories: Math.round(targetCalories),
                 calorie_adjustment: adjustment,
@@ -935,6 +1087,13 @@ $email = $_SESSION['email'] ?? 'No email';
                     snack: Math.round(targetCalories * 0.10)
                 }
             };
+            
+            console.log('calculateNutritionGoals 完整結果:', result);
+            console.log('meal_distribution 存在:', !!result.meal_distribution);
+            console.log('breakfast 值:', result.meal_distribution?.breakfast);
+            
+            console.log('calculateNutritionGoals returning:', result);
+            return result;
         }
 
         // 顯示營養結果
@@ -966,39 +1125,78 @@ $email = $_SESSION['email'] ?? 'No email';
             document.getElementById('nutritionResult').style.display = 'block';
         }
 
-        // 載入餐食建議
+        // 載入餐食建議（已停用，改用直接顯示菜單規劃器）
         async function loadMealSuggestions(nutritionResult) {
-            const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
-            const mealNames = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '點心' };
-            const mealCards = document.getElementById('mealCards');
-
-            mealCards.innerHTML = '';
-
-            for (const mealType of mealTypes) {
-                const mealCard = createMealCard(mealNames[mealType], mealType, nutritionResult);
-                mealCards.appendChild(mealCard);
-            }
-
-            document.getElementById('mealSuggestions').style.display = 'block';
-
-            // 啟用三餐客製化
-            initMealPlanner(nutritionResult);
+            console.log('loadMealSuggestions called (deprecated)');
+            // 此函數已不再使用，直接返回
+            return;
         }
 
-        // ===== 三餐客製化 =====
+        // ===== 每日菜單規劃 =====
         const mealTypesOrder = ['breakfast', 'lunch', 'dinner'];
         const mealTypeName = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' };
         let mealPlan = { breakfast: [], lunch: [], dinner: [] }; // 每餐的食材陣列
         let currentPickMeal = 'breakfast';
+        let currentWeek = new Date(); // 當前週
+        let weeklyMealPlans = {}; // 儲存每週的菜單計畫
+        let currentEditingDate = null; // 當前編輯的日期
 
         function initMealPlanner(nutritionResult) {
-            mealPlan = { breakfast: [], lunch: [], dinner: [] };
-            renderPlanner(nutritionResult);
-            document.getElementById('mealPlannerSection').style.display = 'block';
-            bindPickerFilters();
+            console.log('initMealPlanner called with:', nutritionResult);
+            
+            try {
+                // 初始化空的餐食計畫
+                mealPlan = { breakfast: [], lunch: [], dinner: [] };
+                console.log('餐食計畫已初始化:', mealPlan);
+                
+                // 檢查 nutritionResult 是否存在
+                if (!nutritionResult) {
+                    console.log('無營養結果，顯示空的規劃器');
+                    return;
+                }
+                
+                // 確保 nutritionResult 有必要的屬性
+                if (!nutritionResult.meal_distribution) {
+                    console.warn('nutritionResult 缺少 meal_distribution，創建預設值');
+                    const targetCalories = nutritionResult.target_calories || 2000;
+                    nutritionResult.meal_distribution = {
+                        breakfast: Math.round(targetCalories * 0.25),
+                        lunch: Math.round(targetCalories * 0.35),
+                        dinner: Math.round(targetCalories * 0.30),
+                        snack: Math.round(targetCalories * 0.10)
+                    };
+                }
+                
+                console.log('營養結果檢查完成，開始渲染:', nutritionResult);
+                
+                // 渲染規劃器
+                renderPlanner(nutritionResult);
+                
+                // 綁定過濾器
+                bindPickerFilters();
+                
+                console.log('餐食規劃器初始化完成');
+                
+            } catch (error) {
+                console.error('initMealPlanner 失敗:', error);
+                console.error('錯誤詳情:', error.stack);
+                
+                // 確保至少顯示空的規劃器
+                try {
+                    renderPlanner({ target_calories: 2000, meal_distribution: { breakfast: 500, lunch: 700, dinner: 600, snack: 200 } });
+                } catch (fallbackError) {
+                    console.error('連預設渲染都失敗:', fallbackError);
+                }
+            }
         }
 
         function renderPlanner(nutritionResult) {
+            // 檢查 nutritionResult 是否存在
+            if (!nutritionResult) {
+                console.error('Nutrition result is missing for render planner');
+                return;
+            }
+            
             const wrap = document.getElementById('plannerMeals');
             wrap.innerHTML = '';
 
@@ -1075,8 +1273,48 @@ $email = $_SESSION['email'] ?? 'No email';
             document.getElementById('pickerSearch').value = '';
             document.getElementById('pickerCategory').value = '';
             renderPickerTable(allFoods);
-            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('foodPickerModal'));
-            modal.show();
+            
+            // 使用兼容的 Bootstrap Modal 方法
+            const modalElement = document.getElementById('foodPickerModal');
+            let modal;
+            
+            // 嘗試不同的 Bootstrap 版本方法
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                if (bootstrap.Modal.getOrCreateInstance) {
+                    modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                } else if (bootstrap.Modal.getInstance) {
+                    modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+                } else {
+                    modal = new bootstrap.Modal(modalElement);
+                }
+            } else if (typeof $ !== 'undefined' && $.fn.modal) {
+                // 使用 jQuery Bootstrap
+                $(modalElement).modal('show');
+                return;
+            } else {
+                console.error('Bootstrap Modal not available, using fallback method');
+                // 使用原生方法顯示 Modal
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+                document.body.classList.add('modal-open');
+                
+                // 添加背景遮罩
+                const backdrop = document.createElement('div');
+                backdrop.className = 'modal-backdrop fade show';
+                backdrop.id = 'modalBackdrop';
+                document.body.appendChild(backdrop);
+                return;
+            }
+            
+            try {
+                modal.show();
+            } catch (error) {
+                console.error('Error showing modal:', error);
+                // 使用原生方法作為備用
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+                document.body.classList.add('modal-open');
+            }
         }
 
         function bindPickerFilters() {
@@ -1126,6 +1364,33 @@ $email = $_SESSION['email'] ?? 'No email';
                 fatPer100: food.Fat
             });
             renderPlanner(currentNutritionResult);
+            
+            // 關閉 Modal
+            closeFoodPickerModal();
+        }
+        
+        function closeFoodPickerModal() {
+            const modalElement = document.getElementById('foodPickerModal');
+            
+            // 嘗試使用 Bootstrap Modal 關閉
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                const modal = bootstrap.Modal.getInstance(modalElement);
+                if (modal) {
+                    modal.hide();
+                    return;
+                }
+            }
+            
+            // 使用原生方法關閉
+            modalElement.style.display = 'none';
+            modalElement.classList.remove('show');
+            document.body.classList.remove('modal-open');
+            
+            // 移除背景遮罩
+            const backdrop = document.getElementById('modalBackdrop');
+            if (backdrop) {
+                backdrop.remove();
+            }
         }
 
         function updateGrams(mealType, index, grams) {
@@ -1139,14 +1404,136 @@ $email = $_SESSION['email'] ?? 'No email';
             renderPlanner(currentNutritionResult);
         }
 
+        // ===== 週檢視功能 =====
+        function showWeekView() {
+            document.getElementById('weekView').style.display = 'block';
+            document.getElementById('dayView').style.display = 'none';
+            renderWeekView();
+        }
+
+        function showDayView() {
+            document.getElementById('weekView').style.display = 'none';
+            document.getElementById('dayView').style.display = 'block';
+        }
+
+        function renderWeekView() {
+            const weekDays = document.getElementById('weekDays');
+            weekDays.innerHTML = '';
+
+            // 計算本週的日期範圍
+            const startOfWeek = new Date(currentWeek);
+            startOfWeek.setDate(currentWeek.getDate() - currentWeek.getDay() + 1); // 週一開始
+
+            const weekRange = document.getElementById('weekRange');
+            const endOfWeek = new Date(startOfWeek);
+            endOfWeek.setDate(startOfWeek.getDate() + 6);
+            
+            weekRange.textContent = `${startOfWeek.getMonth() + 1}/${startOfWeek.getDate()} - ${endOfWeek.getMonth() + 1}/${endOfWeek.getDate()}`;
+
+            // 生成7天的卡片
+            for (let i = 0; i < 7; i++) {
+                const day = new Date(startOfWeek);
+                day.setDate(startOfWeek.getDate() + i);
+                
+                const dayCard = createDayCard(day, i);
+                weekDays.appendChild(dayCard);
+            }
+        }
+
+        function createDayCard(date, dayIndex) {
+            const col = document.createElement('div');
+            col.className = 'col-md-4 col-lg-3 mb-3';
+
+            const dayNames = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
+            const dayName = dayNames[dayIndex];
+            const dateStr = `${date.getMonth() + 1}/${date.getDate()}`;
+            
+            // 檢查這一天是否有菜單
+            const dateKey = date.toISOString().split('T')[0];
+            const dayMealPlan = weeklyMealPlans[dateKey] || { breakfast: [], lunch: [], dinner: [] };
+            const hasMeals = dayMealPlan.breakfast.length > 0 || dayMealPlan.lunch.length > 0 || dayMealPlan.dinner.length > 0;
+
+            col.innerHTML = `
+                <div class="card h-100">
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <h6 class="mb-0">${dayName}</h6>
+                            <small class="text-muted">${dateStr}</small>
+                        </div>
+                        <div class="flex-grow-1">
+                            ${hasMeals ? 
+                                `<div class="text-success">
+                                    <i class="bi bi-check-circle me-1"></i>已規劃菜單
+                                </div>` : 
+                                `<div class="text-muted">
+                                    <i class="bi bi-plus-circle me-1"></i>暫無菜單
+                                </div>`
+                            }
+                        </div>
+                        <button class="btn btn-primary btn-sm mt-2" onclick="editDayMenu('${dateKey}')">
+                            <i class="bi bi-plus-circle me-1"></i>${hasMeals ? '編輯菜單' : '新增菜單'}
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            return col;
+        }
+
+        function editDayMenu(dateKey) {
+            // 載入該日的菜單
+            const dayMealPlan = weeklyMealPlans[dateKey] || { breakfast: [], lunch: [], dinner: [] };
+            mealPlan = { ...dayMealPlan };
+            
+            // 切換到日檢視
+            showDayView();
+            
+            // 重新渲染
+            renderPlanner(currentNutritionResult);
+            
+            // 儲存當前編輯的日期
+            currentEditingDate = dateKey;
+        }
+
+        function previousWeek() {
+            currentWeek.setDate(currentWeek.getDate() - 7);
+            renderWeekView();
+        }
+
+        function nextWeek() {
+            currentWeek.setDate(currentWeek.getDate() + 7);
+            renderWeekView();
+        }
+
+        function saveMealPlan() {
+            if (currentEditingDate) {
+                // 儲存到週計畫中
+                weeklyMealPlans[currentEditingDate] = { ...mealPlan };
+                console.log('菜單已儲存到:', currentEditingDate, mealPlan);
+                
+                // 顯示成功訊息
+                alert('菜單已儲存！');
+                
+                // 更新週檢視
+                if (document.getElementById('weekView').style.display !== 'none') {
+                    renderWeekView();
+                }
+            } else {
+                alert('請先選擇要編輯的日期！');
+            }
+        }
+
+
         // 建立餐食卡片
         function createMealCard(mealName, mealType, nutritionResult) {
             const col = document.createElement('div');
             col.className = 'col-md-6 col-lg-3 mb-4';
 
-            const targetCalories = nutritionResult.meal_distribution[mealType];
-            const suggestedFoods = getSuggestedFoods(nutritionResult.goal, mealType);
-            const tips = getNutritionTips(nutritionResult.goal, mealType);
+            // 檢查 nutritionResult 和 meal_distribution 是否存在
+            const targetCalories = nutritionResult?.meal_distribution?.[mealType] || 0;
+            const goal = nutritionResult?.goal || '維持';
+            const suggestedFoods = getSuggestedFoods(goal, mealType);
+            const tips = getNutritionTips(goal, mealType);
 
             col.innerHTML = `
                 <div class="card meal-card">
@@ -1186,57 +1573,81 @@ $email = $_SESSION['email'] ?? 'No email';
 
         // 獲取建議食物
         function getSuggestedFoods(goal, mealType) {
-            const categoryFilters = {
-                '減脂': {
-                    'breakfast': ['蛋白質', '碳水化合物'],
-                    'lunch': ['蛋白質', '蔬菜', '碳水化合物'],
-                    'dinner': ['蛋白質', '蔬菜'],
-                    'snack': ['蛋白質', '水果']
-                },
-                '增肌': {
-                    'breakfast': ['蛋白質', '碳水化合物'],
-                    'lunch': ['蛋白質', '碳水化合物', '脂肪'],
-                    'dinner': ['蛋白質', '碳水化合物', '蔬菜'],
-                    'snack': ['蛋白質', '碳水化合物']
-                },
-                '維持': {
-                    'breakfast': ['蛋白質', '碳水化合物'],
-                    'lunch': ['蛋白質', '碳水化合物', '蔬菜'],
-                    'dinner': ['蛋白質', '蔬菜', '碳水化合物'],
-                    'snack': ['蛋白質', '水果']
-                }
+            // 根據餐點類型提供不同的食物建議
+            const mealSuggestions = {
+                'breakfast': [
+                    { name: '燕麥片', calories: 379, protein: 13, carbs: 67, fat: 6.5, category: '碳水化合物' },
+                    { name: '雞蛋', calories: 155, protein: 13, carbs: 1.1, fat: 11, category: '蛋白質' },
+                    { name: '香蕉', calories: 89, protein: 1.1, carbs: 23, fat: 0.3, category: '水果' },
+                    { name: '希臘優格', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, category: '蛋白質' },
+                    { name: '全麥麵包', calories: 247, protein: 13, carbs: 41, fat: 4.2, category: '碳水化合物' }
+                ],
+                'lunch': [
+                    { name: '雞胸肉', calories: 165, protein: 31, carbs: 0, fat: 3.6, category: '蛋白質' },
+                    { name: '白米飯', calories: 116, protein: 2.6, carbs: 25.9, fat: 0.3, category: '碳水化合物' },
+                    { name: '花椰菜', calories: 25, protein: 3, carbs: 5, fat: 0.3, category: '蔬菜' },
+                    { name: '鮭魚', calories: 208, protein: 25, carbs: 0, fat: 12, category: '蛋白質' },
+                    { name: '地瓜', calories: 86, protein: 1.6, carbs: 20, fat: 0.1, category: '碳水化合物' }
+                ],
+                'dinner': [
+                    { name: '鮭魚', calories: 208, protein: 25, carbs: 0, fat: 12, category: '蛋白質' },
+                    { name: '花椰菜', calories: 25, protein: 3, carbs: 5, fat: 0.3, category: '蔬菜' },
+                    { name: '地瓜', calories: 86, protein: 1.6, carbs: 20, fat: 0.1, category: '碳水化合物' },
+                    { name: '酪梨', calories: 160, protein: 2, carbs: 9, fat: 15, category: '脂肪' },
+                    { name: '雞胸肉', calories: 165, protein: 31, carbs: 0, fat: 3.6, category: '蛋白質' }
+                ],
+                'snack': [
+                    { name: '香蕉', calories: 89, protein: 1.1, carbs: 23, fat: 0.3, category: '水果' },
+                    { name: '希臘優格', calories: 59, protein: 10, carbs: 3.6, fat: 0.4, category: '蛋白質' },
+                    { name: '堅果', calories: 607, protein: 20, carbs: 21, fat: 54, category: '脂肪' },
+                    { name: '蘋果', calories: 52, protein: 0.3, carbs: 14, fat: 0.2, category: '水果' }
+                ]
             };
 
-            const categories = categoryFilters[goal][mealType] || ['蛋白質', '碳水化合物', '蔬菜'];
-            const filteredFoods = allFoods.filter(food => categories.includes(food.Category));
+            // 根據健身目標調整建議
+            let suggestions = mealSuggestions[mealType] || mealSuggestions['breakfast'];
+            
+            if (goal === '減脂') {
+                // 減脂時減少高熱量食物，增加蔬菜
+                suggestions = suggestions.filter(food => 
+                    food.category !== '脂肪' || food.calories < 200
+                );
+            } else if (goal === '增肌') {
+                // 增肌時增加蛋白質和碳水化合物
+                suggestions = suggestions.filter(food => 
+                    food.category === '蛋白質' || food.category === '碳水化合物'
+                );
+            }
 
-            return filteredFoods.slice(0, 3).map(food => ({
-                name: food.Food_Name,
-                calories: food.Calories,
-                protein: food.Protein,
-                carbs: food.Carbs,
-                fat: food.Fat
-            }));
+            // 隨機選擇 3 個建議
+            const shuffled = suggestions.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, 3);
         }
 
         // 獲取營養建議
         function getNutritionTips(goal, mealType) {
             const tips = {
                 '減脂': {
-                    'breakfast': ['選擇高蛋白早餐，如雞蛋、希臘優格', '避免高糖穀物，選擇燕麥片', '搭配蔬菜增加飽足感'],
-                    'lunch': ['控制碳水化合物攝取量', '增加蔬菜比例', '選擇瘦肉蛋白質'],
-                    'dinner': ['減少碳水化合物，增加蛋白質', '選擇蒸煮或烤製方式', '避免高熱量醬料'],
-                    'snack': ['選擇堅果、希臘優格', '避免高糖零食', '控制份量']
+                    'breakfast': ['選擇高纖維穀物如燕麥片', '搭配蛋白質如雞蛋或希臘優格', '加入水果增加維生素'],
+                    'lunch': ['以蔬菜為主，蛋白質為輔', '選擇糙米或地瓜取代白米', '控制油量，多用蒸煮'],
+                    'dinner': ['減少精緻澱粉攝取', '增加蔬菜和蛋白質比例', '避免高熱量醬料和油炸'],
+                    'snack': ['選擇低熱量高營養食物', '如水果、無糖優格', '控制份量，避免過量']
                 },
                 '增肌': {
-                    'breakfast': ['攝取充足蛋白質和碳水化合物', '可選擇全麥麵包配雞蛋', '搭配水果補充維生素'],
-                    'lunch': ['均衡攝取三大營養素', '選擇複合碳水化合物', '搭配健康脂肪'],
+                    'breakfast': ['攝取充足蛋白質和碳水化合物', '可選擇全麥麵包配雞蛋', '搭配香蕉補充鉀離子'],
+                    'lunch': ['均衡攝取三大營養素', '選擇複合碳水化合物如地瓜', '搭配健康脂肪如酪梨'],
                     'dinner': ['訓練後補充蛋白質', '攝取足夠碳水化合物恢復', '搭配蔬菜補充纖維'],
-                    'snack': ['訓練前後補充碳水化合物', '選擇蛋白質飲品', '適量堅果補充健康脂肪']
+                    'snack': ['訓練前後補充碳水化合物', '選擇蛋白質飲品或堅果', '適量補充健康脂肪']
+                },
+                '維持': {
+                    'breakfast': ['均衡攝取各類營養素', '選擇天然食材', '搭配適量蛋白質'],
+                    'lunch': ['多樣化選擇不同食物', '注意營養均衡', '控制總熱量攝取'],
+                    'dinner': ['以蔬菜和蛋白質為主', '適量攝取碳水化合物', '選擇清淡烹調方式'],
+                    'snack': ['選擇天然健康食物', '如水果、堅果', '控制份量避免過量']
                 }
             };
 
-            return tips[goal][mealType] || ['保持均衡飲食', '多喝水', '規律進食'];
+            return tips[goal]?.[mealType] || ['保持均衡飲食', '多喝水', '規律進食'];
         }
 
         // 篩選食物

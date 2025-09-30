@@ -542,6 +542,7 @@
 
     <!-- 自定義 JavaScript 邏輯 -->
     <script>
+        const API_FAVORITES = 'api/favorites.php';
 
         let selectedMuscle = null;
 
@@ -787,7 +788,60 @@
             }
         }
 
-        // 從資料庫獲取訓練資料
+        // 依據大肌群名稱，解析出實際要查詢的目標肌群陣列（對應資料庫 target_muscle 細分）
+        function resolveMuscles(muscleName) {
+            const mapping = {
+                // 胸部細分與別名
+                '胸部': ['上胸', '中胸', '下胸', '胸', '胸肌', '胸大肌'],
+
+                // 背部細分：常見的功能與解剖名稱
+                '背部': [
+                    '上背', '中背', '下背', '背', '背肌',
+                    '背闊肌', '闊背肌',
+                    '斜方肌上束', '斜方肌中束', '斜方肌下束', '斜方肌',
+                    '菱形肌', '豎脊肌',
+                    '圓大肌', '圓小肌',
+                    '岡下肌', '岡上肌'
+                ],
+
+                // 肩膀：三角肌前/中/後束與命名變體
+                '肩膀': [
+                    '肩膀前束', '肩膀中束', '肩膀後束', '肩膀',
+                    '三角肌前束', '三角肌中束', '三角肌後束', '三角肌'
+                ],
+
+                // 手臂
+                '二頭': ['二頭', '二頭肌', '肱二頭肌'],
+                '三頭': ['三頭', '三頭肌', '肱三頭肌'],
+
+                // 下肢
+                '大腿': ['股四頭肌', '股二頭肌', '臀肌', '大腿', '內收肌群'],
+                '小腿': ['小腿', '腓腸肌', '比目魚肌'],
+
+                // 核心/腹
+                '腹部': ['上腹', '下腹', '側腹', '核心', '腹部', '腹斜肌', '腹直肌']
+            };
+            // 若傳入已是陣列，直接回傳
+            if (Array.isArray(muscleName)) return muscleName;
+            // 回傳映射或預設單一查詢
+            return mapping[muscleName] || [muscleName];
+        }
+
+        // 合併多筆查詢結果並依名稱去重
+        function mergeExercisesUnique(resultsArrays) {
+            const merged = [];
+            const seen = new Set();
+            resultsArrays.flat().forEach(ex => {
+                const key = ex.name || `${ex.id || ''}-${ex.target_muscle || ''}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    merged.push(ex);
+                }
+            });
+            return merged;
+        }
+
+        // 從資料庫獲取訓練資料（支援一次查多個細分肌群並合併）
         async function fetchTrainingData(muscleName) {
             try {
                 // 顯示載入狀態
@@ -795,6 +849,10 @@
 
                 // 除錯資訊
                 console.log(`正在查詢肌群：${muscleName}`);
+
+                // 解析出要查詢的實際目標肌群陣列
+                const musclesToQuery = resolveMuscles(muscleName);
+                console.log('解析後要查詢的目標肌群：', musclesToQuery);
 
                 // 呼叫 PHP 後端 API
                 // 判斷是否本機
@@ -805,25 +863,28 @@
                     ? location.origin
                     : "https://jianshen.ngrok.app/健習生/dist";
 
-                // 用這一條就涵蓋你的兩種寫法
-                const response = await fetch(
-                    `${baseURL}/api/get_exercises.php?muscle=${encodeURIComponent(muscleName)}`
+                // 並行查詢多個目標肌群
+                const fetches = musclesToQuery.map(m =>
+                    fetch(`${baseURL}/api/get_exercises.php?muscle=${encodeURIComponent(m)}`)
+                        .then(r => {
+                            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                            return r.json();
+                        })
+                        .then(j => (j && j.success && Array.isArray(j.data)) ? j.data : [])
+                        .catch(err => {
+                            console.warn('查詢失敗：', m, err.message);
+                            return [];
+                        })
                 );
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                const resultsArrays = await Promise.all(fetches);
+                const merged = mergeExercisesUnique(resultsArrays);
 
-                const result = await response.json();
+                console.log(`合併後總共找到 ${merged.length} 個訓練動作`);
 
-                // 除錯資訊
-                console.log('API 回應結果：', result);
-
-                if (result.success && result.data && result.data.length > 0) {
-                    console.log(`找到 ${result.data.length} 個訓練動作`);
-                    displayTrainingData(muscleName, result.data);
+                if (merged.length > 0) {
+                    displayTrainingData(muscleName, merged);
                 } else {
-                    console.log('沒有找到訓練資料');
                     showError(`抱歉，目前沒有找到針對 ${muscleName} 的訓練資料。`);
                 }
 
@@ -858,13 +919,8 @@
                 display.style.display = 'block';
                 display.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
-                // ✅ 在這裡綁定事件，確保卡片已經存在
-                document.querySelectorAll(".favorite-btn").forEach(btn => {
-                    btn.addEventListener("click", function () {
-                        const exercise = JSON.parse(this.getAttribute("data-exercise"));
-                        toggleFavorite(exercise);
-                    });
-                });
+                // 原本這裡會再次為 .favorite-btn 綁定事件，造成與內聯 onclick 重複觸發，
+                // 並因缺少 data-exercise 導致傳入 null。已移除以避免錯誤。
 
             } else {
                 showError(`沒有找到 ${muscleName} 的訓練資料`);
@@ -931,22 +987,53 @@
         }
 
         // 收藏功能
-        function toggleFavorite(exercise, btn) {
-            let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        async function toggleFavorite(exercise, btn) {
+            try {
+                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                const exists = favorites.some(item => item.name === exercise.name);
 
-            const exists = favorites.some(item => item.name === exercise.name);
+                if (exists) {
+                    await fetch(API_FAVORITES + '?name=' + encodeURIComponent(exercise.name), {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        credentials: 'include',
+                        body: 'name=' + encodeURIComponent(exercise.name)
+                    });
+                    alert(`已取消收藏：${exercise.name}`);
+                    if (btn) btn.querySelector('i').classList.replace('bi-star-fill', 'bi-star');
+                } else {
+                    const res = await fetch(API_FAVORITES, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name: exercise.name, exercise })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(()=>({}));
+                        throw new Error(err.error || `HTTP ${res.status}`);
+                    }
+                    alert(`已加入收藏：${exercise.name}`);
+                    if (btn) btn.querySelector('i').classList.replace('bi-star', 'bi-star-fill');
+                }
 
-            if (exists) {
-                favorites = favorites.filter(item => item.name !== exercise.name);
-                alert(`已取消收藏：${exercise.name}`);
-                btn.querySelector("i").classList.replace("bi-star-fill", "bi-star"); // 變空心
-            } else {
-                favorites.push(exercise);
-                alert(`已加入收藏：${exercise.name}`);
-                btn.querySelector("i").classList.replace("bi-star", "bi-star-fill"); // 變實心
+                // 重新同步快取
+                const updated = await fetchFavoritesFromServer();
+                localStorage.setItem('favorites', JSON.stringify(updated));
+            } catch (e) {
+                console.error(e);
+                alert('操作失敗：' + (e?.message || '請先登入或稍後再試'));
             }
+        }
 
-            localStorage.setItem("favorites", JSON.stringify(favorites));
+        async function fetchFavoritesFromServer() {
+            try {
+                const res = await fetch(API_FAVORITES, { credentials: 'include' });
+                if (!res.ok) return [];
+                const data = await res.json();
+                return data.data || [];
+            } catch (e) {
+                return [];
+            }
         }
 
         // ✅ 彈窗控制：可嵌入胸部第 1 個器械的 mp4
@@ -1019,13 +1106,6 @@
         function hideLoading() {
             // 載入完成後，顯示狀態由 displayTrainingData 控制
         }
-
-        document.querySelectorAll(".favorite-btn").forEach(btn => {
-            btn.addEventListener("click", function () {
-                const exercise = JSON.parse(this.getAttribute("data-exercise"));
-                toggleFavorite(exercise);
-            });
-        });
 
         // 顯示錯誤訊息
         function showError(message) {
