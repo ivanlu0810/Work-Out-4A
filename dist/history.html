@@ -437,122 +437,135 @@
   `;
         }
 
+        /** 取得欄位：同時支援底線與連字號 **/
+        const getField = (obj, underScoreKey, hyphenKey) =>
+            obj?.[underScoreKey] ?? obj?.[hyphenKey] ?? '';
+
+        /** 安全取得 record_id（避免 undefined 時 substring 報錯） **/
+        const getId = (r) => r?.record_id || r?.id || '';
+
+        /* render 時：把顯示欄位改成同時支援 */
         function renderData(data) {
             const container = document.getElementById("history-list");
             container.innerHTML = "";
 
-            if (data.length === 0) {
+            if (!Array.isArray(data) || data.length === 0) {
                 container.innerHTML = `
-                    <div class="col-12">
-                        <div class="alert alert-morandi text-center" role="alert">
-                            <i class="bi bi-info-circle-fill me-2"></i>
-                            目前沒有歷史紀錄，請先新增健康數據
-                        </div>
-                    </div>
-                `;
+      <div class="col-12">
+        <div class="alert alert-morandi text-center" role="alert">
+          <i class="bi bi-info-circle-fill me-2"></i>
+          目前沒有歷史紀錄，請先新增健康數據
+        </div>
+      </div>`;
                 return;
             }
 
             data.forEach((record, index) => {
+                const recordId = getId(record);
+                const age = getField(record, 'age', 'age');
+                const h = getField(record, 'height_cm', 'height-cm');
+                const w = getField(record, 'weight_kg', 'weight-kg');
+                const sm = getField(record, 'skeletal_muscle', 'skeletal_muscle');
+                const bfkg = getField(record, 'body_fat', 'body_fat');
+                const bfper = getField(record, 'fat_percentage', 'fat_percentage');
+                const bmr = getField(record, 'basal_metabolism', 'basal_metabolism');
+                const bmi = getField(record, 'bmi', 'bmi');
+
                 const card = document.createElement("div");
                 card.className = "col-12 col-md-6 col-lg-4 mb-4";
-
                 card.innerHTML = `
-                    <div class="card shadow-lg border-0 rounded-4 h-100">
-                        <div class="card-header bg-gradient-primary text-white">
-                            <h5 class="card-title mb-1">
-                                📅 ${record.Date} 
-                                <small class="opacity-75">#${index + 1}</small>
-                            </h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row mb-3">
-                                <div class="col-4 text-center">
-                                    <div class="border-end">
-                                        <strong class="d-block text-primary">年齡</strong>
-                                        <span class="text-muted">${record.age}</span>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <div class="border-end">
-                                        <strong class="d-block text-primary">身高</strong>
-                                        <span class="text-muted">${record.height_cm} cm</span>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <strong class="d-block text-primary">體重</strong>
-                                    <span class="text-muted">${record.weight_kg} kg</span>
-                                </div>
-                            </div>
-                            
-                            <div class="row mb-3">
-                                <div class="col-4 text-center">
-                                    <div class="border-end">
-                                        <strong class="d-block text-success">骨骼肌</strong>
-                                        <span class="text-muted">${record.skeletal_muscle} kg</span>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <div class="border-end">
-                                        <strong class="d-block text-warning">體脂重</strong>
-                                        <span class="text-muted">${record.body_fat} kg</span>
-                                    </div>
-                                </div>
-                                <div class="col-4 text-center">
-                                    <strong class="d-block text-info">體脂率</strong>
-                                    <span class="text-muted">${record.fat_percentage}%</span>
-                                </div>
-                            </div>
-                            
-                            <div class="row">
-                                <div class="col-6 text-center">
-                                    <div class="border-end">
-                                        <strong class="d-block text-danger">基礎代謝</strong>
-                                        <span class="text-muted">${record.basal_metabolism} kcal</span>
-                                    </div>
-                                </div>
-                                <div class="col-6 text-center">
-                                    <strong class="d-block text-secondary">BMI</strong>
-                                    <span class="text-muted">${record.bmi}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
-  <small class="text-muted">
-    <i class="bi bi-clock me-1"></i>
-    記錄 ID: ${record.record_id.substring(0, 8)}...
-  </small>
-  <div>
-    <button class="btn btn-sm btn-detail me-2" onclick='openEditModal(${JSON.stringify(record)})'>
-      <i class="bi bi-pencil-square me-1"></i> 編輯
-    </button>
-    <button class="btn btn-sm btn-remove" onclick="deleteRecord('${record.record_id}')">
-      <i class="bi bi-trash me-1"></i> 刪除
-    </button>
-  </div>
-</div>
+      <div class="card shadow-lg border-0 rounded-4 h-100">
+        <div class="card-header bg-gradient-primary text-white">
+          <h5 class="card-title mb-1">
+            📅 ${record.Date || ''} <small class="opacity-75">#${index + 1}</small>
+          </h5>
+        </div>
+        <div class="card-body">
+          <div class="row mb-3">
+            <div class="col-4 text-center">
+              <div class="border-end">
+                <strong class="d-block text-primary">年齡</strong>
+                <span class="text-muted">${age}</span>
+              </div>
+            </div>
+            <div class="col-4 text-center">
+              <div class="border-end">
+                <strong class="d-block text-primary">身高</strong>
+                <span class="text-muted">${h} cm</span>
+              </div>
+            </div>
+            <div class="col-4 text-center">
+              <strong class="d-block text-primary">體重</strong>
+              <span class="text-muted">${w} kg</span>
+            </div>
+          </div>
 
-                `;
+          <div class="row mb-3">
+            <div class="col-4 text-center">
+              <div class="border-end">
+                <strong class="d-block text-success">骨骼肌</strong>
+                <span class="text-muted">${sm} kg</span>
+              </div>
+            </div>
+            <div class="col-4 text-center">
+              <div class="border-end">
+                <strong class="d-block text-warning">體脂重</strong>
+                <span class="text-muted">${bfkg} kg</span>
+              </div>
+            </div>
+            <div class="col-4 text-center">
+              <strong class="d-block text-info">體脂率</strong>
+              <span class="text-muted">${bfper}%</span>
+            </div>
+          </div>
+
+          <div class="row">
+            <div class="col-6 text-center">
+              <div class="border-end">
+                <strong class="d-block text-danger">基礎代謝</strong>
+                <span class="text-muted">${bmr} kcal</span>
+              </div>
+            </div>
+            <div class="col-6 text-center">
+              <strong class="d-block text-secondary">BMI</strong>
+              <span class="text-muted">${bmi}</span>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+          <small class="text-muted">
+            <i class="bi bi-clock me-1"></i>
+            記錄 ID: ${recordId ? (recordId.substring(0, 8) + '...') : '（無）'}
+          </small>
+          <div>
+            <button class="btn btn-sm btn-detail me-2" onclick='openEditModal(${JSON.stringify(record)})'>
+              <i class="bi bi-pencil-square me-1"></i> 編輯
+            </button>
+            <button class="btn btn-sm btn-remove" onclick="deleteRecord('${recordId}')">
+              <i class="bi bi-trash me-1"></i> 刪除
+            </button>
+          </div>
+        </div>
+      </div>`;
                 container.appendChild(card);
             });
         }
 
-        // 頁面載入時初始化
-        document.addEventListener('DOMContentLoaded', function () {
-            loadHistory();
-        });
-
-
+        /* 刪除：改用 x-www-form-urlencoded（PHP 可直接 $_POST['record_id']） */
         async function deleteRecord(recordId) {
+            if (!recordId) return alert('缺少 record_id，無法刪除');
             if (!confirm('刪除此筆紀錄將無法復原，確定要刪除嗎？')) return;
+
             try {
                 const res = await fetch('delete_record.php', {
                     method: 'POST',
                     credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ record_id: recordId })
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                    body: new URLSearchParams({ record_id: recordId }).toString()
                 });
-                const result = await res.json();
+                const text = await res.text();
+                let result;
+                try { result = JSON.parse(text); } catch { throw new Error('後端未回傳 JSON：' + text); }
                 if (result.success) {
                     await loadHistory();
                 } else {
@@ -560,70 +573,30 @@
                 }
             } catch (err) {
                 console.error(err);
-                alert('刪除發生錯誤，請查看 console。');
+                alert('刪除發生錯誤：' + err.message);
             }
         }
-        // 全域變數：Bootstrap modal instance（稍後會設定）
-        let editModalInstance = null;
 
+        /* 編輯 Modal：讀取時也做欄位鍵名對應 */
         function openEditModal(record) {
-            // 先解析可能被 JSON.stringify 包起來的 record（若傳入的是字串）
-            if (typeof record === 'string') {
-                try { record = JSON.parse(record); } catch (e) { console.error(e); }
-            }
+            if (typeof record === 'string') { try { record = JSON.parse(record); } catch { } }
+            const get = (u, h) => getField(record, u, h);
 
-            // 填入表單欄位
-            document.getElementById('edit_record_id').value = record.record_id || '';
-            document.getElementById('edit_Date').value = record.Date ? record.Date.split(' ')[0] : '';
-            document.getElementById('edit_age').value = record.age ?? '';
-            document.getElementById('edit_height_cm').value = record.height_cm ?? '';
-            document.getElementById('edit_weight_kg').value = record.weight_kg ?? '';
-            document.getElementById('edit_skeletal_muscle').value = record.skeletal_muscle ?? '';
-            document.getElementById('edit_body_fat').value = record.body_fat ?? '';
-            document.getElementById('edit_fat_percentage').value = record.fat_percentage ?? '';
-            document.getElementById('edit_basal_metabolism').value = record.basal_metabolism ?? '';
-            document.getElementById('edit_bmi').value = record.bmi ?? '';
+            document.getElementById('edit_record_id').value = getId(record);
+            document.getElementById('edit_Date').value = (record.Date || '').split(' ')[0] || '';
+            document.getElementById('edit_age').value = get('age', 'age');
+            document.getElementById('edit_height_cm').value = get('height_cm', 'height-cm');
+            document.getElementById('edit_weight_kg').value = get('weight_kg', 'weight-kg');
+            document.getElementById('edit_skeletal_muscle').value = get('skeletal_muscle', 'skeletal_muscle');
+            document.getElementById('edit_body_fat').value = get('body_fat', 'body_fat');
+            document.getElementById('edit_fat_percentage').value = get('fat_percentage', 'fat_percentage');
+            document.getElementById('edit_basal_metabolism').value = get('basal_metabolism', 'basal_metabolism');
+            document.getElementById('edit_bmi').value = get('bmi', 'bmi');
 
-            // 顯示 modal（Bootstrap 5）
             const el = document.getElementById('editRecordModal');
-            if (!editModalInstance) editModalInstance = new bootstrap.Modal(el, { keyboard: true });
-            editModalInstance.show();
+            if (!window.editModalInstance) window.editModalInstance = new bootstrap.Modal(el, { keyboard: true });
+            window.editModalInstance.show();
         }
-
-        document.getElementById('saveEditBtn').addEventListener('click', async () => {
-            const payload = {
-                record_id: document.getElementById('edit_record_id').value,
-                Date: document.getElementById('edit_Date').value,
-                age: document.getElementById('edit_age').value,
-                height_cm: document.getElementById('edit_height_cm').value,
-                weight_kg: document.getElementById('edit_weight_kg').value,
-                skeletal_muscle: document.getElementById('edit_skeletal_muscle').value,
-                body_fat: document.getElementById('edit_body_fat').value,
-                fat_percentage: document.getElementById('edit_fat_percentage').value,
-                basal_metabolism: document.getElementById('edit_basal_metabolism').value,
-                bmi: document.getElementById('edit_bmi').value
-            };
-
-            try {
-                const res = await fetch('update_record.php', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    // 關閉 modal 並重新載入列表
-                    editModalInstance.hide();
-                    await loadHistory();
-                } else {
-                    alert('更新失敗：' + (result.error || '未知錯誤'));
-                }
-            } catch (err) {
-                console.error(err);
-                alert('更新發生錯誤，請查看 console。');
-            }
-        });
     </script>
     <!-- Edit Record Modal -->
     <div class="modal fade" id="editRecordModal" tabindex="-1" aria-hidden="true">
@@ -685,7 +658,68 @@
     </div>
     <!-- 若專案沒有打包 bootstrap.bundle，先用 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // 先把「儲存」的處理邏輯抽成函式
+        async function handleSaveEdit() {
+            const id = document.getElementById('edit_record_id').value;
+            const date = document.getElementById('edit_Date').value;
 
+            const underScorePayload = {
+                record_id: id,
+                Date: date,
+                age: document.getElementById('edit_age').value,
+                height_cm: document.getElementById('edit_height_cm').value,
+                weight_kg: document.getElementById('edit_weight_kg').value,
+                skeletal_muscle: document.getElementById('edit_skeletal_muscle').value,
+                body_fat: document.getElementById('edit_body_fat').value,
+                fat_percentage: document.getElementById('edit_fat_percentage').value,
+                basal_metabolism: document.getElementById('edit_basal_metabolism').value,
+                bmi: document.getElementById('edit_bmi').value
+            };
+            // 同送舊鍵名（連字號）
+            const hyphenPayload = {
+                'height-cm': underScorePayload.height_cm,
+                'weight-kg': underScorePayload.weight_kg
+            };
+
+            const params = new URLSearchParams({ ...underScorePayload, ...hyphenPayload });
+
+            try {
+                const res = await fetch('update_record.php', {
+                    method: 'POST',
+                    credentials: 'include',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded;charset=UTF-8' },
+                    body: params.toString()
+                });
+                const text = await res.text();
+                let result;
+                try { result = JSON.parse(text); } catch { throw new Error('後端未回傳 JSON：' + text); }
+
+                if (result.success) {
+                    window.editModalInstance?.hide();
+                    await loadHistory();
+                } else {
+                    alert('更新失敗：' + (result.error || '未知錯誤'));
+                }
+            } catch (err) {
+                console.error(err);
+                alert('更新發生錯誤：' + err.message);
+            }
+        }
+
+        // ✅ 等整個 DOM 都好了再做這兩件事：1) 呼叫 loadHistory；2) 綁定儲存按鈕
+        document.addEventListener('DOMContentLoaded', () => {
+            // 1) 真的把資料載進來，產生每張卡片上的「編輯/刪除」按鈕
+            loadHistory();
+
+            // 2) 這時候按鈕已在 DOM，才能穩定綁定事件
+            const saveBtn = document.getElementById('saveEditBtn');
+            if (saveBtn && !saveBtn.dataset.bound) {
+                saveBtn.dataset.bound = '1';
+                saveBtn.addEventListener('click', handleSaveEdit);
+            }
+        });
+    </script>
 </body>
 
 </html>
