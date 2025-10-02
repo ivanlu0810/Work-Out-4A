@@ -58,16 +58,17 @@ while ($row = $result->fetch_assoc()) {
         $height_m = $row['height_cm'] / 100;
         $row['bmi'] = round($row['weight_kg'] / ($height_m * $height_m), 2);
     }
-    
+
     // 格式化數據
-    $row['height_cm'] = $row['height_cm'] ? number_format($row['height_cm'], 1) : '無資料';
-    $row['weight_kg'] = $row['weight_kg'] ? number_format($row['weight_kg'], 1) : '無資料';
-    $row['skeletal_muscle'] = $row['skeletal_muscle'] ? number_format($row['skeletal_muscle'], 1) : '無資料';
-    $row['body_fat'] = $row['body_fat'] ? number_format($row['body_fat'], 1) : '無資料';
-    $row['fat_percentage'] = $row['fat_percentage'] ? number_format($row['fat_percentage'], 1) : '無資料';
-    $row['basal_metabolism'] = $row['basal_metabolism'] ? number_format($row['basal_metabolism'], 0) : '無資料';
-    $row['bmi'] = $row['bmi'] ? number_format($row['bmi'], 2) : '無資料';
-    
+    // 讓前端拿到純數字（或 null），不要 number_format
+    $row['height_cm']        = isset($row['height_cm'])        ? (float)$row['height_cm']        : null;
+    $row['weight_kg']        = isset($row['weight_kg'])        ? (float)$row['weight_kg']        : null;
+    $row['skeletal_muscle']  = isset($row['skeletal_muscle'])  ? (float)$row['skeletal_muscle']  : null;
+    $row['body_fat']         = isset($row['body_fat'])         ? (float)$row['body_fat']         : null;
+    $row['fat_percentage']   = isset($row['fat_percentage'])   ? (float)$row['fat_percentage']   : null;
+    $row['basal_metabolism'] = isset($row['basal_metabolism']) ? (float)$row['basal_metabolism'] : null;
+    $row['bmi']              = isset($row['bmi'])              ? (float)$row['bmi']              : null;
+
     $data[] = $row;
 }
 
@@ -75,10 +76,9 @@ while ($row = $result->fetch_assoc()) {
 $totalRecords = count($data);
 
 echo json_encode([
-    "success" => true, 
+    "success" => true,
     "data" => $data,
     "stats" => [
         "total_records" => $totalRecords
     ]
 ], JSON_UNESCAPED_UNICODE);
-?>

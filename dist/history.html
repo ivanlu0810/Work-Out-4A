@@ -563,67 +563,88 @@
                 alert('刪除發生錯誤，請查看 console。');
             }
         }
-        // 全域變數：Bootstrap modal instance（稍後會設定）
+
+        document.addEventListener('click', async (e) => {
+            if (e.target.id === 'saveEditBtn') {
+                const btn = e.target;
+                const payload = {
+                    record_id: document.getElementById('edit_record_id').value,
+                    Date: document.getElementById('edit_Date').value,
+                    age: document.getElementById('edit_age').value,
+                    height_cm: document.getElementById('edit_height_cm').value,
+                    weight_kg: document.getElementById('edit_weight_kg').value,
+                    skeletal_muscle: document.getElementById('edit_skeletal_muscle').value,
+                    body_fat: document.getElementById('edit_body_fat').value,
+                    fat_percentage: document.getElementById('edit_fat_percentage').value,
+                    basal_metabolism: document.getElementById('edit_basal_metabolism').value,
+                    bmi: document.getElementById('edit_bmi').value
+                };
+
+                // UX：按下後短暫停用與顯示儲存中，避免顏色卡住與重複送出
+                const originalHTML = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '儲存中…';
+
+                try {
+                    const res = await fetch('update_record.php', {
+                        method: 'POST',
+                        credentials: 'include',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const result = await res.json();
+                    console.log('update_record 回傳：', result);
+
+                    if (result.success) {
+                        // 關閉 Modal 並重載列表
+                        editModalInstance?.hide();
+                        await loadHistory();
+                    } else {
+                        alert('更新失敗：' + (result.error || '未知錯誤'));
+                    }
+                } catch (err) {
+                    console.error(err);
+                    alert('更新發生錯誤，請查看 console。');
+                } finally {
+                    btn.disabled = false;
+                    btn.innerHTML = originalHTML;
+                }
+            }
+        });
+
+        // 只保留數字/小數點/負號；移除逗號與單位
+        function toNumberString(v) {
+            if (v === null || v === undefined) return '';
+            return String(v).replace(/,/g, '').replace(/[^\d.-]/g, '');
+        }
+
+        // 全域變數：Bootstrap modal instance
         let editModalInstance = null;
 
+        // 清洗：移除逗號/單位，只留數字
+        function toNumberString(v) {
+            if (v === null || v === undefined) return '';
+            return String(v).replace(/,/g, '').replace(/[^\d.-]/g, '');
+        }
+
         function openEditModal(record) {
-            // 先解析可能被 JSON.stringify 包起來的 record（若傳入的是字串）
-            if (typeof record === 'string') {
-                try { record = JSON.parse(record); } catch (e) { console.error(e); }
-            }
+            if (typeof record === 'string') { try { record = JSON.parse(record); } catch (e) { } }
 
-            // 填入表單欄位
             document.getElementById('edit_record_id').value = record.record_id || '';
-            document.getElementById('edit_Date').value = record.Date ? record.Date.split(' ')[0] : '';
-            document.getElementById('edit_age').value = record.age ?? '';
-            document.getElementById('edit_height_cm').value = record.height_cm ?? '';
-            document.getElementById('edit_weight_kg').value = record.weight_kg ?? '';
-            document.getElementById('edit_skeletal_muscle').value = record.skeletal_muscle ?? '';
-            document.getElementById('edit_body_fat').value = record.body_fat ?? '';
-            document.getElementById('edit_fat_percentage').value = record.fat_percentage ?? '';
-            document.getElementById('edit_basal_metabolism').value = record.basal_metabolism ?? '';
-            document.getElementById('edit_bmi').value = record.bmi ?? '';
+            document.getElementById('edit_Date').value = record.Date ? String(record.Date).split(' ')[0].replace(/\//g, '-') : '';
+            document.getElementById('edit_age').value = toNumberString(record.age);
+            document.getElementById('edit_height_cm').value = toNumberString(record.height_cm);
+            document.getElementById('edit_weight_kg').value = toNumberString(record.weight_kg);
+            document.getElementById('edit_skeletal_muscle').value = toNumberString(record.skeletal_muscle);
+            document.getElementById('edit_body_fat').value = toNumberString(record.body_fat);
+            document.getElementById('edit_fat_percentage').value = toNumberString(record.fat_percentage);
+            document.getElementById('edit_basal_metabolism').value = toNumberString(record.basal_metabolism); // ← 關鍵
+            document.getElementById('edit_bmi').value = toNumberString(record.bmi);
 
-            // 顯示 modal（Bootstrap 5）
             const el = document.getElementById('editRecordModal');
             if (!editModalInstance) editModalInstance = new bootstrap.Modal(el, { keyboard: true });
             editModalInstance.show();
         }
-
-        document.getElementById('saveEditBtn').addEventListener('click', async () => {
-            const payload = {
-                record_id: document.getElementById('edit_record_id').value,
-                Date: document.getElementById('edit_Date').value,
-                age: document.getElementById('edit_age').value,
-                height_cm: document.getElementById('edit_height_cm').value,
-                weight_kg: document.getElementById('edit_weight_kg').value,
-                skeletal_muscle: document.getElementById('edit_skeletal_muscle').value,
-                body_fat: document.getElementById('edit_body_fat').value,
-                fat_percentage: document.getElementById('edit_fat_percentage').value,
-                basal_metabolism: document.getElementById('edit_basal_metabolism').value,
-                bmi: document.getElementById('edit_bmi').value
-            };
-
-            try {
-                const res = await fetch('update_record.php', {
-                    method: 'POST',
-                    credentials: 'include',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const result = await res.json();
-                if (result.success) {
-                    // 關閉 modal 並重新載入列表
-                    editModalInstance.hide();
-                    await loadHistory();
-                } else {
-                    alert('更新失敗：' + (result.error || '未知錯誤'));
-                }
-            } catch (err) {
-                console.error(err);
-                alert('更新發生錯誤，請查看 console。');
-            }
-        });
     </script>
     <!-- Edit Record Modal -->
     <div class="modal fade" id="editRecordModal" tabindex="-1" aria-hidden="true">
