@@ -577,53 +577,6 @@
             }
         }
 
-        document.addEventListener('click', async (e) => {
-            if (e.target.id === 'saveEditBtn') {
-                const btn = e.target;
-                const payload = {
-                    record_id: document.getElementById('edit_record_id').value,
-                    Date: document.getElementById('edit_Date').value,
-                    age: document.getElementById('edit_age').value,
-                    height_cm: document.getElementById('edit_height_cm').value,
-                    weight_kg: document.getElementById('edit_weight_kg').value,
-                    skeletal_muscle: document.getElementById('edit_skeletal_muscle').value,
-                    body_fat: document.getElementById('edit_body_fat').value,
-                    fat_percentage: document.getElementById('edit_fat_percentage').value,
-                    basal_metabolism: document.getElementById('edit_basal_metabolism').value,
-                    bmi: document.getElementById('edit_bmi').value
-                };
-
-                // UX：按下後短暫停用與顯示儲存中，避免顏色卡住與重複送出
-                const originalHTML = btn.innerHTML;
-                btn.disabled = true;
-                btn.innerHTML = '儲存中…';
-
-                try {
-                    const res = await fetch('update_record.php', {
-                        method: 'POST',
-                        credentials: 'include',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
-                    const result = await res.json();
-                    console.log('update_record 回傳：', result);
-
-                    if (result.success) {
-                        // 關閉 Modal 並重載列表
-                        editModalInstance?.hide();
-                        await loadHistory();
-                    } else {
-                        alert('更新失敗：' + (result.error || '未知錯誤'));
-                    }
-                } catch (err) {
-                    console.error(err);
-                    alert('更新發生錯誤，請查看 console。');
-                } finally {
-                    btn.disabled = false;
-                    btn.innerHTML = originalHTML;
-                }
-            }
-        });
 
         // 只保留數字/小數點/負號；移除逗號與單位
         function toNumberString(v) {
@@ -634,25 +587,20 @@
         // 全域變數：Bootstrap modal instance
         let editModalInstance = null;
 
-        // 清洗：移除逗號/單位，只留數字
-        function toNumberString(v) {
-            if (v === null || v === undefined) return '';
-            return String(v).replace(/,/g, '').replace(/[^\d.-]/g, '');
-        }
-
         function openEditModal(record) {
             if (typeof record === 'string') { try { record = JSON.parse(record); } catch (e) { } }
-
-            document.getElementById('edit_record_id').value = record.record_id || '';
+            document.getElementById('edit_record_id').value = record.record_id || record.id || '';
             document.getElementById('edit_Date').value = record.Date ? String(record.Date).split(' ')[0].replace(/\//g, '-') : '';
-            document.getElementById('edit_age').value = toNumberString(record.age);
-            document.getElementById('edit_height_cm').value = toNumberString(record.height_cm);
-            document.getElementById('edit_weight_kg').value = toNumberString(record.weight_kg);
-            document.getElementById('edit_skeletal_muscle').value = toNumberString(record.skeletal_muscle);
-            document.getElementById('edit_body_fat').value = toNumberString(record.body_fat);
-            document.getElementById('edit_fat_percentage').value = toNumberString(record.fat_percentage);
-            document.getElementById('edit_basal_metabolism').value = toNumberString(record.basal_metabolism); // ← 關鍵
-            document.getElementById('edit_bmi').value = toNumberString(record.bmi);
+
+            const get = (u, h) => toNumberString(getField(record, u, h));
+            document.getElementById('edit_age').value = get('age', 'age');
+            document.getElementById('edit_height_cm').value = get('height_cm', 'height-cm');
+            document.getElementById('edit_weight_kg').value = get('weight_kg', 'weight-kg');
+            document.getElementById('edit_skeletal_muscle').value = get('skeletal_muscle', 'skeletal_muscle');
+            document.getElementById('edit_body_fat').value = get('body_fat', 'body_fat');
+            document.getElementById('edit_fat_percentage').value = get('fat_percentage', 'fat_percentage');
+            document.getElementById('edit_basal_metabolism').value = get('basal_metabolism', 'basal_metabolism');
+            document.getElementById('edit_bmi').value = get('bmi', 'bmi');
 
             const el = document.getElementById('editRecordModal');
             if (!window.editModalInstance) window.editModalInstance = new bootstrap.Modal(el, { keyboard: true });
@@ -737,13 +685,23 @@
                 basal_metabolism: document.getElementById('edit_basal_metabolism').value,
                 bmi: document.getElementById('edit_bmi').value
             };
-            // 同送舊鍵名（連字號）
+            // 放在 handleSaveEdit() 裡 ↓↓↓
+            const aliasPayload = {
+                id: underScorePayload.record_id, // 後端若收 id 也能過
+                date: underScorePayload.Date     // 後端若收小寫 date 也能過
+            };
+
+            // 若你暫時讓後端同時支援底線/連字號，這裡也可同送；不需要就拿掉 hyphenPayload
             const hyphenPayload = {
                 'height-cm': underScorePayload.height_cm,
                 'weight-kg': underScorePayload.weight_kg
             };
 
-            const params = new URLSearchParams({ ...underScorePayload, ...hyphenPayload });
+            const params = new URLSearchParams({
+                ...underScorePayload,
+                ...aliasPayload,
+                ...hyphenPayload
+            });
 
             try {
                 const res = await fetch('update_record.php', {
