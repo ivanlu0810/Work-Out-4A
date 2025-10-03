@@ -2252,6 +2252,9 @@
                     if (templateId === 'fullbody' && mode === 'recommended') {
                         // 全身訓練推薦模式使用固定的專業菜單
                         applyFixedFullbodyRecommendations();
+                    } else if (templateId === 'upperlower' && mode === 'random') {
+                        // 二分化隨機模式使用新的隨機菜單生成
+                        generateUpperLowerSplitRandom();
                     } else {
                         applyTemplateToWeek(template, mode);
                     }
@@ -2585,6 +2588,132 @@
             return null;
         }
 
+
+        // 二分化(上下分離)隨機菜單生成
+        function generateUpperLowerSplitRandom() {
+            console.log('生成二分化隨機菜單');
+            
+            // 清空現有計畫
+            Object.keys(weeklyPlan).forEach(day => {
+                weeklyPlan[day] = [];
+            });
+            
+            // 重置動作追蹤
+            usedExercises.clear();
+            
+            // 二分化訓練安排
+            const splitSchedule = {
+                monday: 'upper',    // 上半身
+                tuesday: 'lower',   // 下半身
+                wednesday: 'rest',   // 休息
+                thursday: 'upper',  // 上半身
+                friday: 'lower',    // 下半身
+                saturday: 'rest',   // 休息
+                sunday: 'rest'      // 休息
+            };
+            
+            // 上半身動作組合 (8個動作)
+            const upperBodyMuscles = [
+                { muscle: '上胸', count: 1, sets: 3, reps: 10 },
+                { muscle: '中胸', count: 1, sets: 3, reps: 10 },
+                { muscle: '上背', count: 1, sets: 3, reps: 10 },
+                { muscle: '中背', count: 1, sets: 3, reps: 10 },
+                { muscle: '肩膀前束', count: 1, sets: 3, reps: 12 },
+                { muscle: '肩膀中束', count: 1, sets: 3, reps: 12 },
+                { muscle: '二頭肌', count: 1, sets: 3, reps: 12 },
+                { muscle: '三頭肌', count: 1, sets: 3, reps: 12 }
+            ];
+            
+            // 下半身動作組合 (8個動作)
+            const lowerBodyMuscles = [
+                { muscle: '股四頭肌', count: 2, sets: 3, reps: 10 },
+                { muscle: '股二頭肌', count: 2, sets: 3, reps: 10 },
+                { muscle: '臀肌', count: 2, sets: 3, reps: 12 },
+                { muscle: '核心', count: 2, sets: 3, reps: 15 }
+            ];
+            
+            // 為每個訓練日生成動作
+            Object.keys(splitSchedule).forEach(day => {
+                const trainingType = splitSchedule[day];
+                
+                if (trainingType === 'rest') {
+                    console.log(`${day}: 休息日`);
+                    return;
+                }
+                
+                console.log(`生成 ${day} (${trainingType === 'upper' ? '上半身' : '下半身'}) 訓練`);
+                dailyUsedExercises.clear();
+                
+                const muscleGroups = trainingType === 'upper' ? upperBodyMuscles : lowerBodyMuscles;
+                let addedCount = 0;
+                
+                muscleGroups.forEach(muscleGroup => {
+                    for (let i = 0; i < muscleGroup.count; i++) {
+                        const exercise = getRandomExerciseForMuscle(muscleGroup.muscle, 'random');
+                        if (exercise) {
+                            weeklyPlan[day].push({
+                                id: exercise.id,
+                                name: exercise.name,
+                                muscleGroup: muscleGroup.muscle,
+                                sets: muscleGroup.sets,
+                                reps: muscleGroup.reps,
+                                weight: null,
+                                restTime: 60
+                            });
+                            dailyUsedExercises.add(exercise.id);
+                            addedCount++;
+                            console.log(`添加動作: ${exercise.name} (${muscleGroup.muscle})`);
+                        } else {
+                            console.log(`找不到 ${muscleGroup.muscle} 動作`);
+                        }
+                    }
+                });
+                
+                console.log(`${day} 總共添加了 ${addedCount} 個動作`);
+            });
+            
+            // 更新顯示
+            saveWeeklyPlan();
+            renderWeeklyPlan();
+            updateStats();
+            
+            // 同步到資料庫
+            syncToDatabase().catch(error => {
+                console.error('同步到資料庫失敗:', error);
+            });
+            
+            console.log('二分化隨機菜單生成完成');
+        }
+        
+        // 為特定肌群獲取隨機動作
+        function getRandomExerciseForMuscle(muscleGroup, mode = 'random') {
+            if (!exercises || exercises.length === 0) {
+                console.error('動作資料未載入！');
+                return null;
+            }
+            
+            console.log(`尋找 ${muscleGroup} 動作，總動作數: ${exercises.length}`);
+            
+            // 獲取該肌群的所有動作
+            let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
+            console.log(`${muscleGroup} 可用動作數: ${availableExercises.length}`);
+            
+            // 過濾掉今天已經使用的動作
+            availableExercises = availableExercises.filter(ex => !dailyUsedExercises.has(ex.id));
+            console.log(`${muscleGroup} 過濾後可用動作數: ${availableExercises.length}`);
+            
+            if (availableExercises.length === 0) {
+                console.log(`沒有可用的 ${muscleGroup} 動作`);
+                return null;
+            }
+            
+            // 隨機選擇一個動作
+            const randomIndex = Math.floor(Math.random() * availableExercises.length);
+            const selectedExercise = availableExercises[randomIndex];
+            
+            console.log(`選擇 ${muscleGroup} 動作: ${selectedExercise.name} (ID: ${selectedExercise.id})`);
+            return selectedExercise;
+        }
 
         // 獲取隨機動作（只使用資料庫中的動作，找不到就跳過，避免重複）
         function getRandomExercise(muscleGroup, mode = 'random') {
