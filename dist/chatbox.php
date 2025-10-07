@@ -156,7 +156,7 @@ if ($targetMuscle) {
     }
 }
 
-error_log("$exerciseText");
+echo "<script>console.log(" . json_encode($exerciseText, JSON_UNESCAPED_UNICODE) . ");</script>";
 // 🔟 組合送給 AI 的 user message
 $userPrompt = "";
 if ($isFirstChat) {
