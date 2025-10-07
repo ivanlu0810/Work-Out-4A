@@ -171,15 +171,39 @@ if ($targetMuscle) {
         $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle LIKE ? AND user_level = ?");
         $stmt->execute(["%$targetMuscle%", "新手"]);
     }
-    $ssql = $sql . ' ｜參數：[' . implode(', ', $params) . ']';
+    preg_replace("/\s+/", " ", $sql) . ' ｜參數：[' . implode(', ', $params) . ']';
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($rows) {
-        $exerciseText .= "以下是資料庫查到的【{$targetMuscle}】新手訓練動作：\n";
-        foreach ($rows as $row) {
-            $exerciseText .= "- {$row['name']}：建議次數 {$row['hypertrophy_reps_min']}–{$row['hypertrophy_reps_max']}，組數 {$row['hypertrophy_sets_min']}–{$row['hypertrophy_sets_max']}，備註：{$row['notes']}\n";
+    $exerciseText .= "以下是資料庫查到的【{$targetMuscle}】新手訓練動作：\n";
+    foreach ($rows as $row) {
+        $exerciseText .= "- {$row['name']}（{$row['target_muscle']}）\n";
+        $exerciseText .= "  組數：{$row['hypertrophy_sets_min']}–{$row['hypertrophy_sets_max']}，次數：{$row['hypertrophy_reps_min']}–{$row['hypertrophy_reps_max']}\n";
+
+        if (!empty($row['hypertrophy_load_min_pct']) && !empty($row['hypertrophy_load_max_pct'])) {
+            $exerciseText .= "  建議負重：{$row['hypertrophy_load_min_pct']}–{$row['hypertrophy_load_max_pct']}% 1RM\n";
         }
+
+        if (!empty($row['instruction_short'])) {
+            $exerciseText .= "  動作重點：{$row['instruction_short']}\n";
+        }
+
+        if (!empty($row['instruction_cues'])) {
+            $exerciseText .= "  提示：{$row['instruction_cues']}\n";
+        }
+
+        if (!empty($row['difficulty'])) {
+            $exerciseText .= "  難度等級：{$row['difficulty']}\n";
+        }
+
+        if (!empty($row['notes'])) {
+            $exerciseText .= "  備註：{$row['notes']}\n";
+        }
+
+        $exerciseText .= "\n";
     }
+}
+
 }
 
 
@@ -239,6 +263,5 @@ echo json_encode([
     "classified" => $classJson,
     "exercises_used" => $exerciseText,
     "user_data" => $row, // 直接傳給前端用
-    "stmt" => $ssql,
-    "exerciseText" => $exerciseText
+    "stmt" => $ssql
 ], JSON_UNESCAPED_UNICODE);
