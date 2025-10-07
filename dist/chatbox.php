@@ -157,7 +157,10 @@ if ($targetMuscle) {
 }
 
 
-file_put_contents('debug.log', $exerciseText, FILE_APPEND);
+$logPath = __DIR__ . '/../logs/debug.log';
+
+// 每次覆蓋舊檔
+file_put_contents($logPath, date('Y-m-d H:i:s') . "\n" . $exerciseText . "\n");
 
 
 // 🔟 組合送給 AI 的 user message
