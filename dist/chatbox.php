@@ -156,7 +156,7 @@ if ($targetMuscle) {
     }
 }
 
-
+error_log("$exerciseText");
 // 🔟 組合送給 AI 的 user message
 $userPrompt = "";
 if ($isFirstChat) {
