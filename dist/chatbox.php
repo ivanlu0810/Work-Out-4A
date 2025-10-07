@@ -1,4 +1,4 @@
-<?php 
+<?php
 session_start();
 
 header("Content-Type: application/json; charset=UTF-8");
@@ -144,8 +144,9 @@ $targetMuscle = $classJson["target_muscle"] ?? null;
 // 9️⃣ 查 exercises 資料表
 $exerciseText = "";
 if ($targetMuscle) {
-    $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle = ? AND user_level = ?");
-    $stmt->execute([$targetMuscle, "新手"]);
+    $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle LIKE ? AND user_level = ?");
+    $stmt->execute(["%$targetMuscle%", "新手"]);
+
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($rows) {
@@ -212,5 +213,5 @@ echo json_encode([
     "classified" => $classJson,
     "exercises_used" => $exerciseText,
     "user_data" => $row, // 直接傳給前端用
-    "exerciseText"=>$exerciseText
+    "exerciseText" => $exerciseText
 ], JSON_UNESCAPED_UNICODE);
