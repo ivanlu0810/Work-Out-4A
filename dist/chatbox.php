@@ -144,8 +144,34 @@ $targetMuscle = $classJson["target_muscle"] ?? null;
 // 9️⃣ 查 exercises 資料表
 $exerciseText = "";
 if ($targetMuscle) {
-    $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle LIKE ? AND user_level = ?");
-    $stmt->execute(["%$targetMuscle%", "新手"]);
+    // 大類→細分（解法A）
+    $map = [
+        '胸部' => ['上胸','中胸','下胸'],
+        '肩部' => ['肩膀前束','肩膀中束','肩膀後束','肩膀'],
+        '背部' => ['上背','中背','下背'],
+        '腿部' => ['股四頭肌','股二頭肌','小腿','臀肌','臀中束','臀前束','臀後束'],
+        '手臂' => ['二頭肌','三頭肌','前臂'],
+        '核心' => ['上腹','下腹','側腹','核心'],
+    ];
+    $aliases = ['肩膀' => '肩部', '腹部' => '核心'];
+    $key = $aliases[$targetMuscle] ?? $targetMuscle;
+
+    if (isset($map[$key]) && count($map[$key]) > 0) {
+        // 用 IN 精準查多個細分
+        $labels = array_values(array_unique(array_filter($map[$key])));
+        $placeholders = implode(',', array_fill(0, count($labels), '?'));
+        $sql = "SELECT * FROM exercises 
+                WHERE target_muscle IN ($placeholders) 
+                  AND user_level = ?";
+        $stmt = $pdo->prepare($sql);
+        $params = array_merge($labels, ["新手"]);
+        $stmt->execute($params);
+    } else {
+        // 回退到原本的 LIKE（細分或未知值）
+        $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle LIKE ? AND user_level = ?");
+        $stmt->execute(["%$targetMuscle%", "新手"]);
+    }
+
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($rows) {
@@ -155,6 +181,7 @@ if ($targetMuscle) {
         }
     }
 }
+
 
 // 🔟 組合送給 AI 的 user message
 $userPrompt = "";
