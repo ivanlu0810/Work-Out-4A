@@ -146,12 +146,12 @@ $exerciseText = "";
 if ($targetMuscle) {
     // 大類→細分（解法A）
     $map = [
-        '胸部' => ['上胸','中胸','下胸'],
-        '肩部' => ['肩膀前束','肩膀中束','肩膀後束','肩膀'],
-        '背部' => ['上背','中背','下背'],
-        '腿部' => ['股四頭肌','股二頭肌','小腿','臀肌','臀中束','臀前束','臀後束'],
-        '手臂' => ['二頭肌','三頭肌','前臂'],
-        '核心' => ['上腹','下腹','側腹','核心'],
+        '胸部' => ['上胸', '中胸', '下胸'],
+        '肩部' => ['肩膀前束', '肩膀中束', '肩膀後束', '肩膀'],
+        '背部' => ['上背', '中背', '下背'],
+        '腿部' => ['股四頭肌', '股二頭肌', '小腿', '臀肌', '臀中束', '臀前束', '臀後束'],
+        '手臂' => ['二頭肌', '三頭肌', '前臂'],
+        '核心' => ['上腹', '下腹', '側腹', '核心'],
     ];
     $aliases = ['肩膀' => '肩部', '腹部' => '核心'];
     $key = $aliases[$targetMuscle] ?? $targetMuscle;
@@ -171,7 +171,7 @@ if ($targetMuscle) {
         $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle LIKE ? AND user_level = ?");
         $stmt->execute(["%$targetMuscle%", "新手"]);
     }
-
+    $ssql = $sql . ' ｜參數：[' . implode(', ', $params) . ']';
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($rows) {
@@ -239,6 +239,6 @@ echo json_encode([
     "classified" => $classJson,
     "exercises_used" => $exerciseText,
     "user_data" => $row, // 直接傳給前端用
-    "stmt"=>"SELECT * FROM exercises WHERE target_muscle LIKE '%$targetMuscle%' AND user_level = '新手'",
+    "stmt" => $ssql,
     "exerciseText" => $exerciseText
 ], JSON_UNESCAPED_UNICODE);
