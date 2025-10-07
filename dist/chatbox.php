@@ -155,12 +155,11 @@ if ($targetMuscle) {
         }
     }
 }
-function js_console($data) {
-    echo '<script>';
-    echo 'console.log(' . json_encode($data, JSON_UNESCAPED_UNICODE) . ');';
-    echo '</script>';
-}
-js_console(['debug' => '這是偵錯訊息']);
+
+
+file_put_contents('debug.log', $exerciseText, FILE_APPEND);
+
+
 // 🔟 組合送給 AI 的 user message
 $userPrompt = "";
 if ($isFirstChat) {
