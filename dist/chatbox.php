@@ -211,5 +211,6 @@ echo json_encode([
     "reply" => $aiReply,
     "classified" => $classJson,
     "exercises_used" => $exerciseText,
-    "user_data" => $row // 直接傳給前端用
+    "user_data" => $row, // 直接傳給前端用
+    "exerciseText"=>$exerciseText
 ], JSON_UNESCAPED_UNICODE);
