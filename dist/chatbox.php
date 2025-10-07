@@ -146,7 +146,6 @@ $exerciseText = "";
 if ($targetMuscle) {
     $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle LIKE ? AND user_level = ?");
     $stmt->execute(["%$targetMuscle%", "新手"]);
-
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($rows) {
