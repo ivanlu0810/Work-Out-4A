@@ -156,32 +156,6 @@ if ($targetMuscle) {
     }
 }
 
-
-header('Content-Type: application/json; charset=utf-8');
-
-$exerciseText = "這是測試內容\n";
-
-// 設定 log 路徑
-$logDir = __DIR__ . '/../logs';
-if (!file_exists($logDir)) {
-    mkdir($logDir, 0777, true);
-}
-$logPath = $logDir . '/debug.log';
-
-// 嘗試寫入 log（覆蓋舊檔）
-try {
-    if (file_put_contents($logPath, date('Y-m-d H:i:s') . "\n" . $exerciseText . "\n") === false) {
-        throw new Exception("無法寫入 log 檔案：$logPath");
-    }
-} catch (Exception $e) {
-    // 寫入失敗時，記錄在 PHP 錯誤日誌，而不是回傳給前端
-    error_log($e->getMessage());
-}
-
-// 回傳 JSON 給前端
-echo json_encode(['ok' => true], JSON_UNESCAPED_UNICODE);
-
-
 // 🔟 組合送給 AI 的 user message
 $userPrompt = "";
 if ($isFirstChat) {
