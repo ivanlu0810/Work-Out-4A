@@ -171,7 +171,7 @@ if ($targetMuscle) {
         $stmt = $pdo->prepare("SELECT * FROM exercises WHERE target_muscle LIKE ? AND user_level = ?");
         $stmt->execute(["%$targetMuscle%", "新手"]);
     }
-    preg_replace("/\s+/", " ", $sql) . ' ｜參數：[' . implode(', ', $params) . ']';
+    $ssql = preg_replace("/\s+/", " ", $sql) . ' ｜參數：[' . implode(', ', $params) . ']';
     $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     if ($rows) {
