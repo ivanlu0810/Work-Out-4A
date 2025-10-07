@@ -212,6 +212,6 @@ echo json_encode([
     "classified" => $classJson,
     "exercises_used" => $exerciseText,
     "user_data" => $row, // 直接傳給前端用
-    "stmt"=>$stmt,
+    "stmt"=>"SELECT * FROM exercises WHERE target_muscle LIKE '%$targetMuscle%' AND user_level = '新手'",
     "exerciseText" => $exerciseText
 ], JSON_UNESCAPED_UNICODE);
