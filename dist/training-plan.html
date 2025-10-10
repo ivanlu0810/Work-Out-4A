@@ -512,6 +512,39 @@
             /* 底下留 8px 空間 */
         }
 
+        /* 完成狀態樣式 */
+        .completion-status {
+            cursor: pointer;
+            padding: 8px 12px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            font-size: 0.9rem;
+            user-select: none;
+        }
+
+        .completion-status:hover {
+            background: rgba(0,0,0,0.05);
+            transform: scale(1.05);
+        }
+
+        .completion-status.completed {
+            background: rgba(40, 167, 69, 0.1);
+        }
+
+        .completion-status.incomplete:hover {
+            background: rgba(0,0,0,0.05);
+        }
+
+        .completion-status.incomplete:hover i {
+            color: #28a745 !important;
+        }
+
+        .completion-status.incomplete:hover span {
+            color: #28a745 !important;
+        }
+
         /* 🔔 自訂提示框樣式 */
         .custom-alert {
             position: fixed;
@@ -864,6 +897,9 @@
                                 <button class="btn btn-success ms-2" onclick="savePlan()">
                                     <i class="bi bi-save"></i> 儲存計畫
                                 </button>
+                                <button class="btn btn-outline-danger ms-2" onclick="deleteCurrentPlan()">
+                                    <i class="bi bi-trash"></i> 刪除本週計畫
+                                </button>
                             </div>
                         </div>
 
@@ -961,28 +997,60 @@
             <div class="container">
                 <section class="section">
                     <div class="row">
-                        <div class="col-md-3">
+                        <div class="col-md-2 col-sm-6">
                             <div class="stats-card">
                                 <div class="stats-number" id="total-exercises">0</div>
                                 <div class="stats-label">本週動作總數</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2 col-sm-6">
                             <div class="stats-card">
                                 <div class="stats-number" id="training-days">0</div>
                                 <div class="stats-label">本週訓練天數</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
+                        <div class="col-md-2 col-sm-6">
+                            <div class="stats-card">
+                                <div class="stats-number" id="completed-days">0</div>
+                                <div class="stats-label">已完成天數</div>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-sm-6">
                             <div class="stats-card">
                                 <div class="stats-number" id="total-sets">0</div>
                                 <div class="stats-label">本週總組數</div>
                             </div>
                         </div>
-                        <div class="col-md-3">
-                            <div class="stats-card">
-                                <div class="stats-number" id="total-reps">0</div>
-                                <div class="stats-label">本週總次數</div>
+                    </div>
+                    <!-- 訓練完成統計 -->
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header d-flex flex-wrap gap-2 justify-content-between align-items-center">
+                                    <h4 class="mb-0">訓練完成統計（依 training_plan_completion）</h4>
+                                    <div class="d-flex align-items-center gap-2">
+                                        <label for="history-plan-select" class="me-1 text-muted">選擇週次</label>
+                                        <select id="history-plan-select" class="form-select form-select-sm" style="min-width: 220px;"></select>
+                                        <div id="weekly-completion-rate" class="text-muted ms-2">完成率：--%</div>
+                                    </div>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-sm align-middle">
+                                            <thead>
+                                                <tr>
+                                                    <th style="width: 120px;">星期</th>
+                                                    <th style="width: 120px;">完成狀態</th>
+                                                    <th style="width: 140px;">完成百分比</th>
+                                                    <th>完成時間</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="completion-table-body">
+                                                <tr><td colspan="4" class="text-center text-muted">讀取中...</td></tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1063,8 +1131,7 @@
                             <label class="form-label">動作名稱</label>
                             <input type="text" class="form-control" id="exerciseName" readonly>
                         </div>
-
-                        <div class="mb-3">
+                                        
                             <label class="form-label">目標肌群</label>
                             <input type="text" class="form-control" id="muscleGroup" readonly>
                         </div>
@@ -1112,6 +1179,7 @@
         let currentWeek = 0;
         let selectedDay = '';
         let exercises = [];
+        let dayCompletionFromDb = { monday: null, tuesday: null, wednesday: null, thursday: null, friday: null, saturday: null, sunday: null };
         let weeklyPlan = {
             monday: [],
             tuesday: [],
@@ -1243,7 +1311,7 @@
             {
                 id: 'pushpulllegs',
                 name: '三分化',
-                description: '第一天：胸+三頭，第二天：背+二頭，第三天：肩膀+腿，休息一天後循環',
+                description: '第一天：推（胸+肩膀前束+三頭），第二天：拉（背+肩膀中/後束+二頭），第三天：腿部，休息一天後循環',
                 difficulty: 'intermediate',
                 icon: 'bi bi-arrow-repeat',
                 schedule: ['週一', '週二', '週三', '週五', '週六', '週日'],
@@ -1487,35 +1555,51 @@
             };
         }
 
-        // 同步到資料庫
+        // 同步到資料庫（使用 completion-api，會自動覆蓋同週並刪除舊明細）
         async function syncToDatabase() {
-            // 計算週開始日期
             const today = new Date();
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
             const weekStartDate = startOfWeek.toISOString().split('T')[0];
 
-            // 準備資料
-            const planData = {
+            // 轉換 weeklyPlan => completion-api 所需 weekly_plan 結構
+            const weekly_plan = {
+                monday: weeklyPlan.monday || [],
+                tuesday: weeklyPlan.tuesday || [],
+                wednesday: weeklyPlan.wednesday || [],
+                thursday: weeklyPlan.thursday || [],
+                friday: weeklyPlan.friday || [],
+                saturday: weeklyPlan.saturday || [],
+                sunday: weeklyPlan.sunday || [],
+            };
+
+            const payload = {
+                user_id: 1,
                 week_start_date: weekStartDate,
                 week_number: currentWeek,
                 plan_name: `第${currentWeek + 1}週訓練計畫`,
-                exercises: weeklyPlan
+                weekly_plan
             };
 
-            // 發送請求到伺服器
-            const response = await fetch('save_training_plan.php', {
+            const response = await fetch('completion-api.php?action=save_training_plan', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(planData)
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
             });
-
             const result = await response.json();
+            if (!result.success) throw new Error(result.error || '同步失敗');
 
-            if (!result.success) {
-                throw new Error(result.error || '同步失敗');
+            // 將 plan_id 回寫 localStorage（供刪除與統計使用）
+            if (result.plan_id) {
+                try {
+                    const saved = localStorage.getItem('allTrainingPlans');
+                    const store = saved ? JSON.parse(saved) : {};
+                    store[currentWeek] = store[currentWeek] || {};
+                    store[currentWeek].planId = result.plan_id;
+                    store[currentWeek].plan = weeklyPlan;
+                    store[currentWeek].lastSaved = new Date().toISOString();
+                    localStorage.setItem('allTrainingPlans', JSON.stringify(store));
+                } catch (e) { console.warn('寫入 planId 失敗', e); }
             }
 
             return result;
@@ -1533,10 +1617,12 @@
                 await loadExercises();
                 
                 // 然後載入其他資料
-            loadPlan();
+            await loadPlan();
             updateWeekDates();
             renderWeeklyPlan();
-            updateStats();
+            await loadStatsFromDatabase();
+            await loadPlanCompletionStats();
+            await loadPlanHistoryOptions();
             renderTrainingTemplates();
                 
                 console.log('初始化完成');
@@ -1753,6 +1839,7 @@
             localStorage.setItem('weeklyPlan', JSON.stringify(weeklyPlan));
         }
 
+
         // 渲染週計畫
         function renderWeeklyPlan() {
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -1801,9 +1888,123 @@
                         container.appendChild(exerciseDiv);
                     });
                 }
+
+                // 添加完成狀態按鈕（只有在有動作時才顯示）
+                if (weeklyPlan[day].length > 0) {
+                    const completionButton = document.createElement('div');
+                    completionButton.className = 'mt-2 text-center';
+                    
+                    // 以資料庫回傳為主，無資料時回退 local 狀態
+                    const dbFlag = (dayCompletionFromDb && typeof dayCompletionFromDb[day] === 'number') ? dayCompletionFromDb[day] : null;
+                    const isCompleted = dbFlag === null ? weeklyPlan[day].some(exercise => exercise.completed) : dbFlag === 1;
+                    
+                    if (isCompleted) {
+                        // 已完成狀態：顯示綠色勾勾
+                        completionButton.innerHTML = `
+                            <div class="completion-status completed" onclick="toggleDayCompletion('${day}')">
+                                <i class="bi bi-check-circle-fill text-success"></i>
+                                <span class="text-success ms-1">已完成</span>
+                            </div>
+                        `;
+                    } else {
+                        // 未完成狀態：顯示可點擊的勾勾
+                        completionButton.innerHTML = `
+                            <div class="completion-status incomplete" onclick="toggleDayCompletion('${day}')">
+                                <i class="bi bi-circle text-muted"></i>
+                                <span class="text-muted ms-1">點擊完成</span>
+                            </div>
+                        `;
+                    }
+                    
+                    container.appendChild(completionButton);
+                }
             });
 
             updateStats();
+        }
+
+        // 切換每天完成狀態
+        function toggleDayCompletion(day) {
+            if (!weeklyPlan[day] || weeklyPlan[day].length === 0) {
+                return;
+            }
+
+            // 以資料庫狀態為準
+            const isCompleted = (dayCompletionFromDb && typeof dayCompletionFromDb[day] === 'number') ? (dayCompletionFromDb[day] === 1) : weeklyPlan[day].some(exercise => exercise.completed);
+            const newStatus = !isCompleted;
+
+            // 更新所有動作的完成狀態
+            weeklyPlan[day].forEach(exercise => {
+                exercise.completed = newStatus;
+            });
+
+            // 儲存到 localStorage
+            saveWeeklyPlan();
+
+            // 重新渲染
+            renderWeeklyPlan();
+
+            // 取得 planId 與 week_number
+            let planId = null;
+            const saved = localStorage.getItem('allTrainingPlans');
+            if (saved) {
+                try {
+                    const parsed = JSON.parse(saved);
+                    if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
+                        planId = parsed[currentWeek].planId;
+                    }
+                } catch (e) {}
+            }
+
+            // 若沒有 planId，仍保存本地 UI，並提示
+            if (!planId) {
+                console.warn('無 plan_id，僅更新本地狀態');
+                renderWeeklyPlan();
+                return;
+            }
+
+            // 呼叫完成狀態 API
+            const payload = {
+                plan_id: planId,
+                user_id: 1,
+                week_number: currentWeek,
+                day_of_week: day,
+                is_completed: newStatus ? 1 : 0,
+                completion_percentage: newStatus ? 100 : 0
+            };
+
+            fetch('completion-api.php?action=save_training_plan_completion', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            }).then(r => r.json()).then(async (res) => {
+                if (!res.success) throw new Error(res.error || '更新失敗');
+                // 更新快取並重繪
+                dayCompletionFromDb[day] = newStatus ? 1 : 0;
+                renderWeeklyPlan();
+                await loadPlanCompletionStats();
+                console.log(`${day} 完成狀態已更新(資料庫): ${newStatus ? '已完成' : '未完成'}`);
+            }).catch(err => {
+                console.error('儲存日完成狀態失敗:', err);
+            });
+
+            // 顯示成功訊息
+            const message = newStatus ? `${getDayName(day)}訓練已完成！` : `${getDayName(day)}訓練狀態已重置`;
+            showSuccessMessage(message);
+        }
+
+        // 獲取星期名稱
+        function getDayName(day) {
+            const dayNames = {
+                'monday': '週一',
+                'tuesday': '週二', 
+                'wednesday': '週三',
+                'thursday': '週四',
+                'friday': '週五',
+                'saturday': '週六',
+                'sunday': '週日'
+            };
+            return dayNames[day] || day;
         }
 
         // 選擇日期
@@ -2005,20 +2206,26 @@
             renderWeeklyPlan();
         }
 
-        // 更新統計
+        // 更新統計（從當前 weeklyPlan 計算）
         function updateStats() {
             let totalExercises = 0;
             let trainingDays = 0;
+            let completedDays = 0;
             let totalSets = 0;
-            let totalReps = 0;
 
             Object.values(weeklyPlan).forEach(dayExercises => {
                 if (dayExercises.length > 0) {
                     trainingDays++;
+                    // 檢查是否已完成
+                    if (dayExercises.some(exercise => exercise.completed)) {
+                        completedDays++;
+                    }
                     dayExercises.forEach(exercise => {
+                        // 跳過休息日（id: 0）
+                        if (exercise.id === 0) return;
+                        
                         totalExercises++;
-                        totalSets += exercise.sets;
-                        totalReps += exercise.sets * exercise.reps;
+                        totalSets += exercise.sets || 0;
                     });
                 }
             });
@@ -2026,26 +2233,276 @@
             document.getElementById('total-exercises').textContent = totalExercises;
             document.getElementById('training-days').textContent = trainingDays;
             document.getElementById('total-sets').textContent = totalSets;
-            document.getElementById('total-reps').textContent = totalReps;
+            
+            // 如果有完成天數的顯示元素，更新它
+            const completedDaysElement = document.getElementById('completed-days');
+            if (completedDaysElement) {
+                completedDaysElement.textContent = completedDays;
+            }
+        }
+
+        // 從資料庫載入已儲存的統計數據
+        async function loadStatsFromDatabase() {
+            try {
+                const response = await fetch(`save_training_plan.php?week_number=${currentWeek}`);
+                const result = await response.json();
+
+                if (result.success && result.data && result.data.weeklyPlan) {
+                    const savedPlan = result.data.weeklyPlan;
+                    let totalExercises = 0;
+                    let trainingDays = 0;
+                    let completedDays = 0;
+                    let totalSets = 0;
+
+                    Object.values(savedPlan).forEach(dayExercises => {
+                        if (dayExercises.length > 0) {
+                            trainingDays++;
+                            // 檢查是否已完成
+                            if (dayExercises.some(exercise => exercise.completed)) {
+                                completedDays++;
+                            }
+                            dayExercises.forEach(exercise => {
+                                // 跳過休息日（id: 0）
+                                if (exercise.id === 0) return;
+                                
+                                totalExercises++;
+                                totalSets += exercise.sets || 0;
+                            });
+                        }
+                    });
+
+                    document.getElementById('total-exercises').textContent = totalExercises;
+                    document.getElementById('training-days').textContent = trainingDays;
+                    document.getElementById('total-sets').textContent = totalSets;
+                    
+                    // 如果有完成天數的顯示元素，更新它
+                    const completedDaysElement = document.getElementById('completed-days');
+                    if (completedDaysElement) {
+                        completedDaysElement.textContent = completedDays;
+                    }
+                    
+                    console.log('從資料庫載入統計數據:', { totalExercises, trainingDays, completedDays, totalSets });
+                } else {
+                    // 如果沒有儲存的資料，顯示 0
+                    document.getElementById('total-exercises').textContent = 0;
+                    document.getElementById('training-days').textContent = 0;
+                    document.getElementById('total-sets').textContent = 0;
+                }
+            } catch (error) {
+                console.error('載入統計數據失敗:', error);
+                // 載入失敗時顯示 0
+                document.getElementById('total-exercises').textContent = 0;
+                document.getElementById('training-days').textContent = 0;
+                document.getElementById('total-sets').textContent = 0;
+            }
+        }
+
+        // 依據 training_plan_completion 顯示本週每日完成清單與完成率
+        async function loadPlanCompletionStats(overridePlanId = null) {
+            try {
+                const body = document.getElementById('completion-table-body');
+                if (body) {
+                    body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">讀取中...</td></tr>';
+                }
+
+                // 取得目前週的 planId：優先 override，其次 localStorage
+                let planId = overridePlanId || null;
+                const saved = localStorage.getItem('allTrainingPlans');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (!planId && parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
+                            planId = parsed[currentWeek].planId;
+                        }
+                    } catch (e) {}
+                }
+
+                if (!planId) {
+                    // 若無 planId，先以 UI 顯示無資料
+                    if (body) {
+                        body.innerHTML = '<tr><td colspan="4" class="text-center text-muted">尚未儲存本週計畫，無完成紀錄</td></tr>';
+                    }
+                    const rate = document.getElementById('weekly-completion-rate');
+                    if (rate) rate.textContent = '完成率：--%';
+                    return;
+                }
+
+                const res = await fetch(`completion-api.php?action=get_plan_completion_detail&plan_id=${planId}`);
+                const json = await res.json();
+                if (!json.success || !Array.isArray(json.rows)) {
+                    throw new Error(json.error || '讀取完成紀錄失敗');
+                }
+
+                const dayName = {
+                    monday: 'Mon', tuesday: 'Tue', wednesday: 'Wed', thursday: 'Thu',
+                    friday: 'Fri', saturday: 'Sat', sunday: 'Sun'
+                };
+
+                // 快取 DB 狀態供週菜單渲染
+                dayCompletionFromDb = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
+                json.rows.forEach(r => { dayCompletionFromDb[r.day_of_week] = Number(r.is_completed) || 0; });
+
+                // 渲染表格
+                if (body) {
+                    body.innerHTML = '';
+                    json.rows.forEach(r => {
+                        const isDone = Number(r.is_completed) === 1;
+                        const pct = (Number(r.completion_percentage) || 0).toFixed(0) + '%';
+                        const completedTime = r.completed_at ? new Date(r.completed_at).toLocaleString('zh-TW') : '-';
+                        const tr = document.createElement('tr');
+                        tr.innerHTML = `
+                            <td>${dayName[r.day_of_week] || r.day_of_week}</td>
+                            <td>
+                                <span class="badge ${isDone ? 'bg-success' : 'bg-secondary'}">${isDone ? '完成' : '未完成'}</span>
+                            </td>
+                            <td>${pct}</td>
+                            <td>${completedTime}</td>
+                        `;
+                        body.appendChild(tr);
+                    });
+                }
+
+                // 計算完成率
+                const totalDays = json.rows.length || 7;
+                const completedDays = json.rows.filter(r => Number(r.is_completed) === 1).length;
+                const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+                const rate = document.getElementById('weekly-completion-rate');
+                if (rate) rate.textContent = `完成率：${completionRate}%（${completedDays}/${totalDays}）`;
+
+                // 依 DB 狀態重新渲染週菜單的勾勾
+                renderWeeklyPlan();
+
+            } catch (err) {
+                console.error('loadPlanCompletionStats error:', err);
+                const body = document.getElementById('completion-table-body');
+                if (body) {
+                    body.innerHTML = `<tr><td colspan="4" class="text-center text-danger">載入失敗：${err.message}</td></tr>`;
+                }
+                const rate = document.getElementById('weekly-completion-rate');
+                if (rate) rate.textContent = '完成率：--%';
+            }
         }
 
         // 上週/下週
-        function previousWeek() {
+        async function previousWeek() {
             currentWeek--;
             updateWeekDates();
-            loadPlan(); // 載入該週的儲存計畫
+            await loadPlan(); // 載入該週的儲存計畫
             renderWeeklyPlan();
-            updateStats();
+            await loadStatsFromDatabase(); // 載入該週的儲存統計
+            await loadPlanCompletionStats();
             showSuccessMessage('已切換到上週');
         }
 
-        function nextWeek() {
+        async function nextWeek() {
             currentWeek++;
             updateWeekDates();
-            loadPlan(); // 載入該週的儲存計畫
+            await loadPlan(); // 載入該週的儲存計畫
             renderWeeklyPlan();
-            updateStats();
+            await loadStatsFromDatabase(); // 載入該週的儲存統計
+            await loadPlanCompletionStats();
             showSuccessMessage('已切換到下週');
+        }
+
+        // 刪除本週計畫（含明細與完成紀錄）
+        async function deleteCurrentPlan() {
+            try {
+                // 從 localStorage 取得當週 plan_id
+                const saved = localStorage.getItem('allTrainingPlans');
+                let planId = null;
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
+                            planId = parsed[currentWeek].planId;
+                        }
+                    } catch (e) {}
+                }
+
+                if (!planId) {
+                    showSuccessMessage('目前週尚未儲存至資料庫，無需刪除', 'danger');
+                    return;
+                }
+
+                if (!confirm('確定要刪除本週計畫（包含所有動作與完成紀錄）嗎？此動作無法復原。')) return;
+
+                const payload = { plan_id: planId, user_id: 1 };
+                const res = await fetch('completion-api.php?action=delete_training_plan', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const json = await res.json();
+                if (!json.success) throw new Error(json.error || '刪除失敗');
+
+                // 清掉 localStorage 當週快取
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved) || {};
+                        if (parsed[currentWeek]) delete parsed[currentWeek];
+                        localStorage.setItem('allTrainingPlans', JSON.stringify(parsed));
+                    } catch (e) {}
+                }
+
+                // 重置當週資料與畫面
+                resetWeeklyPlan();
+                renderWeeklyPlan();
+                await loadPlanCompletionStats();
+                await loadPlanHistoryOptions();
+                updateStats();
+                showSuccessMessage('本週計畫已刪除');
+            } catch (err) {
+                console.error('deleteCurrentPlan error:', err);
+                showSuccessMessage('刪除本週計畫失敗：' + err.message, 'danger');
+            }
+        }
+
+        // 載入歷史週次選單（以資料庫訓練歷史為準）
+        async function loadPlanHistoryOptions() {
+            const select = document.getElementById('history-plan-select');
+            if (!select) return;
+            select.innerHTML = '<option value="">載入中...</option>';
+
+            try {
+                const res = await fetch('completion-api.php?action=get_training_history');
+                const json = await res.json();
+                if (!json.success || !Array.isArray(json.history)) throw new Error(json.error || '讀取歷史失敗');
+
+                // 依週起始日由新到舊
+                const options = json.history.map(h => ({
+                    planId: h.plan_id || h.id,
+                    text: `${h.plan_name || '未命名'}｜第${Number(h.week_number) + 1 || 1}週｜${h.week_start_date}`
+                }));
+
+                select.innerHTML = '<option value="">選擇週次...</option>' +
+                    options.map(o => `<option value="${o.planId}">${o.text}</option>`).join('');
+
+                // 綁定 change 事件
+                select.onchange = async function () {
+                    const chosenPlanId = this.value;
+                    if (!chosenPlanId) return;
+                    await loadPlanCompletionStats(chosenPlanId);
+                };
+
+                // 預設帶入 localStorage 的當前週 planId
+                let defaultPlanId = null;
+                const saved = localStorage.getItem('allTrainingPlans');
+                if (saved) {
+                    try {
+                        const parsed = JSON.parse(saved);
+                        if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
+                            defaultPlanId = parsed[currentWeek].planId;
+                        }
+                    } catch (e) {}
+                }
+                if (defaultPlanId) {
+                    const found = options.find(o => String(o.planId) === String(defaultPlanId));
+                    if (found) select.value = String(defaultPlanId);
+                }
+            } catch (err) {
+                console.error('loadPlanHistoryOptions error:', err);
+                select.innerHTML = '<option value="">歷史載入失敗</option>';
+            }
         }
 
         // 顯示訊息
@@ -2258,6 +2715,12 @@
                     } else if (templateId === 'upperlower' && mode === 'recommended') {
                         // 二分化推薦模式使用Level 1兩天連續練菜單
                         applyLevel1ContinuousRecommendations();
+                        } else if (templateId === 'pushpulllegs' && mode === 'random') {
+                            // 三分化隨機模式
+                            generatePushPullLegsRandom();
+                    } else if (templateId === 'pushpulllegs' && mode === 'recommended') {
+                            // 三分化推薦模式
+                            generatePushPullLegsRecommendations();
                     } else {
                         applyTemplateToWeek(template, mode);
                     }
@@ -2361,10 +2824,11 @@
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
-            updateStats();
 
-            // 同步到資料庫
-            syncToDatabase().catch(error => {
+            // 同步到資料庫，成功後才更新統計
+            syncToDatabase().then(() => {
+                loadStatsFromDatabase();
+            }).catch(error => {
                 console.error('同步到資料庫失敗:', error);
             });
             
@@ -2395,6 +2859,20 @@
             // 清空現有計畫
             Object.keys(weeklyPlan).forEach(day => {
                 weeklyPlan[day] = [];
+            });
+            
+            // 非訓練日設為休息日（全身訓練：週一、週三、週五）
+            const restDays = ['tuesday', 'thursday', 'saturday', 'sunday'];
+            restDays.forEach(day => {
+                weeklyPlan[day].push({
+                    id: 0,
+                    name: "休息",
+                    muscleGroup: "休息",
+                    sets: 0,
+                    reps: 0,
+                    weight: null,
+                    restTime: null
+                });
             });
             
             // 重置動作追蹤
@@ -2461,10 +2939,11 @@
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
-            updateStats();
             
-            // 同步到資料庫
-            syncToDatabase().catch(error => {
+            // 同步到資料庫，成功後才更新統計
+            syncToDatabase().then(() => {
+                loadStatsFromDatabase();
+            }).catch(error => {
                 console.error('同步到資料庫失敗:', error);
             });
             
@@ -2603,6 +3082,20 @@
             // 清空現有計畫
             Object.keys(weeklyPlan).forEach(day => {
                 weeklyPlan[day] = [];
+            });
+            
+            // 非訓練日設為休息日（二分化：週一、週二、週四、週五）
+            const restDays = ['wednesday', 'saturday', 'sunday'];
+            restDays.forEach(day => {
+                weeklyPlan[day].push({
+                    id: 0,
+                    name: "休息",
+                    muscleGroup: "休息",
+                    sets: 0,
+                    reps: 0,
+                    weight: null,
+                    restTime: null
+                });
             });
             
             // 重置動作追蹤
@@ -2788,14 +3281,351 @@
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
-            updateStats();
             
-            // 同步到資料庫
-            syncToDatabase().catch(error => {
+            // 同步到資料庫，成功後才更新統計
+            syncToDatabase().then(() => {
+                loadStatsFromDatabase();
+            }).catch(error => {
                 console.error('同步到資料庫失敗:', error);
             });
             
             console.log('二分化隨機菜單生成完成');
+        }
+
+        // 三分化（推/拉/腿）隨機菜單生成
+        function generatePushPullLegsRandom() {
+            console.log('生成三分化隨機菜單（推/拉/腿）');
+
+            // 清空現有計畫
+            Object.keys(weeklyPlan).forEach(day => {
+                weeklyPlan[day] = [];
+            });
+
+            // 非訓練日設為休息日（三分化：週四休息）
+            const restDays = ['thursday'];
+            restDays.forEach(day => {
+                weeklyPlan[day].push({
+                    id: 0,
+                    name: "休息",
+                    muscleGroup: "休息",
+                    sets: 0,
+                    reps: 0,
+                    weight: null,
+                    restTime: null
+                });
+            });
+
+            // 重置動作追蹤
+            usedExercises.clear();
+            weeklyUsedExercises.clear();
+
+            // 三分化安排（週四休息，五六日可重新生成）
+            const pplSchedule = {
+                monday: 'push',    // 推：胸 + 肩膀前束 + 三頭
+                tuesday: 'pull',   // 拉：背 + 肩膀中/後束 + 二頭
+                wednesday: 'legs', // 腿：股四頭/股二頭/臀 + 核心
+                thursday: 'rest',  // 休息日
+                friday: 'push',    // 推：胸 + 肩膀前束 + 三頭
+                saturday: 'pull',  // 拉：背 + 肩膀中/後束 + 二頭
+                sunday: 'legs'     // 腿：股四頭/股二頭/臀 + 核心
+            };
+
+            // 第一輪動作安排（週一、二、三）
+            const pushPrimary1 = [
+                { muscle: '上胸', count: 2, sets: 4, reps: 10 },
+                { muscle: '中胸', count: 1, sets: 4, reps: 10 },
+                { muscle: '下胸', count: 1, sets: 4, reps: 10 },
+                { muscle: '三頭肌', count: 1, sets: 3, reps: 12 },
+                { muscle: '肩膀前束', count: 1, sets: 4, reps: 10 }
+            ];
+
+            const pullPrimary1 = [
+                { muscle: '上背', count: 1, sets: 4, reps: 10 },
+                { muscle: '中背', count: 1, sets: 4, reps: 10 },
+                { muscle: '下背', count: 1, sets: 4, reps: 10 },
+                { muscle: '肩膀中束', count: 1, sets: 3, reps: 12 },
+                { muscle: '肩膀後束', count: 1, sets: 3, reps: 12 },
+                { muscle: '二頭肌', count: 1, sets: 3, reps: 12 }
+            ];
+
+            const legsPrimary1 = [
+                { muscle: '股四頭肌', count: 2, sets: 4, reps: 10 },
+                { muscle: '股二頭肌', count: 1, sets: 4, reps: 10 },
+                { muscle: '臀肌', count: 1, sets: 4, reps: 12 },
+                { muscle: '核心', count: 1, sets: 3, reps: 15 }
+            ];
+
+            // 第二輪動作安排（週五、六、日）- 稍微不同的動作組合
+            const pushPrimary2 = [
+                { muscle: '中胸', count: 2, sets: 4, reps: 10 },
+                { muscle: '上胸', count: 1, sets: 4, reps: 10 },
+                { muscle: '下胸', count: 1, sets: 4, reps: 10 },
+                { muscle: '三頭肌', count: 1, sets: 3, reps: 12 },
+                { muscle: '肩膀前束', count: 1, sets: 4, reps: 10 }
+            ];
+
+            const pullPrimary2 = [
+                { muscle: '中背', count: 1, sets: 4, reps: 10 },
+                { muscle: '上背', count: 1, sets: 4, reps: 10 },
+                { muscle: '下背', count: 1, sets: 4, reps: 10 },
+                { muscle: '肩膀中束', count: 1, sets: 3, reps: 12 },
+                { muscle: '肩膀後束', count: 1, sets: 3, reps: 12 },
+                { muscle: '二頭肌', count: 1, sets: 3, reps: 12 }
+            ];
+
+            const legsPrimary2 = [
+                { muscle: '股二頭肌', count: 2, sets: 4, reps: 10 },
+                { muscle: '股四頭肌', count: 1, sets: 4, reps: 10 },
+                { muscle: '臀肌', count: 1, sets: 4, reps: 12 },
+                { muscle: '核心', count: 1, sets: 3, reps: 15 }
+            ];
+
+            Object.keys(pplSchedule).forEach(day => {
+                const type = pplSchedule[day];
+                if (type === 'rest') {
+                    return;
+                }
+
+                dailyUsedExercises.clear();
+
+                // 根據天數選擇不同的動作組合
+                let plan = [];
+                const isFirstRound = ['monday', 'tuesday', 'wednesday'].includes(day);
+                
+                if (type === 'push') {
+                    plan = isFirstRound ? pushPrimary1 : pushPrimary2;
+                } else if (type === 'pull') {
+                    plan = isFirstRound ? pullPrimary1 : pullPrimary2;
+                } else if (type === 'legs') {
+                    plan = isFirstRound ? legsPrimary1 : legsPrimary2;
+                }
+
+                plan.forEach(group => {
+                    for (let i = 0; i < group.count; i++) {
+                        let ex;
+                        
+                        // 固定特定動作（根據不同輪次選擇不同動作）
+                        if (group.muscle === '三頭肌') {
+                            if (isFirstRound) {
+                                ex = exercises.find(e => e.name.includes('纜繩下壓') || e.name.includes('下壓'));
+                            } else {
+                                ex = exercises.find(e => e.name.includes('三頭') && (e.name.includes('伸展') || e.name.includes('推舉')));
+                            }
+                        } else if (group.muscle === '肩膀前束') {
+                            if (isFirstRound) {
+                                ex = exercises.find(e => e.name.includes('啞鈴肩推') || e.name.includes('肩推'));
+                            } else {
+                                ex = exercises.find(e => e.name.includes('前平舉') || e.name.includes('前束'));
+                            }
+                        } else if (group.muscle === '二頭肌') {
+                            if (isFirstRound) {
+                                ex = exercises.find(e => e.name.includes('彎舉') || e.name.includes('二頭'));
+                            } else {
+                                ex = exercises.find(e => e.name.includes('錘式') || e.name.includes('錘子'));
+                            }
+                        } else {
+                            ex = getRandomExerciseForMuscle(group.muscle, 'random');
+                        }
+                        
+                        if (!ex) {
+                            // 如果找不到固定動作，回退到隨機選擇
+                            ex = getRandomExerciseForMuscle(group.muscle, 'random');
+                        }
+                        
+                        if (!ex) continue;
+                        weeklyPlan[day].push({
+                            id: ex.id,
+                            name: ex.name,
+                            muscleGroup: group.muscle,
+                            sets: group.sets,
+                            reps: group.reps,
+                            weight: null,
+                            restTime: 60
+                        });
+                        dailyUsedExercises.add(ex.id);
+                        weeklyUsedExercises.add(ex.id);
+                    }
+                });
+
+                // 推/拉日補充到 6個動作左右（優先缺少的肌群）
+                const targetCount = type === 'legs' ? 6 : 6; // 推日6個動作：上胸×2+中胸+下胸+三頭+肩膀前束
+                let fillPriority;
+                if (type === 'push') {
+                    fillPriority = isFirstRound 
+                        ? ['上胸', '中胸', '下胸', '三頭肌', '肩膀前束']
+                        : ['中胸', '上胸', '下胸', '三頭肌', '肩膀前束'];
+                } else if (type === 'pull') {
+                    fillPriority = isFirstRound
+                        ? ['上背', '中背', '下背', '肩膀中束', '肩膀後束', '二頭肌']
+                        : ['中背', '上背', '下背', '肩膀中束', '肩膀後束', '二頭肌'];
+                } else {
+                    fillPriority = isFirstRound
+                        ? ['股四頭肌', '股二頭肌', '臀肌', '核心']
+                        : ['股二頭肌', '股四頭肌', '臀肌', '核心'];
+                }
+
+                let guard = 0;
+                while (weeklyPlan[day].length < targetCount && guard < 30) {
+                    guard++;
+                    const counts = {};
+                    weeklyPlan[day].forEach(ex => { counts[ex.muscleGroup] = (counts[ex.muscleGroup]||0) + 1; });
+                    const candidates = fillPriority.sort((a,b)=> (counts[a]||0) - (counts[b]||0));
+                    let added = false;
+                    for (const mg of candidates) {
+                        const ex = getRandomExerciseForMuscle(mg, 'random');
+                        if (!ex) continue;
+                        if (dailyUsedExercises.has(ex.id)) continue;
+                        weeklyPlan[day].push({
+                            id: ex.id,
+                            name: ex.name,
+                            muscleGroup: mg,
+                            sets: mg.includes('胸') || mg.includes('背') ? 4 : (mg === '核心' ? 3 : 4),
+                            reps: mg === '核心' ? 15 : 10,
+                            weight: null,
+                            restTime: 60
+                        });
+                        dailyUsedExercises.add(ex.id);
+                        added = true;
+                        break;
+                    }
+                    if (!added) break;
+                }
+            });
+
+            // 更新顯示並同步
+            saveWeeklyPlan();
+            renderWeeklyPlan();
+            
+            // 同步到資料庫，成功後才更新統計
+            syncToDatabase().then(() => {
+                updateStats();
+            }).catch(err => console.error('同步到資料庫失敗:', err));
+
+            console.log('三分化隨機菜單生成完成');
+        }
+
+        // 三分化推薦菜單生成（根據圖片中的動作）
+        function generatePushPullLegsRecommendations() {
+            console.log('生成三分化推薦菜單（推/拉/腿）');
+
+            // 清空現有計畫
+            Object.keys(weeklyPlan).forEach(day => {
+                weeklyPlan[day] = [];
+            });
+
+            // 非訓練日設為休息日（三分化：週四休息）
+            const restDays = ['thursday'];
+            restDays.forEach(day => {
+                weeklyPlan[day].push({
+                    id: 0,
+                    name: "休息",
+                    muscleGroup: "休息",
+                    sets: 0,
+                    reps: 0,
+                    weight: null,
+                    restTime: null
+                });
+            });
+
+            // 重置動作追蹤
+            usedExercises.clear();
+            weeklyUsedExercises.clear();
+
+            // 三分化安排（週四休息，五六日可重新生成）
+            const pplSchedule = {
+                monday: 'push',    // 推：胸 + 肩膀前束 + 三頭
+                tuesday: 'pull',   // 拉：背 + 肩膀中/後束 + 二頭
+                wednesday: 'legs', // 腿：股四頭/股二頭/臀 + 核心
+                thursday: 'rest',  // 休息日
+                friday: 'push',    // 推：胸 + 肩膀前束 + 三頭
+                saturday: 'pull',  // 拉：背 + 肩膀中/後束 + 二頭
+                sunday: 'legs'     // 腿：股四頭/股二頭/臀 + 核心
+            };
+
+            // 推日推薦動作（根據圖片一）
+            const pushRecommendations = [
+                { exerciseName: '平板臥推', muscleGroup: '中胸', sets: 4, reps: '6-8' },
+                { exerciseName: '坐姿肩上推舉', muscleGroup: '肩膀前束', sets: 4, reps: '8-12' },
+                { exerciseName: '上斜啞鈴推舉', muscleGroup: '上胸', sets: 3, reps: '8-12' },
+                { exerciseName: '伏地挺身', muscleGroup: '中胸', sets: 3, reps: '10' },
+                { exerciseName: '啞鈴側平舉', muscleGroup: '肩膀中束', sets: 3, reps: '10-15' },
+                { exerciseName: '纜繩三頭下壓', muscleGroup: '三頭肌', sets: 3, reps: '10-15' }
+            ];
+
+            // 拉日推薦動作（根據圖片二）
+            const pullRecommendations = [
+                { exerciseName: '輔助引體向上', muscleGroup: '上背', sets: 4, reps: '8' },
+                { exerciseName: '俯身槓鈴划船', muscleGroup: '中背', sets: 4, reps: '6-8' },
+                { exerciseName: '窄握纜繩下拉', muscleGroup: '上背', sets: 3, reps: '8-12' },
+                { exerciseName: '纜繩面拉', muscleGroup: '肩膀後束', sets: 3, reps: '10-15' },
+                { exerciseName: '槓鈴彎舉', muscleGroup: '二頭肌', sets: 3, reps: '8-12' },
+                { exerciseName: '纜繩垂式彎舉', muscleGroup: '二頭肌', sets: 3, reps: '10-15' }
+            ];
+
+            // 腿日推薦動作（根據圖片三）
+            const legsRecommendations = [
+                { exerciseName: '深蹲', muscleGroup: '股四頭肌', sets: 4, reps: '6-8' },
+                { exerciseName: '羅馬尼亞硬舉', muscleGroup: '股二頭肌', sets: 4, reps: '8-12' },
+                { exerciseName: '史密斯臀推', muscleGroup: '臀肌', sets: 3, reps: '6-8' },
+                { exerciseName: '俯身腿彎舉', muscleGroup: '股二頭肌', sets: 3, reps: '8-12' },
+                { exerciseName: '坐姿腿屈伸', muscleGroup: '股四頭肌', sets: 3, reps: '10-15' },
+                { exerciseName: '負重提踵', muscleGroup: '小腿', sets: 3, reps: '10-15' }
+            ];
+
+            Object.keys(pplSchedule).forEach(day => {
+                const type = pplSchedule[day];
+                if (type === 'rest') {
+                    return;
+                }
+
+                dailyUsedExercises.clear();
+
+                let recommendations = [];
+                if (type === 'push') {
+                    recommendations = pushRecommendations;
+                } else if (type === 'pull') {
+                    recommendations = pullRecommendations;
+                } else if (type === 'legs') {
+                    recommendations = legsRecommendations;
+                }
+
+                recommendations.forEach(rec => {
+                    // 嘗試找到對應的動作
+                    let exercise = findExerciseByName(rec.exerciseName, rec.muscleGroup);
+                    
+                    if (!exercise) {
+                        console.log(`找不到動作: ${rec.exerciseName} (${rec.muscleGroup})`);
+                        // 如果找不到，嘗試用隨機動作替代
+                        exercise = getRandomExerciseForMuscle(rec.muscleGroup, 'random');
+                    }
+
+                    if (exercise) {
+                        weeklyPlan[day].push({
+                            id: exercise.id,
+                            name: exercise.name,
+                            muscleGroup: rec.muscleGroup,
+                            sets: rec.sets,
+                            reps: rec.reps,
+                            weight: null,
+                            restTime: 60
+                        });
+                        dailyUsedExercises.add(exercise.id);
+                        weeklyUsedExercises.add(exercise.id);
+                        console.log(`添加推薦動作: ${exercise.name} (${rec.muscleGroup})`);
+                    }
+                });
+            });
+
+            // 更新顯示並同步
+            saveWeeklyPlan();
+            renderWeeklyPlan();
+            
+            // 同步到資料庫，成功後才更新統計
+            syncToDatabase().then(() => {
+                updateStats();
+            }).catch(err => console.error('同步到資料庫失敗:', err));
+
+            console.log('三分化推薦菜單生成完成');
         }
         
         // Level 1 改進版二分化推薦菜單
@@ -2865,10 +3695,11 @@
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
-            updateStats();
             
-            // 同步到資料庫
-            syncToDatabase().catch(error => {
+            // 同步到資料庫，成功後才更新統計
+            syncToDatabase().then(() => {
+                loadStatsFromDatabase();
+            }).catch(error => {
                 console.error('同步到資料庫失敗:', error);
             });
             
@@ -2970,10 +3801,11 @@
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
-            updateStats();
             
-            // 同步到資料庫
-            syncToDatabase().catch(error => {
+            // 同步到資料庫，成功後才更新統計
+            syncToDatabase().then(() => {
+                loadStatsFromDatabase();
+            }).catch(error => {
                 console.error('同步到資料庫失敗:', error);
             });
             
@@ -3001,7 +3833,6 @@
             if (availableExercises.length === 0) {
                 const muscleMapping = {
                     // 胸部細分
-                    '胸': '中胸',
                     '上胸': '上胸',
                     '中胸': '中胸',
                     '下胸': '下胸',
@@ -3046,6 +3877,37 @@
             // 先過濾掉今天已經使用的動作
             availableExercises = availableExercises.filter(ex => !dailyUsedExercises.has(ex.id));
             
+            // 額外過濾：確保動作名稱與目標肌群匹配
+            availableExercises = availableExercises.filter(ex => {
+                const name = ex.name.toLowerCase();
+                
+                // 如果是拉日相關肌群，過濾掉練胸和練腿的動作
+                if (muscleGroup.includes('背') || muscleGroup.includes('二頭') || muscleGroup.includes('肩膀中') || muscleGroup.includes('肩膀後')) {
+                    if (name.includes('臥推') || name.includes('推') || name.includes('夾胸') || name.includes('飛鳥') || name.includes('擠壓')) {
+                        console.log(`過濾掉練胸動作: ${ex.name} (目標: ${muscleGroup})`);
+                        return false;
+                    }
+                    if (name.includes('腿') || name.includes('深蹲') || name.includes('硬舉') || name.includes('彎舉') || name.includes('腿推') || name.includes('登階') || name.includes('弓箭步') || name.includes('臀推') || name.includes('腿彎舉') || name.includes('腿舉')) {
+                        console.log(`過濾掉練腿動作: ${ex.name} (目標: ${muscleGroup})`);
+                        return false;
+                    }
+                    if (name.includes('平板') || name.includes('支撐') || name.includes('捲腹') || name.includes('仰臥') || name.includes('腹')) {
+                        console.log(`過濾掉練核心動作: ${ex.name} (目標: ${muscleGroup})`);
+                        return false;
+                    }
+                }
+                
+                // 如果是推日相關肌群，過濾掉練背的動作
+                if (muscleGroup.includes('胸') || muscleGroup.includes('三頭') || muscleGroup.includes('肩膀前')) {
+                    if (name.includes('下拉') || name.includes('划船') || name.includes('拉') || name.includes('反向')) {
+                        console.log(`過濾掉練背動作: ${ex.name} (目標: ${muscleGroup})`);
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
+            
             // 如果有可用動作就直接使用，不進行新手過濾（避免過濾太嚴格）
             // 新手友善過濾僅作為輔助參考
             
@@ -3062,10 +3924,13 @@
                     '下腹': ['抬腿', '下腹', '仰臥'],
                     '側腹': ['側', '俄羅斯', '轉體'],
                     '上背': ['下拉', '高位', '拉'],
-                    '中背': ['划船', '坐姿', '啞鈴'],
+                    '中背': ['划船', '坐姿', '划', '拉'],
                     '股四頭肌': ['深蹲', '腿推', '腿舉', '登階'],
                     '股二頭肌': ['腿彎舉', '羅馬尼亞', '硬舉'],
-                    '臀肌': ['深蹲', '弓箭步', '臀推']
+                    '臀肌': ['深蹲', '弓箭步', '臀推'],
+                    '肩膀前束': ['肩推', '槓鈴', '史密斯', '推舉', '前束', '前平舉'],
+                    '肩膀中束': ['側平舉', '中束', '側舉', '側平'],
+                    '肩膀後束': ['後束', '後平舉', '反向', '後飛鳥']
                 };
 
                 const kw = keywordsByGroup[muscleGroup] || [];
@@ -3105,7 +3970,6 @@
             if (availableExercises.length === 0) {
                 const muscleMapping = {
                     // 胸部細分
-                    '胸': '中胸',  // 預設映射到中胸
                     '上胸': '上胸',
                     '中胸': '中胸',
                     '下胸': '下胸',
@@ -3328,10 +4192,16 @@
                 if (muscleGroup.includes('肩膀') && (name.includes('彎舉') || name.includes('下拉') || name.includes('划船'))) {
                     return false;
                 }
-                if (muscleGroup.includes('背') && (name.includes('飛鳥') || name.includes('彎舉') || name.includes('臥推'))) {
+                if ((muscleGroup.includes('肩膀中') || muscleGroup.includes('肩膀後')) && (name.includes('臥推') || name.includes('推') || name.includes('夾胸') || name.includes('飛鳥') || name.includes('擠壓') || name.includes('腿') || name.includes('深蹲') || name.includes('硬舉') || name.includes('腿推') || name.includes('登階') || name.includes('弓箭步') || name.includes('臀推') || name.includes('腿彎舉') || name.includes('腿舉') || name.includes('平板') || name.includes('支撐') || name.includes('捲腹') || name.includes('仰臥') || name.includes('腹'))) {
+                    return false;
+                }
+                if (muscleGroup.includes('背') && (name.includes('飛鳥') || name.includes('彎舉') || name.includes('臥推') || name.includes('推') || name.includes('夾胸') || name.includes('擠壓') || name.includes('腿') || name.includes('深蹲') || name.includes('硬舉') || name.includes('腿推') || name.includes('登階') || name.includes('弓箭步') || name.includes('臀推') || name.includes('腿彎舉') || name.includes('腿舉') || name.includes('平板') || name.includes('支撐') || name.includes('捲腹') || name.includes('仰臥') || name.includes('腹'))) {
                     return false;
                 }
                 if (muscleGroup.includes('腹') && (name.includes('飛鳥') || name.includes('彎舉') || name.includes('下拉') || name.includes('臥推'))) {
+                    return false;
+                }
+                if (muscleGroup.includes('二頭') && (name.includes('臥推') || name.includes('推') || name.includes('夾胸') || name.includes('飛鳥') || name.includes('擠壓') || name.includes('腿') || name.includes('深蹲') || name.includes('硬舉') || name.includes('腿推') || name.includes('登階') || name.includes('弓箭步') || name.includes('臀推') || name.includes('腿彎舉') || name.includes('腿舉'))) {
                     return false;
                 }
                 
