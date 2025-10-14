@@ -557,6 +557,8 @@
             if (!confirm('刪除此筆紀錄將無法復原，確定要刪除嗎？')) return;
 
             try {
+                const btns = document.querySelectorAll('.btn-remove');
+                btns.forEach(b=>b.disabled=true);
                 const res = await fetch('delete_record.php', {
                     method: 'POST',
                     credentials: 'include',
@@ -567,6 +569,7 @@
                 let result;
                 try { result = JSON.parse(text); } catch { throw new Error('後端未回傳 JSON：' + text); }
                 if (result.success) {
+                    alert('刪除成功');
                     await loadHistory();
                 } else {
                     alert('刪除失敗：' + (result.error || '未知錯誤'));
@@ -574,6 +577,9 @@
             } catch (err) {
                 console.error(err);
                 alert('刪除發生錯誤：' + err.message);
+            } finally {
+                const btns = document.querySelectorAll('.btn-remove');
+                btns.forEach(b=>b.disabled=false);
             }
         }
 
@@ -581,6 +587,7 @@
         // 只保留數字/小數點/負號；移除逗號與單位
         function toNumberString(v) {
             if (v === null || v === undefined) return '';
+            // 確保返回的是可編輯的字串
             return String(v).replace(/,/g, '').replace(/[^\d.-]/g, '');
         }
 
@@ -589,18 +596,54 @@
 
         function openEditModal(record) {
             if (typeof record === 'string') { try { record = JSON.parse(record); } catch (e) { } }
+            
+            // 清除所有輸入欄位的值
             document.getElementById('edit_record_id').value = record.record_id || record.id || '';
             document.getElementById('edit_Date').value = record.Date ? String(record.Date).split(' ')[0].replace(/\//g, '-') : '';
 
-            const get = (u, h) => toNumberString(getField(record, u, h));
-            document.getElementById('edit_age').value = get('age', 'age');
-            document.getElementById('edit_height_cm').value = get('height_cm', 'height-cm');
-            document.getElementById('edit_weight_kg').value = get('weight_kg', 'weight-kg');
-            document.getElementById('edit_skeletal_muscle').value = get('skeletal_muscle', 'skeletal_muscle');
-            document.getElementById('edit_body_fat').value = get('body_fat', 'body_fat');
-            document.getElementById('edit_fat_percentage').value = get('fat_percentage', 'fat_percentage');
-            document.getElementById('edit_basal_metabolism').value = get('basal_metabolism', 'basal_metabolism');
-            document.getElementById('edit_bmi').value = get('bmi', 'bmi');
+            // 安全地設定數值欄位
+            const setValue = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = value || '';
+                    element.disabled = false; // 確保欄位未被禁用
+                    element.readOnly = false; // 確保欄位可讀寫
+                    console.log(`設定 ${id}: ${value}, disabled: ${element.disabled}, readOnly: ${element.readOnly}`);
+                } else {
+                    console.error(`找不到元素: ${id}`);
+                }
+            };
+
+            setValue('edit_age', record.age || '');
+            setValue('edit_height_cm', record['height-cm'] || record.height_cm || '');
+            setValue('edit_weight_kg', record['weight-kg'] || record.weight_kg || '');
+            setValue('edit_skeletal_muscle', record.skeletal_muscle || '');
+            setValue('edit_body_fat', record.body_fat || '');
+            setValue('edit_fat_percentage', record.fat_percentage || '');
+            setValue('edit_basal_metabolism', record.basal_metabolism || '');
+            setValue('edit_bmi', record.bmi || '');
+
+            // 動態綁定：身高/體重變更自動計算 BMI
+            const heightEl = document.getElementById('edit_height_cm');
+            const weightEl = document.getElementById('edit_weight_kg');
+            const bmiEl = document.getElementById('edit_bmi');
+            
+            const recomputeBMI = () => {
+                const h = parseFloat(heightEl.value);
+                const w = parseFloat(weightEl.value);
+                if (Number.isFinite(h) && h > 0 && Number.isFinite(w)) {
+                    const m = h / 100;
+                    bmiEl.value = (w / (m * m)).toFixed(2);
+                }
+            };
+            
+            // 移除舊的事件監聽器，避免重複綁定
+            heightEl.removeEventListener('input', recomputeBMI);
+            weightEl.removeEventListener('input', recomputeBMI);
+            
+            // 重新綁定事件
+            heightEl.addEventListener('input', recomputeBMI);
+            weightEl.addEventListener('input', recomputeBMI);
 
             const el = document.getElementById('editRecordModal');
             if (!window.editModalInstance) window.editModalInstance = new bootstrap.Modal(el, { keyboard: true });
@@ -673,6 +716,13 @@
             const id = document.getElementById('edit_record_id').value;
             const date = document.getElementById('edit_Date').value;
 
+            // 基本驗證
+            const height = parseFloat(document.getElementById('edit_height_cm').value);
+            const weight = parseFloat(document.getElementById('edit_weight_kg').value);
+            if (!date) return alert('請選擇日期');
+            if (!Number.isFinite(height) || height <= 0) return alert('請填入有效身高');
+            if (!Number.isFinite(weight) || weight <= 0) return alert('請填入有效體重');
+
             const underScorePayload = {
                 record_id: id,
                 Date: date,
@@ -685,13 +735,10 @@
                 basal_metabolism: document.getElementById('edit_basal_metabolism').value,
                 bmi: document.getElementById('edit_bmi').value
             };
-            // 放在 handleSaveEdit() 裡 ↓↓↓
             const aliasPayload = {
-                id: underScorePayload.record_id, // 後端若收 id 也能過
-                date: underScorePayload.Date     // 後端若收小寫 date 也能過
+                id: underScorePayload.record_id,
+                date: underScorePayload.Date
             };
-
-            // 若你暫時讓後端同時支援底線/連字號，這裡也可同送；不需要就拿掉 hyphenPayload
             const hyphenPayload = {
                 'height-cm': underScorePayload.height_cm,
                 'weight-kg': underScorePayload.weight_kg
@@ -703,7 +750,10 @@
                 ...hyphenPayload
             });
 
+            const saveBtn = document.getElementById('saveEditBtn');
             try {
+                saveBtn.disabled = true;
+                saveBtn.innerText = '儲存中...';
                 const res = await fetch('update_record.php', {
                     method: 'POST',
                     credentials: 'include',
@@ -715,6 +765,7 @@
                 try { result = JSON.parse(text); } catch { throw new Error('後端未回傳 JSON：' + text); }
 
                 if (result.success) {
+                    alert('更新成功');
                     window.editModalInstance?.hide();
                     await loadHistory();
                 } else {
@@ -723,6 +774,9 @@
             } catch (err) {
                 console.error(err);
                 alert('更新發生錯誤：' + err.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerText = '儲存變更';
             }
         }
 

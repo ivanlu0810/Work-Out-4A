@@ -44,6 +44,11 @@ switch($action) {
             deleteTrainingPlan($pdo);
         }
         break;
+    case 'delete_training_plan_by_week':
+        if ($method === 'POST') {
+            deleteTrainingPlanByWeek($pdo);
+        }
+        break;
         
     case 'load_training_plan':
         if ($method === 'GET') {
@@ -485,16 +490,64 @@ function deleteTrainingPlan($pdo) {
     }
 }
 
+// 按週次刪除訓練計畫
+function deleteTrainingPlanByWeek($pdo) {
+    $input = json_decode(file_get_contents('php://input'), true);
+    $required = ['week_number','week_start_date','user_id'];
+    foreach ($required as $f) {
+        if (!isset($input[$f])) {
+            http_response_code(400);
+            echo json_encode(['error' => "缺少必要欄位: $f"]);
+            return;
+        }
+    }
+    try {
+        $pdo->beginTransaction();
+        
+        // 先找出該週的所有計畫
+        $find_sql = "SELECT id FROM training_plans WHERE user_id = ? AND week_number = ? AND week_start_date = ?";
+        $find_stmt = $pdo->prepare($find_sql);
+        $find_stmt->execute([$input['user_id'], $input['week_number'], $input['week_start_date']]);
+        $plan_ids = $find_stmt->fetchAll(PDO::FETCH_COLUMN);
+        
+        if (empty($plan_ids)) {
+            echo json_encode(['success' => true, 'message' => '沒有找到該週的計畫']);
+            $pdo->commit();
+            return;
+        }
+        
+        // 刪除所有相關資料
+        foreach ($plan_ids as $plan_id) {
+            $del1 = $pdo->prepare("DELETE FROM training_plan_completion WHERE plan_id=? AND user_id=?");
+            $del1->execute([$plan_id, $input['user_id']]);
+            $del2 = $pdo->prepare("DELETE FROM training_plan_exercises WHERE plan_id=?");
+            $del2->execute([$plan_id]);
+            $del3 = $pdo->prepare("DELETE FROM training_plans WHERE id=? AND user_id=?");
+            $del3->execute([$plan_id, $input['user_id']]);
+        }
+        
+        $pdo->commit();
+        echo json_encode(['success' => true, 'deleted_count' => count($plan_ids)]);
+    } catch(PDOException $e) {
+        $pdo->rollBack();
+        http_response_code(500);
+        echo json_encode(['error'=>'刪除失敗: '.$e->getMessage()]);
+    }
+}
+
 // 載入訓練計畫
 function loadTrainingPlan($pdo) {
     $user_id = $_GET['user_id'] ?? 1;
     $week_number = $_GET['week_number'] ?? null;
     $week_start_date = $_GET['week_start_date'] ?? null;
     
+    // 添加調試日誌
+    error_log("loadTrainingPlan: user_id=$user_id, week_number=$week_number, week_start_date=$week_start_date");
+    
     try {
         $sql = "SELECT tp.*, tpe.* FROM training_plans tp
                 LEFT JOIN training_plan_exercises tpe ON tp.id = tpe.plan_id
-                WHERE tp.user_id = ?";
+                WHERE tp.user_id = ? AND tp.is_active = 1";
         $params = [$user_id];
         
         if ($week_number) {
@@ -509,9 +562,14 @@ function loadTrainingPlan($pdo) {
         
         $sql .= " ORDER BY tp.week_start_date DESC, tpe.day_of_week, tpe.order_index";
         
+        error_log("SQL: $sql");
+        error_log("Params: " . json_encode($params));
+        
         $stmt = $pdo->prepare($sql);
         $stmt->execute($params);
         $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        error_log("查詢結果數量: " . count($results));
         
         // 組織資料結構
         $plans = [];
@@ -532,6 +590,7 @@ function loadTrainingPlan($pdo) {
             }
             
             if ($row['exercise_id']) {
+                error_log("處理動作: plan_id={$plan_id}, day_of_week={$row['day_of_week']}, exercise_name={$row['exercise_name']}");
                 $plans[$plan_id]['exercises'][$row['day_of_week']][] = [
                     'id' => $row['exercise_id'],
                     'name' => $row['exercise_name'],
@@ -545,6 +604,8 @@ function loadTrainingPlan($pdo) {
                 ];
             }
         }
+        
+        error_log("最終 plans 結構: " . json_encode($plans));
         
         echo json_encode([
             'success' => true,
