@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健習生｜基本資料</title>
+    <link rel="icon" href="images/fitness.png" type="image/png">
+
+    <!-- 字體 & Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+
+    <style>
+        .profile-card {
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            padding: 2rem;
+            background: #fff;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: none;
+            /* 移除外框 */
+        }
+
+        /* 必填星號（柔和莫蘭迪紅） */
+        .form-label span {
+            color: #b76e79;
+            margin-left: 3px;
+            font-weight: 600;
+        }
+
+        /* 取消修改 → 灰色 */
+        .btn-cancel {
+            background-color: #6c757d !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        .btn-cancel:hover,
+        .btn-cancel:active,
+        .btn-cancel:focus {
+            background-color: #5a6268 !important;
+            color: #fff !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        /* 保存修改 → 藍紫色 */
+        .btn-save {
+            background-color: #5A628C !important;
+            border: none !important;
+            color: #fff !important;
+        }
+
+        .btn-save:hover,
+        .btn-save:active,
+        .btn-save:focus {
+            background-color: #4e567d !important;
+            color: #fff !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+
+        /* 上傳大頭貼 → 藍紫色 */
+        .btn-upload {
+            background-color: #7f90a9 !important;
+            color: #fff !important;
+            border: none !important;
+        }
+
+        .btn-upload:hover {
+            background-color: #67798f !important;
+            color: #fff !important;
+        }
+
+        .btn-upload:focus,
+        .btn-upload:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* footer 與上方保持 60px 間距 */
+        footer {
+            margin-top: 60px;
+        }
+
+        /* 載入中狀態 */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner-border-sm {
+            width: 1rem;
+            height: 1rem;
+        }
+
+        /* 讓標題置中 */
+        .card-header {
+            padding: 1rem 1rem;
+            background-color: #f8f9fa;
+            text-align: center;
+            border-bottom: 1px solid #dee2e6;
+            /* 分隔線 */
+            margin-bottom: 0.75rem;
+            /* ✨ 讓 header 與 body 之間有空隙 */
+        }
+
+        .card-header h6 {
+            margin: 0;
+            font-size: 1.05rem;
+            /* 稍微放大字體 */
+            font-weight: 600;
+            color: #2c3e50;
+            /* 深藍灰，辨識度更高 */
+        }
+
+        .card-body {
+            padding-top: 2rem;
+            /* 原本可能是 1rem，往下加大 */
+            padding-bottom: 1.25rem;
+            /* 保持下方間距 */
+        }
+
+        .mb-4-3 {
+            margin-bottom: 2.1rem !important;
+            /* 40px */
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <!-- 側邊選單 -->
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-menu">
+                    <ul class="menu">
+                        <li class="sidebar-title">我的檔案</li>
+
+                        <li class="sidebar-item">
+                            <a href="index.html" class='sidebar-link'>
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>健康儀表板</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item active">
+                            <a href="profile.html" class='sidebar-link'>
+                                <i class="bi bi-person-badge-fill"></i>
+                                <span>基本資料</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="history.html" class='sidebar-link'>
+                                <i class="bi bi-pen-fill"></i>
+                                <span>歷史紀錄</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">智慧建議</li>
+                        <li class="sidebar-item">
+                            <a href="training.html" class='sidebar-link'>
+                                <i class="bi bi-pentagon-fill"></i>
+                                <span>訓練探索</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="training-plan.html" class='sidebar-link'>
+                                <i class="bi bi-calendar-check-fill"></i>
+                                <span>訓練計畫</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="food.html" class='sidebar-link'>
+                                <i class="bi bi-basket-fill"></i>
+                                <span>飲食指南</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="favorite.html" class='sidebar-link'>
+                                <i class="bi bi-grid-1x2-fill"></i>
+                                <span>我的最愛</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">更多選項</li>
+                        <li class="sidebar-item">
+                            <a href="logout.php" class='sidebar-link'>
+                                <i class="bi bi-egg-fill"></i>
+                                <span>登出帳戶</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+            </div>
+        </div>
+
+        <!-- 主要內容 -->
+        <div id="main">
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3 class="mb-4-3 me-3">基本資料⚙️</h3>
+                            <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
+                                以下為您的個人檔案資訊，您可以修改並保存。
+                            </p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="index.html">健康儀表板</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">基本資料</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="container">
+                <div class="profile-card">
+                    <div class="text-center mb-4">
+                        <img id="avatarPreview" src="assets/images/faces/1.jpg" alt="大頭貼" class="profile-avatar mb-3">
+                        <div>
+                            <!-- 隱藏檔案選擇 -->
+                            <input type="file" id="avatarInput" accept="image/*" style="display:none">
+                            <button type="button" class="btn btn-upload btn-sm" id="uploadBtn">
+                                上傳大頭貼
+                            </button>
+                            <div class="mt-2">
+                                <small class="text-muted">支援 JPG、PNG、GIF 格式，檔案大小不超過 5MB</small>
+                            </div>
+                        </div>
+                    </div>
+                    <form id="profileForm">
+                        <div class="row">
+                            <!-- 基本資料 -->
+                            <div class="col-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">基本資料</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <!-- 第一行：姓名 + 性別 -->
+                                            <div class="col-md-6 mb-3">
+                                                <label for="name" class="form-label">姓名 *</label>
+                                                <input type="text" class="form-control" id="name" name="name" required>
+                                            </div>
+
+                                            <div class="col-md-6 mb-3">
+                                                <label for="gender" class="form-label">性別 *</label>
+                                                <select class="form-control" id="gender" name="gender" required>
+                                                    <option value="male">男性</option>
+                                                    <option value="female">女性</option>
+                                                </select>
+                                            </div>
+
+                                            <!-- 第二行：電子郵件，佔滿一整行 -->
+                                            <div class="col-md-12 mb-3">
+                                                <label for="email" class="form-label">電子郵件 *</label>
+                                                <input type="email" class="form-control" id="email" name="email"
+                                                    required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 帳號安全 -->
+                            <div class="col-12 mb-4">
+                                <div class="card shadow-sm">
+                                    <div class="card-header bg-light">
+                                        <h6 class="mb-0">帳號安全</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="password" class="form-label">密碼<span>*</span></label>
+                                                <input type="password" class="form-control" id="password"
+                                                    name="password" placeholder="********" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label for="confirmPassword"
+                                                    class="form-label">確認密碼<span>*</span></label>
+                                                <input type="password" class="form-control" id="confirmPassword"
+                                                    name="confirmPassword" placeholder="********" required>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- 按鈕區 -->
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="reset" class="btn btn-cancel">取消修改</button>
+                            <button type="submit" class="btn btn-save" id="saveBtn">
+                                <span class="btn-text">保存修改</span>
+                                <span class="btn-loading" style="display: none;">
+                                    <span class="spinner-border spinner-border-sm me-2" role="status"
+                                        aria-hidden="true"></span>
+                                    儲存中...
+                                </span>
+                            </button>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <footer>
+                <div class="footer clearfix mb-0 text-muted">
+                    <div class="float-start">
+                        <p>健習生</p>
+                    </div>
+                    <div class="float-end">
+                        <p>謝昀倢 黃詠翰 呂沁垣 游博翔</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- JS 套件 -->
+    <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <!-- 大頭貼即時預覽 + 表單處理 -->
+    <script>
+        // 頁面載入時獲取用戶資料
+        document.addEventListener('DOMContentLoaded', function () {
+            loadUserProfile();
+        });
+
+        // 載入用戶資料
+        async function loadUserProfile() {
+            try {
+                const response = await fetch('get_user_info.php');
+                if (response.ok) {
+                    const userData = await response.json();
+
+                    // 填充表單欄位
+                    document.getElementById('name').value = userData.username || '';
+                    document.getElementById('email').value = userData.email || '';
+                    document.getElementById('gender').value = userData.gender || '';
+
+                    // 更新大頭貼顯示
+                    if (userData.avatar) {
+                        document.getElementById('avatarPreview').src = userData.avatar;
+                    }
+
+                    // 密碼欄位保持空白，讓用戶重新輸入
+                    if (document.getElementById('password')) {
+                        document.getElementById('password').value = '';
+                    }
+                    if (document.getElementById('confirmPassword')) {
+                        document.getElementById('confirmPassword').value = '';
+                    }
+
+                    console.log('用戶資料載入成功:', userData);
+                } else {
+                    console.error('載入用戶資料失敗:', response.status);
+                    document.getElementById('name').value = '請先登入';
+                    document.getElementById('email').value = '請先登入';
+                }
+            } catch (error) {
+                console.error('載入用戶資料時發生錯誤:', error);
+                document.getElementById('name').value = '載入失敗';
+                document.getElementById('email').value = '載入失敗';
+            }
+        }
+
+        // 大頭貼上傳按鈕點擊事件
+        document.getElementById("uploadBtn").addEventListener("click", function () {
+            document.getElementById("avatarInput").click();
+        });
+
+        // 大頭貼檔案選擇事件
+        document.getElementById("avatarInput").addEventListener("change", async function () {
+            const file = this.files[0];
+            if (file) {
+                // 即時預覽
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    document.getElementById("avatarPreview").src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+
+                // 上傳到伺服器
+                await uploadAvatar(file);
+            }
+        });
+
+        // 上傳大頭貼到伺服器
+        async function uploadAvatar(file) {
+            const formData = new FormData();
+            formData.append('avatar', file);
+
+            try {
+                const response = await fetch('upload_avatar.php', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert('大頭貼上傳成功！');
+                    // 更新顯示的大頭貼路徑
+                    document.getElementById('avatarPreview').src = result.avatar_path;
+                } else {
+                    alert('上傳失敗：' + result.error);
+                    // 恢復原本的大頭貼
+                    loadUserProfile();
+                }
+            } catch (error) {
+                console.error('上傳大頭貼時發生錯誤:', error);
+                alert('上傳失敗，請稍後再試。');
+                // 恢復原本的大頭貼
+                loadUserProfile();
+            }
+        }
+
+        // 表單提交處理
+        document.getElementById('profileForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // 驗證密碼確認
+            const password = document.getElementById('password').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+
+            if (password !== confirmPassword) {
+                alert('密碼確認不符！');
+                return;
+            }
+
+            // 顯示載入狀態
+            const saveBtn = document.getElementById('saveBtn');
+            const btnText = saveBtn.querySelector('.btn-text');
+            const btnLoading = saveBtn.querySelector('.btn-loading');
+
+            btnText.style.display = 'none';
+            btnLoading.style.display = 'inline-block';
+            saveBtn.disabled = true;
+
+            try {
+                // 準備要發送的資料
+                const formData = {
+                    name: document.getElementById('name').value,
+                    email: document.getElementById('email').value,
+                    password: password,
+                    gender: document.getElementById('gender').value
+                };
+
+                // 發送 AJAX 請求到後端 API
+                const response = await fetch('update_profile.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    alert(result.message);
+
+                    // 重新載入用戶資料
+                    await loadUserProfile();
+
+                    // 清空密碼欄位
+                    document.getElementById('password').value = '';
+                    document.getElementById('confirmPassword').value = '';
+                } else {
+                    alert('更新失敗：' + result.error);
+                }
+
+            } catch (error) {
+                console.error('更新資料時發生錯誤:', error);
+                alert('更新資料失敗，請稍後再試。');
+            } finally {
+                // 恢復按鈕狀態
+                btnText.style.display = 'inline-block';
+                btnLoading.style.display = 'none';
+                saveBtn.disabled = false;
+            }
+        });
+
+        // 取消修改按鈕
+        document.querySelector('.btn-cancel').addEventListener('click', function () {
+            if (confirm('確定要取消修改嗎？未保存的更改將會遺失。')) {
+                // 重新載入用戶資料，恢復原始值
+                loadUserProfile();
+            }
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,1584 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- 組員上傳就要執行這段指令同步 git pull origin main -->
+<script src="https://cdn.jsdelivr.net/npm/echarts@5/dist/echarts.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/echarts-liquidfill@3/dist/echarts-liquidfill.min.js"></script>
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健習生｜健康儀表板</title>
+    <link rel="icon" href="images/fitness.png" type="image/png">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/vendors/iconly/bold.css">
+
+    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+
+    <link rel="stylesheet" href="assets/css/chatbox.css" />
+    <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+
+    <style>
+        .stats-icon.orange {
+            background-color: #ff9500;
+            color: white;
+        }
+
+        .stats-icon.teal {
+            background-color: #20c997;
+            color: white;
+        }
+
+        .stats-icon.indigo {
+            background-color: #6610f2;
+            color: white;
+        }
+
+        .stats-icon.pink {
+            background-color: #e83e8c;
+            color: white;
+        }
+
+        /* 確保主要內容區域可以滾動 */
+        #main {
+            height: 100vh !important;
+            overflow-y: auto !important;
+        }
+
+        /* 確保內容足夠長以觸發滾動 */
+        .page-content {
+            min-height: 120vh !important;
+            padding-bottom: 50px !important;
+        }
+
+        html,
+        body {
+            height: 100%;
+            overflow: auto;
+        }
+
+        .card {
+            border-radius: 16px;
+            /* 統一圓角 */
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            /* 柔和陰影 */
+            margin-bottom: 20px;
+            /* 統一上下間距 */
+            margin-top: 20px;
+        }
+
+        .card .card-body {
+            padding: 1rem;
+            /* 減少內距 */
+        }
+
+        .card-body {
+            padding-top: 1.25rem !important;
+            /* 減少上下內距 */
+            padding-bottom: 1.25rem !important;
+        }
+
+        .col-lg-3 .card {
+            margin-bottom: 20px;
+            margin-top: 20px;
+        }
+
+        /* 統計卡片緊湊樣式 */
+        .stats-card .card-body {
+            padding: 0.75rem 1rem !important;
+        }
+
+        .stats-card h6 {
+            margin-bottom: 0.25rem !important;
+        }
+
+        .card-header {
+            padding: 1rem 1rem !important;
+            /* 減少上下間距 */
+            background-color: #f5f7fa;
+            /* 淡淡的灰藍色背景 */
+            border-bottom: 1px solid #e0e0e0;
+            /* 下邊框淡灰 */
+            border-radius: 12px 12px 0 0;
+            /* 讓標題區域圓角更柔和 */
+        }
+
+        .card-header h4 {
+            margin: 0;
+            line-height: 1.6;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #34495e;
+            /* 深灰藍，文字更穩重 */
+        }
+
+        /* 用戶大頭貼樣式 */
+        .avatar.avatar-xl {
+            width: 80px !important;
+            height: 80px !important;
+            border-radius: 50% !important;
+            overflow: hidden;
+        }
+
+        .avatar img {
+            width: 100% !important;
+            height: 100% !important;
+            object-fit: cover !important;
+            border-radius: 50% !important;
+            border: 2px solid #e0e0e0;
+            transition: border-color 0.3s ease;
+        }
+
+        .avatar img:hover {
+            border-color: #95abc3;
+        }
+
+        /* 讓左右欄位高度一致 */
+        /* 取消第一列卡片的 margin-top */
+        .col-lg-9 .row:first-child .card {
+            margin-top: 0 !important;
+        }
+
+        .col-lg-3 {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 讓卡片能填滿高度 */
+        .card {
+            flex: 1 1 auto;
+        }
+
+        .date-input {
+            width: 160px !important;
+            /* 增加寬度（原本140px → 160px） */
+            text-align: center;
+            /* 文字置中 */
+            display: inline-block;
+            padding-right: 6px;
+            /* 預留內距，避免文字貼邊 */
+            padding-left: 6px;
+        }
+
+        /* 基本樣式 */
+        .date-btn {
+            border: none;
+            color: #fff;
+            /* 預設白字 */
+            font-weight: 600;
+            padding: 6px 14px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        /* 三顆按鈕各自顏色 */
+        #apply-date-range {
+            background-color: #b0bccf;
+            /* 深藍灰 */
+        }
+
+        #apply-date-range:hover {
+            background-color: #9daac0;
+            /* hover 深一點 */
+            color: #fff;
+            /* 保持白字 */
+        }
+
+        #reset-date-range {
+            background-color: #9aaec7;
+            /* 中灰藍 */
+        }
+
+        #reset-date-range:hover {
+            background-color: #869bb5;
+            /* hover 深一點 */
+            color: #fff;
+        }
+
+        #last-30-days {
+            background-color: #c7d3e6;
+            /* 淺灰藍 */
+        }
+
+        #last-30-days:hover {
+            background-color: #b2bfd8;
+            /* hover 深一點 */
+            color: #fff;
+        }
+
+        .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #fff !important;
+        }
+
+        .btn-primary:hover {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+        }
+
+        #weight-chart,
+        #body-composition-chart,
+        #fat-percentage-chart,
+        #bmi-chart {
+            min-height: 390px;
+        }
+
+        /* 讓空圖時的提示字不要太醒目但仍可見 */
+        .apexcharts-annotation-text {
+            opacity: .7;
+            letter-spacing: .5px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+
+        <!-- 聊天氣泡 -->
+        <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+
+        <div id="chat-container" class="position-relative">
+            <div id="chat-icon" class="chat-icon">
+                <img src="assets/images/chat-icon.png" alt="chat icon" />
+            </div>
+            <div id="chat-window" class="chat-window">
+                <div class="header">AI健習生</div>
+                <div class="body">
+                    <div class="message">你好，有什麼可以幫忙的嗎？</div>
+                    <div id="user-id" style="display: none;"></div>
+                </div>
+                <div class="footer">
+                    <input type="text" placeholder="輸入訊息..." />
+                    <button>發送</button>
+                </div>
+            </div>
+        </div>
+
+        <script src="assets/js/chatbox.js"></script>
+        <!-- 聊天氣泡結束 -->
+
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-menu">
+                    <ul class="menu">
+                        <li class="sidebar-title">我的檔案</li>
+
+                        <li class="sidebar-item active">
+                            <a href="index.html" class='sidebar-link'>
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>健康儀表板</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="profile.html" class='sidebar-link'>
+                                <i class="bi bi-person-badge-fill"></i>
+                                <span>基本資料</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="history.html" class='sidebar-link'>
+                                <i class="bi bi-pen-fill"></i>
+                                <span>歷史紀錄</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">智慧建議</li>
+                        <li class="sidebar-item">
+                            <a href="training.html" class='sidebar-link'>
+                                <i class="bi bi-pentagon-fill"></i>
+                                <span>訓練探索</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="training-plan.html" class='sidebar-link'>
+                                <i class="bi bi-calendar-check-fill"></i>
+                                <span>訓練計畫</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="food.html" class='sidebar-link'>
+                                <i class="bi bi-basket-fill"></i>
+                                <span>飲食指南</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="favorite.html" class='sidebar-link'>
+                                <i class="bi bi-grid-1x2-fill"></i>
+                                <span>我的最愛</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">更多選項</li>
+                        <li class="sidebar-item">
+                            <a href="logout.php" class='sidebar-link'>
+                                <i class="bi bi-egg-fill"></i>
+                                <span>登出帳戶</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+            </div>
+        </div>
+        <div id="main">
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <div class="page-heading">
+                <div class="d-flex align-items-center">
+                    <h3 class="mb-0 me-3">健康儀表板🔎
+                    </h3>
+                    <button class="btn btn-custom d-flex align-items-center" data-bs-toggle="modal"
+                        data-bs-target="#addDataModal">
+                        <i class="bi bi-plus-circle me-2"></i>新增數據
+                    </button>
+                </div>
+            </div>
+            <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
+                以下為您目前最新的基本身體資料，系統會自動統計最近一次的數值顯示於下方。
+            </p>
+            <div class="page-content">
+                <section class="row align-items-stretch">
+                    <div class="col-12 col-lg-9 d-flex flex-column">
+                        <div class="row">
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <!-- 紫色 ICON -->
+                                            <div class="stats-icon morandi-purple me-3">
+                                                <img src="icons/clipboard-data.svg" alt="Clipboard Data"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <!-- 文字內容 -->
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold mb-1">記錄筆數</h6>
+                                                <h6 class="font-extrabold mb-0" id="total-records">0 筆</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stats-icon morandi-blue me-3">
+                                                <img src="icons/ruler-combined-solid.svg" alt="Ruler-Combined-Solid"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold">身高</h6>
+                                                <h6 class="font-extrabold mb-0" id="avg-height">0.0 cm</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stats-icon morandi-green me-3">
+                                                <img src="icons/speedometer2.svg" alt="speedometer2"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold">體重</h6>
+                                                <h6 class="font-extrabold mb-0" id="avg-weight">0.0 kg</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stats-icon morandi-pink me-3">
+                                                <img src="icons/clipboard-account.svg" alt="clipboard-account"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold">BMI</h6>
+                                                <h6 class="font-extrabold mb-0" id="avg-bmi">0.0</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stats-icon morandi-apricot me-3">
+                                                <img src="icons/fire-solid.svg" alt="muscle-gain"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold">基礎代謝</h6>
+                                                <h6 class="font-extrabold mb-0" id="avg-metabolism">0 kcal</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stats-icon morandi-graygreen me-3">
+                                                <img src="icons/muscle-gain.svg" alt="muscle-gain"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold">骨骼肌</h6>
+                                                <h6 class="font-extrabold mb-0" id="avg-skeletal">0.0 kg</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stats-icon morandi-gray me-3">
+                                                <img src="icons/pie-chart.svg" alt="muscle-gain"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold">體脂肪</h6>
+                                                <h6 class="font-extrabold mb-0" id="avg-body-fat">0.0 kg</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-12 col-sm-6 col-md-6 col-lg-3">
+                                <div class="card stats-card">
+                                    <div class="card-body d-flex justify-content-center align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="stats-icon morandi-cream me-3">
+                                                <img src="icons/add-chart.svg" alt="muscle-gain"
+                                                    class="icon-svg white-filter">
+                                            </div>
+                                            <div class="text-center">
+                                                <h6 class="text-muted font-semibold">體脂率</h6>
+                                                <h6 class="font-extrabold mb-0" id="avg-fat-percentage">0.0%</h6>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- 時間範圍選擇器 -->
+                        <div class="row mb-2">
+                            <div class="col-12">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div class="d-flex align-items-center justify-content-between">
+                                            <h6 class="mb-0">圖表時間範圍</h6>
+                                            <div class="d-flex align-items-center">
+
+                                                <!-- 開始日期 -->
+                                                <input type="date" id="start-date" class="form-control me-2 date-input"
+                                                    placeholder="年／月／日">
+                                                <span class="me-2">至</span>
+
+                                                <!-- 結束日期 -->
+                                                <input type="date" id="end-date" class="form-control me-3 date-input"
+                                                    placeholder="年／月／日">
+
+                                                <!-- 操作按鈕 -->
+                                                <button class="btn date-btn btn-sm" id="apply-date-range">套用範圍</button>
+                                                <button class="btn date-btn btn-sm ms-2"
+                                                    id="last-30-days">最近30天</button>
+                                                <button class="btn date-btn btn-sm ms-2"
+                                                    id="reset-date-range">重置</button>
+
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mt-0">
+                            <div class="col-12 col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card text-center">體重變化趨勢</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="weight-chart"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card text-center">身體組成變化</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="body-composition-chart"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card text-center">體脂率變化趨勢</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="fat-percentage-chart"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 col-lg-6">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h4 class="card text-center">BMI數值變化趨勢</h4>
+                                    </div>
+                                    <div class="card-body">
+                                        <div id="bmi-chart"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-12 col-lg-3 d-flex flex-column">
+                        <div class="card mt-0">
+                            <div class="card-body py-4 px-5">
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar avatar-xl">
+                                        <img src="assets/images/faces/1.jpg" alt="預設大頭貼">
+                                    </div>
+                                    <div class="ms-3 name">
+                                        <h5 class="font-bold" id="user-name">John Duck</h5>
+                                        <h6 class="text-muted mb-0" id="user-email">@johnducky</h6>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card text-center mt-3">
+                            <div class="card-header">
+                                <h4 class="fw-bold">健康目標追蹤</h4>
+                            </div>
+                            <div class="card-content pb-4">
+
+                                <!-- ✅ 每一列包在 w-75 的 container，並靠中對齊 -->
+                                <div class="mx-auto w-75 d-flex align-items-start justify-content-start py-3">
+                                    <div class="goal-icon rounded-circle d-flex align-items-center justify-content-center me-3"
+                                        style="width: 40px; height: 40px; background-color: #c1cdd7; overflow: hidden; flex-shrink: 0;">
+                                        <img src="images/barbell.png" alt="目標體重"
+                                            style="width: 60%; height: 60%; object-fit: contain; filter: brightness(0) invert(1);">
+                                    </div>
+                                    <div class="text-start flex-grow-1">
+                                        <h6 class="mb-2 fw-bold text-dark">目標體重</h6>
+                                        <div class="d-flex align-items-center" style="min-width: 0;">
+                                            <div class="text-muted fw-normal" style="min-width: 80px;">目前：<span
+                                                    id="current-weight" class="fw-semibold">0.0</span> kg</div>
+                                            <i class="bi bi-arrow-right text-muted mx-2"></i>
+                                            <div class="text-primary fw-semibold">目標：<span id="goal-weight-display"
+                                                    class="fw-bold"></span> kg</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mx-auto w-75 d-flex align-items-start justify-content-start py-3">
+                                    <div class="goal-icon rounded-circle d-flex align-items-center justify-content-center me-3"
+                                        style="width: 40px; height: 40px; background-color: #cfddd6; overflow: hidden; flex-shrink: 0;">
+                                        <img src="images/up.png" alt="目標體脂率"
+                                            style="width: 60%; height: 60%; object-fit: contain; filter: brightness(0) invert(1);">
+                                    </div>
+                                    <div class="text-start flex-grow-1">
+                                        <h6 class="mb-2 fw-bold text-dark">目標體脂率</h6>
+                                        <div class="d-flex align-items-center" style="min-width: 0;">
+                                            <div class="text-muted fw-normal" style="min-width: 80px;">目前：<span
+                                                    id="current-fat-percentage" class="fw-semibold">0.0</span>%</div>
+                                            <i class="bi bi-arrow-right text-muted mx-2"></i>
+                                            <div class="text-primary fw-semibold">目標：<span
+                                                    id="goal-fat-percentage-display" class="fw-bold"></span>%</div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="mx-auto w-75 d-flex align-items-start justify-content-start py-3">
+                                    <div class="goal-icon rounded-circle d-flex align-items-center justify-content-center me-3"
+                                        style="width: 40px; height: 40px; background-color: #e6d4da; overflow: hidden; flex-shrink: 0;">
+                                        <img src="images/line-chart.png" alt="目標肌肉量"
+                                            style="width: 60%; height: 60%; object-fit: contain; filter: brightness(0) invert(1);">
+                                    </div>
+                                    <div class="text-start flex-grow-1">
+                                        <h6 class="mb-2 fw-bold text-dark">目標肌肉量</h6>
+                                        <div class="d-flex align-items-center" style="min-width: 0;">
+                                            <div class="text-muted fw-normal" style="min-width: 80px;">目前: <span
+                                                    id="current-muscle" class="fw-semibold">0.0</span> kg</div>
+                                            <i class="bi bi-arrow-right text-muted mx-2"></i>
+                                            <div class="text-primary fw-semibold">目標：<span id="goal-muscle-display"
+                                                    class="fw-bold"></span> kg</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="px-4">
+                                    <button class="btn btn-block btn-xl btn-light-primary font-bold mt-3"
+                                        data-bs-toggle="modal" data-bs-target="#setGoalModal">設定目標</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card text-center equal-h mt-3">
+                            <div class="card-header">
+                                <h4 class="fw-bold">目標達成率</h4>
+                            </div>
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                <div id="goal-progress-chart"
+                                    style="width: 100%; aspect-ratio: 1/1; max-height: 200px;"></div>
+                                <p class="mt-3 text-muted">離目標只差一點，加油！</p>
+                            </div>
+                        </div>
+                        <div class="card equal-h mt-3">
+                            <div class="card-header">
+                                <h4 class="text-center">身體組成比例</h4>
+                            </div>
+                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                <div id="body-composition-pie-chart"></div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <footer>
+                <div class="footer clearfix mb-0 text-muted">
+                    <div class="float-start">
+                        <p>健習生</p>
+                    </div>
+                    <div class="float-end">
+                        <p>謝昀倢 黃詠翰 呂沁垣 游博翔</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+
+    <script src="assets/vendors/apexcharts/apexcharts.js"></script>
+    <script src="assets/js/pages/dashboard.js"></script>
+
+    <script src="assets/js/main.js"></script>
+
+    <!-- 設定目標彈出視窗 -->
+    <div class="modal fade" id="setGoalModal" tabindex="-1" aria-labelledby="setGoalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="setGoalModalLabel">設定健康目標</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="goalForm">
+                        <div class="mb-3">
+                            <label for="goal_weight" class="form-label">目標體重 (kg)</label>
+                            <input type="number" class="form-control" id="goal_weight" name="goal_weight" step="0.1"
+                                min="30" max="200" value="70.0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="goal_fat_percentage" class="form-label">目標體脂率 (%)</label>
+                            <input type="number" class="form-control" id="goal_fat_percentage"
+                                name="goal_fat_percentage" step="0.1" min="5" max="50" value="15.0">
+                        </div>
+                        <div class="mb-3">
+                            <label for="goal_muscle" class="form-label">目標肌肉量 (kg)</label>
+                            <input type="number" class="form-control" id="goal_muscle" name="goal_muscle" step="0.1"
+                                min="10" max="100" value="35.0">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" id="saveGoalBtn" class="btn btn-primary">保存目標</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 新增數據彈出視窗 -->
+    <div class="modal fade" id="addDataModal" tabindex="-1" aria-labelledby="addDataModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addDataModalLabel">新增健康數據</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="healthDataForm">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="test_date" class="form-label">測量日期</label>
+                                <input type="date" class="form-control" id="test_date" name="test_date">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="age" class="form-label">年齡 *</label>
+                                <input type="number" class="form-control" id="age" name="age" min="1" max="120"
+                                    required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="height_cm" class="form-label">身高 (cm) *</label>
+                                <input type="number" class="form-control" id="height_cm" name="height_cm" step="0.1"
+                                    min="50" max="250" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="weight_kg" class="form-label">體重 (kg) *</label>
+                                <input type="number" class="form-control" id="weight_kg" name="weight_kg" step="0.1"
+                                    min="20" max="300" required>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="skeletal_muscle" class="form-label">骨骼肌重 (kg)</label>
+                                <input type="number" class="form-control" id="skeletal_muscle" name="skeletal_muscle"
+                                    step="0.1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="body_fat" class="form-label">體脂肪重 (kg)</label>
+                                <input type="number" class="form-control" id="body_fat" name="body_fat" step="0.1">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="fat_percentage" class="form-label">體脂率 (%)</label>
+                                <input type="number" class="form-control" id="fat_percentage" name="fat_percentage"
+                                    step="0.1">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="basal_metabolism" class="form-label">基礎代謝量 (kcal)</label>
+                                <input type="number" class="form-control" id="basal_metabolism" name="basal_metabolism"
+                                    step="0.1">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="bmi" class="form-label">BMI (可選)</label>
+                                <input type="number" class="form-control" id="bmi" name="bmi" step="0.1">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                    <button type="button" class="btn btn-primary" id="saveDataBtn">保存數據</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 成功提示視窗 -->
+    <!-- 成功提示視窗 -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <!-- 原本是 <h5 class="modal-title">提示！</h5> -->
+                    <h5 class="modal-title" id="successTitle">提示！</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage">健康數據已保存！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 錯誤提示視窗 -->
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">錯誤</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage">保存數據時發生錯誤。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 設置今天的日期為默認值（使用本地時區）
+        const today = new Date();
+        const year = today.getFullYear();
+        const month = String(today.getMonth() + 1).padStart(2, '0');
+        const day = String(today.getDate()).padStart(2, '0');
+        document.getElementById('test_date').value = `${year}-${month}-${day}`;
+
+        // 載入用戶資訊
+        fetch('get_user_info.php')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    // 如果未登入，跳轉到登入頁面
+                    window.location.href = 'auth-login.html';
+                    throw new Error('Not logged in');
+                }
+            })
+            .then(data => {
+                // 更新用戶資訊
+                document.getElementById('user-id').textContent = data.userid;
+                document.getElementById('user-name').textContent = data.username;
+                document.getElementById('user-email').textContent = data.email;
+
+                // 更新用戶大頭貼
+                const userAvatar = document.querySelector('.avatar img');
+                if (data.avatar && data.avatar.trim() !== '') {
+                    userAvatar.src = data.avatar;
+                    userAvatar.alt = data.username + ' 的大頭貼';
+                } else {
+                    // 如果沒有上傳大頭貼，使用預設圖片
+                    userAvatar.src = 'assets/images/faces/1.jpg';
+                    userAvatar.alt = '預設大頭貼';
+                }
+            })
+            .catch(error => {
+                console.error('Error loading user info:', error);
+            });
+
+        // 載入健康數據統計
+        fetch('get_health_stats.php')
+            .then(response => {
+                if (response.ok) {
+                    return response.json();
+                } else {
+                    throw new Error('Failed to load health stats');
+                }
+            })
+            .then(data => {
+                // 更新統計數據（顯示最新記錄）
+                document.getElementById('total-records').textContent = data.total_records + ' 筆';
+                document.getElementById('avg-weight').textContent = data.latest_weight + ' kg';
+                document.getElementById('avg-height').textContent = data.latest_height + ' cm';
+                document.getElementById('avg-skeletal').textContent = data.latest_skeletal_muscle + ' kg';
+                document.getElementById('avg-body-fat').textContent = data.latest_body_fat + ' kg';
+                document.getElementById('avg-fat-percentage').textContent = data.latest_fat_percentage + '%';
+                document.getElementById('avg-metabolism').textContent = data.latest_basal_metabolism + ' kcal';
+                document.getElementById('avg-bmi').textContent = data.latest_bmi;
+
+                // 更新目標追蹤的目前數據
+                document.getElementById('current-weight').textContent = data.latest_weight;
+                document.getElementById('current-fat-percentage').textContent = data.latest_fat_percentage;
+                document.getElementById('current-muscle').textContent = data.latest_skeletal_muscle;
+
+                // 更新目標達成率圖表
+                if (window.goalProgressChart) {
+                    window.goalProgressChart.update();
+                }
+            })
+            .catch(error => {
+                console.error('Error loading health stats:', error);
+            });
+
+        // 載入圖表數據
+        // 載入圖表數據（無論有沒有資料，都會渲染四張圖/占位）
+        function loadChartData(startDate = null, endDate = null) {
+            let url = 'get_chart_data.php';
+            const params = new URLSearchParams();
+
+            if (startDate && endDate) {
+                params.append('start_date', startDate);
+                params.append('end_date', endDate);
+                url += '?' + params.toString();
+            }
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Failed to load chart data');
+                    return response.json();
+                })
+                .then(data => {
+                    // ✅ 安全預設：就算後端沒資料，也給空陣列，確保 create*Chart 能被呼叫並顯示占位
+                    const safe = {
+                        dates: Array.isArray(data.dates) ? data.dates : [],
+                        weight: Array.isArray(data.weight) ? data.weight : [],
+                        skeletal_muscle: Array.isArray(data.skeletal_muscle) ? data.skeletal_muscle : [],
+                        body_fat: Array.isArray(data.body_fat) ? data.body_fat : [],
+                        fat_percentage: Array.isArray(data.fat_percentage) ? data.fat_percentage : [],
+                        bmi: Array.isArray(data.bmi) ? data.bmi : []
+                    };
+
+                    // 不再用 length 判斷；直接交給各圖表函式自行決定要畫折線還是顯示占位
+                    createWeightChart(safe);
+                    createBodyCompositionChart(safe);
+                    createFatPercentageChart(safe);
+                    createBMIChart(safe);
+                })
+                .catch(error => {
+                    console.error('Error loading chart data:', error);
+                    // 後端掛掉或網路錯誤時，也顯示占位，避免整塊塌陷
+                    showPlaceholder("#weight-chart", 390);
+                    showPlaceholder("#body-composition-chart", 390);
+                    showPlaceholder("#fat-percentage-chart", 390);
+                    showPlaceholder("#bmi-chart", 390);
+                });
+        }
+
+        // ============ 共用：無資料時也畫出有軸/網格的空圖 ============
+        function renderEmptyApexLine(containerSelector, {
+            title = '',
+            yMin = 0,
+            yMax = 100,
+            xStart = null,
+            xEnd = null,
+            color = '#2c3e50'
+        } = {}) {
+            const el = document.querySelector(containerSelector);
+            el.innerHTML = '';
+
+            let start, end;
+            if (xStart && xEnd) { start = new Date(xStart); end = new Date(xEnd); }
+            else { end = new Date(); start = new Date(); start.setDate(end.getDate() - 30); }
+
+            const xCategories = [];
+            const steps = 4; // → 5 個刻度
+            const span = end.getTime() - start.getTime();
+            for (let i = 0; i <= steps; i++) {
+                const t = new Date(start.getTime() + (span * i / steps));
+                xCategories.push(t.toISOString().split('T')[0]);
+            }
+
+            const options = {
+                series: [{ name: '', data: new Array(xCategories.length).fill(null) }],
+                chart: { type: 'line', height: 390, toolbar: { show: false }, animations: { enabled: false } },
+                stroke: { curve: 'smooth', width: 3 },
+                grid: { strokeDashArray: 3 },
+                xaxis: {
+                    categories: xCategories,
+                    tickAmount: 5,
+                    labels: {
+                        rotate: 0,
+                        formatter: (value) => {
+                            const d = new Date(value);
+                            return d.toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' });
+                        }
+                    }
+                },
+                yaxis: {
+                    min: yMin, max: yMax, tickAmount: 6,
+                    title: { text: title, style: { color, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: color, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                annotations: {
+                    texts: [{
+                        x: '50%', y: '50%', text: '暫無數據', textAnchor: 'middle',
+                        style: { fontSize: '14px', color: '#94a3b8', fontWeight: 600 }
+                    }]
+                },
+                colors: ['#d0d4dc']
+            };
+            new ApexCharts(el, options).render();
+        }
+
+        // ============ 1) 體重變化趨勢 ============
+        function createWeightChart(data) {
+            const el = document.querySelector("#weight-chart");
+            el.innerHTML = '';
+
+            const colorY = '#2c3e50';
+            const seriesData = data.weight.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.weight[i] !== null);
+
+            if (seriesData.length === 0) {
+                renderEmptyApexLine("#weight-chart", {
+                    title: '體重 (kg)', yMin: 40, yMax: 120,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
+
+            const options = {
+                series: [{ name: '體重 (kg)', data: seriesData }],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                colors: ['#AB8B8B'],
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: {
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
+                },
+                yaxis: {
+                    title: { text: '體重 (kg)', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
+            };
+            new ApexCharts(el, options).render();
+        }
+
+        // ============ 2) 身體組成變化 ============
+        function createBodyCompositionChart(data) {
+            const el = document.querySelector("#body-composition-chart");
+            el.innerHTML = '';
+
+            const colorY = '#2c3e50';
+            const skeletal = data.skeletal_muscle.filter(v => v !== null);
+            const fat = data.body_fat.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.skeletal_muscle[i] !== null || data.body_fat[i] !== null);
+
+            if (skeletal.length === 0 && fat.length === 0) {
+                renderEmptyApexLine("#body-composition-chart", {
+                    title: '重量 (kg)', yMin: 0, yMax: 60,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
+
+            const options = {
+                series: [
+                    { name: '骨骼肌重 (kg)', data: skeletal },
+                    { name: '體脂肪重 (kg)', data: fat }
+                ],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                colors: ['#99898C', '#60575A'],
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: {
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
+                },
+                yaxis: {
+                    title: { text: '重量 (kg)', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
+            };
+            new ApexCharts(el, options).render();
+        }
+
+        // ============ 3) 體脂率變化趨勢 ============
+        function createFatPercentageChart(data) {
+            const el = document.querySelector("#fat-percentage-chart");
+            el.innerHTML = '';
+
+            const colorY = '#2c3e50';
+            const seriesData = data.fat_percentage.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.fat_percentage[i] !== null);
+
+            if (seriesData.length === 0) {
+                renderEmptyApexLine("#fat-percentage-chart", {
+                    title: '體脂率 (%)', yMin: 0, yMax: 50,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
+
+            const options = {
+                series: [{ name: '體脂率 (%)', data: seriesData }],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                colors: ['#745E60'],
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: {
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
+                },
+                yaxis: {
+                    title: { text: '體脂率 (%)', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
+            };
+            new ApexCharts(el, options).render();
+        }
+
+        // ============ 4) BMI 變化趨勢 ============
+        function createBMIChart(data) {
+            const el = document.querySelector("#bmi-chart");
+            el.innerHTML = '';
+
+            const colorY = '#2c3e50';
+            const seriesData = data.bmi.filter(v => v !== null);
+            const dates = data.dates.filter((_, i) => data.bmi[i] !== null);
+
+            if (seriesData.length === 0) {
+                renderEmptyApexLine("#bmi-chart", {
+                    title: 'BMI', yMin: 10, yMax: 40,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
+
+            const options = {
+                series: [{ name: 'BMI', data: seriesData }],
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                colors: ['#9C7178'],
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: {
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
+                },
+                yaxis: {
+                    title: { text: 'BMI', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
+            };
+            new ApexCharts(el, options).render();
+        }
+
+        // 初始化時間範圍選擇器
+        function initializeDateRange() {
+            // 不設置預設值，讓用戶自己選擇
+            console.log('Date range selector initialized - no default values set');
+        }
+
+        // 時間範圍選擇器事件處理
+        document.getElementById('apply-date-range').addEventListener('click', function () {
+            const startDate = document.getElementById('start-date').value;
+            const endDate = document.getElementById('end-date').value;
+
+            if (startDate && endDate) {
+                if (startDate > endDate) {
+                    showModal('開始日期不能晚於結束日期！', '提示！');
+                    return;
+                }
+                loadChartData(startDate, endDate);
+            } else {
+                showModal('請先挑選日期再套用！', '提示！');
+            }
+        });
+
+        document.getElementById('reset-date-range').addEventListener('click', function () {
+            // 清除日期選擇器
+            document.getElementById('start-date').value = '';
+            document.getElementById('end-date').value = '';
+            console.log('Date range reset - loading all data');
+            loadChartData(); // 載入所有數據
+        });
+
+        // 最近30天按鈕事件
+        document.getElementById('last-30-days').addEventListener('click', function () {
+            const today = new Date();
+            const thirtyDaysAgo = new Date();
+            thirtyDaysAgo.setDate(today.getDate() - 30);
+
+            document.getElementById('start-date').value = thirtyDaysAgo.toISOString().split('T')[0];
+            document.getElementById('end-date').value = today.toISOString().split('T')[0];
+            console.log('Last 30 days selected:', thirtyDaysAgo.toISOString().split('T')[0], 'to', today.toISOString().split('T')[0]);
+            loadChartData(thirtyDaysAgo.toISOString().split('T')[0], today.toISOString().split('T')[0]);
+        });
+
+        // 初始化時間範圍選擇器
+        initializeDateRange();
+
+        // 載入圖表數據
+        loadChartData();
+        // 目標達成率圓環圖 - 動態計算
+        function createGoalProgressChart() {
+            var chartDom = document.querySelector("#goal-progress-chart");
+            var myChart = echarts.init(chartDom);
+
+            // 計算目標達成率
+            function calculateGoalProgress() {
+                const currentWeight = parseFloat(document.getElementById('current-weight').textContent) || 0;
+                const currentFatPercentage = parseFloat(document.getElementById('current-fat-percentage').textContent) || 0;
+                const currentMuscle = parseFloat(document.getElementById('current-muscle').textContent) || 0;
+
+                const gwText = document.getElementById('goal-weight-display').textContent.trim();
+                const gfText = document.getElementById('goal-fat-percentage-display').textContent.trim();
+                const gmText = document.getElementById('goal-muscle-display').textContent.trim();
+
+                const goalWeight = gwText ? parseFloat(gwText) : 0;
+                const goalFatPercentage = gfText ? parseFloat(gfText) : 0;
+                const goalMuscle = gmText ? parseFloat(gmText) : 0;
+
+
+                // 計算各項指標的達成率 (0-100%)
+                let weightProgress = 0;
+                let fatProgress = 0;
+                let muscleProgress = 0;
+
+                // 體重達成率：基於目前體重與目標體重的差距計算
+                if (currentWeight > 0 && goalWeight > 0) {
+                    if (currentWeight > goalWeight) {
+                        // 減重情況：目前體重 > 目標體重
+                        // 假設起始體重是目標體重的 1.2 倍（20% 超重）
+                        const startWeight = goalWeight * 1.2;
+                        const totalToLose = startWeight - goalWeight;
+                        const alreadyLost = startWeight - currentWeight;
+                        weightProgress = Math.min(100, Math.max(0, (alreadyLost / totalToLose) * 100));
+                    } else if (currentWeight <= goalWeight) {
+                        // 已達到或超過目標體重
+                        weightProgress = 100;
+                    }
+                }
+
+                // 體脂率達成率：基於目前體脂率與目標體脂率的差距計算
+                if (currentFatPercentage > 0 && goalFatPercentage > 0) {
+                    if (currentFatPercentage > goalFatPercentage) {
+                        // 降低體脂率情況
+                        // 假設起始體脂率是目標體脂率的 1.5 倍（50% 超標）
+                        const startFatPercentage = goalFatPercentage * 1.5;
+                        const totalToReduce = startFatPercentage - goalFatPercentage;
+                        const alreadyReduced = startFatPercentage - currentFatPercentage;
+                        fatProgress = Math.min(100, Math.max(0, (alreadyReduced / totalToReduce) * 100));
+                    } else if (currentFatPercentage <= goalFatPercentage) {
+                        // 已達到或超過目標體脂率
+                        fatProgress = 100;
+                    }
+                }
+
+                // 肌肉量達成率：基於目前肌肉量與目標肌肉量的差距計算
+                if (currentMuscle > 0 && goalMuscle > 0) {
+                    if (currentMuscle < goalMuscle) {
+                        // 增肌情況
+                        // 假設起始肌肉量是目標肌肉量的 0.8 倍（20% 不足）
+                        const startMuscle = goalMuscle * 0.8;
+                        const totalToGain = goalMuscle - startMuscle;
+                        const alreadyGained = currentMuscle - startMuscle;
+                        muscleProgress = Math.min(100, Math.max(0, (alreadyGained / totalToGain) * 100));
+                    } else if (currentMuscle >= goalMuscle) {
+                        // 已達到或超過目標肌肉量
+                        muscleProgress = 100;
+                    }
+                }
+
+                // 計算綜合達成率 (加權平均)
+                const overallProgress = Math.round((weightProgress * 0.4 + fatProgress * 0.3 + muscleProgress * 0.3));
+
+                return Math.min(100, Math.max(0, overallProgress));
+            }
+
+            // 更新圖表
+            function updateGoalProgressChart(progress) {
+                const progressDecimal = progress / 100;
+
+                var option = {
+                    series: [{
+                        type: 'liquidFill',
+                        data: [progressDecimal],
+                        radius: '65%',
+                        center: ['50%', '50%'],
+                        outline: {
+                            show: true,
+                            borderDistance: 3,
+                            itemStyle: {
+                                borderWidth: 2,
+                                borderColor: '#6b7b8c'
+                            }
+                        },
+                        backgroundStyle: { color: '#f5f7fa' },
+                        label: {
+                            normal: {
+                                formatter: progress + '%',
+                                fontSize: 20,
+                                color: '#34495e',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        color: [{
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: '#9c99a2' },
+                                { offset: 1, color: '#cddce6' }
+                            ]
+                        }]
+                    }]
+                };
+
+                myChart.setOption(option);
+            }
+
+            // 初始計算並更新圖表
+            const initialProgress = calculateGoalProgress();
+            updateGoalProgressChart(initialProgress);
+
+            // 讓圖表跟隨視窗大小縮放
+            window.addEventListener("resize", function () {
+                myChart.resize();
+            });
+
+            // 返回更新函數，供其他地方調用
+            return {
+                update: function () {
+                    const progress = calculateGoalProgress();
+                    updateGoalProgressChart(progress);
+                }
+            };
+        }
+        // 創建目標達成率圖表並保存更新函數
+        window.goalProgressChart = createGoalProgressChart();
+
+        // 創建身體組成比例圓餅圖
+        function createBodyCompositionPieChart() {
+            // 清除舊的圖表
+            const chartContainer = document.querySelector("#body-composition-pie-chart");
+            chartContainer.innerHTML = '';
+
+            fetch('get_health_stats.php')
+                .then(response => response.json())
+                .then(data => {
+                    const latestSkeletal = parseFloat(data.latest_skeletal_muscle) || 0;
+                    const latestBodyFat = parseFloat(data.latest_body_fat) || 0;
+                    const latestWeight = parseFloat(data.latest_weight) || 0;
+
+                    // 計算其他組成（體重 - 骨骼肌 - 體脂肪）
+                    const otherComposition = Math.max(0, latestWeight - latestSkeletal - latestBodyFat);
+
+                    const options = {
+                        series: [latestSkeletal, latestBodyFat, otherComposition],
+                        chart: {
+                            type: 'donut',
+                            height: 260
+                        },
+                        labels: ['骨骼肌', '體脂肪', '其他'],
+                        colors: ['#BFC5DB', '#B2ABC5', '#C7C7C7'],
+                        dataLabels: {
+                            enabled: true,
+                            formatter: function (val, opts) {
+                                return opts.w.globals.series[opts.seriesIndex].toFixed(1) + ' kg';
+                            }
+                        },
+                        legend: {
+                            position: 'bottom'
+                        },
+                        plotOptions: {
+                            pie: {
+                                donut: {
+                                    size: '60%',
+                                    labels: {
+                                        show: true,
+                                        total: {
+                                            show: true,
+                                            label: '總重量',
+                                            formatter: function (w) {
+                                                return w.globals.seriesTotals.reduce((a, b) => a + b, 0).toFixed(1) + ' kg';
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    };
+
+                    const chart = new ApexCharts(chartContainer, options);
+                    chart.render();
+                })
+                .catch(error => {
+                    console.error('Error creating body composition pie chart:', error);
+                });
+        }
+
+        // 載入身體組成比例圖表
+        createBodyCompositionPieChart();
+
+        // 設定目標功能
+        document.getElementById('saveGoalBtn').addEventListener('click', function () {
+            const goalWeight = document.getElementById('goal_weight').value;
+            const goalFatPercentage = document.getElementById('goal_fat_percentage').value;
+            const goalMuscle = document.getElementById('goal_muscle').value;
+
+            // 更新顯示的目標值
+            document.getElementById('goal-weight-display').textContent = goalWeight;
+            document.getElementById('goal-fat-percentage-display').textContent = goalFatPercentage;
+            document.getElementById('goal-muscle-display').textContent = goalMuscle;
+
+            // 關閉設定目標視窗
+            const setGoalModal = bootstrap.Modal.getInstance(document.getElementById('setGoalModal'));
+            setGoalModal.hide();
+
+            // 更新目標達成率圖表
+            if (window.goalProgressChart) {
+                window.goalProgressChart.update();
+            }
+
+            // 顯示成功提示
+            // 顯示成功提示
+            showModal('目標設定成功！', '提示！');
+        });
+
+        // 保存數據按鈕點擊事件
+        document.getElementById('saveDataBtn').addEventListener('click', function () {
+            // 顯示保存中狀態
+            const saveBtn = document.getElementById('saveDataBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = '保存中...';
+
+            const form = document.getElementById('healthDataForm');
+            const formData = new FormData(form);
+
+            // 將FormData轉換為JSON對象
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            // 發送數據到服務器
+            fetch('save_health_data.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(data)
+            })
+                .then(response => response.json())
+                .then(result => {
+                    // 恢復按鈕狀態
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '保存數據';
+
+                    if (result.success) {
+                        // 顯示成功消息
+                        document.getElementById('successMessage').textContent = result.message;
+                        const successModal = new bootstrap.Modal(document.getElementById('successModal'));
+                        successModal.show();
+
+                        // 關閉新增數據視窗
+                        const addDataModal = bootstrap.Modal.getInstance(document.getElementById('addDataModal'));
+                        addDataModal.hide();
+
+                        // 重置表單
+                        form.reset();
+                        // 重新設置今天的日期為默認值
+                        const today = new Date();
+                        const year = today.getFullYear();
+                        const month = String(today.getMonth() + 1).padStart(2, '0');
+                        const day = String(today.getDate()).padStart(2, '0');
+                        document.getElementById('test_date').value = `${year}-${month}-${day}`;
+
+                        // 重新載入統計數據
+                        fetch('get_health_stats.php')
+                            .then(response => response.json())
+                            .then(data => {
+                                document.getElementById('total-records').textContent = data.total_records + ' 筆';
+                                document.getElementById('avg-weight').textContent = data.latest_weight + ' kg';
+                                document.getElementById('avg-height').textContent = data.latest_height + ' cm';
+                                document.getElementById('avg-skeletal').textContent = data.latest_skeletal_muscle + ' kg';
+                                document.getElementById('avg-body-fat').textContent = data.latest_body_fat + ' kg';
+                                document.getElementById('avg-fat-percentage').textContent = data.latest_fat_percentage + '%';
+                                document.getElementById('avg-metabolism').textContent = data.latest_basal_metabolism + ' kcal';
+                                document.getElementById('avg-bmi').textContent = data.latest_bmi;
+                            })
+                            .catch(error => {
+                                console.error('Error reloading health stats:', error);
+                            });
+
+                        // 重新載入圖表數據
+                        const startDate = document.getElementById('start-date').value;
+                        const endDate = document.getElementById('end-date').value;
+                        if (startDate && endDate) {
+                            loadChartData(startDate, endDate);
+                        } else {
+                            loadChartData();
+                        }
+                    } else {
+                        // 顯示錯誤消息
+                        document.getElementById('errorMessage').textContent = result.error || '保存數據時發生錯誤';
+                        const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                        errorModal.show();
+                    }
+                })
+                .catch(error => {
+                    // 恢復按鈕狀態
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = '保存數據';
+
+                    console.error('Error:', error);
+                    document.getElementById('errorMessage').textContent = '網絡錯誤，請稍後再試';
+                    const errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+                    errorModal.show();
+                });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            flatpickr("#start-date", {
+                dateFormat: "Y-m-d",   // 傳給後端的格式：2025-09-01
+                altInput: true,        // 顯示替代輸入框
+                altFormat: "Y年m月d日", // 使用者看到的格式：2025年09月01日
+                locale: "zh"           // 中文語系
+            });
+
+            flatpickr("#end-date", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "Y年m月d日",
+                locale: "zh"
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            // 開始日期
+            flatpickr("#start-date", {
+                dateFormat: "Y-m-d",     // 後端格式：2025-09-01
+                altInput: true,          // 顯示替代輸入框
+                altFormat: "Y年m月d日",   // 使用者看到的格式
+                locale: "zh"             // 中文介面
+            });
+
+            // 結束日期
+            flatpickr("#end-date", {
+                dateFormat: "Y-m-d",
+                altInput: true,
+                altFormat: "Y年m月d日",
+                locale: "zh"
+            });
+        });
+        document.addEventListener("DOMContentLoaded", function () {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get("login") === "success") {
+                showModal('歡迎回來！', '提示！');  // 若想標題是「成功」，第二個參數改成 '成功'
+                const newUrl = window.location.pathname;
+                window.history.replaceState({}, document.title, newUrl);
+            }
+        });
+
+        // 顯示「暫無數據」的占位畫面（維持高度避免排版縮掉）
+        function showPlaceholder(containerSelector, heightPx = 390) {
+            const el = document.querySelector(containerSelector);
+            el.innerHTML = '';
+            el.style.height = heightPx + 'px';
+            el.style.display = 'flex';
+            el.style.alignItems = 'center';
+            el.style.justifyContent = 'center';
+            el.innerHTML = "<p class='text-muted m-0'>暫無數據</p>";
+        }
+        function showModal(message, title = '提示！') {
+            const titleEl = document.getElementById('successTitle');
+            const msgEl = document.getElementById('successMessage');
+            if (titleEl) titleEl.textContent = title;
+            if (msgEl) msgEl.textContent = message;
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+        }
+    </script>
+</body>
+
+</html>

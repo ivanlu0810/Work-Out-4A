@@ -1,0 +1,1276 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健習生｜訓練探索</title> <!-- 修改標題 -->
+    <link rel="icon" href="images/fitness.png" type="image/png">
+
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+
+
+    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+    <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
+
+    <!-- 自定義樣式，用於人體圖和互動效果 -->
+    <style>
+        /*人體互動圖*/
+        #human-body-map-container {
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+            /* 原本是 10px auto 0 auto → 改成上下 0 */
+            padding: 0;
+        }
+
+        #human-body-map-svg {
+            width: 90%;
+            height: auto;
+        }
+
+        /* SVG 身體部位預設樣式 */
+        /* SVG 身體部位預設樣式 */
+        /* 預設 */
+        #human-body-map-svg .body-part {
+            fill: #cbd2d9;
+            /* 淡藍灰（莫蘭迪底色） */
+            stroke: #9c99a2;
+            /* 灰紫邊框 */
+            stroke-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        /* Hover */
+        #human-body-map-svg .body-part:hover {
+            fill: #b7c3cc;
+            /* 比底色稍深一點 */
+        }
+
+        /* 選中狀態 */
+        #human-body-map-svg .body-part.selected {
+            fill: #b1bbc6 !important;
+            /* 莫蘭迪藍，淡亮 */
+            stroke: #98a2ad !important;
+            /* 深藍灰邊框 */
+            stroke-width: 2px;
+        }
+
+        /*人體互動圖動畫*/
+        #human-body-map-container {
+            animation: fadeInUp 0.6s ease-out both;
+        }
+
+        @keyframes fadeInUp {
+            0% {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 提示框樣式 */
+        .tooltip-muscle-groups {
+            position: absolute;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 0.9rem;
+            pointer-events: none;
+            /* 讓滑鼠穿透 */
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 10;
+        }
+
+        .muscle-group-list {
+            margin-top: 0px;
+            padding: 20px;
+            border: 1px solid #eee;
+            border-radius: 8px;
+            background-color: #f9f9f9;
+        }
+
+        .muscle-group-item {
+            display: inline-block;
+            margin: 5px;
+            padding: 8px 15px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .muscle-group-item:hover {
+            background-color: #2f6bac;
+            color: white;
+        }
+
+        .equipment-display {
+            margin-top: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            background-color: #fff;
+        }
+
+        .equipment-card {
+            border: 1px solid #eee;
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .equipment-card img {
+            max-width: 100px;
+            height: auto;
+            margin-bottom: 10px;
+        }
+
+        /* 確保主要內容區域可以滾動 */
+        /* === 修正雙捲軸：覆寫內層滾動與過大高度 === */
+        #main {
+            height: auto !important;
+            overflow-y: visible !important;
+        }
+
+        .page-content,
+        .section {
+            min-height: auto !important;
+            padding-bottom: 0 !important;
+        }
+
+        .muscle-popover {
+            position: absolute;
+            max-width: 320px;
+            background: #fff;
+            border: 1px solid #cdd4db;
+            border-radius: 10px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, .12);
+            padding: 12px 14px;
+            z-index: 20;
+        }
+
+        .muscle-popover h4 {
+            margin: 0 0 6px;
+            font-size: 1.05rem;
+        }
+
+        .muscle-popover p {
+            margin: 0 0 8px;
+            color: #4b5563;
+            line-height: 1.5;
+        }
+
+        .muscle-popover .close-btn {
+            position: absolute;
+            right: 8px;
+            top: 6px;
+            border: none;
+            background: transparent;
+            font-size: 18px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        /* 手臂選擇按鈕樣式 */
+        .arm-selection-buttons {
+            margin-top: 15px;
+        }
+
+        .arm-selection-buttons .btn {
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .arm-selection-buttons .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .arm-selection-buttons .btn i {
+            margin-right: 8px;
+            font-size: 1.1rem;
+        }
+
+        /* 器材顯示樣式 */
+        .equipment-display {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 讓卡片區塊撐滿頁面 */
+        .container {
+            max-width: 100% !important;
+            /* 移除 bootstrap 的固定寬度 */
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        .equipment-display {
+            width: 100%;
+        }
+
+        .equipment-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        /* 平板（小於 1200px）時改 3 欄 */
+        @media (max-width: 1200px) {
+            .equipment-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        /* 手機（小於 768px）時改 1 欄 */
+        @media (max-width: 768px) {
+            .equipment-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .equipment-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border-left: 4px solid #95abc3;
+        }
+
+        .equipment-card h4 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+
+        .equipment-card p {
+            color: #6c757d;
+            margin-bottom: 15px;
+        }
+
+        .training-details {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .training-details h5 {
+            width: 100%;
+            /* 吃滿容器寬度 */
+            text-align: center;
+            /* 標題文字置中 */
+            color: #495057;
+            margin-bottom: 12px;
+            font-size: 1rem;
+        }
+
+        .training-details h5 i {
+            margin-right: 6px;
+            /* icon 與文字間隔 */
+            color: #007bff;
+            vertical-align: middle;
+            /* 垂直對齊 */
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .detail-value {
+            color: #6c757d;
+        }
+
+        .loading-spinner {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+            font-size: 1.1rem;
+        }
+
+        .error-message {
+            text-align: center;
+            padding: 40px;
+            color: #58474d;
+            font-size: 1.1rem;
+            background: #dec6cf;
+            border-radius: 8px;
+        }
+
+        .favorite-btn:focus,
+        .favorite-btn:active {
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .mb-4-3 {
+            margin-bottom: 2.1rem !important;
+            /* 40px */
+        }
+    </style>
+
+</head>
+
+<body>
+    <div id="app">
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-menu">
+                    <ul class="menu">
+                        <li class="sidebar-title">我的檔案</li>
+
+                        <li class="sidebar-item">
+                            <a href="index.html" class='sidebar-link'>
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>健康儀表板</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="profile.html" class='sidebar-link'>
+                                <i class="bi bi-person-badge-fill"></i>
+                                <span>基本資料</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="history.html" class='sidebar-link'>
+                                <i class="bi bi-pen-fill"></i>
+                                <span>歷史紀錄</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">智慧建議</li>
+                        <li class="sidebar-item active">
+                            <a href="training.html" class='sidebar-link'>
+                                <i class="bi bi-pentagon-fill"></i>
+                                <span>訓練探索</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="training-plan.html" class='sidebar-link'>
+                                <i class="bi bi-calendar-check-fill"></i>
+                                <span>訓練計畫</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="food.html" class='sidebar-link'>
+                                <i class="bi bi-basket-fill"></i>
+                                <span>飲食指南</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="favorite.html" class='sidebar-link'>
+                                <i class="bi bi-grid-1x2-fill"></i>
+                                <span>我的最愛</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">更多選項</li>
+                        <li class="sidebar-item">
+                            <a href="logout.php" class='sidebar-link'>
+                                <i class="bi bi-egg-fill"></i>
+                                <span>登出帳戶</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+            </div>
+        </div>
+        <div id="main">
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3 class="mb-4-3 me-3">點選想訓練的目標肌群💪🏻</h3>
+                            <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
+                                以下是訓練部位說明，可依此作為訓練參考依據，協助規劃適合您的健身菜單。
+                            </p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="index.html">健康儀表板</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">訓練探索</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 主要內容區域 -->
+                <div class="container">
+                    <section class="section">
+
+                        <!-- 人體圖容器 -->
+                        <div id="human-body-map-container">
+                            <!-- 人體圖 SVG -->
+                            <svg id="human-body-map-svg" viewBox="0 0 400 600" xmlns="http://www.w3.org/2000/svg">
+                                <!-- 背部：放到最上面 -->
+                                <rect class="body-part" data-muscle="背部" x="160" y="90" width="80" height="160" rx="10"
+                                    fill="transparent" stroke="#999" stroke-dasharray="3,3" />
+
+                                <!-- 頭部 -->
+                                <ellipse class="body-part" data-muscle="頭頸" cx="200" cy="50" rx="30" ry="40"
+                                    fill="#dbe4ed" />
+
+                                <!-- 胸部 -->
+                                <path class="body-part" data-muscle="胸部"
+                                    d="M160 90 Q200 70 240 90 L240 150 Q200 170 160 150 Z" fill="#dbe4ed" />
+
+                                <!-- 腹部 -->
+                                <rect class="body-part" data-muscle="腹部" x="170" y="160" width="60" height="80" rx="8"
+                                    fill="#dbe4ed" />
+
+                                <!-- 左肩膀 -->
+                                <circle class="body-part" data-muscle="肩膀" cx="150" cy="100" r="25" fill="#dbe4ed" />
+
+                                <!-- 右肩膀 -->
+                                <circle class="body-part" data-muscle="肩膀" cx="250" cy="100" r="25" fill="#dbe4ed" />
+
+                                <!-- 左大臂 -->
+                                <ellipse class="body-part" data-muscle="大臂" cx="130" cy="140" rx="20" ry="40"
+                                    fill="#dbe4ed" />
+                                <!-- 左小臂 -->
+                                <ellipse class="body-part" data-muscle="小臂" cx="120" cy="200" rx="18" ry="35"
+                                    fill="#dbe4ed" />
+
+                                <!-- 右大臂 -->
+                                <ellipse class="body-part" data-muscle="大臂" cx="270" cy="140" rx="20" ry="40"
+                                    fill="#dbe4ed" />
+                                <!-- 右小臂 -->
+                                <ellipse class="body-part" data-muscle="小臂" cx="280" cy="200" rx="18" ry="35"
+                                    fill="#dbe4ed" />
+
+                                <!-- 臀部 -->
+                                <ellipse class="body-part" data-muscle="臀部" cx="200" cy="260" rx="40" ry="30"
+                                    fill="#dbe4ed" />
+
+                                <!-- 左大腿 -->
+                                <ellipse class="body-part" data-muscle="大腿" cx="180" cy="340" rx="25" ry="60"
+                                    fill="#dbe4ed" />
+
+                                <!-- 右大腿 -->
+                                <ellipse class="body-part" data-muscle="大腿" cx="220" cy="340" rx="25" ry="60"
+                                    fill="#dbe4ed" />
+
+                                <!-- 左小腿 -->
+                                <ellipse class="body-part" data-muscle="小腿" cx="180" cy="450" rx="20" ry="55"
+                                    fill="#dbe4ed" />
+
+                                <!-- 右小腿 -->
+                                <ellipse class="body-part" data-muscle="小腿" cx="220" cy="450" rx="20" ry="55"
+                                    fill="#dbe4ed" />
+                            </svg>
+                            <div id="muscle-popover-root"></div>
+
+                            <!-- 提示框 -->
+                            <div class="tooltip-muscle-groups" id="tooltip">點擊選擇目標肌群</div>
+                        </div>
+
+                        <!-- 選中肌群顯示 -->
+                        <div id="selected-muscle-display"
+                            style="margin-top: 20px; padding: 15px; background-color: #e9eff5; border-radius: 8px; display: none; border: 1px solid #cdd4db;">
+                            <h3>已選擇肌群：<span id="selected-muscle-name"></span></h3>
+                            <p id="selected-muscle-description"></p>
+                        </div>
+
+                        <!-- 推薦器材顯示區域 -->
+                        <div class="equipment-display" id="equipment-display" style="display: none;">
+                            <h3>推薦訓練器材</h3>
+                            <div id="equipment-list"></div>
+                        </div>
+
+                        <!-- 生成的訓練計畫顯示區域 -->
+                        <div id="training-plan-display"
+                            style="display: none; margin-top: 30px; padding: 20px; background-color: #f8f9fa; border-radius: 8px;">
+                            <h3><i class="fas fa-clipboard-list"></i> 您的個人化訓練計畫</h3>
+                            <div id="training-plan-content"></div>
+                        </div>
+                    </section>
+                </div>
+
+            </div>
+
+            <footer>
+                <div class="footer clearfix mb-0 text-muted">
+                    <div class="float-start">
+                        <p>健習生</p>
+                    </div>
+                    <div class="float-end">
+                        <p>謝昀倢 黃詠翰 呂沁垣 游博翔</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+    <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+
+    <script src="assets/js/main.js"></script>
+    <!-- ✅ 引入共用方法 -->
+    <script src="assets/js/common.js"></script>
+
+    <!-- 自定義 JavaScript 邏輯 -->
+    <script>
+        const API_FAVORITES = 'api/favorites.php';
+
+        let selectedMuscle = null;
+
+        // 初始化事件監聽
+        document.addEventListener('DOMContentLoaded', function () {
+            initializeBodyMap();
+            // initializeMuscleGroupList(); // 暫時移除，因為人體圖已經足夠直觀
+            initializeGeneratePlanButton();
+        });
+
+        // 初始化人體圖
+        function initializeBodyMap() {
+            const bodyParts = document.querySelectorAll('.body-part');
+            const tooltip = document.getElementById('tooltip');
+
+            bodyParts.forEach(part => {
+                // 滑鼠移入顯示提示
+                part.addEventListener('mouseenter', function (e) {
+                    const muscleName = this.getAttribute('data-muscle');
+                    tooltip.textContent = `點擊選擇：${muscleName}`;
+                    tooltip.style.opacity = '1';
+                });
+
+                // 滑鼠移動更新提示位置
+                part.addEventListener('mousemove', function (e) {
+                    const rect = document.getElementById('human-body-map-container').getBoundingClientRect();
+                    tooltip.style.left = (e.clientX - rect.left + 10) + 'px';
+                    tooltip.style.top = (e.clientY - rect.top - 30) + 'px';
+                });
+
+                // 滑鼠移出隱藏提示
+                part.addEventListener('mouseleave', function () {
+                    tooltip.style.opacity = '0';
+                });
+
+                // 點擊選擇肌群
+                part.addEventListener('click', function (e) {
+                    const muscleName = this.getAttribute('data-muscle');
+                    selectMuscleGroup(muscleName, e); // 把 event 傳進去
+                });
+
+            });
+        }
+
+        // 選擇肌群
+        function selectMuscleGroup(muscleName, evt) {
+            // 如果是大臂，顯示選擇二頭或三頭的選項
+            if (muscleName === '大臂') {
+                showArmSelection(evt);
+                return;
+            }
+
+            // 如果是身體，顯示選擇胸部或背部的選項
+            if (muscleName === '身體') {
+                showBodySelection(evt);
+                return;
+            }
+
+            selectedMuscle = muscleName;
+            updateMuscleSelection(muscleName);
+
+            // 上方大卡不要自動顯示
+            const sel = document.getElementById('selected-muscle-display');
+            if (sel) sel.style.display = 'none';
+
+            // ★ 每次點新肌群：先把底下「推薦訓練器材」整塊收起來
+            const equip = document.getElementById('equipment-display');
+            if (equip) equip.style.display = 'none';
+
+            // ★ 同時把「生成個人訓練計畫」按鈕也隱藏
+            const genBtn = document.getElementById('generate-plan-btn');
+            if (genBtn) genBtn.style.display = 'none';
+
+            // ★ 也把舊的訓練計畫區塊收起（避免殘留）
+            const plan = document.getElementById('training-plan-display');
+            if (plan) plan.style.display = 'none';
+
+            // 只彈出 Popover，不自動展開底部
+            if (evt) showMusclePopover(muscleName, evt.clientX, evt.clientY);
+        }
+
+        // 更新肌群選擇的視覺狀態
+        function updateMuscleSelection(muscleName) {
+            // 重置：移除 selected 並清空可能的 inline 樣式，回到 CSS 預設
+            document.querySelectorAll('.body-part').forEach(part => {
+                part.classList.remove('selected');
+                part.style.fill = '';         // 用 CSS 預設 fill
+                part.style.stroke = '';       // 用 CSS 預設 stroke（#87959b）
+                part.style.strokeWidth = '';  // 用 CSS 預設線寬
+            });
+
+            // 高亮選中的部位：只改填色，不動邊線
+            document.querySelectorAll(`[data-muscle="${muscleName}"]`).forEach(part => {
+                part.classList.add('selected');
+                part.style.fill = '#b0bec5';  // 比原本略深一點，對比更好
+                // 不設定 stroke / strokeWidth，讓 CSS 接手（selected 會是 2px）
+            });
+        }
+
+        // 顯示手臂選擇彈出視窗
+        function showArmSelection(evt) {
+            const root = document.getElementById('muscle-popover-root');
+            if (!root) return;
+            root.innerHTML = '';
+
+            const pop = document.createElement('div');
+            pop.className = 'muscle-popover';
+            pop.innerHTML = `
+                <button class="close-btn" aria-label="close">&times;</button>
+                <h4>選擇手臂訓練部位</h4>
+                <p>點擊下方按鈕選擇要訓練的肌群</p>
+                <div class="arm-selection-buttons">
+                    <button class="btn btn-primary w-100 mb-2" onclick="selectArmMuscle('二頭', ${evt.clientX}, ${evt.clientY})">
+                        <i class="bi bi-target"></i> 二頭肌訓練
+                    </button>
+                    <button class="btn btn-success w-100" onclick="selectArmMuscle('三頭', ${evt.clientX}, ${evt.clientY})">
+                        <i class="bi bi-fire"></i> 三頭肌訓練
+                    </button>
+                </div>
+            `;
+            root.appendChild(pop);
+
+            // 定位彈出視窗
+            const container = document.getElementById('human-body-map-container');
+            const rect = container.getBoundingClientRect();
+            let left = evt.clientX - rect.left + 10;
+            let top = evt.clientY - rect.top + 10;
+            pop.style.left = `${left}px`;
+            pop.style.top = `${top}px`;
+
+            // 關閉按鈕
+            pop.querySelector('.close-btn').addEventListener('click', () => root.innerHTML = '');
+        }
+
+        // 選擇手臂肌群
+        function selectArmMuscle(muscleType, clientX, clientY) {
+            selectedMuscle = muscleType;
+            updateMuscleSelection('大臂'); // 高亮整個大臂區域
+
+            // 隱藏之前的顯示
+            const equip = document.getElementById('equipment-display');
+            if (equip) equip.style.display = 'none';
+
+            // 從資料庫獲取訓練資料
+            fetchTrainingData(muscleType);
+
+            // 關閉手臂選擇彈出視窗
+            const root = document.getElementById('muscle-popover-root');
+            if (root) root.innerHTML = '';
+        }
+
+        // 顯示身體選擇彈出視窗
+        function showBodySelection(evt) {
+            const root = document.getElementById('muscle-popover-root');
+            if (!root) return;
+            root.innerHTML = '';
+
+            const pop = document.createElement('div');
+            pop.className = 'muscle-popover';
+            pop.innerHTML = `
+                <button class="close-btn" aria-label="close">&times;</button>
+                <h4>選擇身體訓練部位</h4>
+                <p>點擊下方按鈕選擇要訓練的肌群</p>
+                <div class="arm-selection-buttons">
+                    <button class="btn btn-primary w-100 mb-2" onclick="selectBodyMuscle('胸部', ${evt.clientX}, ${evt.clientY})">
+                        <i class="bi bi-heart"></i> 胸部訓練
+                    </button>
+                    <button class="btn btn-success w-100" onclick="selectBodyMuscle('背部', ${evt.clientX}, ${evt.clientY})">
+                        <i class="bi bi-arrow-up-circle"></i> 背部訓練
+                    </button>
+                </div>
+            `;
+            root.appendChild(pop);
+
+            // 定位彈出視窗
+            const container = document.getElementById('human-body-map-container');
+            const rect = container.getBoundingClientRect();
+            let left = evt.clientX - rect.left + 10;
+            let top = evt.clientY - rect.top + 10;
+            pop.style.left = `${left}px`;
+            pop.style.top = `${top}px`;
+
+            // 關閉按鈕
+            pop.querySelector('.close-btn').addEventListener('click', () => root.innerHTML = '');
+        }
+
+        // 選擇身體肌群
+        function selectBodyMuscle(muscleType, clientX, clientY) {
+            selectedMuscle = muscleType;
+            updateMuscleSelection('身體'); // 高亮整個身體區域
+
+            // 隱藏之前的顯示
+            const equip = document.getElementById('equipment-display');
+            if (equip) equip.style.display = 'none';
+
+            // 從資料庫獲取訓練資料
+            fetchTrainingData(muscleType);
+
+            // 關閉身體選擇彈出視窗
+            const root = document.getElementById('muscle-popover-root');
+            if (root) root.innerHTML = '';
+        }
+
+        function showMusclePopover(muscleName, clientX, clientY) {
+            const root = document.getElementById('muscle-popover-root');
+            if (!root) return;
+            root.innerHTML = '';
+
+            // 建立 Popover（包含查看器材按鈕）
+            const pop = document.createElement('div');
+            pop.className = 'muscle-popover';
+            pop.innerHTML = `
+                <button class="close-btn" aria-label="close">&times;</button>
+                <h4>已選擇肌群：${muscleName}</h4>
+                <p>點擊下方按鈕查看對應的訓練動作</p>
+                <div style="margin-top:10px; display:flex; gap:8px; justify-content:flex-end;">
+                    <button id="btn-open-equip" class="btn btn-primary">查看器材</button>
+                </div>
+            `;
+            root.appendChild(pop);
+
+            // 定位（沿用你原本的容器）
+            const container = document.getElementById('human-body-map-container');
+            const rect = container.getBoundingClientRect();
+            let left = clientX - rect.left + 10;
+            let top = clientY - rect.top + 10;
+            pop.style.left = `${left}px`;
+            pop.style.top = `${top}px`;
+
+            // 關閉
+            pop.querySelector('.close-btn').addEventListener('click', () => root.innerHTML = '');
+
+            // 查看器材：從資料庫獲取訓練資料
+            const openEquip = pop.querySelector('#btn-open-equip');
+            if (openEquip) {
+                openEquip.addEventListener('click', () => {
+                    // 從資料庫獲取訓練資料
+                    fetchTrainingData(muscleName);
+
+                    // 關閉彈出視窗
+                    root.innerHTML = '';
+                });
+            }
+        }
+
+        // 依據大肌群名稱，解析出實際要查詢的目標肌群陣列（對應資料庫 target_muscle 細分）
+        function resolveMuscles(muscleName) {
+            const mapping = {
+                // 胸部細分與別名
+                '胸部': ['上胸', '中胸', '下胸', '胸', '胸肌', '胸大肌'],
+
+                // 背部細分：常見的功能與解剖名稱
+                '背部': [
+                    '上背', '中背', '下背', '背', '背肌',
+                    '背闊肌', '闊背肌',
+                    '斜方肌上束', '斜方肌中束', '斜方肌下束', '斜方肌',
+                    '菱形肌', '豎脊肌',
+                    '圓大肌', '圓小肌',
+                    '岡下肌', '岡上肌'
+                ],
+
+                // 肩膀：三角肌前/中/後束與命名變體
+                '肩膀': [
+                    '肩膀前束', '肩膀中束', '肩膀後束', '肩膀',
+                    '三角肌前束', '三角肌中束', '三角肌後束', '三角肌'
+                ],
+
+                // 手臂
+                '二頭': ['二頭', '二頭肌', '肱二頭肌'],
+                '三頭': ['三頭', '三頭肌', '肱三頭肌'],
+
+                // 下肢
+                '大腿': ['股四頭肌', '股二頭肌', '臀肌', '大腿', '內收肌群'],
+                '小腿': ['小腿', '腓腸肌', '比目魚肌'],
+
+                // 核心/腹
+                '腹部': ['上腹', '下腹', '側腹', '核心', '腹部', '腹斜肌', '腹直肌']
+            };
+            // 若傳入已是陣列，直接回傳
+            if (Array.isArray(muscleName)) return muscleName;
+            // 回傳映射或預設單一查詢
+            return mapping[muscleName] || [muscleName];
+        }
+
+        // 合併多筆查詢結果並依名稱去重
+        function mergeExercisesUnique(resultsArrays) {
+            const merged = [];
+            const seen = new Set();
+            resultsArrays.flat().forEach(ex => {
+                const key = ex.name || `${ex.id || ''}-${ex.target_muscle || ''}`;
+                if (!seen.has(key)) {
+                    seen.add(key);
+                    merged.push(ex);
+                }
+            });
+            return merged;
+        }
+
+        // 從資料庫獲取訓練資料（支援一次查多個細分肌群並合併）
+        async function fetchTrainingData(muscleName) {
+            try {
+                // 顯示載入狀態
+                showLoading();
+
+                // 除錯資訊
+                console.log(`正在查詢肌群：${muscleName}`);
+
+                // 解析出要查詢的實際目標肌群陣列
+                const musclesToQuery = resolveMuscles(muscleName);
+                console.log('解析後要查詢的目標肌群：', musclesToQuery);
+
+                // 呼叫 PHP 後端 API
+                // 判斷是否本機
+                const isLocalHost = /^(localhost|127\.0\.0\.1|::1)$/.test(location.hostname);
+
+                // 線上請改成你的正式網域（含子目錄就自己加上去）
+                const baseURL = isLocalHost
+                    ? location.origin
+                    : "https://jianshen.ngrok.app/健習生/dist";
+
+                // 並行查詢多個目標肌群
+                const fetches = musclesToQuery.map(m =>
+                    fetch(`${baseURL}/api/get_exercises.php?muscle=${encodeURIComponent(m)}`)
+                        .then(r => {
+                            if (!r.ok) throw new Error(`HTTP ${r.status}`);
+                            return r.json();
+                        })
+                        .then(j => (j && j.success && Array.isArray(j.data)) ? j.data : [])
+                        .catch(err => {
+                            console.warn('查詢失敗：', m, err.message);
+                            return [];
+                        })
+                );
+
+                const resultsArrays = await Promise.all(fetches);
+                const merged = mergeExercisesUnique(resultsArrays);
+
+                console.log(`合併後總共找到 ${merged.length} 個訓練動作`);
+
+                if (merged.length > 0) {
+                    displayTrainingData(muscleName, merged);
+                } else {
+                    showError(`抱歉，目前沒有找到針對 ${muscleName} 的訓練資料。`);
+                }
+
+                hideLoading();
+
+            } catch (error) {
+                console.error('獲取訓練資料時發生錯誤:', error);
+                showError('獲取訓練資料時發生錯誤，請稍後再試。');
+                hideLoading();
+            }
+        }
+
+        // 顯示訓練資料
+        function displayTrainingData(muscleName, trainingData) {
+            const display = document.getElementById('equipment-display');
+            const listElement = document.getElementById('equipment-list');
+
+            if (!display || !listElement) return;
+
+            listElement.innerHTML = '';
+
+            if (trainingData && trainingData.length > 0) {
+                const equipmentGrid = document.createElement('div');
+                equipmentGrid.className = 'equipment-grid';
+
+                trainingData.forEach((exercise, index) => {
+                    const exerciseCard = createExerciseCard(exercise, index + 1);
+                    equipmentGrid.appendChild(exerciseCard);
+                });
+
+                listElement.appendChild(equipmentGrid);
+                display.style.display = 'block';
+                display.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // 原本這裡會再次為 .favorite-btn 綁定事件，造成與內聯 onclick 重複觸發，
+                // 並因缺少 data-exercise 導致傳入 null。已移除以避免錯誤。
+
+            } else {
+                showError(`沒有找到 ${muscleName} 的訓練資料`);
+            }
+        }
+
+        // 建立訓練動作卡片
+        function createExerciseCard(exercise, index) {
+            const card = document.createElement('div');
+            card.className = 'equipment-card';
+
+            let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+            let isFavorite = favorites.some(item => item.name === exercise.name);
+
+            card.innerHTML = `
+        <!-- 標題 -->
+        <h4 class="text-center mb-3">${index}. ${exercise.name}</h4>
+        <p>針對 ${exercise.target_muscle} 的專業訓練動作</p>
+
+        <!-- 增肌訓練 -->
+        <div class="training-details">
+            <h5><i class="bi bi-target"></i> 增肌訓練</h5>
+            <div class="detail-row"><span class="detail-label">組數：</span>
+                <span class="detail-value">${exercise.hypertrophy_sets_min}-${exercise.hypertrophy_sets_max} 組</span></div>
+            <div class="detail-row"><span class="detail-label">次數：</span>
+                <span class="detail-value">${exercise.hypertrophy_reps_min}-${exercise.hypertrophy_reps_max} 次</span></div>
+            <div class="detail-row"><span class="detail-label">重量：</span>
+                <span class="detail-value">${exercise.hypertrophy_load_min_pct}-${exercise.hypertrophy_load_max_pct}% 體重</span></div>
+        </div>
+
+        <!-- 減脂訓練 -->
+        <div class="training-details">
+            <h5><i class="bi bi-fire"></i> 減脂訓練</h5>
+            <div class="detail-row"><span class="detail-label">組數：</span>
+                <span class="detail-value">${exercise.fatloss_sets_min}-${exercise.fatloss_sets_max} 組</span></div>
+            <div class="detail-row"><span class="detail-label">次數：</span>
+                <span class="detail-value">${exercise.fatloss_reps_min}-${exercise.fatloss_reps_max} 次</span></div>
+            <div class="detail-row"><span class="detail-label">重量：</span>
+                <span class="detail-value">${exercise.fatloss_load_min_pct}-${exercise.fatloss_load_max_pct}% 體重</span></div>
+        </div>
+
+        <!-- ⭐收藏 & ℹ️ 詳情：放在減脂訓練底下 -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <!-- 收藏 -->
+            <button type="button" 
+                    class="btn btn-link p-0 m-0 favorite-btn" 
+                    style="color:#f0ad4e; outline:none; box-shadow:none;"
+                    onclick='toggleFavorite(${JSON.stringify(exercise)}, this)'>
+                <i class="bi ${isFavorite ? "bi-star-fill" : "bi-star"} fs-5"></i>
+            </button>
+
+            <!-- 詳情 -->
+            <button type="button" 
+                    class="p-0 bg-transparent border-0 shadow-none" 
+                    data-bs-toggle="modal" 
+                    data-bs-target="#exerciseModal"
+                    style="line-height:1; outline:none;"
+                    onclick='openExerciseModal(${JSON.stringify(exercise)}, ${index})'>
+                <i class="bi bi-info-circle text-primary fs-5"></i>
+            </button>
+        </div>
+    `;
+            return card;
+        }
+
+        // 收藏功能
+        async function toggleFavorite(exercise, btn) {
+            try {
+                let favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+                const exists = favorites.some(item => item.name === exercise.name);
+
+                if (exists) {
+                    await fetch(API_FAVORITES + '?name=' + encodeURIComponent(exercise.name), {
+                        method: 'DELETE',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        credentials: 'include',
+                        body: 'name=' + encodeURIComponent(exercise.name)
+                    });
+                    alert(`已取消收藏：${exercise.name}`);
+                    if (btn) btn.querySelector('i').classList.replace('bi-star-fill', 'bi-star');
+                } else {
+                    const res = await fetch(API_FAVORITES, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name: exercise.name, exercise })
+                    });
+                    if (!res.ok) {
+                        const err = await res.json().catch(()=>({}));
+                        throw new Error(err.error || `HTTP ${res.status}`);
+                    }
+                    alert(`已加入收藏：${exercise.name}`);
+                    if (btn) btn.querySelector('i').classList.replace('bi-star', 'bi-star-fill');
+                }
+
+                // 重新同步快取
+                const updated = await fetchFavoritesFromServer();
+                localStorage.setItem('favorites', JSON.stringify(updated));
+            } catch (e) {
+                console.error(e);
+                alert('操作失敗：' + (e?.message || '請先登入或稍後再試'));
+            }
+        }
+
+        async function fetchFavoritesFromServer() {
+            try {
+                const res = await fetch(API_FAVORITES, { credentials: 'include' });
+                if (!res.ok) return [];
+                const data = await res.json();
+                return data.data || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        // ✅ 彈窗控制：可嵌入胸部第 1 個器械的 mp4
+        function openExerciseModal(exercise, index) {
+            const videoContainer = document.getElementById('exerciseVideoContainer');
+            videoContainer.innerHTML = "";
+
+            // 動態插入內容
+            videoContainer.innerHTML = `
+        <!-- 示範影片 -->
+        <div class="mb-3">
+            <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">示範影片：</h6>
+            <div class="ratio ratio-16x9">
+                <video id="exerciseVideo" controls playsinline preload="auto">
+                    <source src="${exercise.video_url || ''}" type="video/mp4">
+                    您的瀏覽器不支援影片播放。
+                </video>
+            </div>
+        </div>
+
+        <!-- 動作解說 -->
+        <div class="mb-3">
+            <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">動作解說：</h6>
+            <p style="color:#555; line-height:1.6;">
+                ${exercise.instruction_full || exercise.description || "此動作暫無解說"}
+            </p>
+        </div>
+
+        <!-- 適用對象 -->
+        <div>
+            <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">適用對象：</h6>
+            <p style="color:#555; line-height:1.6;">
+                ${exercise.user_level || "不限，請依照自身能力選擇是否執行。"}
+            </p>
+        </div>
+        
+        <!-- 注意事項 -->
+        <div class="mb-3">
+            <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">注意事項：</h6>
+            <p style="color:#555; line-height:1.6;">
+                ${exercise.caution || "請保持正確姿勢，避免受傷"}
+            </p>
+        </div>        
+    `;
+
+            // 開啟 Modal
+            const modalEl = document.getElementById('exerciseModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+
+            // 關閉時重置影片
+            modalEl.addEventListener("hidden.bs.modal", () => {
+                const v = document.getElementById("exerciseVideo");
+                if (v) { v.pause(); try { v.currentTime = 0; } catch (e) { } }
+            }, { once: true });
+        }
+
+        // 顯示載入狀態
+        function showLoading() {
+            const display = document.getElementById('equipment-display');
+            const listElement = document.getElementById('equipment-list');
+
+            if (display && listElement) {
+                display.style.display = 'block';
+                listElement.innerHTML = '<div class="loading-spinner">正在載入訓練資料...</div>';
+            }
+        }
+
+        // 隱藏載入狀態
+        function hideLoading() {
+            // 載入完成後，顯示狀態由 displayTrainingData 控制
+        }
+
+        // 顯示錯誤訊息
+        function showError(message) {
+            const display = document.getElementById('equipment-display');
+            const listElement = document.getElementById('equipment-list');
+
+            if (display && listElement) {
+                display.style.display = 'block';
+                listElement.innerHTML = `<div class="error-message">${message}</div>`;
+            }
+        }
+
+        // 顯示選中的肌群資訊
+        function displaySelectedMuscle(muscleName) {
+            const display = document.getElementById('selected-muscle-display');
+            const nameElement = document.getElementById('selected-muscle-name');
+            const descriptionElement = document.getElementById('selected-muscle-description');
+
+            nameElement.textContent = muscleName;
+            descriptionElement.textContent = muscleData[muscleName].description;
+            display.style.display = 'block';
+        }
+
+        // 顯示推薦器材
+        function displayRecommendedEquipment(muscleName) {
+            const display = document.getElementById('equipment-display');
+            const listElement = document.getElementById('equipment-list');
+
+            const equipment = muscleData[muscleName].equipment;
+            listElement.innerHTML = '';
+
+            if (equipment && equipment.length > 0) {
+                equipment.forEach(item => {
+                    const equipmentCard = document.createElement('div');
+                    equipmentCard.className = 'equipment-card';
+                    equipmentCard.innerHTML = `
+                        <img src="${item.image}" alt="${item.alt}" onerror="this.style.display='none'; this.nextElementSibling.textContent='圖片載入失敗';">
+                        <h4>${item.name}</h4>
+                        <p>${item.description}</p>
+                    `;
+                    listElement.appendChild(equipmentCard);
+                });
+                display.style.display = 'block';
+            } else {
+                listElement.innerHTML = '<p>此肌群暫無推薦器材。</p>';
+                display.style.display = 'block';
+            }
+        }
+
+        // 初始化生成計畫按鈕
+        function initializeGeneratePlanButton() {
+            const button = document.getElementById('generate-plan-btn');
+            button.addEventListener('click', generateTrainingPlan);
+        }
+
+        // 生成訓練計畫
+        function generateTrainingPlan() {
+            if (!selectedMuscle) return;
+
+            const plan = trainingPlans[selectedMuscle];
+            const display = document.getElementById('training-plan-display');
+            const content = document.getElementById('training-plan-content');
+
+            if (!plan) {
+                content.innerHTML = `<p>抱歉，目前沒有針對 ${selectedMuscle} 的訓練計畫。</p>`;
+                display.style.display = 'block';
+                display.scrollIntoView({ behavior: 'smooth' });
+                return;
+            }
+
+            let planHTML = `
+                <div style="margin-bottom: 20px;">
+                    <h4 style="color: #667eea; margin-bottom: 15px;">
+                        <i class="fas fa-target"></i> ${selectedMuscle}專項訓練計畫
+                    </h4>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <h5><i class="fas fa-list"></i> 訓練動作：</h5>
+                    <div style="display: grid; gap: 10px; margin-top: 10px;">
+            `;
+
+            plan.exercises.forEach((exercise, index) => {
+                planHTML += `
+                    <div style="background: white; padding: 15px; border-radius: 8px; border-left: 4px solid #667eea;">
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong>${index + 1}. ${exercise.name}</strong>
+                            <span style="color: #666; font-size: 0.9rem;">${exercise.sets}</span>
+                        </div>
+                        <div style="margin-top: 5px; color: #666;">
+                            <span>次數：${exercise.reps}</span> | 
+                            <span>休息：${exercise.rest}</span>
+                        </div>
+                    </div>
+                `;
+            });
+
+            planHTML += `
+                    </div>
+                </div>
+                
+                <div>
+                    <h5><i class="fas fa-lightbulb"></i> 訓練小貼士：</h5>
+                    <ul style="margin-top: 10px; padding-left: 20px;">
+            `;
+
+            plan.tips.forEach(tip => {
+                planHTML += `<li style="margin-bottom: 5px; color: #666;">${tip}</li>`;
+            });
+
+            planHTML += `
+                    </ul>
+                </div>
+                
+                <div style="margin-top: 20px; padding: 15px; background: #e7f3ff; border-radius: 8px;">
+                    <p style="margin: 0; color: #0066cc; font-weight: 500;">
+                        <i class="fas fa-info-circle"></i> 
+                        建議每週進行2-3次此部位訓練，給肌肉充足的恢復時間。
+                    </p>
+                </div>
+            `;
+
+            content.innerHTML = planHTML;
+            display.style.display = 'block';
+
+            // 滾動到訓練計畫區域
+            display.scrollIntoView({ behavior: 'smooth' });
+        }
+        document.addEventListener("DOMContentLoaded", () => {
+            const currentPath = window.location.pathname.split("/").pop(); // 取得目前檔案名稱
+
+            document.querySelectorAll(".sidebar-item a").forEach(link => {
+                if (link.getAttribute("href") === currentPath) {
+                    link.parentElement.classList.add("active");
+
+                    // 如果是子選單，展開父層 has-sub
+                    const parentItem = link.closest(".has-sub");
+                    if (parentItem) {
+                        parentItem.classList.add("active");
+                        const submenu = parentItem.querySelector(".submenu");
+                        if (submenu) submenu.classList.add("active");
+                    }
+                }
+            });
+        });
+    </script>
+    //空白詳情 Modal
+    <div class="modal fade" id="exerciseModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">📌詳細說明</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="exerciseVideoContainer">
+                        <!-- 影片會由 JS 動態塞進來 -->
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>

@@ -1,0 +1,163 @@
+{\rtf1\ansi\deff0 {\fonttbl {\f0 Times New Roman;}}
+{\colortbl;\red0\green0\blue0;\red0\green0\blue255;\red255\green0\blue0;}
+
+{\pard\qc\f0\fs24\b 健習生資料庫結構文件\par}
+{\pard\qc\f0\fs12 版本：1.0 | 建立日期：2024年12月\par}
+{\pard\qc\f0\fs12 維護者：健習生開發團隊\par}
+{\pard\qc\f0\fs12 \par}
+
+{\pard\f0\fs16\b 1. 使用者資料表 (users)\par}
+{\pard\f0\fs12 說明：儲存使用者基本資料與登入資訊\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • user_id (VARCHAR(36)) - 使用者唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • username (VARCHAR(50)) - 使用者名稱 [必填]\par}
+{\pard\f0\fs12 • email (VARCHAR(100)) - 登入用電子信箱 [必填, 唯一]\par}
+{\pard\f0\fs12 • password_hash (VARCHAR(255)) - 加密後的密碼 [必填]\par}
+{\pard\f0\fs12 • role (VARCHAR(20)) - 使用者角色 [必填, 預設: user]\par}
+{\pard\f0\fs12 • gender (VARCHAR(10)) - 性別 [必填]\par}
+{\pard\f0\fs12 • age (INT) - 年齡 [必填]\par}
+{\pard\f0\fs12 • height_cm (FLOAT) - 身高 (公分) [必填]\par}
+{\pard\f0\fs12 • weight_kg (FLOAT) - 體重 (公斤) [必填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 • updated_at (TIMESTAMP) - 最後更新時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 2. INBODY 測量記錄表 (inbody_records)\par}
+{\pard\f0\fs12 說明：儲存使用者的體組成測量記錄\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • record_id (VARCHAR(36)) - 記錄唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • user_id (VARCHAR(36)) - 對應 users 表的 user_id [外鍵]\par}
+{\pard\f0\fs12 • test_date (DATETIME) - 測量日期時間 [必填]\par}
+{\pard\f0\fs12 • skeletal_muscle (FLOAT) - 骨骼肌重量 (kg) [必填]\par}
+{\pard\f0\fs12 • body_fat (FLOAT) - 體脂肪重量 (kg) [必填]\par}
+{\pard\f0\fs12 • fat_percentage (FLOAT) - 體脂率 (%) [必填]\par}
+{\pard\f0\fs12 • basal_metabolism (FLOAT) - 基礎代謝量 (kcal) [必填]\par}
+{\pard\f0\fs12 • bmi (FLOAT) - 身體質量指數 [選填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 3. 動作資料表 (exercises)\par}
+{\pard\f0\fs12 說明：儲存所有訓練動作的詳細資訊\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • id (INT AUTO_INCREMENT) - 動作唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • name (VARCHAR(100)) - 動作名稱 [必填]\par}
+{\pard\f0\fs12 • muscle_group (VARCHAR(50)) - 主要訓練肌群 [必填]\par}
+{\pard\f0\fs12 • target_muscle (VARCHAR(100)) - 目標肌群詳細說明 [選填]\par}
+{\pard\f0\fs12 • description (TEXT) - 動作描述 [選填]\par}
+{\pard\f0\fs12 • difficulty_level (VARCHAR(20)) - 難度等級 [必填, 預設: beginner]\par}
+{\pard\f0\fs12 • equipment_needed (VARCHAR(100)) - 所需器材 [選填]\par}
+{\pard\f0\fs12 • instructions (TEXT) - 動作指導 [選填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 • updated_at (TIMESTAMP) - 最後更新時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 4. 訓練計畫表 (training_plans)\par}
+{\pard\f0\fs12 說明：儲存使用者的週訓練計畫\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • id (VARCHAR(36)) - 計畫唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • user_id (VARCHAR(36)) - 對應 users 表的 user_id [外鍵]\par}
+{\pard\f0\fs12 • week_start_date (DATE) - 週開始日期 [必填]\par}
+{\pard\f0\fs12 • week_number (INT) - 週數編號 [必填]\par}
+{\pard\f0\fs12 • plan_name (VARCHAR(100)) - 計畫名稱 [必填]\par}
+{\pard\f0\fs12 • exercises (JSON) - 週訓練計畫 (JSON 格式) [必填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 • updated_at (TIMESTAMP) - 最後更新時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 5. 餐單計畫表 (meal_plans)\par}
+{\pard\f0\fs12 說明：儲存使用者的週餐單計畫\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • id (VARCHAR(36)) - 餐單唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • user_id (VARCHAR(36)) - 對應 users 表的 user_id [外鍵]\par}
+{\pard\f0\fs12 • week_start_date (DATE) - 週開始日期 [必填]\par}
+{\pard\f0\fs12 • week_number (INT) - 週數編號 [必填]\par}
+{\pard\f0\fs12 • plan_name (VARCHAR(100)) - 餐單名稱 [必填]\par}
+{\pard\f0\fs12 • meals (JSON) - 週餐單計畫 (JSON 格式) [必填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 • updated_at (TIMESTAMP) - 最後更新時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 6. 食物營養資料表 (foods)\par}
+{\pard\f0\fs12 說明：儲存食物與營養成分資料\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • id (INT AUTO_INCREMENT) - 食物唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • name (VARCHAR(100)) - 食物名稱 [必填]\par}
+{\pard\f0\fs12 • brand (VARCHAR(50)) - 品牌名稱 [選填]\par}
+{\pard\f0\fs12 • serving_size_g (FLOAT) - 每份重量 (公克) [必填]\par}
+{\pard\f0\fs12 • kcal (FLOAT) - 卡路里 (kcal) [必填]\par}
+{\pard\f0\fs12 • protein_g (FLOAT) - 蛋白質 (公克) [必填]\par}
+{\pard\f0\fs12 • carb_g (FLOAT) - 碳水化合物 (公克) [必填]\par}
+{\pard\f0\fs12 • fat_g (FLOAT) - 脂肪 (公克) [必填]\par}
+{\pard\f0\fs12 • sugar_g (FLOAT) - 糖分 (公克) [選填]\par}
+{\pard\f0\fs12 • fiber_g (FLOAT) - 纖維 (公克) [選填]\par}
+{\pard\f0\fs12 • sodium_mg (FLOAT) - 鈉 (毫克) [選填]\par}
+{\pard\f0\fs12 • tags (JSON) - 食物標籤 (JSON 陣列) [選填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 • updated_at (TIMESTAMP) - 最後更新時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 7. 使用者目標設定表 (user_targets)\par}
+{\pard\f0\fs12 說明：儲存使用者的營養目標設定\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • id (VARCHAR(36)) - 目標唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • user_id (VARCHAR(36)) - 對應 users 表的 user_id [外鍵, 唯一]\par}
+{\pard\f0\fs12 • kcal_target (FLOAT) - 目標卡路里攝取量 [必填]\par}
+{\pard\f0\fs12 • protein_target_g (FLOAT) - 目標蛋白質攝取量 (公克) [必填]\par}
+{\pard\f0\fs12 • carb_target_g (FLOAT) - 目標碳水化合物攝取量 (公克) [必填]\par}
+{\pard\f0\fs12 • fat_target_g (FLOAT) - 目標脂肪攝取量 (公克) [必填]\par}
+{\pard\f0\fs12 • meals_per_day (INT) - 每日餐次數 [必填, 預設: 3]\par}
+{\pard\f0\fs12 • diet_type (VARCHAR(50)) - 飲食型態 [必填, 預設: balanced]\par}
+{\pard\f0\fs12 • allergens (JSON) - 過敏原清單 (JSON 陣列) [選填]\par}
+{\pard\f0\fs12 • dislikes (JSON) - 不喜歡的食物 (JSON 陣列) [選填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 • updated_at (TIMESTAMP) - 最後更新時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 8. 使用者偏好設定表 (user_preferences)\par}
+{\pard\f0\fs12 說明：儲存使用者的飲食偏好設定\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 欄位清單：\par}
+{\pard\f0\fs12 • id (VARCHAR(36)) - 偏好唯一識別碼 [主鍵]\par}
+{\pard\f0\fs12 • user_id (VARCHAR(36)) - 對應 users 表的 user_id [外鍵, 唯一]\par}
+{\pard\f0\fs12 • budget_level (VARCHAR(20)) - 預算等級 [必填, 預設: medium]\par}
+{\pard\f0\fs12 • cooking_time_min (INT) - 可接受烹調時間 (分鐘) [必填, 預設: 30]\par}
+{\pard\f0\fs12 • cuisine (VARCHAR(50)) - 偏好菜系 [選填]\par}
+{\pard\f0\fs12 • avoid_ingredients (JSON) - 避免的食材 (JSON 陣列) [選填]\par}
+{\pard\f0\fs12 • created_at (TIMESTAMP) - 建立時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 • updated_at (TIMESTAMP) - 最後更新時間 [必填, 預設: NOW()]\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs16\b 資料表關聯說明\par}
+{\pard\f0\fs12 • users → inbody_records (一對多)\par}
+{\pard\f0\fs12 • users → training_plans (一對多)\par}
+{\pard\f0\fs12 • users → meal_plans (一對多)\par}
+{\pard\f0\fs12 • users → user_targets (一對一)\par}
+{\pard\f0\fs12 • users → user_preferences (一對一)\par}
+{\pard\f0\fs12 \par}
+
+{\pard\f0\fs12\b 備註：\par}
+{\pard\f0\fs12 • 所有 user_id 欄位都關聯到 users.user_id\par}
+{\pard\f0\fs12 • JSON 欄位用於儲存複雜的結構化資料\par}
+{\pard\f0\fs12 • 時間戳記欄位自動維護建立和更新時間\par}
+{\pard\f0\fs12 \par}
+
+{\pard\qc\f0\fs10 文件版本：1.0 | 最後更新：2024年12月\par}
+{\pard\qc\f0\fs10 維護者：健習生開發團隊\par}
+}
+
+

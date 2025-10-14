@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健習生｜飲食指南</title>
+    <link rel="icon" href="images/fitness.png" type="image/png">
+
+    <!-- 字體 & Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+
+    <!-- 自訂樣式 -->
+    <style>
+        /* 統一卡片樣式 */
+        .card {
+            border-radius: 16px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            border: none;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            border-radius: 16px 16px 0 0;
+            padding: 1rem 1.5rem;
+        }
+
+        /* 營養計算器樣式 */
+        .nutrition-calculator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .nutrition-result {
+            background: #fff;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .macro-bar {
+            height: 8px;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+
+        .protein-bar { background: linear-gradient(90deg, #ff6b6b, #ee5a24); }
+        .carb-bar { background: linear-gradient(90deg, #4ecdc4, #44a08d); }
+        .fat-bar { background: linear-gradient(90deg, #feca57, #ff9ff3); }
+
+        /* 餐食建議卡片 */
+        .meal-card {
+            border-left: 4px solid #667eea;
+            transition: all 0.3s ease;
+        }
+
+        .meal-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .food-item {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 0.75rem;
+            margin: 0.5rem 0;
+            border-left: 3px solid #667eea;
+        }
+
+        .nutrition-badge {
+            background: #667eea;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin: 0.25rem;
+        }
+
+        /* 進度條樣式 */
+        .progress {
+            height: 12px;
+            border-radius: 6px;
+            background-color: #e9ecef;
+        }
+
+        .progress-bar {
+            border-radius: 6px;
+        }
+
+        /* 按鈕樣式 */
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.75rem 2rem;
+            font-weight: 600;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* 統計卡片 */
+        .stats-card {
+            text-align: center;
+            padding: 1.5rem;
+            border-radius: 16px;
+            background: #fff;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-bottom: 0.5rem;
+        }
+
+        .stats-label {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        /* 響應式設計 */
+        @media (max-width: 768px) {
+            .nutrition-calculator {
+                padding: 1rem;
+            }
+            
+            .nutrition-result {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-menu">
+                    <ul class="menu">
+                        <li class="sidebar-title">我的檔案</li>
+                        <li class="sidebar-item">
+                            <a href="index.html" class='sidebar-link'>
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>健康儀表板</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="profile.html" class='sidebar-link'>
+                                <i class="bi bi-person-badge-fill"></i>
+                                <span>基本資料</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="history.html" class='sidebar-link'>
+                                <i class="bi bi-pen-fill"></i>
+                                <span>歷史紀錄</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">智慧建議</li>
+                        <li class="sidebar-item">
+                            <a href="training.html" class='sidebar-link'>
+                                <i class="bi bi-pentagon-fill"></i>
+                                <span>訓練探索</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item active">
+                            <a href="nutrition-guide.html" class='sidebar-link'>
+                                <i class="bi bi-basket-fill"></i>
+                                <span>飲食指南</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="favorite.html" class='sidebar-link'>
+                                <i class="bi bi-grid-1x2-fill"></i>
+                                <span>我的最愛</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="training-plan.html" class='sidebar-link'>
+                                <i class="bi bi-calendar-check-fill"></i>
+                                <span>訓練計畫</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">更多選項</li>
+                        <li class="sidebar-item">
+                            <a href="logout.php" class='sidebar-link'>
+                                <i class="bi bi-egg-fill"></i>
+                                <span>登出帳戶</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+            </div>
+        </div>
+
+        <div id="main">
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3 class="mb-4-3 me-3">飲食指南🍎</h3>
+                            <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
+                                科學計算您的營養需求，制定個人化的飲食計畫，讓增肌減脂更有效率。
+                            </p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="index.html">健康儀表板</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">飲食指南</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 營養需求計算器 -->
+            <div class="container">
+                <section class="section">
+                    <div class="nutrition-calculator">
+                        <h4 class="mb-4"><i class="bi bi-calculator me-2"></i>個人營養需求計算</h4>
+                        <form id="nutritionForm">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="form-label">年齡</label>
+                                    <input type="number" class="form-control" id="age" min="15" max="100" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">性別</label>
+                                    <select class="form-select" id="gender" required>
+                                        <option value="">請選擇</option>
+                                        <option value="男">男</option>
+                                        <option value="女">女</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">身高 (cm)</label>
+                                    <input type="number" class="form-control" id="height" min="100" max="250" required>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">體重 (kg)</label>
+                                    <input type="number" class="form-control" id="weight" min="30" max="200" step="0.1" required>
+                                </div>
+                            </div>
+                            <div class="row mt-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">活動強度</label>
+                                    <select class="form-select" id="activityLevel" required>
+                                        <option value="">請選擇</option>
+                                        <option value="久坐">久坐 (辦公室工作，很少運動)</option>
+                                        <option value="輕度活動">輕度活動 (每週1-3次輕度運動)</option>
+                                        <option value="中度活動">中度活動 (每週3-5次中等強度運動)</option>
+                                        <option value="高度活動">高度活動 (每週6-7次高強度運動)</option>
+                                        <option value="極高度活動">極高度活動 (體力勞動，每天訓練)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">健身目標</label>
+                                    <select class="form-select" id="goal" required>
+                                        <option value="">請選擇</option>
+                                        <option value="減脂">減脂 (減少體脂，塑造線條)</option>
+                                        <option value="增肌">增肌 (增加肌肉量，提升力量)</option>
+                                        <option value="維持">維持 (保持現狀，健康生活)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-light w-100">
+                                        <i class="bi bi-calculator me-2"></i>計算營養需求
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </section>
+
+                <!-- 營養需求結果 -->
+                <section class="section" id="nutritionResult" style="display: none;">
+                    <div class="nutrition-result">
+                        <h5 class="mb-4"><i class="bi bi-graph-up me-2"></i>您的營養需求</h5>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="targetCalories">0</div>
+                                    <div class="stats-label">目標熱量 (卡路里)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="proteinGrams">0</div>
+                                    <div class="stats-label">蛋白質 (克)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="carbGrams">0</div>
+                                    <div class="stats-label">碳水化合物 (克)</div>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="stats-card">
+                                    <div class="stats-number" id="fatGrams">0</div>
+                                    <div class="stats-label">脂肪 (克)</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 營養素比例圖 -->
+                        <div class="mt-4">
+                            <h6>營養素分配比例</h6>
+                            <div class="macro-bar protein-bar" id="proteinBar" style="width: 0%"></div>
+                            <div class="d-flex justify-content-between">
+                                <span>蛋白質 <span id="proteinPercent">0%</span></span>
+                                <span id="proteinCalories">0 卡路里</span>
+                            </div>
+                            
+                            <div class="macro-bar carb-bar" id="carbBar" style="width: 0%"></div>
+                            <div class="d-flex justify-content-between">
+                                <span>碳水化合物 <span id="carbPercent">0%</span></span>
+                                <span id="carbCalories">0 卡路里</span>
+                            </div>
+                            
+                            <div class="macro-bar fat-bar" id="fatBar" style="width: 0%"></div>
+                            <div class="d-flex justify-content-between">
+                                <span>脂肪 <span id="fatPercent">0%</span></span>
+                                <span id="fatCalories">0 卡路里</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 餐食建議 -->
+                <section class="section" id="mealSuggestions" style="display: none;">
+                    <h5 class="mb-4"><i class="bi bi-egg-fried me-2"></i>餐食建議</h5>
+                    <div class="row" id="mealCards">
+                        <!-- 餐食建議將在這裡動態生成 -->
+                    </div>
+                </section>
+            </div>
+
+            <footer>
+                <div class="footer clearfix mb-0 text-muted">
+                    <div class="float-start">
+                        <p>健習生</p>
+                    </div>
+                    <div class="float-end">
+                        <p>謝昀倢 黃詠翰 呂沁垣 游博翔</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <script>
+        // 營養計算功能
+        document.getElementById('nutritionForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = {
+                age: document.getElementById('age').value,
+                gender: document.getElementById('gender').value,
+                height: document.getElementById('height').value,
+                weight: document.getElementById('weight').value,
+                activity_level: document.getElementById('activityLevel').value,
+                goal: document.getElementById('goal').value
+            };
+            
+            try {
+                // 計算 BMR
+                const bmrResponse = await fetch('calculate_nutrition.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'calculate_bmr', ...formData })
+                });
+                const bmrResult = await bmrResponse.json();
+                
+                if (!bmrResult.success) throw new Error(bmrResult.error);
+                
+                // 計算 TDEE
+                const tdeeResponse = await fetch('calculate_nutrition.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'calculate_tdee', bmr: bmrResult.bmr, activity_level: formData.activity_level })
+                });
+                const tdeeResult = await tdeeResponse.json();
+                
+                if (!tdeeResult.success) throw new Error(tdeeResult.error);
+                
+                // 計算營養目標
+                const nutritionResponse = await fetch('calculate_nutrition.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'calculate_nutrition_goals', tdee: tdeeResult.tdee, goal: formData.goal })
+                });
+                const nutritionResult = await nutritionResponse.json();
+                
+                if (!nutritionResult.success) throw new Error(nutritionResult.error);
+                
+                // 顯示結果
+                displayNutritionResults(nutritionResult);
+                await loadMealSuggestions(nutritionResult);
+                
+            } catch (error) {
+                alert('計算失敗: ' + error.message);
+            }
+        });
+        
+        function displayNutritionResults(result) {
+            // 更新數值
+            document.getElementById('targetCalories').textContent = result.target_calories;
+            document.getElementById('proteinGrams').textContent = result.macros.protein.grams;
+            document.getElementById('carbGrams').textContent = result.macros.carbs.grams;
+            document.getElementById('fatGrams').textContent = result.macros.fat.grams;
+            
+            // 更新比例條
+            document.getElementById('proteinBar').style.width = result.macros.protein.percentage + '%';
+            document.getElementById('carbBar').style.width = result.macros.carbs.percentage + '%';
+            document.getElementById('fatBar').style.width = result.macros.fat.percentage + '%';
+            
+            // 更新百分比和卡路里
+            document.getElementById('proteinPercent').textContent = result.macros.protein.percentage + '%';
+            document.getElementById('proteinCalories').textContent = result.macros.protein.calories + ' 卡路里';
+            
+            document.getElementById('carbPercent').textContent = result.macros.carbs.percentage + '%';
+            document.getElementById('carbCalories').textContent = result.macros.carbs.calories + ' 卡路里';
+            
+            document.getElementById('fatPercent').textContent = result.macros.fat.percentage + '%';
+            document.getElementById('fatCalories').textContent = result.macros.fat.calories + ' 卡路里';
+            
+            // 顯示結果區域
+            document.getElementById('nutritionResult').style.display = 'block';
+        }
+        
+        async function loadMealSuggestions(nutritionResult) {
+            const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
+            const mealNames = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '點心' };
+            const mealCards = document.getElementById('mealCards');
+            
+            mealCards.innerHTML = '';
+            
+            for (const mealType of mealTypes) {
+                try {
+                    const response = await fetch('calculate_nutrition.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            action: 'get_meal_suggestions',
+                            goal: nutritionResult.goal,
+                            meal_type: mealType,
+                            calories: nutritionResult.meal_distribution[mealType]
+                        })
+                    });
+                    const result = await response.json();
+                    
+                    if (result.success) {
+                        const mealCard = createMealCard(mealNames[mealType], result);
+                        mealCards.appendChild(mealCard);
+                    }
+                } catch (error) {
+                    console.error('載入餐食建議失敗:', error);
+                }
+            }
+            
+            document.getElementById('mealSuggestions').style.display = 'block';
+        }
+        
+        function createMealCard(mealName, data) {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 col-lg-3 mb-4';
+            
+            col.innerHTML = `
+                <div class="card meal-card">
+                    <div class="card-header">
+                        <h6 class="mb-0">${mealName}</h6>
+                        <small class="text-muted">目標: ${data.target_calories} 卡路里</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>建議食物:</h6>
+                            ${data.suggested_foods.slice(0, 3).map(food => `
+                                <div class="food-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold">${food.name}</span>
+                                        <span class="text-muted">${food.calories_per_100g}卡/100g</span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span class="nutrition-badge">蛋白質 ${food.protein_per_100g}g</span>
+                                        <span class="nutrition-badge">碳水 ${food.carbs_per_100g}g</span>
+                                        <span class="nutrition-badge">脂肪 ${food.fat_per_100g}g</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-3">
+                            <h6>營養建議:</h6>
+                            <ul class="list-unstyled">
+                                ${data.tips.map(tip => `<li><i class="bi bi-check-circle text-success me-2"></i>${tip}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            return col;
+        }
+    </script>
+</body>
+</html>

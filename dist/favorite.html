@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>健習生｜我的最愛</title>
+    <link rel="icon" href="images/fitness.png" type="image/png">
+
+    <!-- 字體 & Bootstrap -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/bootstrap.css">
+    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
+    <link rel="stylesheet" href="assets/css/app.css">
+
+    <!-- 自訂樣式 -->
+    <style>
+        #favorite-list table {
+            border: 4px double #212529 !important;
+            border-collapse: collapse;
+        }
+
+        #favorite-list table th,
+        #favorite-list table td {
+            border: 3px double #495057 !important;
+            vertical-align: middle;
+        }
+
+        /* 統一「名稱」與「目標肌群」字體樣式 (顏色與訓練細節相同灰色) */
+        #favorite-list td:nth-child(2),
+        #favorite-list td:nth-child(3) {
+            font-family: 'Nunito', sans-serif !important;
+            font-size: 1rem !important;
+            font-weight: 600 !important;
+            color: #6c757d !important;
+            /* ✅ 統一為灰色 */
+        }
+
+        /* 表格內所有細節統一灰色 */
+        #favorite-list td {
+            color: #6c757d !important;
+        }
+
+        .training-details {
+            display: flex;
+            justify-content: space-between;
+            text-align: center;
+        }
+
+        .training-details div {
+            flex: 1;
+            padding: 4px 6px;
+            border-right: 3px double #495057;
+        }
+
+        .training-details div:last-child {
+            border-right: none;
+        }
+
+        .training-details strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        /* 動作詳情：莫蘭迪藍灰 */
+        .btn-detail {
+            background-color: #7f90a9 !important;
+            border: none;
+            color: #fff !important;
+        }
+
+        .btn-detail:hover,
+        .btn-detail:active,
+        .btn-detail:focus {
+            background-color: #67798f !important;
+            color: #fff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 移除：莫蘭迪紫紅 */
+        .btn-remove {
+            background-color: #94696d !important;
+            border: none;
+            color: #fff !important;
+        }
+
+        .btn-remove:hover,
+        .btn-remove:active,
+        .btn-remove:focus {
+            background-color: #7a5558 !important;
+            color: #fff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 表格與 footer 間距 */
+        #favorite-list {
+            margin-bottom: 60px;
+        }
+
+        .mb-4-3 {
+            margin-bottom: 2.1rem !important;
+            /* 40px */
+        }
+
+        /* 手風琴卡片：莫蘭迪風格 */
+        .accordion .card {
+            border: 2px solid #e6ddd9;
+            border-radius: 14px;
+            overflow: hidden;
+            box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
+            margin-bottom: 14px;
+        }
+
+        .accordion .card-header {
+            background: linear-gradient(135deg, #f9fbfc 0%, #e6eaf0 100%);
+            padding: 0;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .accordion .btn-toggle {
+            width: 100%;
+            text-align: left;
+            padding: 14px 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+
+        .accordion .btn-toggle:focus {
+            box-shadow: none;
+        }
+
+        .acc-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 12px;
+            margin-left: auto;
+            font-weight: 600;
+        }
+
+        .badge-soft {
+            border: 1px solid rgba(0, 0, 0, .06);
+            padding: 6px 10px;
+            border-radius: 10px;
+            font-size: .85rem;
+            background: #fff;
+            color: #6c757d;
+        }
+
+        .badge-hyper {
+            background: #c8d5db;
+        }
+
+        .badge-fat {
+            background: #e6ddd9;
+        }
+
+        .badge-muscle {
+            background: #b0bccf;
+        }
+
+        .acc-body {
+            background: #fff;
+            padding: 14px 16px;
+        }
+
+        .acc-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+        }
+
+        @media (max-width: 576px) {
+            .acc-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .acc-stat {
+            border: 2px dashed #e9ecef;
+            border-radius: 12px;
+            padding: 10px 12px;
+            text-align: center;
+        }
+
+        .acc-stat strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #2c3e50;
+        }
+
+        .acc-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        /* 展開區塊的段落樣式 */
+        .acc-section {
+            margin-top: 10px;
+        }
+
+        .acc-section h6 {
+            color: #2c3e50;
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 6px;
+        }
+
+        .acc-section p {
+            color: #6c757d;
+            line-height: 1.6;
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <div id="sidebar" class="active">
+            <div class="sidebar-wrapper active">
+                <div class="sidebar-menu">
+                    <ul class="menu">
+                        <li class="sidebar-title">我的檔案</li>
+
+                        <li class="sidebar-item">
+                            <a href="index.html" class='sidebar-link'>
+                                <i class="bi bi-file-earmark-medical-fill"></i>
+                                <span>健康儀表板</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="profile.html" class='sidebar-link'>
+                                <i class="bi bi-person-badge-fill"></i>
+                                <span>基本資料</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="history.html" class='sidebar-link'>
+                                <i class="bi bi-pen-fill"></i>
+                                <span>歷史紀錄</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">智慧建議</li>
+                        <li class="sidebar-item">
+                            <a href="training.html" class='sidebar-link'>
+                                <i class="bi bi-pentagon-fill"></i>
+                                <span>訓練探索</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="training-plan.html" class='sidebar-link'>
+                                <i class="bi bi-calendar-check-fill"></i>
+                                <span>訓練計畫</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a href="food.html" class='sidebar-link'>
+                                <i class="bi bi-basket-fill"></i>
+                                <span>飲食指南</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-item active">
+                            <a href="favorite.html" class='sidebar-link'>
+                                <i class="bi bi-grid-1x2-fill"></i>
+                                <span>我的最愛</span>
+                            </a>
+                        </li>
+                        <li class="sidebar-title">更多選項</li>
+                        <li class="sidebar-item">
+                            <a href="logout.php" class='sidebar-link'>
+                                <i class="bi bi-egg-fill"></i>
+                                <span>登出帳戶</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <button class="sidebar-toggler btn x"><i data-feather="x"></i></button>
+            </div>
+        </div>
+        <div id="main">
+            <header class="mb-3">
+                <a href="#" class="burger-btn d-block d-xl-none">
+                    <i class="bi bi-justify fs-3"></i>
+                </a>
+            </header>
+
+            <div class="page-heading">
+                <div class="page-title">
+                    <div class="row">
+                        <div class="col-12 col-md-6 order-md-1 order-last">
+                            <h3 class="mb-4-3 me-3">我的最愛🤍</h3>
+                            <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
+                                以下是您收藏的訓練動作，可作為專屬健身計畫的參考依據，方便快速查看與管理。
+                            </p>
+                        </div>
+                        <div class="col-12 col-md-6 order-md-2 order-first">
+                            <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
+                                <ol class="breadcrumb">
+                                    <li class="breadcrumb-item"><a href="index.html">健康儀表板</a></li>
+                                    <li class="breadcrumb-item active" aria-current="page">我的最愛</li>
+                                </ol>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 收藏清單 -->
+            <div class="container">
+                <section class="section">
+                    <div id="favorite-list"></div>
+                </section>
+            </div>
+
+            <footer>
+                <div class="footer clearfix mb-0 text-muted">
+                    <div class="float-start">
+                        <p>健習生</p>
+                    </div>
+                    <div class="float-end">
+                        <p>謝昀倢 黃詠翰 呂沁垣 游博翔</p>
+                    </div>
+                </div>
+            </footer>
+        </div>
+    </div>
+
+    <!-- 詳細說明 Modal -->
+    <div class="modal fade" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="exerciseModalLabel">📌詳細說明</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body" id="exerciseModalBody">
+                    <!-- JS 動態插入內容 -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JS 套件 -->
+    <script src="assets/vendors/perfect-scrollbar/perfect-scrollbar.min.js"></script>
+    <script src="assets/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
+
+    <!-- 收藏頁面邏輯 -->
+    <script>
+        const API_FAVORITES = 'api/favorites.php';
+
+        document.addEventListener("DOMContentLoaded", async function () {
+            const list = document.getElementById("favorite-list");
+            list.innerHTML = `<div class="d-flex justify-content-center align-items-center" style="height:200px;"><p class="fs-6 text-muted">載入中…</p></div>`;
+
+            // 將舊的 localStorage 收藏遷移到資料庫（只做一次）
+            try { await migrateLocalFavoritesOnce(); } catch (e) { }
+
+            // 從後端載入收藏
+            const serverFavorites = await fetchFavoritesFromServer();
+            if (!serverFavorites || serverFavorites.length === 0) {
+                list.innerHTML = `
+          <div class="d-flex justify-content-center align-items-center" style="height:200px;">
+            <p class="fs-5" style="color:#58474d;">目前沒有收藏任何器材。</p>
+          </div>
+        `;
+                // 清空快取
+                localStorage.setItem("favorites", JSON.stringify([]));
+                return;
+            }
+
+            // 同步快取
+            localStorage.setItem("favorites", JSON.stringify(serverFavorites));
+            renderFavorites(serverFavorites);
+        });
+
+        async function fetchFavoritesFromServer() {
+            try {
+                const res = await fetch(API_FAVORITES, { credentials: 'include' });
+                if (!res.ok) throw new Error('無法載入收藏');
+                const data = await res.json();
+                return data.data || [];
+            } catch (e) {
+                console.error(e);
+                return [];
+            }
+        }
+
+        async function migrateLocalFavoritesOnce() {
+            const migrated = localStorage.getItem('favorites_migrated');
+            if (migrated === '1') return;
+            const local = JSON.parse(localStorage.getItem('favorites') || '[]');
+            if (!Array.isArray(local) || local.length === 0) { localStorage.setItem('favorites_migrated', '1'); return; }
+
+            for (const exercise of local) {
+                const name = exercise.name || '';
+                if (!name) continue;
+                try {
+                    await fetch(API_FAVORITES, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        credentials: 'include',
+                        body: JSON.stringify({ name, exercise })
+                    });
+                } catch (e) { console.warn('上傳收藏失敗', name); }
+            }
+            localStorage.setItem('favorites_migrated', '1');
+            // 舊資料可清空避免重複
+            localStorage.setItem('favorites', JSON.stringify([]));
+        }
+
+        function renderFavorites(favorites) {
+            const list = document.getElementById("favorite-list");
+            if (!favorites?.length) {
+                list.innerHTML = `
+      <div class="d-flex justify-content-center align-items-center" style="height:200px;">
+        <p class="fs-5" style="color:#58474d;">目前沒有收藏任何器材。</p>
+      </div>`;
+                return;
+            }
+
+            let html = `<div class="accordion" id="favAccordion">`;
+            favorites.forEach((ex, i) => {
+                const id = `favItem${i}`;
+                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
+                const hypertrophyWeightMax = hypertrophyWeightMin + 15;
+                const fatlossWeightMin = hypertrophyWeightMin - 20;
+                const fatlossWeightMax = hypertrophyWeightMin - 5;
+
+                html += `
+      <div class="card">
+        <div class="card-header" id="heading-${id}">
+          <button class="btn btn-toggle" type="button" data-bs-toggle="collapse"
+                  data-bs-target="#collapse-${id}" aria-expanded="false" aria-controls="collapse-${id}">
+            <i class="bi bi-caret-right-fill me-1"></i>
+            <span>${ex.name || '未命名動作'}</span>
+            <div class="acc-meta">
+              <span class="badge-soft badge-muscle"><i class="bi bi-person-arms-up me-1"></i>${ex.target_muscle || '—'}</span>
+              <span class="badge-soft badge-hyper">💪 增肌：${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max} 組 / ${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max} 次 / ${hypertrophyWeightMin}-${hypertrophyWeightMax}%</span>
+              <span class="badge-soft badge-fat">🔥 減脂：${ex.fatloss_sets_min}-${ex.fatloss_sets_max} 組 / ${ex.fatloss_reps_min}-${ex.fatloss_reps_max} 次 / ${fatlossWeightMin}-${fatlossWeightMax}%</span>
+            </div>
+          </button>
+        </div>
+
+        <div id="collapse-${id}" class="collapse" aria-labelledby="heading-${id}" data-bs-parent="#favAccordion">
+          <div class="acc-body">
+            <div class="row g-3">
+              <!-- 示範影片 -->
+              <div class="col-12 col-md-6">
+                <div class="acc-section">
+                  <div class="ratio ratio-16x9">
+                    <video controls playsinline preload="metadata">
+                      <source src="${ex.video_url || ''}" type="video/mp4">
+                      您的瀏覽器不支援影片播放。
+                    </video>
+                  </div>
+                </div>
+              </div>
+
+              <!-- 指標與文字說明 -->
+              <div class="col-12 col-md-6">
+                <div class="acc-grid mb-2">
+                  <div class="acc-stat"><strong>增肌 組數</strong>${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</div>
+                  <div class="acc-stat"><strong>增肌 次數</strong>${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</div>
+                  <div class="acc-stat"><strong>增肌 重量</strong>${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
+                  <div class="acc-stat"><strong>減脂 組數</strong>${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</div>
+                  <div class="acc-stat"><strong>減脂 次數</strong>${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</div>
+                  <div class="acc-stat"><strong>減脂 重量</strong>${fatlossWeightMin}-${fatlossWeightMax}%</div>
+                </div>
+
+                <!-- 動作解說 -->
+                <div class="acc-section">
+                  <h6>動作解說：</h6>
+                  <p>${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
+                </div>
+
+                <!-- 適用對象 -->
+                <div class="acc-section">
+                  <h6>適用對象：</h6>
+                  <p>${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
+                </div>
+
+                <!-- 注意事項 -->
+                <div class="acc-section">
+                  <h6>注意事項：</h6>
+                  <p>${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
+                </div>
+
+                <div class="acc-actions">                  
+                  <button class="btn btn-remove btn-sm"
+                          onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
+                    移除
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+            });
+
+            html += `</div>`;
+            list.innerHTML = html;
+
+            // 展開時換箭頭
+            list.querySelectorAll('.btn-toggle').forEach(btn => {
+                const icon = btn.querySelector('.bi');
+                const target = btn.getAttribute('data-bs-target');
+                const el = document.querySelector(target);
+                el?.addEventListener('show.bs.collapse', () => { icon.classList.replace('bi-caret-right-fill', 'bi-caret-down-fill'); });
+                el?.addEventListener('hide.bs.collapse', () => { icon.classList.replace('bi-caret-down-fill', 'bi-caret-right-fill'); });
+            });
+        }
+
+        // 移除收藏（改為呼叫 API）
+        async function removeFavorite(name) {
+            if (!confirm(`確定要移除收藏：${name}嗎？`)) return;
+            try {
+                await fetch(API_FAVORITES + '?name=' + encodeURIComponent(name), {
+                    method: 'DELETE',
+                    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                    credentials: 'include',
+                    body: 'name=' + encodeURIComponent(name)
+                });
+                // 重新載入列表
+                const serverFavorites = await fetchFavoritesFromServer();
+                localStorage.setItem('favorites', JSON.stringify(serverFavorites));
+                renderFavorites(serverFavorites);
+            } catch (e) {
+                alert('移除失敗，請稍後再試');
+            }
+        }
+
+        // 詳細說明 Modal（跟 training.html 一致）
+        function openExerciseModal(exercise, index) {
+            const modalBody = document.getElementById("exerciseModalBody");
+
+            modalBody.innerHTML = `
+        <!-- 示範影片 -->
+        <div class="mb-3">
+          <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">示範影片：</h6>
+          <div class="ratio ratio-16x9">
+            <video id="exerciseVideo" controls playsinline preload="auto">
+              <source src="${exercise.video_url || ''}" type="video/mp4">
+              您的瀏覽器不支援影片播放。
+            </video>
+          </div>
+        </div>
+
+        <!-- 動作解說 -->
+        <div class="mb-3">
+          <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">動作解說：</h6>
+          <p style="color:#6c757d; line-height:1.6;">
+            ${exercise.instruction_full || exercise.description || "此動作暫無解說"}
+          </p>
+        </div>
+
+        <!-- 適用對象 -->
+        <div>
+          <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">適用對象：</h6>
+          <p style="color:#6c757d; line-height:1.6;">
+            ${exercise.user_level || "不限，請依照自身能力選擇是否執行。"}
+          </p>
+        </div>
+        
+        <!-- 注意事項 -->
+        <div class="mb-3">
+          <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">注意事項：</h6>
+          <p style="color:#6c757d; line-height:1.6;">
+            ${exercise.caution || "請保持正確姿勢，避免受傷"}
+          </p>
+        </div>        
+      `;
+
+            // Modal 關閉時重置影片
+            const modalEl = document.getElementById('exerciseModal');
+            modalEl.addEventListener("hidden.bs.modal", () => {
+                const v = document.getElementById("exerciseVideo");
+                if (v) {
+                    v.pause(); try { v.currentTime = 0; } catch (e) { }
+                }
+            }, { once: true });
+        }
+    </script>
+</body>
+
+</html>
