@@ -112,6 +112,91 @@ function normalizeTargetMuscles($raw) {
     return array_values(array_unique($res));
 }
 
+/**
+ * 依名稱判斷「動作型態」與「去重鍵」
+ * - 回傳：['type' => 'compound'|'isolation', 'key' => 'front_raise' ...]
+ * - 僅用名稱做啟發式，不會改動資料
+ */
+function classifyExerciseType($name) {
+    $n = function_exists('mb_strtolower') ? mb_strtolower($name, 'UTF-8') : strtolower($name);
+
+    // 肩/上肢常見
+    if (preg_match('/(肩推|推舉|shoulder\s*press|press)/u', $n))            return ['type' => 'compound', 'key' => 'shoulder_press'];
+    if (preg_match('/(側平舉|側肩上舉|lateral\s*raise)/u', $n))              return ['type' => 'isolation','key' => 'lateral_raise'];
+    if (preg_match('/(前平舉|front\s*raise)/u', $n))                           return ['type' => 'isolation','key' => 'front_raise'];
+    if (preg_match('/(反向飛鳥|後束飛鳥|rear\s*delt|reverse\s*fly)/u', $n))    return ['type' => 'isolation','key' => 'rear_delt_fly'];
+
+    // 下肢常見
+    if (preg_match('/(深蹲|squat)/u', $n))                                     return ['type' => 'compound', 'key' => 'squat'];
+    if (preg_match('/(腿推|leg\s*press)/u', $n))                               return ['type' => 'compound', 'key' => 'leg_press'];
+    if (preg_match('/(弓步|弓箭步|lunge)/u', $n))                               return ['type' => 'compound', 'key' => 'lunge'];
+    if (preg_match('/(臀推|hip\s*thrust)/u', $n))                               return ['type' => 'compound', 'key' => 'hip_thrust'];
+    if (preg_match('/(硬舉|deadlift)/u', $n))                                  return ['type' => 'compound', 'key' => 'deadlift'];
+    if (preg_match('/(腿屈伸|leg\s*extension)/u', $n))                          return ['type' => 'isolation','key' => 'leg_extension'];
+    if (preg_match('/(腿後彎|腿彎舉|leg\s*curl)/u', $n))                        return ['type' => 'isolation','key' => 'leg_curl'];
+    if (preg_match('/(提踵|calf\s*raise)/u', $n))                               return ['type' => 'isolation','key' => 'calf_raise'];
+
+    // 其他（保守預設）
+    return ['type' => 'isolation', 'key' => preg_replace('/[\s（）\(\)]+/u', '', $n)]; // 以精簡名當 key，避免完全重覆
+}
+
+/**
+ * 在單一「部位桶」內，根據 eachCount 做多樣化挑選
+ * - 規則：至少 1 個複合，其餘優先不同 key；若仍不足再放任何以補滿
+ * - 使用 $seed 做穩定隨機排序（在傳入前請先排序過）
+ */
+function pickDiverseExercises(array $rows, int $eachCount, int $seed): array {
+    $compound = [];
+    $isolation = [];
+    foreach ($rows as $r) {
+        $cls = classifyExerciseType($r['name'] ?? '');
+        $r['_type'] = $cls['type'];
+        $r['_key']  = $cls['key'];
+        if ($r['_type'] === 'compound') $compound[] = $r; else $isolation[] = $r;
+    }
+
+    // 穩定隨機：同一用戶同一天固定，但每天有變化
+    $stableSort = function(array &$arr) use ($seed) {
+        usort($arr, function($a, $b) use ($seed) {
+            $ka = crc32(($a['name'] ?? '') . '|' . $seed) % 100000;
+            $kb = crc32(($b['name'] ?? '') . '|' . $seed) % 100000;
+            return $ka <=> $kb;
+        });
+    };
+    $stableSort($compound);
+    $stableSort($isolation);
+
+    $pick = [];
+    $used = [];
+
+    // 1) 先確保至少 1 個複合（若有）
+    foreach ($compound as $c) {
+        if (!isset($used[$c['_key']])) {
+            $pick[] = $c;
+            $used[$c['_key']] = true;
+            break;
+        }
+    }
+
+    // 2) 再以不同 key 的孤立/機械補齊
+    foreach ($isolation as $iso) {
+        if (count($pick) >= $eachCount) break;
+        if (isset($used[$iso['_key']])) continue;
+        $pick[] = $iso;
+        $used[$iso['_key']] = true;
+    }
+
+    // 3) 若仍不足，再從複合/孤立交替補足（允許 key 重覆）
+    $i = 0; $j = 0;
+    while (count($pick) < $eachCount && ($i < count($compound) || $j < count($isolation))) {
+        if ($i < count($compound)) $pick[] = $compound[$i++];
+        if (count($pick) >= $eachCount) break;
+        if ($j < count($isolation)) $pick[] = $isolation[$j++];
+    }
+
+    return array_slice($pick, 0, $eachCount);
+}
+
 // 5️⃣ 撈歷史紀錄
 $history = getChatHistory($pdo, $userId, 10);
 $isFirstChat = count($history) === 0;
@@ -264,7 +349,7 @@ if (in_array($intent, ["plan", "exercise_qa"], true) && !empty($targetMuscles)) 
 - 同一部位優先包含：1 個多關節/複合動作（如推/蹲/臀推/硬舉），搭配 1–2 個孤立/機械（如側平舉、腿屈伸、腿後彎）；避免連續出現同型態（例如連續 3 個前平舉）。
 - 若使用者未提供 1RM，強度使用 **RPE 6–8 或保留 2–3 下**；每個動作寫清楚 **休息秒數**。";
 
-        // B：資料候選分桶＋穩定隨機＋每部位精選 eachCount 個
+        // B：資料候選分桶＋穩定隨機＋每部位精選 eachCount 個（含同型態過濾）
         // 1) 反向映射：細分 -> 大類
         $bigOf = [];
         foreach ($map as $big => $subs) {
@@ -280,7 +365,7 @@ if (in_array($intent, ["plan", "exercise_qa"], true) && !empty($targetMuscles)) 
             $buckets[$big][] = $erow;
         }
 
-        // 3) 穩定隨機排序
+        // 3) 穩定隨機排序（桶內）
         $stableOrder = function(array &$arr) use ($seed) {
             usort($arr, function($a, $b) use ($seed) {
                 $ka = crc32(($a['name'] ?? '') . '|' . $seed) % 100000;
@@ -290,13 +375,16 @@ if (in_array($intent, ["plan", "exercise_qa"], true) && !empty($targetMuscles)) 
         };
         foreach ($buckets as $k => &$arr) { $stableOrder($arr); } unset($arr);
 
-        // 4) 每個大部位只取 {$eachCount} 個，並分段輸出（避免交錯）
+        // 4) 每個大部位挑選（同型態過濾 + 至少1複合）
         $exerciseText .= "以下是資料庫查到的【" . implode('、', $targetMuscles) . "】新手訓練候選動作（已依部位分段與精選）：\n";
         foreach ($targetMuscles as $big) {
             if (empty($buckets[$big])) continue;
+
+            // —— 核心「同型態過濾」挑選器 —— //
+            $picked = pickDiverseExercises($buckets[$big], $eachCount, $seed);
+
             $exerciseText .= "── 「{$big}」推薦動作（擇{$eachCount}）：\n";
-            $pick = array_slice($buckets[$big], 0, $eachCount);
-            foreach ($pick as $erow) {
+            foreach ($picked as $erow) {
                 $exerciseText .= "- {$erow['name']}（{$erow['target_muscle']}）\n";
                 $exerciseText .= "  組數：{$erow['hypertrophy_sets_min']}–{$erow['hypertrophy_sets_max']}，次數：{$erow['hypertrophy_reps_min']}–{$erow['hypertrophy_reps_max']}\n";
                 if (!empty($erow['hypertrophy_load_min_pct']) && !empty($erow['hypertrophy_load_max_pct'])) {
@@ -332,7 +420,7 @@ if (in_array($intent, ["plan","exercise_qa"], true) && isset($GLOBALS['_selectio
     $userPrompt .= $GLOBALS['_selectionGuide'] . "\n\n"; // A：先餵規則，讓模型照規則排
 }
 if ($exerciseText) {
-    $userPrompt .= $exerciseText . "\n\n"; // B：再餵分段精選候選
+    $userPrompt .= $exerciseText . "\n\n"; // B：再餵分段精選候選（已做同型態過濾）
 }
 $userPrompt .= "使用者的問題：" . $userMessage;
 
