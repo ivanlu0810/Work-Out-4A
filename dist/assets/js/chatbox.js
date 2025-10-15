@@ -173,15 +173,33 @@ async function sendMessage() {
   showTyping();
 
   const userId = document.getElementById("user-id").textContent;
+
   try {
-    const response = await fetch("https://jianshen.ngrok.app/%E5%81%A5%E7%BF%92%E7%94%9F/dist/chatbox.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: userId,
-        messages: [{ role: "user", content: text }],
-      }),
+    const payload = JSON.stringify({
+      user_id: userId,
+      messages: [{ role: "user", content: text }],
     });
+
+    // 1) 優先打同資料夾的 chatbox.php（自動適配 ngrok / localhost）
+    const siblingEndpoint = new URL("chatbox.php", window.location.href).href;
+
+    let response;
+    try {
+      response = await fetch(siblingEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (e1) {
+      // 2) 失敗時回退到固定 ngrok 端點（當你用 ngrok 測試時仍可用）
+      const ngrokEndpoint = "https://jianshen.ngrok.app/%E5%81%A5%E7%BF%92%E7%94%9F/dist/chatbox.php";
+      response = await fetch(ngrokEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      });
+    }
 
     const data = await response.json();
     const aiReply = data.reply || "❌ 無法取得回覆";
@@ -196,6 +214,7 @@ async function sendMessage() {
     appendMessage("❌ 發送失敗，請稍後再試", "bot");
   }
 }
+
 
 
 // --------- 發送事件 ----------
