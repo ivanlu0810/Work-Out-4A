@@ -14,7 +14,7 @@ ini_set('display_errors', 0);
 
 // 資料庫連接
 $host = 'localhost';
-$dbname = '健習生';
+$dbname = 'test';
 $username = 'root';
 $password = '';
 

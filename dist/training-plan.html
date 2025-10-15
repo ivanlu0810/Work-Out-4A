@@ -545,6 +545,16 @@
             color: #28a745 !important;
         }
 
+        .completion-status.disabled {
+            cursor: not-allowed;
+            opacity: 0.6;
+        }
+
+        .completion-status.disabled:hover {
+            background: none;
+            transform: none;
+        }
+
         /* 🔔 自訂提示框樣式 */
         .custom-alert {
             position: fixed;
@@ -1079,8 +1089,7 @@
     </div>
 
     <!-- 選擇動作彈出視窗 -->
-    <div class="modal fade exercise-modal" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel"
-        aria-hidden="true">
+    <div class="modal fade exercise-modal" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1115,7 +1124,7 @@
     </div>
 
     <!-- 設定組數次數彈出視窗 -->
-    <div class="modal fade" id="setRepsModal" tabindex="-1" aria-labelledby="setRepsModalLabel" aria-hidden="true">
+    <div class="modal fade" id="setRepsModal" tabindex="-1" aria-labelledby="setRepsModalLabel">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
@@ -1165,7 +1174,7 @@
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" onclick="addExerciseToDay()">加入課表</button>
+                    <button type="button" class="btn btn-primary" onclick="handleAddExerciseClick()">加入課表</button>
                 </div>
             </div>
         </div>
@@ -1189,6 +1198,17 @@
             saturday: [],
             sunday: []
         };
+
+        // 確保 weeklyPlan 具有完整 7 天結構
+        function normalizeWeeklyPlan(plan) {
+            const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
+            const normalized = {};
+            days.forEach(d => {
+                const arr = plan && Array.isArray(plan[d]) ? plan[d] : [];
+                normalized[d] = arr;
+            });
+            return normalized;
+        }
 
         // 訓練模板資料
         const trainingTemplates = [
@@ -1505,19 +1525,61 @@
         // 從資料庫載入計畫
         async function loadPlan() {
             try {
-                const response = await fetch(`save_training_plan.php?week_number=${currentWeek}`);
-                const result = await response.json();
+                console.log('=== loadPlan 開始 ===');
+                console.log('載入週次:', currentWeek);
+                
+                // 先嘗試載入特定週次
+                let response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=9`);
+                let result = await response.json();
+                
+                console.log('特定週次 API 回應:', result);
 
-                if (result.success && result.data) {
-                    weeklyPlan = result.data.weeklyPlan;
+                // 如果特定週次沒有資料，嘗試載入所有計畫
+                if (!result.success || !result.plans || result.plans.length === 0) {
+                    console.log('特定週次沒有資料，嘗試載入所有計畫');
+                    response = await fetch(`completion-api.php?action=load_training_plan&user_id=9`);
+                    result = await response.json();
+                    console.log('所有計畫 API 回應:', result);
+                }
+
+                if (result.success && result.plans && result.plans.length > 0) {
+                    // 取第一個計畫（應該是最新的）
+                    const plan = result.plans[0];
+                    console.log('找到計畫:', plan.id, '週次:', plan.week_number, '日期:', plan.week_start_date);
+                    console.log('計畫的 exercises 結構:', plan.exercises);
+                    
+                    // 檢查是否為正確的週次
+                    if (plan.week_number != currentWeek) {
+                        console.warn('警告：載入的計畫週次不符！期望:', currentWeek, '實際:', plan.week_number);
+                        console.log('但我們會使用這個計畫，因為它是唯一可用的');
+                    }
+                    
+                    // 轉換 exercises 結構為 weeklyPlan 格式
+                    const weeklyPlanData = {
+                        monday: plan.exercises.monday || [],
+                        tuesday: plan.exercises.tuesday || [],
+                        wednesday: plan.exercises.wednesday || [],
+                        thursday: plan.exercises.thursday || [],
+                        friday: plan.exercises.friday || [],
+                        saturday: plan.exercises.saturday || [],
+                        sunday: plan.exercises.sunday || []
+                    };
+                    
+                    console.log('轉換後的 weeklyPlanData:', weeklyPlanData);
+                    
+                    weeklyPlan = normalizeWeeklyPlan(weeklyPlanData);
                     console.log('從資料庫載入計畫成功:', weeklyPlan);
                 } else {
-                    // 如果資料庫沒有資料，嘗試從localStorage載入
-                    loadFromLocalStorage();
+                    console.log('資料庫沒有找到計畫，清空本地資料');
+                    // 如果資料庫沒有資料，清空本地資料
+                    resetWeeklyPlan();
+                    console.log('已清空本地計畫資料');
                 }
             } catch (error) {
-                console.log('從資料庫載入失敗，嘗試從localStorage載入:', error);
-                loadFromLocalStorage();
+                console.log('從資料庫載入失敗，清空本地資料:', error);
+                // 如果資料庫載入失敗，也清空本地資料
+                resetWeeklyPlan();
+                console.log('已清空本地計畫資料');
             }
         }
 
@@ -1528,7 +1590,7 @@
                 try {
                     const allPlans = JSON.parse(saved);
                     if (allPlans[currentWeek] && allPlans[currentWeek].plan) {
-                        weeklyPlan = allPlans[currentWeek].plan;
+                        weeklyPlan = normalizeWeeklyPlan(allPlans[currentWeek].plan || {});
                         console.log('從localStorage載入計畫成功:', weeklyPlan);
                     } else {
                         resetWeeklyPlan();
@@ -1553,10 +1615,37 @@
                 saturday: [],
                 sunday: []
             };
+            
+            // 清除 localStorage 中的當週資料
+            localStorage.removeItem('weeklyPlan');
+            
+            // 清除 allTrainingPlans 中的當週資料
+            const saved = localStorage.getItem('allTrainingPlans');
+            if (saved) {
+                try {
+                    const allPlans = JSON.parse(saved);
+                    if (allPlans[currentWeek]) {
+                        delete allPlans[currentWeek];
+                        localStorage.setItem('allTrainingPlans', JSON.stringify(allPlans));
+                    }
+                } catch (e) {
+                    console.error('清除 localStorage 失敗:', e);
+                }
+            }
+        }
+
+        // 強制清空所有本地快取（用於資料庫清理後）
+        function clearAllLocalCache() {
+            console.log('清空所有本地快取');
+            localStorage.removeItem('weeklyPlan');
+            localStorage.removeItem('allTrainingPlans');
+            resetWeeklyPlan();
+            console.log('本地快取已清空');
         }
 
         // 同步到資料庫（使用 completion-api，會自動覆蓋同週並刪除舊明細）
         async function syncToDatabase() {
+            console.log('=== syncToDatabase 開始 ===');
             const today = new Date();
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
@@ -1574,7 +1663,7 @@
             };
 
             const payload = {
-                user_id: 1,
+                user_id: 9,
                 week_start_date: weekStartDate,
                 week_number: currentWeek,
                 plan_name: `第${currentWeek + 1}週訓練計畫`,
@@ -1587,6 +1676,7 @@
                 body: JSON.stringify(payload)
             });
             const result = await response.json();
+            console.log('同步結果:', result);
             if (!result.success) throw new Error(result.error || '同步失敗');
 
             // 將 plan_id 回寫 localStorage（供刪除與統計使用）
@@ -1599,6 +1689,9 @@
                     store[currentWeek].plan = weeklyPlan;
                     store[currentWeek].lastSaved = new Date().toISOString();
                     localStorage.setItem('allTrainingPlans', JSON.stringify(store));
+                    
+                    // 重新渲染以更新完成按鈕狀態
+                    renderWeeklyPlan();
                 } catch (e) { console.warn('寫入 planId 失敗', e); }
             }
 
@@ -1616,14 +1709,28 @@
                 // 先載入動作資料
                 await loadExercises();
                 
-                // 然後載入其他資料
-            await loadPlan();
-            updateWeekDates();
-            renderWeeklyPlan();
-            await loadStatsFromDatabase();
-            await loadPlanCompletionStats();
-            await loadPlanHistoryOptions();
-            renderTrainingTemplates();
+                // 載入計畫資料（現在會自動清空本地快取如果資料庫沒有資料）
+                await loadPlan();
+                
+                // 檢查是否有本地快取但資料庫沒有資料的情況
+                const saved = localStorage.getItem('allTrainingPlans');
+                if (saved) {
+                    try {
+                        const allPlans = JSON.parse(saved);
+                        if (allPlans[currentWeek] && allPlans[currentWeek].plan) {
+                            console.log('發現本地快取但資料庫可能沒有資料，清空本地快取');
+                            clearAllLocalCache();
+                        }
+                    } catch (e) {
+                        console.log('檢查本地快取時發生錯誤:', e);
+                    }
+                }
+                
+                updateWeekDates();
+                renderWeeklyPlan();
+                await loadPlanCompletionStats();
+                await loadPlanHistoryOptions();
+                renderTrainingTemplates();
                 
                 console.log('初始化完成');
             } catch (error) {
@@ -1837,21 +1944,44 @@
         // 儲存週計畫
         function saveWeeklyPlan() {
             localStorage.setItem('weeklyPlan', JSON.stringify(weeklyPlan));
+            
+            // 同時更新 allTrainingPlans
+            const saved = localStorage.getItem('allTrainingPlans');
+            let allPlans = {};
+            if (saved) {
+                try {
+                    allPlans = JSON.parse(saved);
+                } catch (e) {
+                    console.error('解析 allTrainingPlans 失敗:', e);
+                }
+            }
+            
+            allPlans[currentWeek] = {
+                plan: weeklyPlan,
+                planId: allPlans[currentWeek]?.planId || null // 保留現有的 planId
+            };
+            
+            localStorage.setItem('allTrainingPlans', JSON.stringify(allPlans));
+            console.log('已儲存週計畫到 localStorage:', { currentWeek, weeklyPlan });
         }
 
 
         // 渲染週計畫
         function renderWeeklyPlan() {
+            console.log('renderWeeklyPlan 開始渲染，當前 weeklyPlan:', weeklyPlan);
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
             days.forEach(day => {
                 const container = document.getElementById(day + '-exercises');
+                console.log(`渲染 ${day}，容器:`, container, '動作數量:', weeklyPlan[day].length);
+                
                 container.innerHTML = '';
 
                 if (weeklyPlan[day].length === 0) {
                     container.innerHTML = '<div class="empty-state">暫無動作</div>';
                 } else {
                     weeklyPlan[day].forEach((exercise, index) => {
+                        console.log(`渲染 ${day} 的第 ${index} 個動作:`, exercise);
                         const exerciseDiv = document.createElement('div');
                         const isRest = exercise.id === 0;
                         exerciseDiv.className = isRest ? 'exercise-item rest-item' : 'exercise-item';
@@ -1860,9 +1990,16 @@
                         if (isRest) {
                             detailsHtml = '<div class="exercise-details text-success"><i class="bi bi-moon me-1"></i>今日休息，讓身體恢復</div>';
                         } else {
+                            // 以資料庫增肌建議的範圍顯示；若沒有則退回 sets/reps 數值
+                            const showSets = (Number(exercise.setsMin) && Number(exercise.setsMax) && exercise.setsMax !== exercise.setsMin)
+                                ? `${exercise.setsMin}-${exercise.setsMax}`
+                                : (exercise.sets ?? '');
+                            const showReps = (Number(exercise.repsMin) && Number(exercise.repsMax) && exercise.repsMax !== exercise.repsMin)
+                                ? `${exercise.repsMin}-${exercise.repsMax}`
+                                : (exercise.reps ?? '');
                             detailsHtml = `
                                 <div class="exercise-details">
-                                    ${exercise.sets}組 × ${exercise.reps}次
+                                    ${showSets}組 × ${showReps}次
                                     ${exercise.weight ? `@ ${exercise.weight}kg` : ''}
                                     ${exercise.restTime ? `休息 ${exercise.restTime}秒` : ''}
                                 </div>
@@ -1894,6 +2031,18 @@
                     const completionButton = document.createElement('div');
                     completionButton.className = 'mt-2 text-center';
                     
+                    // 檢查是否有儲存到資料庫的計畫
+                    let planId = null;
+                    const saved = localStorage.getItem('allTrainingPlans');
+                    if (saved) {
+                        try {
+                            const parsed = JSON.parse(saved);
+                            if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
+                                planId = parsed[currentWeek].planId;
+                            }
+                        } catch (e) {}
+                    }
+                    
                     // 以資料庫回傳為主，無資料時回退 local 狀態
                     const dbFlag = (dayCompletionFromDb && typeof dayCompletionFromDb[day] === 'number') ? dayCompletionFromDb[day] : null;
                     const isCompleted = dbFlag === null ? weeklyPlan[day].some(exercise => exercise.completed) : dbFlag === 1;
@@ -1906,12 +2055,20 @@
                                 <span class="text-success ms-1">已完成</span>
                             </div>
                         `;
-                    } else {
-                        // 未完成狀態：顯示可點擊的勾勾
+                    } else if (planId) {
+                        // 未完成狀態：顯示可點擊的勾勾（有儲存到資料庫）
                         completionButton.innerHTML = `
                             <div class="completion-status incomplete" onclick="toggleDayCompletion('${day}')">
                                 <i class="bi bi-circle text-muted"></i>
                                 <span class="text-muted ms-1">點擊完成</span>
+                            </div>
+                        `;
+                    } else {
+                        // 未儲存狀態：顯示不可點擊的提示
+                        completionButton.innerHTML = `
+                            <div class="completion-status disabled">
+                                <i class="bi bi-circle text-secondary"></i>
+                                <span class="text-secondary ms-1">請先儲存計畫</span>
                             </div>
                         `;
                     }
@@ -1919,13 +2076,30 @@
                     container.appendChild(completionButton);
                 }
             });
-
             updateStats();
         }
 
         // 切換每天完成狀態
         function toggleDayCompletion(day) {
             if (!weeklyPlan[day] || weeklyPlan[day].length === 0) {
+                showSuccessMessage('該天沒有動作，無法標記完成', 'warning');
+                return;
+            }
+
+            // 檢查是否有儲存到資料庫的計畫
+            let planId = null;
+            const savedData = localStorage.getItem('allTrainingPlans');
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
+                        planId = parsed[currentWeek].planId;
+                    }
+                } catch (e) {}
+            }
+
+            if (!planId) {
+                showSuccessMessage('請先儲存計畫到資料庫後才能標記完成', 'warning');
                 return;
             }
 
@@ -1944,12 +2118,10 @@
             // 重新渲染
             renderWeeklyPlan();
 
-            // 取得 planId 與 week_number
-            let planId = null;
-            const saved = localStorage.getItem('allTrainingPlans');
-            if (saved) {
+            // 取得 planId 與 week_number（重複使用上面的變數）
+            if (savedData) {
                 try {
-                    const parsed = JSON.parse(saved);
+                    const parsed = JSON.parse(savedData);
                     if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
                         planId = parsed[currentWeek].planId;
                     }
@@ -1966,7 +2138,7 @@
             // 呼叫完成狀態 API
             const payload = {
                 plan_id: planId,
-                user_id: 1,
+                user_id: 9,
                 week_number: currentWeek,
                 day_of_week: day,
                 is_completed: newStatus ? 1 : 0,
@@ -2092,20 +2264,66 @@
             document.getElementById('exerciseName').value = exerciseName;
             document.getElementById('muscleGroup').value = muscleGroup;
 
-            // 如果是休息選項，直接加入而不顯示設定表單
+            // 休息：直接加入
             if (exerciseId === 0) {
                 addExerciseToDay(exerciseId, exerciseName, muscleGroup, 0, 0, '休息日');
-                bootstrap.Modal.getInstance(document.getElementById('exerciseModal')).hide();
+                const exerciseModal = bootstrap.Modal.getInstance(document.getElementById('exerciseModal'));
+                if (exerciseModal) exerciseModal.hide();
                 return;
             }
 
-            // 生成建議
-            generateRecommendations(muscleGroup);
+            // 直接加入（以資料庫增肌建議為準：顯示範圍，統計採下限）
+            try {
+                // 從資料庫動作表找出建議
+                const exInfo = Array.isArray(exercises) ? exercises.find(e => String(e.id) === String(exerciseId)) : null;
+                const setsMin = Number(exInfo?.hypertrophy_sets_min) || 3;
+                const setsMax = Number(exInfo?.hypertrophy_sets_max) || setsMin;
+                const repsMin = Number(exInfo?.hypertrophy_reps_min) || 12;
+                const repsMax = Number(exInfo?.hypertrophy_reps_max) || repsMin;
 
-            // 關閉動作選擇視窗，開啟設定視窗
-            bootstrap.Modal.getInstance(document.getElementById('exerciseModal')).hide();
-            const setRepsModal = new bootstrap.Modal(document.getElementById('setRepsModal'));
-            setRepsModal.show();
+                let day = selectedDay || document.getElementById('selectedDay').value;
+                if (!day) {
+                    const activeCard = document.querySelector('.day-card.active');
+                    if (activeCard && activeCard.parentElement && activeCard.parentElement.id) {
+                        day = activeCard.parentElement.id;
+                    }
+                }
+                if (!day) {
+                    showSuccessMessage('請先選擇要加入動作的日期', 'danger');
+                    return;
+                }
+
+                weeklyPlan = normalizeWeeklyPlan(weeklyPlan || {});
+                if (!Array.isArray(weeklyPlan[day])) weeklyPlan[day] = [];
+
+                const exercise = {
+                    id: exerciseId,
+                    name: exerciseName,
+                    muscleGroup: muscleGroup,
+                    // 統計用（採建議下限）
+                    sets: setsMin,
+                    reps: repsMin,
+                    // 顯示用範圍
+                    setsMin: setsMin,
+                    setsMax: setsMax,
+                    repsMin: repsMin,
+                    repsMax: repsMax,
+                    weight: null,
+                    restTime: 60
+                };
+
+                weeklyPlan[day].push(exercise);
+                saveWeeklyPlan();
+                renderWeeklyPlan();
+
+                const exerciseModal = bootstrap.Modal.getInstance(document.getElementById('exerciseModal'));
+                if (exerciseModal) exerciseModal.hide();
+
+                showSuccessMessage(`已加入 ${exerciseName} 至「${day}」，請記得按「儲存計畫」`);
+            } catch (e) {
+                console.error('selectExercise auto-add error:', e);
+                showSuccessMessage('加入課表時發生錯誤', 'danger');
+            }
         }
 
         // 生成建議
@@ -2132,16 +2350,40 @@
 
         // 添加動作到課表
         async function addExerciseToDay(exerciseId, exerciseName, muscleGroup, sets, reps, weight) {
+            console.log('addExerciseToDay 被呼叫:', { exerciseId, exerciseName, muscleGroup, sets, reps, weight, selectedDay });
+            
+            // 驗證 selectedDay 是否有效
+            if (!selectedDay) {
+                console.error('selectedDay 未設定，無法加入動作');
+                showSuccessMessage('請先選擇要加入動作的日期', 'danger');
+                return;
+            }
+            
+            // 確保 weeklyPlan 結構完整
+            weeklyPlan = normalizeWeeklyPlan(weeklyPlan || {});
+
             // 如果沒有傳入參數，從表單讀取
             if (exerciseId === undefined) {
                 exerciseId = document.getElementById('selectedExerciseId').value;
-                const day = document.getElementById('selectedDay').value;
+                const day = selectedDay; // 直接使用全域變數 selectedDay
                 sets = parseInt(document.getElementById('sets').value);
                 reps = parseInt(document.getElementById('reps').value);
                 weight = document.getElementById('weight').value;
                 const restTime = document.getElementById('restTime').value;
                 exerciseName = document.getElementById('exerciseName').value;
                 muscleGroup = document.getElementById('muscleGroup').value;
+
+                console.log('從表單讀取:', { exerciseId, day, sets, reps, weight, restTime, exerciseName, muscleGroup });
+
+                // 驗證必要欄位
+                if (!exerciseId || !exerciseName || !muscleGroup || !sets || !reps) {
+                    console.error('必要欄位缺失:', { exerciseId, exerciseName, muscleGroup, sets, reps });
+                    showSuccessMessage('請填寫所有必要欄位', 'danger');
+                    return;
+                }
+
+                // 確保當天為陣列
+                if (!Array.isArray(weeklyPlan[day])) weeklyPlan[day] = [];
 
                 const exercise = {
                     id: exerciseId,
@@ -2154,11 +2396,21 @@
                 };
 
                 weeklyPlan[day].push(exercise);
+                console.log('已加入動作到', day, ':', exercise);
 
                 // 關閉設定視窗
-                bootstrap.Modal.getInstance(document.getElementById('setRepsModal')).hide();
+                const setRepsModal = bootstrap.Modal.getInstance(document.getElementById('setRepsModal'));
+                if (setRepsModal) {
+                    setRepsModal.hide();
+                }
             } else {
                 // 直接傳入參數（用於休息選項）
+                const day = selectedDay; // 使用全域變數 selectedDay
+                console.log('使用 selectedDay:', day);
+                
+                // 確保當天為陣列
+                if (!Array.isArray(weeklyPlan[day])) weeklyPlan[day] = [];
+
                 const exercise = {
                     id: exerciseId,
                     name: exerciseName,
@@ -2169,7 +2421,8 @@
                     restTime: null
                 };
 
-                weeklyPlan[selectedDay].push(exercise);
+                weeklyPlan[day].push(exercise);
+                console.log('已加入動作到', day, ':', exercise);
             }
 
             saveWeeklyPlan();
@@ -2188,26 +2441,21 @@
         }
 
         // 移除動作
-        async function removeExercise(day, index) {
+        function removeExercise(day, index) {
             // 從本地計畫中移除
             weeklyPlan[day].splice(index, 1);
-
-            // 同步到資料庫
-            try {
-                await syncToDatabase();
-                showSuccessMessage('動作已移除並同步到資料庫！');
-            } catch (error) {
-                console.error('同步到資料庫失敗:', error);
-                showSuccessMessage('動作已移除，但同步到資料庫失敗', 'danger');
-            }
 
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
+            showSuccessMessage('動作已移除，請記得按「儲存計畫」');
         }
 
         // 更新統計（從當前 weeklyPlan 計算）
         function updateStats() {
+            console.log('=== updateStats 開始 ===');
+            console.log('當前 weeklyPlan:', weeklyPlan);
+            
             let totalExercises = 0;
             let trainingDays = 0;
             let completedDays = 0;
@@ -2225,7 +2473,9 @@
                         if (exercise.id === 0) return;
                         
                         totalExercises++;
-                        totalSets += exercise.sets || 0;
+                        // 確保 sets 是數字
+                        const sets = parseInt(exercise.sets) || 0;
+                        totalSets += sets;
                     });
                 }
             });
@@ -2233,6 +2483,8 @@
             document.getElementById('total-exercises').textContent = totalExercises;
             document.getElementById('training-days').textContent = trainingDays;
             document.getElementById('total-sets').textContent = totalSets;
+            
+            console.log('統計結果:', { totalExercises, trainingDays, completedDays, totalSets });
             
             // 如果有完成天數的顯示元素，更新它
             const completedDaysElement = document.getElementById('completed-days');
@@ -2244,11 +2496,20 @@
         // 從資料庫載入已儲存的統計數據
         async function loadStatsFromDatabase() {
             try {
-                const response = await fetch(`save_training_plan.php?week_number=${currentWeek}`);
+                const response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=9`);
                 const result = await response.json();
 
-                if (result.success && result.data && result.data.weeklyPlan) {
-                    const savedPlan = result.data.weeklyPlan;
+                if (result.success && result.plans && result.plans.length > 0) {
+                    const plan = result.plans[0];
+                    const savedPlan = {
+                        monday: plan.exercises.monday || [],
+                        tuesday: plan.exercises.tuesday || [],
+                        wednesday: plan.exercises.wednesday || [],
+                        thursday: plan.exercises.thursday || [],
+                        friday: plan.exercises.friday || [],
+                        saturday: plan.exercises.saturday || [],
+                        sunday: plan.exercises.sunday || []
+                    };
                     let totalExercises = 0;
                     let trainingDays = 0;
                     let completedDays = 0;
@@ -2266,7 +2527,10 @@
                                 if (exercise.id === 0) return;
                                 
                                 totalExercises++;
-                                totalSets += exercise.sets || 0;
+                                // 確保 sets 是數字
+                                const sets = parseInt(exercise.sets) || 0;
+                                totalSets += sets;
+                                console.log('動作統計:', exercise.name, 'sets:', exercise.sets, 'parsed:', sets);
                             });
                         }
                     });
@@ -2389,7 +2653,6 @@
             updateWeekDates();
             await loadPlan(); // 載入該週的儲存計畫
             renderWeeklyPlan();
-            await loadStatsFromDatabase(); // 載入該週的儲存統計
             await loadPlanCompletionStats();
             showSuccessMessage('已切換到上週');
         }
@@ -2399,7 +2662,6 @@
             updateWeekDates();
             await loadPlan(); // 載入該週的儲存計畫
             renderWeeklyPlan();
-            await loadStatsFromDatabase(); // 載入該週的儲存統計
             await loadPlanCompletionStats();
             showSuccessMessage('已切換到下週');
         }
@@ -2407,33 +2669,71 @@
         // 刪除本週計畫（含明細與完成紀錄）
         async function deleteCurrentPlan() {
             try {
+                console.log('=== 開始刪除計畫 ===');
+                console.log('currentWeek:', currentWeek);
+                
                 // 從 localStorage 取得當週 plan_id
                 const saved = localStorage.getItem('allTrainingPlans');
+                console.log('localStorage allTrainingPlans:', saved);
+                
                 let planId = null;
                 if (saved) {
                     try {
                         const parsed = JSON.parse(saved);
+                        console.log('parsed localStorage:', parsed);
                         if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
                             planId = parsed[currentWeek].planId;
+                            console.log('找到 planId:', planId);
                         }
-                    } catch (e) {}
+                    } catch (e) {
+                        console.error('解析 localStorage 失敗:', e);
+                    }
                 }
 
                 if (!planId) {
-                    showSuccessMessage('目前週尚未儲存至資料庫，無需刪除', 'danger');
-                    return;
+                    console.log('沒有找到 planId，嘗試強制刪除當週所有資料');
+                    // 強制刪除當週所有資料（即使沒有 planId）
+                    if (!confirm('確定要刪除本週計畫（包含所有動作與完成紀錄）嗎？此動作無法復原。')) return;
+                    
+                    // 直接刪除當週的資料
+                    const today = new Date();
+                    const startOfWeek = new Date(today);
+                    startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
+                    const weekStartDate = startOfWeek.toISOString().split('T')[0];
+                    
+                    const payload = { 
+                        week_number: currentWeek, 
+                        week_start_date: weekStartDate,
+                        user_id: 9 
+                    };
+                    
+                    console.log('強制刪除 payload:', payload);
+                    const res = await fetch('completion-api.php?action=delete_training_plan_by_week', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const json = await res.json();
+                    console.log('強制刪除結果:', json);
+                    
+                    if (!json.success) {
+                        throw new Error(json.error || '強制刪除失敗');
+                    }
+                } else {
+                    console.log('使用 planId 刪除:', planId);
+                    if (!confirm('確定要刪除本週計畫（包含所有動作與完成紀錄）嗎？此動作無法復原。')) return;
+
+                    const payload = { plan_id: planId, user_id: 1 };
+                    console.log('刪除 payload:', payload);
+                    const res = await fetch('completion-api.php?action=delete_training_plan', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const json = await res.json();
+                    console.log('刪除結果:', json);
+                    if (!json.success) throw new Error(json.error || '刪除失敗');
                 }
-
-                if (!confirm('確定要刪除本週計畫（包含所有動作與完成紀錄）嗎？此動作無法復原。')) return;
-
-                const payload = { plan_id: planId, user_id: 1 };
-                const res = await fetch('completion-api.php?action=delete_training_plan', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(payload)
-                });
-                const json = await res.json();
-                if (!json.success) throw new Error(json.error || '刪除失敗');
 
                 // 清掉 localStorage 當週快取
                 if (saved) {
@@ -2450,6 +2750,7 @@
                 await loadPlanCompletionStats();
                 await loadPlanHistoryOptions();
                 updateStats();
+                
                 showSuccessMessage('本週計畫已刪除');
             } catch (err) {
                 console.error('deleteCurrentPlan error:', err);
@@ -2825,12 +3126,8 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
 
-            // 同步到資料庫，成功後才更新統計
-            syncToDatabase().then(() => {
-                loadStatsFromDatabase();
-            }).catch(error => {
-                console.error('同步到資料庫失敗:', error);
-            });
+            // 更新統計
+            updateStats();
             
             console.log('模板應用完成，週計畫:', weeklyPlan);
             
@@ -2940,12 +3237,8 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
             
-            // 同步到資料庫，成功後才更新統計
-            syncToDatabase().then(() => {
-                loadStatsFromDatabase();
-            }).catch(error => {
-                console.error('同步到資料庫失敗:', error);
-            });
+            // 更新統計
+            updateStats();
             
             console.log('固定全身推薦菜單應用完成');
         }
@@ -3282,12 +3575,8 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
             
-            // 同步到資料庫，成功後才更新統計
-            syncToDatabase().then(() => {
-                loadStatsFromDatabase();
-            }).catch(error => {
-                console.error('同步到資料庫失敗:', error);
-            });
+            // 更新統計
+            updateStats();
             
             console.log('二分化隨機菜單生成完成');
         }
@@ -3496,10 +3785,8 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
             
-            // 同步到資料庫，成功後才更新統計
-            syncToDatabase().then(() => {
-                updateStats();
-            }).catch(err => console.error('同步到資料庫失敗:', err));
+            // 更新統計
+            updateStats();
 
             console.log('三分化隨機菜單生成完成');
         }
@@ -3620,10 +3907,8 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
             
-            // 同步到資料庫，成功後才更新統計
-            syncToDatabase().then(() => {
-                updateStats();
-            }).catch(err => console.error('同步到資料庫失敗:', err));
+            // 更新統計
+            updateStats();
 
             console.log('三分化推薦菜單生成完成');
         }
@@ -3696,12 +3981,8 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
             
-            // 同步到資料庫，成功後才更新統計
-            syncToDatabase().then(() => {
-                loadStatsFromDatabase();
-            }).catch(error => {
-                console.error('同步到資料庫失敗:', error);
-            });
+            // 更新統計
+            updateStats();
             
             console.log('Level 1二分化推薦菜單應用完成');
         }
@@ -3802,12 +4083,8 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
             
-            // 同步到資料庫，成功後才更新統計
-            syncToDatabase().then(() => {
-                loadStatsFromDatabase();
-            }).catch(error => {
-                console.error('同步到資料庫失敗:', error);
-            });
+            // 更新統計
+            updateStats();
             
             console.log('Level 1兩天連續練菜單應用完成');
         }
@@ -4260,6 +4537,86 @@
         // 搜尋和篩選事件
         document.getElementById('exerciseSearch').addEventListener('input', renderExerciseList);
         document.getElementById('muscleGroupFilter').addEventListener('change', renderExerciseList);
+
+        // 由表單提交加入（避免瀏覽器或事件參數造成的不一致）
+        function handleAddExerciseClick() {
+            console.log('=== handleAddExerciseClick 開始執行 ===');
+            try {
+                let day = document.getElementById('selectedDay').value || selectedDay;
+                console.log('1. 取得 day:', day, 'selectedDay:', selectedDay);
+                
+                // 後備：從目前被選取的 day-card 取得 day id
+                if (!day) {
+                    const activeCard = document.querySelector('.day-card.active');
+                    console.log('2. 尋找 activeCard:', activeCard);
+                    if (activeCard && activeCard.parentElement && activeCard.parentElement.id) {
+                        day = activeCard.parentElement.id; // parent 容器的 id 例如 monday
+                        console.log('3. 從 activeCard 取得 day:', day);
+                    }
+                }
+                
+                if (!day) { 
+                    console.error('4. day 仍然為空，無法加入動作');
+                    showSuccessMessage('請先選擇要加入動作的日期', 'danger'); 
+                    return; 
+                }
+
+                const exerciseId = document.getElementById('selectedExerciseId').value;
+                const exerciseName = document.getElementById('exerciseName').value;
+                const muscleGroup = document.getElementById('muscleGroup').value;
+                const sets = parseInt(document.getElementById('sets').value);
+                const reps = parseInt(document.getElementById('reps').value);
+                const weight = document.getElementById('weight').value;
+                const restTime = document.getElementById('restTime').value;
+
+                console.log('5. 表單資料:', { exerciseId, exerciseName, muscleGroup, sets, reps, weight, restTime });
+
+                if (!exerciseId || !exerciseName || !muscleGroup || !Number.isFinite(sets) || !Number.isFinite(reps)) {
+                    console.error('6. 必要欄位缺失');
+                    showSuccessMessage('請完整填寫組數與次數', 'danger');
+                    return;
+                }
+
+                weeklyPlan = normalizeWeeklyPlan(weeklyPlan || {});
+                if (!Array.isArray(weeklyPlan[day])) weeklyPlan[day] = [];
+
+                const exercise = {
+                    id: exerciseId,
+                    name: exerciseName,
+                    muscleGroup,
+                    sets,
+                    reps,
+                    weight: weight || null,
+                    restTime: restTime || null
+                };
+
+                console.log('7. 準備加入動作:', exercise, '到', day);
+                weeklyPlan[day].push(exercise);
+                console.log('8. 加入成功，當前 weeklyPlan[', day, ']:', weeklyPlan[day]);
+
+                saveWeeklyPlan();
+                console.log('9. 已儲存到 localStorage');
+                
+                renderWeeklyPlan();
+                console.log('10. 已重新渲染課表');
+
+                const modal = bootstrap.Modal.getInstance(document.getElementById('setRepsModal'));
+                if (modal) modal.hide();
+
+                // 進一步同步到資料庫
+                syncToDatabase().then(() => {
+                    console.log('11. 同步到資料庫成功');
+                    showSuccessMessage(`已加入 ${exerciseName} 至「${day}」並同步到資料庫！`);
+                }).catch(err => {
+                    console.error('12. 同步到資料庫失敗:', err);
+                    showSuccessMessage(`已加入 ${exerciseName} 至「${day}」，但同步到資料庫失敗`, 'danger');
+                });
+            } catch (e) {
+                console.error('handleAddExerciseClick error:', e);
+                showSuccessMessage('加入課表時發生錯誤', 'danger');
+            }
+            console.log('=== handleAddExerciseClick 執行完成 ===');
+        }
     </script>
 
 </body>
