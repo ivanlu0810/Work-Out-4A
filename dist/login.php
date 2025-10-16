@@ -24,7 +24,37 @@ $stmt->store_result();
 
 if ($stmt->num_rows === 0) {
     // 沒有這個使用者
-    echo "<script>alert('尚未註冊'); window.location.href='auth-login.html';</script>";
+    echo "<!DOCTYPE html>
+<html lang='zh-Hant'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>健習生｜登入</title>
+    <link rel='icon' href='images/fitness.png' type='image/png'>
+    <link href='https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='assets/css/bootstrap.css'>
+    <link rel='stylesheet' href='assets/vendors/bootstrap-icons/bootstrap-icons.css'>
+    <link rel='stylesheet' href='assets/css/app.css'>
+</head>
+<body>
+    <div class='modal fade show' id='errorModal' tabindex='-1' style='display: block; background-color: rgba(0,0,0,0.5);'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h5 class='modal-title'>提示！</h5>
+                </div>
+                <div class='modal-body'>
+                    <p>尚未註冊</p>
+                </div>
+                <div class='modal-footer'>
+                    <button type='button' class='btn btn-primary' onclick='window.location.href=\"auth-login.html\"'>確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src='assets/js/bootstrap.bundle.min.js'></script>
+</body>
+</html>";
     $stmt->close();
     $conn->close();
     exit;
@@ -52,7 +82,37 @@ if (password_verify($password, $password_hash)) {
     echo "<script>window.location.href='index.html?login=success';</script>";
 } else {
     // 密碼錯誤
-    echo "<script>alert('密碼錯誤'); window.location.href='auth-login.html';</script>";
+    echo "<!DOCTYPE html>
+<html lang='zh-Hant'>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>健習生｜登入</title>
+    <link rel='icon' href='images/fitness.png' type='image/png'>
+    <link href='https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap' rel='stylesheet'>
+    <link rel='stylesheet' href='assets/css/bootstrap.css'>
+    <link rel='stylesheet' href='assets/vendors/bootstrap-icons/bootstrap-icons.css'>
+    <link rel='stylesheet' href='assets/css/app.css'>
+</head>
+<body>
+    <div class='modal fade show' id='errorModal' tabindex='-1' style='display: block; background-color: rgba(0,0,0,0.5);'>
+        <div class='modal-dialog'>
+            <div class='modal-content'>
+                <div class='modal-header'>
+                    <h5 class='modal-title'>提示！</h5>
+                </div>
+                <div class='modal-body'>
+                    <p>密碼錯誤</p>
+                </div>
+                <div class='modal-footer'>
+                    <button type='button' class='btn btn-primary' onclick='window.location.href=\"auth-login.html\"'>確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src='assets/js/bootstrap.bundle.min.js'></script>
+</body>
+</html>";
 }
 
 $stmt->close();

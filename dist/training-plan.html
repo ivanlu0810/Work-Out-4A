@@ -63,8 +63,8 @@
 
         .calendar-nav .btn {
             border-radius: 50%;
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -236,19 +236,9 @@
             border-radius: 4px;
         }
 
-        .legend-color.training-day {
-            background: #e8eaed;
-            border: 1px solid #4caf50;
-        }
-
         .legend-color.rest-day {
             background: #fff3e0;
             border: 1px solid #ff9800;
-        }
-
-        .legend-color.today {
-            background: #e3f2fd;
-            border: 1px solid #1976d2;
         }
 
         .calendar-day:not(.other-month):hover {
@@ -353,13 +343,27 @@
             text-align: left;
         }
 
+        .day-training-details h6 {
+            display: flex;
+            align-items: center;
+        }
+
+        .day-training-details h6 i {
+            line-height: 1;
+            vertical-align: middle;
+            font-size: 0.9em;
+        }
+
         .training-list {
-            max-height: 400px;
+            max-height: 300px;
             overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 1rem;
         }
 
         .training-item {
-            background: #f8f9fa;
+            background: #f8f9fa !important;
             border: 1px solid #e9ecef;
             border-radius: 8px;
             padding: 12px;
@@ -368,19 +372,28 @@
         }
 
         .training-item:hover {
-            background: #e9ecef;
+            background: #e9ecef !important;
             transform: translateY(-1px);
         }
 
         .training-item-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            min-height: 36px;
+        }
+
+        .training-item-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+            height: 36px;
         }
 
         .training-number {
-            background: #007bff;
+            background: #8B9DC3; /* 莫蘭迪藍灰色 */
             color: white;
             width: 24px;
             height: 24px;
@@ -390,16 +403,16 @@
             justify-content: center;
             font-size: 0.75rem;
             font-weight: 600;
+            transform: translateY(9px); /* 再往下移動更多 */
         }
 
         .training-name {
             font-weight: 600;
             color: #495057;
-            flex: 1;
         }
 
         .muscle-group-badge {
-            background: #28a745;
+            background: #9db3c6;
             color: white;
             padding: 2px 8px;
             border-radius: 12px;
@@ -411,6 +424,80 @@
             display: flex;
             gap: 12px;
             flex-wrap: wrap;
+            margin-top: 8px;
+            width: 100%;
+            justify-content: flex-start; /* 靠左對齊，與動作標題對齊 */
+            padding-left: 36px; /* 與動作名稱對齊（編號24px + 間距12px） */
+        }
+
+        .training-item-actions {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+            position: relative;
+            top: 12px;
+            z-index: 2; /* 確保不被其他元素覆蓋 */
+            pointer-events: auto; /* 確保可點擊 */
+        }
+
+        .training-item-actions .btn {
+            pointer-events: auto; /* 明確允許按鈕接收點擊 */
+        }
+
+        /* 訓練動作按鈕樣式 - 與 history.html 一致 */
+        .btn-edit-exercise {
+            background-color: #7f90a9 !important;
+            border: none !important;
+            color: #fff !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            height: 36px;
+            padding: 0 0.75rem;
+            line-height: 1;
+        }
+
+        .btn-edit-exercise:hover,
+        .btn-edit-exercise:active,
+        .btn-edit-exercise:focus {
+            background-color: #67798f !important;
+            color: #fff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-remove-exercise {
+            background-color: #94696d !important;
+            border: none !important;
+            color: #fff !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            height: 36px;
+            padding: 0 0.75rem;
+            line-height: 1;
+        }
+
+        .btn-remove-exercise:hover,
+        .btn-remove-exercise:active,
+        .btn-remove-exercise:focus {
+            background-color: #7a5558 !important;
+            color: #fff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-edit-exercise i,
+        .btn-remove-exercise i {
+            display: inline-block;
+            line-height: 1;
+        }
+
+        /* 組數和次數圖標的莫蘭迪色系 */
+        .training-item-details .detail-item i {
+            color: #A8C8A8 !important; /* 莫蘭迪綠色 */
         }
 
         .detail-item {
@@ -551,21 +638,18 @@
         .list-group-item:last-child {
             border-bottom: none !important;
         }
-
         .list-group-item:focus {
             border: none !important;
             outline: none !important;
             box-shadow: none !important;
             border-bottom: 1px solid #e9ecef !important;
         }
-
         .list-group-item:active {
             border: none !important;
             outline: none !important;
             box-shadow: none !important;
             border-bottom: 1px solid #e9ecef !important;
         }
-
         /* 日期卡片 */
         .day-card {
             background: #fff;
@@ -631,6 +715,11 @@
         /* 訓練內容詳情模態視窗位置調整 */
         #trainingDetailsModal .modal-dialog {
             margin-top: 5vh;
+        }
+
+        /* 日曆選擇菜單模態視窗位置調整 */
+        #calendarDayModal .modal-dialog {
+            margin-top: 1vh;
         }
 
         .modal-body {
@@ -906,13 +995,37 @@
             background-color: #5A628C !important;
             border-color: #5A628C !important;
             color: #fff !important;
-            border-radius: 25px;
+            border-radius: 6px;
             font-weight: 500;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
         }
 
         .btn-primary:hover {
             background-color: #4e567d !important;
             border-color: #4e567d !important;
+        }
+
+        /* 確保取消按鈕與儲存按鈕大小一致 */
+        .btn-secondary {
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            border-radius: 6px;
+        }
+
+        /* 強制所有模態框中的按鈕使用圓角矩形樣式 */
+        .modal-footer .btn,
+        .modal-footer .btn-primary,
+        .modal-footer .btn-secondary {
+            border-radius: 6px !important;
+            padding: 0.375rem 0.75rem !important;
+            font-size: 1rem !important;
+            height: 38px !important;
+            min-height: 38px !important;
+            line-height: 1.5 !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
         }
 
         .btn-outline-danger {
@@ -1190,7 +1303,6 @@
             background: none;
             transform: none;
         }
-
         /* 🔔 自訂提示框樣式 */
         .custom-alert {
             position: fixed;
@@ -1206,14 +1318,12 @@
             justify-content: space-between;
             z-index: 9999;
         }
-
         .custom-alert-success {
             background: #e6f4ea;
             /* 淺綠 */
             color: #1e4620;
             border-left: 6px solid #718d79;
         }
-
         .custom-alert-danger {
             background: #fdecea;
             /* 淺紅 */
@@ -1333,6 +1443,15 @@
             /* 調整字色避免太淡 */
             border-bottom: 1px solid #e9ecef;
             /* 底線同樣保持淡灰 */
+        }
+
+        /* 確保模態框內容背景色不會變暗 */
+        .modal-content {
+            background-color: #ffffff !important;
+        }
+
+        .modal-body {
+            background-color: #ffffff !important;
         }
 
         /* ✅ 僅針對「訓練分化模板」卡片開啟 hover 動畫 */
@@ -1559,14 +1678,6 @@
                         </div>
                         
                         <div class="calendar-legend">
-                            <div class="legend-item">
-                                <div class="legend-color training-day"></div>
-                                <span>訓練日</span>
-                            </div>
-                            <div class="legend-item">
-                                <div class="legend-color today"></div>
-                                <span>今天</span>
-                            </div>
                         </div>
                     </div>
                 </section>
@@ -1816,7 +1927,6 @@
             </div>
         </div>
     </div>
-
     <!-- 設定組數次數彈出視窗 -->
     <div class="modal fade" id="setRepsModal" tabindex="-1" aria-labelledby="setRepsModalLabel">
         <div class="modal-dialog">
@@ -2393,7 +2503,6 @@
                 showSuccessMessage('儲存失敗: ' + error.message, 'danger');
             }
         }
-
         // 從資料庫載入計畫
         async function loadPlan() {
             let response;
@@ -2943,9 +3052,19 @@
                 content += `
                     <div class="training-item">
                         <div class="training-item-header">
-                            <span class="training-number">${index + 1}</span>
-                            <span class="training-name">${exercise.name}</span>
-                            <span class="muscle-group-badge">${exercise.muscleGroup}</span>
+                            <div class="training-item-left">
+                                <span class="training-number">${index + 1}</span>
+                                <span class="training-name">${exercise.name}</span>
+                                <span class="muscle-group-badge">${exercise.muscleGroup}</span>
+                            </div>
+                            <div class="training-item-actions">
+                                <button class="btn btn-sm btn-edit-exercise" onclick="editSingleExercise('${date.toISOString()}', ${index})">
+                                    <i class="bi bi-pencil"></i> 編輯
+                                </button>
+                                <button class="btn btn-sm btn-remove-exercise" onclick="removeSingleExercise('${date.toISOString()}', ${index})">
+                                    <i class="bi bi-trash"></i> 移除
+                                </button>
+                            </div>
                         </div>
                         <div class="training-item-details">
                             ${sets ? `<span class="detail-item"><i class="bi bi-hash"></i> ${sets} 組</span>` : ''}
@@ -2957,11 +3076,6 @@
             });
             
             content += `
-                    </div>
-                    <div class="mt-3 text-center">
-                        <button class="btn btn-primary" onclick="editDayTraining('${date.toISOString()}')">
-                            <i class="bi bi-pencil"></i> 編輯訓練內容
-                        </button>
                     </div>
                 </div>
             `;
@@ -3022,7 +3136,6 @@
                 openExerciseModal(dayName);
             }, 100);
         }
-
         // 顯示日期選擇菜單
         function showCalendarDayMenu(date, dayName, dayTrainingData) {
             const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
@@ -3105,6 +3218,218 @@
                 // 顯示沒有訓練內容的提示
                 showNoTrainingContent(date);
             }
+        }
+
+        // 清除所有模態框backdrop的函數
+        function clearAllModalBackdrops() {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+
+        // 編輯單個訓練動作
+        function editSingleExercise(dateString, exerciseIndex) {
+            const date = new Date(dateString);
+            const dayTrainingData = getDayTrainingData(date);
+            
+            if (!dayTrainingData || !dayTrainingData[exerciseIndex]) {
+                alert('找不到要編輯的訓練動作');
+                return;
+            }
+            
+            const exercise = dayTrainingData[exerciseIndex];
+            
+            // 創建編輯模態框
+            const modalHtml = `
+                <div class="modal fade" id="editExerciseModal" tabindex="-1" aria-labelledby="editExerciseModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="editExerciseModalLabel">
+                                    <i class="bi bi-pencil me-2"></i>編輯訓練動作
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="mb-3">
+                                    <label class="form-label">動作名稱</label>
+                                    <input type="text" class="form-control" id="editExerciseName" value="${exercise.name}" readonly>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">組數</label>
+                                    <input type="number" class="form-control" id="editExerciseSets" value="${exercise.sets || ''}" min="1" max="20">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">次數</label>
+                                    <input type="number" class="form-control" id="editExerciseReps" value="${exercise.reps || ''}" min="1" max="100">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">重量 (kg)</label>
+                                    <input type="number" class="form-control" id="editExerciseWeight" value="${exercise.weight || ''}" min="0" step="0.5">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="saveEditedExercise('${dateString}', ${exerciseIndex})">儲存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 清除所有現有的backdrop
+            clearAllModalBackdrops();
+            
+            // 移除現有的模態框
+            const existingModal = document.getElementById('editExerciseModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('editExerciseModal'));
+            modal.show();
+            
+            // 模態框關閉時移除DOM元素和清除backdrop
+            document.getElementById('editExerciseModal').addEventListener('hidden.bs.modal', function () {
+                // 清除backdrop
+                const backdrop = document.querySelector('.modal-backdrop');
+                if (backdrop) {
+                    backdrop.remove();
+                }
+                // 移除body上的modal-open類別
+                document.body.classList.remove('modal-open');
+                // 移除DOM元素
+                this.remove();
+            });
+        }
+
+        // 儲存編輯後的訓練動作
+        function saveEditedExercise(dateString, exerciseIndex) {
+            const date = new Date(dateString);
+            const dayTrainingData = getDayTrainingData(date);
+            
+            if (!dayTrainingData || !dayTrainingData[exerciseIndex]) {
+                alert('找不到要編輯的訓練動作');
+                return;
+            }
+            
+            // 獲取表單數據
+            const sets = document.getElementById('editExerciseSets').value;
+            const reps = document.getElementById('editExerciseReps').value;
+            const weight = document.getElementById('editExerciseWeight').value;
+            
+            // 更新訓練動作數據
+            dayTrainingData[exerciseIndex].sets = sets;
+            dayTrainingData[exerciseIndex].reps = reps;
+            dayTrainingData[exerciseIndex].weight = weight;
+            
+            // 儲存到localStorage
+            saveDailyTrainingData(date, dayTrainingData);
+            
+            // 關閉模態框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('editExerciseModal'));
+            if (modal) {
+                modal.hide();
+                // 確保backdrop被清除
+                setTimeout(() => {
+                    const backdrop = document.querySelector('.modal-backdrop');
+                    if (backdrop) {
+                        backdrop.remove();
+                    }
+                    document.body.classList.remove('modal-open');
+                }, 100);
+            }
+            
+            // 重新顯示訓練內容詳情
+            showDayTrainingDetails(date, dayTrainingData);
+            
+            // 更新行事曆
+            updateCalendarTrainingData();
+            
+            showSuccessMessage('訓練動作已更新');
+        }
+
+        // 移除單個訓練動作
+        function removeSingleExercise(dateString, exerciseIndex) {
+            // 創建確認模態框
+            const confirmModalHtml = `
+                <div class="modal fade" id="confirmRemoveModal" tabindex="-1" aria-labelledby="confirmRemoveModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmRemoveModalLabel">提示！</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>確定要移除這個訓練動作嗎？</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="confirmRemoveExercise('${dateString}', ${exerciseIndex})">確定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除現有的確認模態框
+            const existingModal = document.getElementById('confirmRemoveModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框
+            document.body.insertAdjacentHTML('beforeend', confirmModalHtml);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('confirmRemoveModal'));
+            modal.show();
+            
+            // 模態框關閉時移除DOM元素
+            document.getElementById('confirmRemoveModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }
+
+        // 確認移除訓練動作
+        function confirmRemoveExercise(dateString, exerciseIndex) {
+            const date = new Date(dateString);
+            const dayTrainingData = getDayTrainingData(date);
+            
+            if (!dayTrainingData || !dayTrainingData[exerciseIndex]) {
+                alert('找不到要移除的訓練動作');
+                return;
+            }
+            
+            // 移除指定索引的訓練動作
+            dayTrainingData.splice(exerciseIndex, 1);
+            
+            // 儲存到localStorage
+            saveDailyTrainingData(date, dayTrainingData);
+            
+            // 關閉確認模態框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmRemoveModal'));
+            if (modal) modal.hide();
+            
+            // 重新顯示訓練內容詳情
+            if (dayTrainingData.length > 0) {
+                showDayTrainingDetails(date, dayTrainingData);
+            } else {
+                // 如果沒有訓練動作了，關閉模態框
+                const modal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
+                if (modal) modal.hide();
+            }
+            
+            // 更新行事曆
+            updateCalendarTrainingData();
+            
+            showSuccessMessage('訓練動作已移除');
         }
 
         // 為某一天新增訓練動作（獨立於週次）
@@ -4126,8 +4451,6 @@
             localStorage.setItem('allTrainingPlans', JSON.stringify(allPlans));
             console.log('已儲存週計畫到 localStorage:', { currentWeek, weeklyPlan });
         }
-
-
         // 渲染週計畫
         function renderWeeklyPlan() {
             console.log('renderWeeklyPlan 開始渲染，當前 weeklyPlan:', weeklyPlan);
@@ -4754,7 +5077,6 @@
                 document.getElementById('total-sets').textContent = 0;
             }
         }
-
         // 依據 training_plan_completion 顯示本週每日完成清單與完成率
         async function loadPlanCompletionStats(overridePlanId = null) {
             try {
@@ -6866,7 +7188,6 @@
                 showSuccessMessage('本週訓練計畫已刪除！');
             }
         }
-
         // 正規化週計畫資料結構
         function normalizeWeeklyPlan(data) {
             if (!data || typeof data !== 'object') {

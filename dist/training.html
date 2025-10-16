@@ -334,6 +334,20 @@
             /* 40px */
         }
 
+        /* 與 profile.html 一致的主色按鈕樣式 */
+        .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #fff !important;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+            color: #fff !important;
+        }
+
         /* 分頁控制樣式 */
         .pagination-controls {
             display: flex;
@@ -1348,7 +1362,7 @@
                         credentials: 'include',
                         body: 'name=' + encodeURIComponent(exercise.name)
                     });
-                    alert(`已取消收藏：${exercise.name}`);
+                    showModal(`已取消收藏：${exercise.name}`, '提示！');
                     if (btn) btn.querySelector('i').classList.replace('bi-star-fill', 'bi-star');
                 } else {
                     const res = await fetch(API_FAVORITES, {
@@ -1361,7 +1375,7 @@
                         const err = await res.json().catch(()=>({}));
                         throw new Error(err.error || `HTTP ${res.status}`);
                     }
-                    alert(`已加入收藏：${exercise.name}`);
+                    showModal(`已加入收藏：${exercise.name}`, '提示！');
                     if (btn) btn.querySelector('i').classList.replace('bi-star', 'bi-star-fill');
                 }
 
@@ -1370,7 +1384,7 @@
                 localStorage.setItem('favorites', JSON.stringify(updated));
             } catch (e) {
                 console.error(e);
-                alert('操作失敗：' + (e?.message || '請先登入或稍後再試'));
+                showModal('操作失敗：' + (e?.message || '請先登入或稍後再試'), '錯誤');
             }
         }
 
@@ -1627,7 +1641,57 @@
                 }
             });
         });
+
+        // 與 profile.html 一致的 showModal 函數
+        function showModal(message, title = '提示！') {
+            if (title === '錯誤') {
+                const msgEl = document.getElementById('errorMessage');
+                if (msgEl) msgEl.textContent = message;
+                new bootstrap.Modal(document.getElementById('errorModal')).show();
+            } else {
+                const titleEl = document.getElementById('successTitle');
+                const msgEl = document.getElementById('successMessage');
+                if (titleEl) titleEl.textContent = title;
+                if (msgEl) msgEl.textContent = message;
+                new bootstrap.Modal(document.getElementById('successModal')).show();
+            }
+        }
     </script>
+    <!-- 與 profile.html 一致的提示 Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successTitle">提示！</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage">操作成功！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">錯誤</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage">發生錯誤。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <div class="modal fade" id="exerciseModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
             <div class="modal-content">
@@ -1641,7 +1705,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">關閉</button>
                 </div>
             </div>
         </div>

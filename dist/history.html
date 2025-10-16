@@ -1043,7 +1043,7 @@
 
         /* 刪除：改用 x-www-form-urlencoded（PHP 可直接 $_POST['record_id']） */
         async function deleteRecord(recordId) {
-            if (!recordId) return showCustomAlert('缺少 record_id，無法刪除', '錯誤');
+            if (!recordId) return showCustomAlert('缺少 record_id，無法刪除', '提示！');
             
             // 使用自定義確認對話框
             const confirmed = await showConfirmDialog('刪除此筆紀錄將無法復原，確定要刪除嗎？', '提示！');
@@ -1065,11 +1065,11 @@
                     showCustomAlert('刪除成功');
                     await loadHistory();
                 } else {
-                    showCustomAlert('刪除失敗：' + (result.error || '未知錯誤'), '錯誤');
+                    showCustomAlert('刪除失敗：' + (result.error || '未知錯誤'), '提示！');
                 }
             } catch (err) {
                 console.error(err);
-                showCustomAlert('刪除發生錯誤：' + err.message, '錯誤');
+                showCustomAlert('刪除發生錯誤：' + err.message, '提示！');
             } finally {
                 const btns = document.querySelectorAll('.btn-remove');
                 btns.forEach(b=>b.disabled=false);
@@ -1268,12 +1268,33 @@
             const id = document.getElementById('edit_record_id').value;
             const date = document.getElementById('edit_Date').value;
 
-            // 基本驗證
+            // 檢查必填欄位是否為空值
+            const requiredFields = [
+                { id: 'edit_Date', name: '日期' },
+                { id: 'edit_age', name: '年齡' },
+                { id: 'edit_height_cm', name: '身高' },
+                { id: 'edit_weight_kg', name: '體重' },
+                { id: 'edit_skeletal_muscle', name: '骨骼肌' },
+                { id: 'edit_body_fat', name: '體脂重' },
+                { id: 'edit_fat_percentage', name: '體脂率' },
+                { id: 'edit_basal_metabolism', name: '基礎代謝' },
+                { id: 'edit_bmi', name: 'BMI' }
+            ];
+
+            // 檢查每個必填欄位
+            for (const field of requiredFields) {
+                const element = document.getElementById(field.id);
+                const value = element ? element.value.trim() : '';
+                if (!value) {
+                    return showCustomAlert(`${field.name}不能是空值`, '提示！');
+                }
+            }
+
+            // 數值驗證
             const height = parseFloat(document.getElementById('edit_height_cm').value);
             const weight = parseFloat(document.getElementById('edit_weight_kg').value);
-            if (!date) return showCustomAlert('請選擇日期', '錯誤');
-            if (!Number.isFinite(height) || height <= 0) return showCustomAlert('請填入有效身高', '錯誤');
-            if (!Number.isFinite(weight) || weight <= 0) return showCustomAlert('請填入有效體重', '錯誤');
+            if (!Number.isFinite(height) || height <= 0) return showCustomAlert('請填入有效身高', '提示！');
+            if (!Number.isFinite(weight) || weight <= 0) return showCustomAlert('請填入有效體重', '提示！');
 
             const underScorePayload = {
                 record_id: id,
@@ -1321,11 +1342,11 @@
                     window.editModalInstance?.hide();
                     await loadHistory();
                 } else {
-                    showCustomAlert('更新失敗：' + (result.error || '未知錯誤'), '錯誤');
+                    showCustomAlert('更新失敗：' + (result.error || '未知錯誤'), '提示！');
                 }
             } catch (err) {
                 console.error(err);
-                showCustomAlert('更新發生錯誤：' + err.message, '錯誤');
+                showCustomAlert('更新發生錯誤：' + err.message, '提示！');
             } finally {
                 saveBtn.disabled = false;
                 saveBtn.innerText = '儲存變更';
