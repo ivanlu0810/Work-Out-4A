@@ -69,12 +69,27 @@ $email = $_SESSION['email'] ?? 'No email';
             border-radius: 8px;
             border: 1px solid #e9ecef;
             padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
         }
 
         .form-control:focus,
         .form-select:focus {
             border-color: #7f90a9;
             box-shadow: 0 0 0 0.2rem rgba(127, 144, 169, 0.25);
+        }
+
+        /* 自動填入的欄位樣式 */
+        .form-control.auto-filled,
+        .form-select.auto-filled {
+            background-color: #f8f9fa;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .form-control.auto-filled:focus,
+        .form-select.auto-filled:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
         }
 
         /* 按鈕樣式 */
@@ -355,9 +370,9 @@ $email = $_SESSION['email'] ?? 'No email';
                 <div class="page-title">
                     <div class="row">
                         <div class="col-12 col-md-6 order-md-1 order-last">
-                            <h3 class="mb-4-3 me-3">飲食指南🍎</h3>
+                            <h3 class="mb-4-3 me-3">增肌飲食指南💪</h3>
                             <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
-                                科學計算您的營養需求，制定個人化的飲食計畫，讓增肌減脂更有效率。
+                                專為增肌設計的營養計算，科學制定個人化飲食計畫，讓肌肉增長更有效率。
                             </p>
                         </div>
                         <div class="col-12 col-md-6 order-md-2 order-first">
@@ -382,7 +397,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                 <h5 class="alert-heading mb-2">需要您的身體資料</h5>
                                 <p class="mb-2">為了提供更精確的營養建議，請先填寫您的基本身體資料。</p>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-warning btn-sm" onclick="loadUserData()">
+                                    <button class="btn btn-warning btn-sm" onclick="reloadUserData()">
                                         <i class="bi bi-arrow-clockwise me-1"></i>重新載入資料
                                     </button>
                                     <a href="index.php" class="btn btn-primary btn-sm">
@@ -400,9 +415,12 @@ $email = $_SESSION['email'] ?? 'No email';
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-check-circle-fill me-3" style="font-size: 1.5rem;"></i>
-                            <div>
+                            <div class="flex-grow-1">
                                 <h5 class="alert-heading mb-2">資料載入成功！</h5>
-                                <p class="mb-0" id="dataSourceInfo">已從資料庫載入您的身體資料，系統將自動填入表單。</p>
+                                <p class="mb-2" id="dataSourceInfo">已從資料庫載入您的身體資料，系統將自動填入表單。</p>
+                                <button class="btn btn-outline-success btn-sm" onclick="reloadUserData()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>重新載入資料
+                                </button>
                             </div>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉"></button>
@@ -413,7 +431,8 @@ $email = $_SESSION['email'] ?? 'No email';
                 <section class="section">
                     <div class="card">
                         <div class="card-header">
-                            <h4><i class="bi bi-calculator me-2"></i>個人營養需求計算</h4>
+                            <h4><i class="bi bi-calculator me-2"></i>增肌營養需求計算</h4>
+                            <small class="text-muted">系統會自動從您的資料庫記錄中載入身體資料，專為增肌設計</small>
                         </div>
                         <div class="card-body">
                             <form id="nutritionForm">
@@ -446,7 +465,6 @@ $email = $_SESSION['email'] ?? 'No email';
                                         <label for="activityLevel" class="form-label">活動強度</label>
                                         <select class="form-select" id="activityLevel" required>
                                             <option value="">請選擇</option>
-                                            <option value="久坐">久坐 (辦公室工作，很少運動)</option>
                                             <option value="輕度活動">輕度活動 (每週1-3次輕度運動)</option>
                                             <option value="中度活動">中度活動 (每週3-5次中等強度運動)</option>
                                             <option value="高度活動">高度活動 (每週6-7次高強度運動)</option>
@@ -455,11 +473,8 @@ $email = $_SESSION['email'] ?? 'No email';
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label for="goal" class="form-label">健身目標</label>
-                                        <select class="form-select" id="goal" required>
-                                            <option value="">請選擇</option>
-                                            <option value="減脂">減脂 (減少體脂，塑造線條)</option>
-                                            <option value="增肌">增肌 (增加肌肉量，提升力量)</option>
-                                            <option value="維持">維持 (保持現狀，健康生活)</option>
+                                        <select class="form-select" id="goal" required disabled>
+                                            <option value="增肌" selected>增肌 (增加肌肉量，提升力量)</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4 mb-3 d-flex align-items-end">
@@ -562,12 +577,17 @@ $email = $_SESSION['email'] ?? 'No email';
                 <!-- 餐食建議 -->
                 <section class="section" id="mealSuggestions" style="display: none;">
                     <div class="card">
-                        <div class="card-header">
-                            <h4><i class="bi bi-egg-fried me-2"></i>餐食建議</h4>
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h4 class="mb-0"><i class="bi bi-lightbulb me-2"></i>健身小提醒</h4>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#mealSuggestionsContent" aria-expanded="true" aria-controls="mealSuggestionsContent">
+                                <i class="bi bi-chevron-down" id="mealSuggestionsIcon"></i>
+                            </button>
                         </div>
-                        <div class="card-body">
-                            <div class="row" id="mealCards">
-                                <!-- 餐食建議將在這裡動態生成 -->
+                        <div class="collapse show" id="mealSuggestionsContent">
+                            <div class="card-body">
+                                <div class="row" id="mealCards">
+                                    <!-- 餐食建議將在這裡動態生成 -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -577,10 +597,16 @@ $email = $_SESSION['email'] ?? 'No email';
                 <section class="section" id="mealPlannerSection" style="display: none;">
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
-                            <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>三餐客製化</h4>
-                            <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
+                            <div>
+                                <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>三餐客製化</h4>
+                                <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
+                            </div>
+                            <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="collapse" data-bs-target="#mealPlannerContent" aria-expanded="true" aria-controls="mealPlannerContent">
+                                <i class="bi bi-chevron-down" id="mealPlannerIcon"></i>
+                            </button>
                         </div>
-                        <div class="card-body">
+                        <div class="collapse show" id="mealPlannerContent">
+                            <div class="card-body">
                             <div class="row g-3">
                                 <div class="col-md-6 col-lg-3">
                                     <div class="stats-card">
@@ -608,8 +634,72 @@ $email = $_SESSION['email'] ?? 'No email';
                                 </div>
                             </div>
 
-                            <div class="row mt-4" id="plannerMeals">
-                                <!-- 各餐區塊渲染 -->
+                            <!-- 進度圖表 -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>營養進度</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="progress-chart">
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span>熱量</span>
+                                                            <span id="caloriesProgress">0 / 0</span>
+                                                        </div>
+                                                        <div class="progress" style="height: 20px;">
+                                                            <div class="progress-bar bg-primary" id="caloriesBar" style="width: 0%"></div>
+                                                        </div>
+                                                        <small class="text-muted" id="caloriesStatus">尚未開始</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="progress-chart">
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span>蛋白質</span>
+                                                            <span id="proteinProgress">0 / 0</span>
+                                                        </div>
+                                                        <div class="progress" style="height: 20px;">
+                                                            <div class="progress-bar bg-danger" id="proteinBar" style="width: 0%"></div>
+                                                        </div>
+                                                        <small class="text-muted" id="proteinStatus">尚未開始</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="progress-chart">
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span>碳水化合物</span>
+                                                            <span id="carbsProgress">0 / 0</span>
+                                                        </div>
+                                                        <div class="progress" style="height: 20px;">
+                                                            <div class="progress-bar bg-info" id="carbsBar" style="width: 0%"></div>
+                                                        </div>
+                                                        <small class="text-muted" id="carbsStatus">尚未開始</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3 mb-3">
+                                                    <div class="progress-chart">
+                                                        <div class="d-flex justify-content-between mb-2">
+                                                            <span>脂肪</span>
+                                                            <span id="fatProgress">0 / 0</span>
+                                                        </div>
+                                                        <div class="progress" style="height: 20px;">
+                                                            <div class="progress-bar bg-warning" id="fatBar" style="width: 0%"></div>
+                                                        </div>
+                                                        <small class="text-muted" id="fatStatus">尚未開始</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                                <div class="row mt-4" id="plannerMeals">
+                                    <!-- 各餐區塊渲染 -->
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -722,20 +812,34 @@ $email = $_SESSION['email'] ?? 'No email';
                 
                 if (hasCompleteData) {
                     // 有完整資料，自動填入表單
-                    document.getElementById('age').value = userData.age;
-                    document.getElementById('gender').value = userData.gender;
-                    document.getElementById('height').value = userData.height;
-                    document.getElementById('weight').value = userData.weight;
+                    const ageField = document.getElementById('age');
+                    const genderField = document.getElementById('gender');
+                    const heightField = document.getElementById('height');
+                    const weightField = document.getElementById('weight');
+                    const activityField = document.getElementById('activityLevel');
+                    const goalField = document.getElementById('goal');
+                    
+                    ageField.value = userData.age;
+                    ageField.classList.add('auto-filled');
+                    
+                    genderField.value = userData.gender;
+                    genderField.classList.add('auto-filled');
+                    
+                    heightField.value = userData.height;
+                    heightField.classList.add('auto-filled');
+                    
+                    weightField.value = userData.weight;
+                    weightField.classList.add('auto-filled');
                     
                     // 設定預設活動強度（可讓用戶修改）
-                    if (!document.getElementById('activityLevel').value) {
-                        document.getElementById('activityLevel').value = '中度活動';
+                    if (!activityField.value) {
+                        activityField.value = '中度活動';
+                        activityField.classList.add('auto-filled');
                     }
                     
-                    // 設定預設健身目標（可讓用戶修改）
-                    if (!document.getElementById('goal').value) {
-                        document.getElementById('goal').value = '維持';
-                    }
+                    // 自動設定健身目標為增肌
+                    goalField.value = '增肌';
+                    goalField.classList.add('auto-filled');
                     
                     // 顯示資料來源提示
                     if (userData.has_inbody_data) {
@@ -743,6 +847,12 @@ $email = $_SESSION['email'] ?? 'No email';
                     } else {
                         showUserDataInfo(userData);
                     }
+                    
+                    // 自動計算增肌營養需求
+                    setTimeout(() => {
+                        autoCalculateNutrition();
+                    }, 1000);
+                    
                 } else {
                     // 資料不完整，顯示引導
                     showDataInputGuide();
@@ -764,16 +874,58 @@ $email = $_SESSION['email'] ?? 'No email';
         function showInbodyDataInfo(userData) {
             document.getElementById('dataGuideSection').style.display = 'none';
             document.getElementById('dataSuccessSection').style.display = 'block';
-            document.getElementById('dataSourceInfo').textContent = 
-                `已從 InBody 資料載入您的身體資料（${userData.last_inbody_date}），系統將自動填入表單。`;
+            document.getElementById('dataSourceInfo').innerHTML = 
+                `✅ 已從 InBody 資料載入您的身體資料（${userData.last_inbody_date}）<br>
+                年齡：${userData.age}歲 | 身高：${userData.height}cm | 體重：${userData.weight}kg<br>
+                系統將自動填入表單並計算營養需求。`;
         }
 
         // 顯示一般用戶資料資訊
         function showUserDataInfo(userData) {
             document.getElementById('dataGuideSection').style.display = 'none';
             document.getElementById('dataSuccessSection').style.display = 'block';
-            document.getElementById('dataSourceInfo').textContent = 
-                `已從基本資料載入您的身體資料，系統將自動填入表單。`;
+            document.getElementById('dataSourceInfo').innerHTML = 
+                `✅ 已從基本資料載入您的身體資料<br>
+                年齡：${userData.age}歲 | 身高：${userData.height}cm | 體重：${userData.weight}kg<br>
+                系統將自動填入表單並計算營養需求。`;
+        }
+
+        // 重新載入用戶資料
+        function reloadUserData() {
+            // 清除現有的自動填入樣式
+            const fields = ['age', 'gender', 'height', 'weight', 'activityLevel', 'goal'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.classList.remove('auto-filled');
+                    field.value = '';
+                }
+            });
+            
+            // 重新載入資料
+            loadUserData();
+        }
+
+        // 自動計算營養需求
+        function autoCalculateNutrition() {
+            const form = document.getElementById('nutritionForm');
+            const formData = new FormData(form);
+            
+            // 檢查所有必要欄位是否已填寫
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const activityLevel = document.getElementById('activityLevel').value;
+            const goal = document.getElementById('goal').value;
+            
+            if (age && gender && height && weight && activityLevel && goal) {
+                console.log('自動計算營養需求...');
+                
+                // 模擬表單提交
+                const event = new Event('submit', { bubbles: true, cancelable: true });
+                form.dispatchEvent(event);
+            }
         }
 
         // 載入食物資料
@@ -822,6 +974,24 @@ $email = $_SESSION['email'] ?? 'No email';
             // 食物搜尋
             document.getElementById('foodSearch').addEventListener('input', filterFoods);
             document.getElementById('categoryFilter').addEventListener('change', filterFoods);
+            
+            // 健身目標選擇時自動計算
+            document.getElementById('goal').addEventListener('change', function() {
+                // 檢查是否所有必要欄位都已填寫
+                const age = document.getElementById('age').value;
+                const gender = document.getElementById('gender').value;
+                const height = document.getElementById('height').value;
+                const weight = document.getElementById('weight').value;
+                const activityLevel = document.getElementById('activityLevel').value;
+                const goal = document.getElementById('goal').value;
+                
+                if (age && gender && height && weight && activityLevel && goal) {
+                    console.log('健身目標已選擇，自動計算營養需求...');
+                    setTimeout(() => {
+                        autoCalculateNutrition();
+                    }, 500);
+                }
+            });
         }
 
         // 計算營養需求
@@ -966,18 +1136,17 @@ $email = $_SESSION['email'] ?? 'No email';
             document.getElementById('nutritionResult').style.display = 'block';
         }
 
-        // 載入餐食建議
+        // 載入健身小提醒
         async function loadMealSuggestions(nutritionResult) {
-            const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
-            const mealNames = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '點心' };
             const mealCards = document.getElementById('mealCards');
-
             mealCards.innerHTML = '';
 
-            for (const mealType of mealTypes) {
-                const mealCard = createMealCard(mealNames[mealType], mealType, nutritionResult);
-                mealCards.appendChild(mealCard);
-            }
+            // 創建健身前後的小提醒卡片
+            const preWorkoutCard = createWorkoutTipCard('訓練前', 'pre-workout', nutritionResult);
+            const postWorkoutCard = createWorkoutTipCard('訓練後', 'post-workout', nutritionResult);
+            
+            mealCards.appendChild(preWorkoutCard);
+            mealCards.appendChild(postWorkoutCard);
 
             document.getElementById('mealSuggestions').style.display = 'block';
 
@@ -1021,7 +1190,14 @@ $email = $_SESSION['email'] ?? 'No email';
                     <div class="card">
                         <div class="card-header d-flex justify-content-between align-items-center">
                             <h6 class="mb-0">${mealTypeName[mt]}</h6>
-                            <button class="btn btn-sm btn-primary" onclick="openFoodPicker('${mt}')"><i class="bi bi-plus-lg me-1"></i>新增食材</button>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-success" onclick="generateSmartMenu('${mt}')" title="智能推薦">
+                                    <i class="bi bi-magic me-1"></i>智能菜單
+                                </button>
+                                <button class="btn btn-sm btn-primary" onclick="openFoodPicker('${mt}')">
+                                    <i class="bi bi-plus-lg me-1"></i>手動新增
+                                </button>
+                            </div>
                         </div>
                         <div class="card-body p-0">
                             <div class="table-responsive">
@@ -1055,6 +1231,9 @@ $email = $_SESSION['email'] ?? 'No email';
             document.getElementById('planProtein').textContent = totals.protein.toFixed(0) + 'g';
             document.getElementById('planCarbs').textContent = totals.carbs.toFixed(0) + 'g';
             document.getElementById('planFat').textContent = totals.fat.toFixed(0) + 'g';
+            
+            // 更新進度圖表
+            updateProgressCharts(totals, nutritionResult);
         }
 
         function computeTotals() {
@@ -1139,6 +1318,167 @@ $email = $_SESSION['email'] ?? 'No email';
             renderPlanner(currentNutritionResult);
         }
 
+        // 更新進度圖表
+        function updateProgressCharts(totals, nutritionResult) {
+            const targets = {
+                calories: nutritionResult.target_calories,
+                protein: nutritionResult.macros.protein.grams,
+                carbs: nutritionResult.macros.carbs.grams,
+                fat: nutritionResult.macros.fat.grams
+            };
+
+            // 更新熱量進度
+            updateProgressBar('calories', totals.calories, targets.calories);
+            updateProgressBar('protein', totals.protein, targets.protein);
+            updateProgressBar('carbs', totals.carbs, targets.carbs);
+            updateProgressBar('fat', totals.fat, targets.fat);
+        }
+
+        // 更新單一進度條
+        function updateProgressBar(type, current, target) {
+            const percentage = Math.min((current / target) * 100, 100);
+            const progressElement = document.getElementById(`${type}Bar`);
+            const progressText = document.getElementById(`${type}Progress`);
+            const statusElement = document.getElementById(`${type}Status`);
+
+            progressElement.style.width = percentage + '%';
+            progressText.textContent = `${current.toFixed(0)} / ${target}`;
+
+            // 設定狀態文字和顏色
+            if (percentage < 80) {
+                statusElement.textContent = '還需要更多';
+                statusElement.className = 'text-warning';
+                progressElement.className = `progress-bar bg-warning`;
+            } else if (percentage <= 100) {
+                statusElement.textContent = '目標達成';
+                statusElement.className = 'text-success';
+                progressElement.className = `progress-bar bg-success`;
+            } else {
+                statusElement.textContent = '超出目標';
+                statusElement.className = 'text-danger';
+                progressElement.className = `progress-bar bg-danger`;
+            }
+        }
+
+        // 顯示通知
+        function showNotification(message, type = 'info') {
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type] || 'alert-info';
+
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show alert-fixed`;
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // 3秒後自動移除
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // 智能菜單生成
+        function generateSmartMenu(mealType) {
+            const targetCalories = currentNutritionResult.meal_distribution[mealType];
+            const smartMenu = getSmartMenuForMeal(mealType, targetCalories);
+            
+            // 清空現有菜單
+            mealPlan[mealType] = [];
+            
+            // 添加智能推薦的食物
+            smartMenu.forEach(food => {
+                mealPlan[mealType].push({
+                    name: food.name,
+                    grams: food.grams,
+                    caloriesPer100: food.calories,
+                    proteinPer100: food.protein,
+                    carbsPer100: food.carbs,
+                    fatPer100: food.fat
+                });
+            });
+            
+            renderPlanner(currentNutritionResult);
+            
+            // 顯示成功訊息
+            showNotification(`已為${mealTypeName[mealType]}生成智能菜單！`, 'success');
+        }
+
+        // 獲取各餐的智能菜單
+        function getSmartMenuForMeal(mealType, targetCalories) {
+            const menus = {
+                'breakfast': [
+                    { name: '燕麥片', grams: 50, calories: 379, protein: 13.0, carbs: 67.0, fat: 6.5 },
+                    { name: '雞蛋', grams: 100, calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 },
+                    { name: '香蕉', grams: 100, calories: 89, protein: 1.1, carbs: 23.0, fat: 0.3 }
+                ],
+                'lunch': [
+                    { name: '雞胸肉', grams: 150, calories: 165, protein: 31.0, carbs: 0.0, fat: 3.6 },
+                    { name: '糙米飯', grams: 100, calories: 111, protein: 2.6, carbs: 23.0, fat: 0.9 },
+                    { name: '花椰菜', grams: 100, calories: 25, protein: 3.0, carbs: 5.0, fat: 0.3 }
+                ],
+                'dinner': [
+                    { name: '鮭魚', grams: 120, calories: 208, protein: 25.0, carbs: 0.0, fat: 12.0 },
+                    { name: '地瓜', grams: 150, calories: 86, protein: 1.6, carbs: 20.0, fat: 0.1 },
+                    { name: '酪梨', grams: 50, calories: 160, protein: 2.0, carbs: 9.0, fat: 15.0 }
+                ]
+            };
+            
+            return menus[mealType] || [];
+        }
+
+        // 建立健身小提醒卡片
+        function createWorkoutTipCard(title, type, nutritionResult) {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 mb-4';
+
+            const tips = getWorkoutTips(type);
+            const suggestedFoods = getWorkoutFoods(type);
+
+            col.innerHTML = `
+                <div class="card meal-card">
+                    <div class="card-header">
+                        <h6 class="mb-0">${title}</h6>
+                        <small class="text-muted">增肌最佳時機</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>建議食物:</h6>
+                            ${suggestedFoods.map(food => `
+                                <div class="food-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold">${food.name}</span>
+                                        <span class="text-muted">${food.calories}卡/100g</span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span class="nutrition-badge">蛋白質 ${food.protein}g</span>
+                                        <span class="nutrition-badge">碳水 ${food.carbs}g</span>
+                                        <span class="nutrition-badge">脂肪 ${food.fat}g</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-3">
+                            <h6>小提醒:</h6>
+                            <ul class="list-unstyled">
+                                ${tips.map(tip => `<li><i class="bi bi-check-circle text-success me-2"></i>${tip}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return col;
+        }
+
         // 建立餐食卡片
         function createMealCard(mealName, mealType, nutritionResult) {
             const col = document.createElement('div');
@@ -1182,6 +1522,42 @@ $email = $_SESSION['email'] ?? 'No email';
             `;
 
             return col;
+        }
+
+        // 獲取健身前後的食物建議
+        function getWorkoutFoods(type) {
+            const foods = {
+                'pre-workout': [
+                    { name: '香蕉', calories: 89, protein: 1.1, carbs: 23.0, fat: 0.3 },
+                    { name: '燕麥片', calories: 379, protein: 13.0, carbs: 67.0, fat: 6.5 },
+                    { name: '全麥麵包', calories: 247, protein: 13.0, carbs: 41.0, fat: 4.2 }
+                ],
+                'post-workout': [
+                    { name: '雞胸肉', calories: 165, protein: 31.0, carbs: 0.0, fat: 3.6 },
+                    { name: '希臘優格', calories: 59, protein: 10.0, carbs: 3.6, fat: 0.4 },
+                    { name: '雞蛋', calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 }
+                ]
+            };
+            return foods[type] || [];
+        }
+
+        // 獲取健身前後的小提醒
+        function getWorkoutTips(type) {
+            const tips = {
+                'pre-workout': [
+                    '訓練前1-2小時進食，避免空腹運動',
+                    '選擇易消化的碳水化合物提供能量',
+                    '避免高脂肪食物，以免影響消化',
+                    '適量補充水分，保持身體水分平衡'
+                ],
+                'post-workout': [
+                    '訓練後30分鐘內補充蛋白質',
+                    '搭配碳水化合物幫助肌肉恢復',
+                    '選擇完整蛋白質來源',
+                    '充足水分補充，促進代謝'
+                ]
+            };
+            return tips[type] || [];
         }
 
         // 獲取建議食物
