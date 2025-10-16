@@ -125,12 +125,34 @@
             border: none;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease-in-out;
+            min-height: 80px; /* 進一步減少最小高度 */
         }
 
         .card.bg-primary:hover,
         .card.bg-success:hover,
         .card.bg-info:hover {
             transform: translateY(-2px);
+        }
+
+        /* 統計卡片內容調整 */
+        .card.bg-primary .card-body,
+        .card.bg-success .card-body,
+        .card.bg-info .card-body {
+            padding: 0.75rem 1rem; /* 進一步減少內邊距 */
+        }
+
+        .card.bg-primary h4,
+        .card.bg-success h4,
+        .card.bg-info h4 {
+            font-size: 1.6rem; /* 進一步減少數字大小 */
+            margin-bottom: 0.25rem; /* 進一步減少與文字的間距 */
+        }
+
+        .card.bg-primary p,
+        .card.bg-success p,
+        .card.bg-info p {
+            font-size: 0.85rem; /* 進一步減少文字大小 */
+            margin-bottom: 0; /* 移除底部邊距 */
         }
 
         /* 搜尋和控制面板樣式 */
@@ -372,6 +394,67 @@
             color: #ffffff !important;
         }
 
+        /* 分頁控制樣式 - 水平排列 */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        #pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-controls button {
+            padding: 0;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 35px;
+            height: 35px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .pagination-controls button:hover:not(:disabled) {
+            background: #5A628C;
+            color: white;
+            border-color: #5A628C;
+        }
+
+        .pagination-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-controls button.active {
+            background: #5A628C;
+            color: white;
+            border-color: #5A628C;
+        }
+
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+
+
     </style>
 </head>
 
@@ -507,6 +590,13 @@
             <div class="container">
                 <section class="section">
                     <div id="history-list" class="row g-4"></div>
+                    
+                    <!-- 分頁控制 -->
+                    <div id="pagination-container" class="pagination-controls" style="display: none !important;">
+                        <div id="pagination-controls">
+                            <!-- 分頁按鈕將由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -731,8 +821,113 @@
         /** 安全取得 record_id（避免 undefined 時 substring 報錯） **/
         const getId = (r) => r?.record_id || r?.id || '';
 
+        // 全域變數：分頁相關
+        let currentPage = 1;
+        const recordsPerPage = 3;
+
+        // 分頁函數
+        function paginateData(data, page = 1) {
+            const startIndex = (page - 1) * recordsPerPage;
+            const endIndex = startIndex + recordsPerPage;
+            return data.slice(startIndex, endIndex);
+        }
+
+        // 渲染分頁控制 - 水平排列
+        function renderPagination(totalRecords, currentPageNum) {
+            const totalPages = Math.ceil(totalRecords / recordsPerPage);
+            const paginationContainer = document.getElementById("pagination-container");
+            const paginationControls = document.getElementById("pagination-controls");
+
+            if (totalPages <= 1) {
+                paginationContainer.style.display = "none";
+                return;
+            }
+
+            paginationContainer.style.display = "flex";
+            paginationControls.innerHTML = "";
+
+            // 上一頁按鈕
+            const prevButton = document.createElement("button");
+            prevButton.innerHTML = '<';
+            prevButton.disabled = currentPageNum === 1;
+            prevButton.onclick = () => goToPage(currentPageNum - 1);
+            paginationControls.appendChild(prevButton);
+
+            // 頁碼按鈕
+            const startPage = Math.max(1, currentPageNum - 2);
+            const endPage = Math.min(totalPages, currentPageNum + 2);
+
+            if (startPage > 1) {
+                const firstPageBtn = createPageButton(1);
+                paginationControls.appendChild(firstPageBtn);
+                if (startPage > 2) {
+                    const ellipsis = document.createElement("span");
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 5px';
+                    ellipsis.style.display = 'flex';
+                    ellipsis.style.alignItems = 'center';
+                    ellipsis.style.justifyContent = 'center';
+                    ellipsis.style.minWidth = '35px';
+                    ellipsis.style.height = '35px';
+                    paginationControls.appendChild(ellipsis);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = createPageButton(i);
+                paginationControls.appendChild(pageBtn);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement("span");
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 5px';
+                    ellipsis.style.display = 'flex';
+                    ellipsis.style.alignItems = 'center';
+                    ellipsis.style.justifyContent = 'center';
+                    ellipsis.style.minWidth = '35px';
+                    ellipsis.style.height = '35px';
+                    paginationControls.appendChild(ellipsis);
+                }
+                const lastPageBtn = createPageButton(totalPages);
+                paginationControls.appendChild(lastPageBtn);
+            }
+
+            // 下一頁按鈕
+            const nextButton = document.createElement("button");
+            nextButton.innerHTML = '>';
+            nextButton.disabled = currentPageNum === totalPages;
+            nextButton.onclick = () => goToPage(currentPageNum + 1);
+            paginationControls.appendChild(nextButton);
+
+            // 頁碼資訊
+            const pageInfo = document.createElement("span");
+            pageInfo.className = "pagination-info";
+            pageInfo.textContent = `第 ${currentPageNum} 頁，共 ${totalPages} 頁 (共 ${totalRecords} 項)`;
+            paginationControls.appendChild(pageInfo);
+        }
+
+        // 建立頁碼按鈕 - 與 training.html 一致
+        function createPageButton(pageNumber) {
+            const button = document.createElement("button");
+            button.textContent = pageNumber;
+            button.className = currentPage === pageNumber ? 'active' : '';
+            button.onclick = () => goToPage(pageNumber);
+            return button;
+        }
+
+        // 跳轉到指定頁碼
+        function goToPage(pageNumber) {
+            const totalPages = Math.ceil((window.historyDataFiltered || []).length / recordsPerPage);
+            if (pageNumber < 1 || pageNumber > totalPages) return;
+
+            currentPage = pageNumber;
+            applyDateFilter({ onlyOnApply: false, resetPage: false });
+        }
+
         /* render 時：把顯示欄位改成同時支援 */
-        function renderData(data) {
+        function renderData(data, page = 1) {
             const container = document.getElementById("history-list");
             container.innerHTML = "";
 
@@ -745,10 +940,17 @@
           目前沒有歷史紀錄，請先新增健康數據
         </div>
       </div>`;
+                // 隱藏分頁控制
+                document.getElementById("pagination-container").style.display = "none";
                 return;
             }
 
-            data.forEach((record, index) => {
+            // 分頁處理
+            const paginatedData = paginateData(data, page);
+            renderPagination(data.length, page);
+
+            paginatedData.forEach((record, index) => {
+                const globalIndex = (page - 1) * recordsPerPage + index;
                 const recordId = getId(record);
                 const age = getField(record, 'age', 'age');
                 const h = getField(record, 'height_cm', 'height-cm');
@@ -765,7 +967,7 @@
       <div class="card shadow-lg border-0 rounded-4 h-100">
         <div class="card-header bg-gradient-primary text-white">
           <h5 class="card-title mb-1">
-            📅 ${record.Date || ''} <small class="opacity-75">#${index + 1}</small>
+            📅 ${record.Date || ''} <small class="opacity-75">#${globalIndex + 1}</small>
           </h5>
         </div>
         <div class="card-body">
@@ -927,9 +1129,14 @@
                 });
             }
 
+            // 重置到第一頁（當篩選條件改變時）
+            if (options.resetPage !== false) {
+                currentPage = 1;
+            }
+
             // 優先用目前篩選後的資料更新統計與列表
             updateStats(options.preferServerStats, filtered);
-            renderData(filtered);
+            renderData(filtered, currentPage);
 
             // 暫存目前的過濾結果
             window.historyDataFiltered = filtered;
@@ -1151,7 +1358,7 @@
                         showCustomAlert('請先選擇「起始日期」與「結束日期」，再套用篩選', '提示！');
                         return;
                     }
-                    applyDateFilter({ onlyOnApply: true });
+                    applyDateFilter({ onlyOnApply: true, resetPage: true });
                 });
             }
             if (resetBtn && !resetBtn.dataset.bound) {
@@ -1159,7 +1366,7 @@
                 resetBtn.addEventListener('click', () => {
                     if (startEl) startEl.value = '';
                     if (endEl) endEl.value = '';
-                    applyDateFilter({ onlyOnApply: true });
+                    applyDateFilter({ onlyOnApply: true, resetPage: true });
                 });
             }
             // 取消改變日期即時套用：需按下「套用篩選」才會生效

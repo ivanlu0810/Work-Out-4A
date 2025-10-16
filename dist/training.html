@@ -228,7 +228,7 @@
 
         .equipment-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            grid-template-columns: repeat(5, 1fr);
             gap: 20px;
             margin-top: 20px;
         }
@@ -332,6 +332,125 @@
         .mb-4-3 {
             margin-bottom: 2.1rem !important;
             /* 40px */
+        }
+
+        /* 分頁控制樣式 */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            gap: 10px;
+        }
+
+        .pagination-controls button {
+            padding: 8px 16px;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .pagination-controls button:hover:not(:disabled) {
+            background: #5A628C;
+            color: white;
+            border-color: #5A628C;
+        }
+
+        .pagination-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin: 0 10px;
+        }
+
+        .page-numbers {
+            display: flex;
+            gap: 5px;
+        }
+
+        .page-numbers button {
+            min-width: 35px;
+            height: 35px;
+            padding: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-numbers button.active {
+            background: #5A628C;
+            color: white;
+            border-color: #5A628C;
+        }
+
+        /* 搜尋框樣式 */
+        .search-container {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+
+        .search-input-group {
+            position: relative;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 40px 10px 15px;
+            border: 1px solid #ced4da;
+            border-radius: 25px;
+            font-size: 0.95rem;
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #5A628C;
+            box-shadow: 0 0 0 0.2rem rgba(90, 98, 140, 0.25);
+        }
+
+        .search-icon {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #6c757d;
+            font-size: 1rem;
+        }
+
+        .search-results-info {
+            text-align: center;
+            margin-top: 10px;
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 40px 20px;
+            color: #6c757d;
+            background: #f8f9fa;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+
+        .no-results i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #adb5bd;
         }
     </style>
 
@@ -507,6 +626,21 @@
                         <!-- 推薦器材顯示區域 -->
                         <div class="equipment-display" id="equipment-display" style="display: none;">
                             <h3>推薦訓練器材</h3>
+                            
+                            <!-- 搜尋框 -->
+                            <div class="search-container">
+                                <div class="search-input-group">
+                                    <input type="text" 
+                                           class="search-input" 
+                                           id="exerciseSearchInput" 
+                                           placeholder="搜尋器械名稱...">
+                                    <i class="bi bi-search search-icon"></i>
+                                </div>
+                                <div class="search-results-info" id="searchResultsInfo" style="display: none;">
+                                    <!-- 搜尋結果資訊會動態顯示在這裡 -->
+                                </div>
+                            </div>
+                            
                             <div id="equipment-list"></div>
                         </div>
 
@@ -545,12 +679,17 @@
         const API_FAVORITES = 'api/favorites.php';
 
         let selectedMuscle = null;
+        let currentTrainingData = []; // 儲存當前訓練資料
+        let filteredTrainingData = []; // 儲存搜尋過濾後的資料
+        let currentPage = 1; // 當前頁碼
+        const itemsPerPage = 5; // 每頁顯示數量
 
         // 初始化事件監聽
         document.addEventListener('DOMContentLoaded', function () {
             initializeBodyMap();
             // initializeMuscleGroupList(); // 暫時移除，因為人體圖已經足夠直觀
             initializeGeneratePlanButton();
+            initializeSearchFunction();
         });
 
         // 初始化人體圖
@@ -904,26 +1043,236 @@
 
             if (!display || !listElement) return;
 
-            listElement.innerHTML = '';
+            // 儲存訓練資料並重置頁碼和搜尋
+            currentTrainingData = trainingData;
+            filteredTrainingData = [...trainingData]; // 複製原始資料
+            currentPage = 1;
+
+            // 清空搜尋框
+            const searchInput = document.getElementById('exerciseSearchInput');
+            if (searchInput) {
+                searchInput.value = '';
+            }
 
             if (trainingData && trainingData.length > 0) {
-                const equipmentGrid = document.createElement('div');
-                equipmentGrid.className = 'equipment-grid';
-
-                trainingData.forEach((exercise, index) => {
-                    const exerciseCard = createExerciseCard(exercise, index + 1);
-                    equipmentGrid.appendChild(exerciseCard);
-                });
-
-                listElement.appendChild(equipmentGrid);
                 display.style.display = 'block';
+                renderCurrentPage();
                 display.scrollIntoView({ behavior: 'smooth', block: 'start' });
-
-                // 原本這裡會再次為 .favorite-btn 綁定事件，造成與內聯 onclick 重複觸發，
-                // 並因缺少 data-exercise 導致傳入 null。已移除以避免錯誤。
-
             } else {
                 showError(`沒有找到 ${muscleName} 的訓練資料`);
+            }
+        }
+
+        // 渲染當前頁面的資料
+        function renderCurrentPage() {
+            const listElement = document.getElementById('equipment-list');
+            if (!listElement) return;
+
+            listElement.innerHTML = '';
+
+            // 使用過濾後的資料
+            const dataToRender = filteredTrainingData;
+
+            if (dataToRender.length === 0) {
+                // 顯示無搜尋結果
+                const noResultsDiv = document.createElement('div');
+                noResultsDiv.className = 'no-results';
+                noResultsDiv.innerHTML = `
+                    <i class="bi bi-search"></i>
+                    <h5>找不到相關器械</h5>
+                    <p>請嘗試其他關鍵字或清空搜尋框</p>
+                `;
+                listElement.appendChild(noResultsDiv);
+                return;
+            }
+
+            // 計算當前頁面的資料範圍
+            const startIndex = (currentPage - 1) * itemsPerPage;
+            const endIndex = Math.min(startIndex + itemsPerPage, dataToRender.length);
+            const currentPageData = dataToRender.slice(startIndex, endIndex);
+
+            // 建立器材網格
+            const equipmentGrid = document.createElement('div');
+            equipmentGrid.className = 'equipment-grid';
+
+            currentPageData.forEach((exercise, index) => {
+                const globalIndex = startIndex + index + 1; // 全域索引
+                const exerciseCard = createExerciseCard(exercise, globalIndex);
+                equipmentGrid.appendChild(exerciseCard);
+            });
+
+            listElement.appendChild(equipmentGrid);
+
+            // 建立分頁控制元件
+            createPaginationControls();
+        }
+
+        // 建立分頁控制元件
+        function createPaginationControls() {
+            const listElement = document.getElementById('equipment-list');
+            if (!listElement) return;
+
+            const dataToRender = filteredTrainingData;
+            const totalPages = Math.ceil(dataToRender.length / itemsPerPage);
+            
+            // 如果只有一頁或沒有資料，不顯示分頁控制
+            if (totalPages <= 1) return;
+
+            const paginationDiv = document.createElement('div');
+            paginationDiv.className = 'pagination-controls';
+
+            // 上一頁按鈕
+            const prevButton = document.createElement('button');
+            prevButton.innerHTML = '‹ 上一頁';
+            prevButton.disabled = currentPage === 1;
+            prevButton.onclick = () => goToPage(currentPage - 1);
+
+            // 下一頁按鈕
+            const nextButton = document.createElement('button');
+            nextButton.innerHTML = '下一頁 ›';
+            nextButton.disabled = currentPage === totalPages;
+            nextButton.onclick = () => goToPage(currentPage + 1);
+
+            // 頁碼資訊
+            const pageInfo = document.createElement('span');
+            pageInfo.className = 'pagination-info';
+            const totalItems = dataToRender.length;
+            const originalTotal = currentTrainingData.length;
+            if (totalItems === originalTotal) {
+                pageInfo.textContent = `第 ${currentPage} 頁，共 ${totalPages} 頁 (共 ${totalItems} 項)`;
+            } else {
+                pageInfo.textContent = `第 ${currentPage} 頁，共 ${totalPages} 頁 (搜尋結果 ${totalItems} 項，共 ${originalTotal} 項)`;
+            }
+
+            // 頁碼按鈕
+            const pageNumbersDiv = document.createElement('div');
+            pageNumbersDiv.className = 'page-numbers';
+
+            // 計算要顯示的頁碼範圍
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // 調整起始頁碼
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+
+            // 第一頁
+            if (startPage > 1) {
+                const firstPageBtn = createPageButton(1);
+                pageNumbersDiv.appendChild(firstPageBtn);
+                if (startPage > 2) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 5px';
+                    pageNumbersDiv.appendChild(ellipsis);
+                }
+            }
+
+            // 頁碼按鈕
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = createPageButton(i);
+                pageNumbersDiv.appendChild(pageBtn);
+            }
+
+            // 最後一頁
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement('span');
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 5px';
+                    pageNumbersDiv.appendChild(ellipsis);
+                }
+                const lastPageBtn = createPageButton(totalPages);
+                pageNumbersDiv.appendChild(lastPageBtn);
+            }
+
+            // 組合所有元件
+            paginationDiv.appendChild(prevButton);
+            paginationDiv.appendChild(pageNumbersDiv);
+            paginationDiv.appendChild(nextButton);
+            paginationDiv.appendChild(pageInfo);
+
+            listElement.appendChild(paginationDiv);
+        }
+
+        // 建立頁碼按鈕
+        function createPageButton(pageNumber) {
+            const button = document.createElement('button');
+            button.textContent = pageNumber;
+            button.className = currentPage === pageNumber ? 'active' : '';
+            button.onclick = () => goToPage(pageNumber);
+            return button;
+        }
+
+        // 跳轉到指定頁碼
+        function goToPage(pageNumber) {
+            const dataToRender = filteredTrainingData;
+            const totalPages = Math.ceil(dataToRender.length / itemsPerPage);
+            if (pageNumber < 1 || pageNumber > totalPages) return;
+
+            currentPage = pageNumber;
+            renderCurrentPage();
+            
+            // 滾動到器材顯示區域頂部
+            const display = document.getElementById('equipment-display');
+            if (display) {
+                display.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            }
+        }
+
+        // 初始化搜尋功能
+        function initializeSearchFunction() {
+            // 使用事件委派，確保即使元素後來才出現也能正常工作
+            document.addEventListener('input', function(e) {
+                if (e.target && e.target.id === 'exerciseSearchInput') {
+                    const searchInput = e.target;
+                    const searchTerm = searchInput.value.trim().toLowerCase();
+                
+                    if (searchTerm === '') {
+                        // 清空搜尋，顯示所有資料
+                        filteredTrainingData = [...currentTrainingData];
+                        updateSearchResultsInfo('');
+                    } else {
+                        // 執行搜尋
+                        filteredTrainingData = currentTrainingData.filter(exercise => {
+                            // 搜尋多個欄位
+                            const nameMatch = exercise.name && exercise.name.toLowerCase().includes(searchTerm);
+                            const muscleMatch = exercise.target_muscle && exercise.target_muscle.toLowerCase().includes(searchTerm);
+                            const muscleGroupMatch = exercise.muscle_group && exercise.muscle_group.toLowerCase().includes(searchTerm);
+                            const equipmentMatch = exercise.equipment_needed && exercise.equipment_needed.toLowerCase().includes(searchTerm);
+                            const descriptionMatch = exercise.description && exercise.description.toLowerCase().includes(searchTerm);
+                            
+                            return nameMatch || muscleMatch || muscleGroupMatch || equipmentMatch || descriptionMatch;
+                        });
+                        updateSearchResultsInfo(searchTerm);
+                    }
+
+                    // 重置到第一頁並重新渲染
+                    currentPage = 1;
+                    renderCurrentPage();
+                }
+            });
+        }
+
+        // 更新搜尋結果資訊
+        function updateSearchResultsInfo(searchTerm) {
+            const searchResultsInfo = document.getElementById('searchResultsInfo');
+            if (!searchResultsInfo) return;
+
+            if (searchTerm === '') {
+                searchResultsInfo.style.display = 'none';
+            } else {
+                const totalResults = filteredTrainingData.length;
+                const totalOriginal = currentTrainingData.length;
+                
+                if (totalResults === 0) {
+                    searchResultsInfo.innerHTML = `<i class="bi bi-exclamation-triangle"></i> 找不到包含 "${searchTerm}" 的器械`;
+                } else {
+                    searchResultsInfo.innerHTML = `<i class="bi bi-check-circle"></i> 找到 ${totalResults} 個包含 "${searchTerm}" 的器械`;
+                }
+                searchResultsInfo.style.display = 'block';
             }
         }
 
@@ -1183,7 +1532,9 @@
         // 初始化生成計畫按鈕
         function initializeGeneratePlanButton() {
             const button = document.getElementById('generate-plan-btn');
-            button.addEventListener('click', generateTrainingPlan);
+            if (button) {
+                button.addEventListener('click', generateTrainingPlan);
+            }
         }
 
         // 生成訓練計畫
