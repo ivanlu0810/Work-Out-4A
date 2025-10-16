@@ -14,15 +14,10 @@ ob_clean();
 
 header('Content-Type: application/json; charset=utf-8');
 
-// 如果沒有登入狀態，嘗試使用預設的測試用戶資料
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
-    // 設定預設的測試用戶資料（根據您的資料庫圖片，用戶ID是9）
-    $_SESSION['logged_in'] = true;
-    $_SESSION['user_id'] = '9';
-    $_SESSION['username'] = '測試用戶';
-    $_SESSION['email'] = 'test@example.com';
-    $_SESSION['gender'] = '男';
-    $_SESSION['role'] = 'user';
+    http_response_code(401);
+    echo json_encode(['error' => 'Not logged in', 'session_data' => $_SESSION]);
+    exit;
 }
 
 try {

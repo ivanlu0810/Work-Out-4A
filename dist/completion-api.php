@@ -1,4 +1,170 @@
 <?php
+header('Content-Type: application/json; charset=utf-8');
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Methods: POST, GET, OPTIONS');
+header('Access-Control-Allow-Headers: Content-Type');
+if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') { exit(0); }
+
+// 簡單的錯誤輸出控制
+ini_set('display_errors', 0);
+
+// 資料庫連線（依你的本機環境）
+$dbHost = '127.0.0.1';
+$dbPort = '3307';
+$dbName = 'test';
+$dbUser = 'root';
+$dbPass = '';
+
+try {
+    $pdo = new PDO("mysql:host={$dbHost};port={$dbPort};dbname={$dbName};charset=utf8mb4", $dbUser, $dbPass, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+    ]);
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => 'DB 連線失敗: ' . $e->getMessage()], JSON_UNESCAPED_UNICODE);
+    exit;
+}
+
+$action = $_GET['action'] ?? '';
+
+// 讀取原始 JSON
+function read_json() {
+    $raw = file_get_contents('php://input');
+    if (!$raw) return [];
+    $data = json_decode($raw, true);
+    return is_array($data) ? $data : [];
+}
+
+try {
+    // 1) 儲存每天完成狀態
+    if ($action === 'save_training_plan_completion' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+        $data = read_json();
+        $planId  = (int)($data['plan_id'] ?? 0);
+        $userId  = (int)($data['user_id'] ?? 0);
+        $weekNum = (int)($data['week_number'] ?? 0);
+        $day     = $data['day_of_week'] ?? '';
+        $isDone  = (int)($data['is_completed'] ?? 0);
+        $pct     = (int)($data['completion_percentage'] ?? 0);
+
+        if (!$planId || !$userId || !$day) {
+            echo json_encode(['success' => false, 'error' => '缺少必要欄位'], JSON_UNESCAPED_UNICODE); exit;
+        }
+
+        // 查詢當天總動作數
+        $stmt = $pdo->prepare("SELECT COUNT(*) AS cnt FROM training_plan_exercises WHERE plan_id = ? AND day_of_week = ?");
+        $stmt->execute([$planId, $day]);
+        $total = (int)($stmt->fetch()['cnt'] ?? 0);
+        $completed = $isDone ? $total : 0;
+
+        // 若沒有 UNIQUE KEY 也能運作：先查有無，無則 INSERT，有則 UPDATE
+        $chk = $pdo->prepare("SELECT id FROM training_plan_completion WHERE plan_id = ? AND day_of_week = ? LIMIT 1");
+        $chk->execute([$planId, $day]);
+        $row = $chk->fetch();
+        if ($row) {
+            $upd = $pdo->prepare("UPDATE training_plan_completion
+                                  SET user_id = :user_id,
+                                      week_number = :week_number,
+                                      is_completed = :is_completed,
+                                      completed_at = CASE WHEN :is_completed=1 THEN NOW() ELSE NULL END,
+                                      completion_percentage = :pct,
+                                      total_exercises = :total,
+                                      completed_exercises = :completed,
+                                      updated_at = NOW()
+                                  WHERE id = :id");
+            $upd->execute([
+                ':user_id' => $userId,
+                ':week_number' => $weekNum,
+                ':is_completed' => $isDone,
+                ':pct' => $pct,
+                ':total' => $total,
+                ':completed' => $completed,
+                ':id' => $row['id']
+            ]);
+        } else {
+            $ins = $pdo->prepare("INSERT INTO training_plan_completion
+                                  (plan_id, user_id, week_number, day_of_week, is_completed, completed_at, completion_percentage, total_exercises, completed_exercises)
+                                  VALUES (:plan_id, :user_id, :week_number, :day, :is_completed, CASE WHEN :is_completed=1 THEN NOW() ELSE NULL END, :pct, :total, :completed)
+                                 ");
+            $ins->execute([
+                ':plan_id' => $planId,
+                ':user_id' => $userId,
+                ':week_number' => $weekNum,
+                ':day' => $day,
+                ':is_completed' => $isDone,
+                ':pct' => $pct,
+                ':total' => $total,
+                ':completed' => $completed,
+            ]);
+        }
+
+        echo json_encode(['success' => true], JSON_UNESCAPED_UNICODE); exit;
+    }
+
+    // 2) 讀取某計畫的完成細節
+    if ($action === 'get_plan_completion_detail' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        $planId = (int)($_GET['plan_id'] ?? 0);
+        if (!$planId) { echo json_encode(['success' => false, 'error' => '缺少 plan_id']); exit; }
+        $stmt = $pdo->prepare("SELECT * FROM training_plan_completion WHERE plan_id = ? ORDER BY FIELD(day_of_week,'monday','tuesday','wednesday','thursday','friday','saturday','sunday')");
+        $stmt->execute([$planId]);
+        $rows = $stmt->fetchAll();
+        echo json_encode(['success' => true, 'rows' => $rows], JSON_UNESCAPED_UNICODE); exit;
+    }
+
+    // 3) 讀取計畫（供前端載入 weeklyPlan）
+    if ($action === 'load_training_plan' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        $userId = (int)($_GET['user_id'] ?? 0);
+        $weekNum = isset($_GET['week_number']) ? (int)$_GET['week_number'] : null;
+        if (!$userId) { echo json_encode(['success' => false, 'error' => '缺少 user_id']); exit; }
+
+        $params = [$userId];
+        $where = 'WHERE user_id = ?';
+        if ($weekNum !== null) { $where .= ' AND week_number = ?'; $params[] = $weekNum; }
+
+        // plans
+        $plans = $pdo->prepare("SELECT id, user_id, week_start_date, week_number, plan_name FROM training_plans $where ORDER BY id DESC");
+        $plans->execute($params);
+        $planRows = $plans->fetchAll();
+
+        $resultPlans = [];
+        foreach ($planRows as $p) {
+            $exStmt = $pdo->prepare("SELECT day_of_week, exercise_id, exercise_name, muscle_group, sets, reps, weight, rest_time FROM training_plan_exercises WHERE plan_id = ? ORDER BY FIELD(day_of_week,'monday','tuesday','wednesday','thursday','friday','saturday','sunday'), id");
+            $exStmt->execute([$p['id']]);
+            $exRows = $exStmt->fetchAll();
+            $weekly = [
+                'monday'=>[], 'tuesday'=>[], 'wednesday'=>[], 'thursday'=>[], 'friday'=>[], 'saturday'=>[], 'sunday'=>[]
+            ];
+            foreach ($exRows as $ex) {
+                $weekly[$ex['day_of_week']][] = [
+                    'id' => (int)$ex['exercise_id'],
+                    'name' => $ex['exercise_name'],
+                    'muscleGroup' => $ex['muscle_group'],
+                    'sets' => (int)$ex['sets'],
+                    'reps' => (int)$ex['reps'],
+                    'weight' => $ex['weight'] === null ? null : (float)$ex['weight'],
+                    'restTime' => $ex['rest_time'] === null ? null : (int)$ex['rest_time'],
+                ];
+            }
+            $resultPlans[] = [
+                'id' => (int)$p['id'],
+                'user_id' => (int)$p['user_id'],
+                'week_start_date' => $p['week_start_date'],
+                'week_number' => (int)$p['week_number'],
+                'plan_name' => $p['plan_name'],
+                'exercises' => $weekly,
+            ];
+        }
+        echo json_encode(['success' => true, 'plans' => $resultPlans], JSON_UNESCAPED_UNICODE); exit;
+    }
+
+    echo json_encode(['success' => false, 'error' => '未知的 action'], JSON_UNESCAPED_UNICODE);
+} catch (Throwable $e) {
+    http_response_code(500);
+    echo json_encode(['success' => false, 'error' => $e->getMessage()], JSON_UNESCAPED_UNICODE);
+}
+?>
+
+<?php
 // 健習生系統 - 完成狀態記錄 PHP API
 // 用於處理前端完成狀態的 AJAX 請求
 // 建立時間：2024年12月

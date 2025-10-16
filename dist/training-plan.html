@@ -1599,21 +1599,55 @@
 
         // 從資料庫載入計畫
         async function loadPlan() {
+            let response;
+            let result;
             try {
                 console.log('=== loadPlan 開始 ===');
                 console.log('載入週次:', currentWeek);
                 
                 // 先嘗試載入特定週次
-                let response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=9`);
-                let result = await response.json();
+                response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=9`);
+                result = await response.json();
                 
                 console.log('特定週次 API 回應:', result);
 
-                if (result.success && result.data && result.data.plan) {
-                    // 只有資料庫真的有資料時才載入
-                    weeklyPlan = result.data.weeklyPlan;
-                    console.log('從資料庫載入計畫成功:', weeklyPlan);
-                } else {
+                let loaded = false;
+                if (result && result.success) {
+                    // 1) 相容 save_training_plan.php 風格：data.weeklyPlan
+                    if (result.data && result.data.weeklyPlan) {
+                        weeklyPlan = normalizeWeeklyPlan(result.data.weeklyPlan);
+                        loaded = true;
+                        console.log('使用 data.weeklyPlan 成功載入');
+                        // 嘗試取得 planId
+                        var planIdLoaded = result.data.plan?.id || null;
+                    }
+                    // 2) 相容 data.plan + data.weeklyPlan（舊版）
+                    else if (result.data && result.data.plan && result.data.weeklyPlan) {
+                        weeklyPlan = normalizeWeeklyPlan(result.data.weeklyPlan);
+                        loaded = true;
+                        console.log('使用 data.plan + data.weeklyPlan 成功載入');
+                        var planIdLoaded = result.data.plan?.id || null;
+                    }
+                    // 3) 相容 completion-api：plans[0].exercises
+                    else if (Array.isArray(result.plans) && result.plans.length > 0) {
+                        const plan = result.plans[0];
+                        const weeklyPlanData = {
+                            monday: plan.exercises?.monday || [],
+                            tuesday: plan.exercises?.tuesday || [],
+                            wednesday: plan.exercises?.wednesday || [],
+                            thursday: plan.exercises?.thursday || [],
+                            friday: plan.exercises?.friday || [],
+                            saturday: plan.exercises?.saturday || [],
+                            sunday: plan.exercises?.sunday || []
+                        };
+                        weeklyPlan = normalizeWeeklyPlan(weeklyPlanData);
+                        loaded = true;
+                        console.log('使用 plans[0].exercises 成功載入');
+                        var planIdLoaded = plan.id || null;
+                    }
+                }
+
+                if (!loaded) {
                     // 資料庫沒有資料，清空計畫和相關的 localStorage
                     console.log('資料庫沒有該週的計畫，清空本地計畫');
                     resetWeeklyPlan();
@@ -1632,11 +1666,24 @@
                     completionRecords = completionRecords.filter(record => record.weekNumber !== currentWeek);
                     localStorage.setItem('completionRecords', JSON.stringify(completionRecords));
                 }
+                
+                // 將已載入的計畫寫入 localStorage 並設為非 dirty（可啟用完成按鈕）
+                if (loaded) {
+                    try {
+                        const saved = localStorage.getItem('allTrainingPlans');
+                        const store = saved ? JSON.parse(saved) : {};
+                        store[currentWeek] = store[currentWeek] || {};
+                        store[currentWeek].plan = weeklyPlan;
+                        if (planIdLoaded) store[currentWeek].planId = planIdLoaded;
+                        store[currentWeek].dirty = false;
+                        localStorage.setItem('allTrainingPlans', JSON.stringify(store));
+                    } catch (e) { console.warn('寫入本地儲存失敗', e); }
+                }
             } catch (error) {
                 console.log('從資料庫載入失敗，清空本地計畫:', error);
                 resetWeeklyPlan();
                 // 如果特定週次沒有資料，嘗試載入所有計畫
-                if (!result.success || !result.plans || result.plans.length === 0) {
+                if (!result || !result.success || !result.plans || result.plans.length === 0) {
                     console.log('特定週次沒有資料，嘗試載入所有計畫');
                     response = await fetch(`completion-api.php?action=load_training_plan&user_id=9`);
                     result = await response.json();
@@ -1676,11 +1723,6 @@
                     resetWeeklyPlan();
                     console.log('已清空本地計畫資料');
                 }
-            } catch (error) {
-                console.log('從資料庫載入失敗，清空本地資料:', error);
-                // 如果資料庫載入失敗，也清空本地資料
-                resetWeeklyPlan();
-                console.log('已清空本地計畫資料');
             }
             
             // 重新渲染
@@ -1814,8 +1856,9 @@
                 // 先載入動作資料
                 await loadExercises();
                 
-                // 然後載入其他資料（本地流程）
-                loadPlan();
+                // 然後載入其他資料（改為以資料庫為主）
+                await loadPlan();
+                await loadPlanCompletionStats();
                 updateWeekDates();
                 renderWeeklyPlan();
                 updateStats();
@@ -2143,55 +2186,7 @@
                     }
                 }
 
-                // 添加完成狀態按鈕（只有在有動作時才顯示）
-                if (weeklyPlan[day].length > 0) {
-                    const completionButton = document.createElement('div');
-                    completionButton.className = 'mt-2 text-center';
-                    
-                    // 檢查是否有儲存到資料庫的計畫
-                    let planId = null;
-                    const saved = localStorage.getItem('allTrainingPlans');
-                    if (saved) {
-                        try {
-                            const parsed = JSON.parse(saved);
-                            if (parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
-                                planId = parsed[currentWeek].planId;
-                            }
-                        } catch (e) {}
-                    }
-                    
-                    // 以資料庫回傳為主，無資料時回退 local 狀態
-                    const dbFlag = (dayCompletionFromDb && typeof dayCompletionFromDb[day] === 'number') ? dayCompletionFromDb[day] : null;
-                    const isCompleted = dbFlag === null ? weeklyPlan[day].some(exercise => exercise.completed) : dbFlag === 1;
-                    
-                    if (isCompleted) {
-                        // 已完成狀態：顯示綠色勾勾
-                        completionButton.innerHTML = `
-                            <div class="completion-status completed" onclick="toggleDayCompletion('${day}')">
-                                <i class="bi bi-check-circle-fill text-success"></i>
-                                <span class="text-success ms-1">已完成</span>
-                            </div>
-                        `;
-                    } else if (planId) {
-                        // 未完成狀態：顯示可點擊的勾勾（有儲存到資料庫）
-                        completionButton.innerHTML = `
-                            <div class="completion-status incomplete" onclick="toggleDayCompletion('${day}')">
-                                <i class="bi bi-circle text-muted"></i>
-                                <span class="text-muted ms-1">點擊完成</span>
-                            </div>
-                        `;
-                    } else {
-                        // 未儲存狀態：顯示不可點擊的提示
-                        completionButton.innerHTML = `
-                            <div class="completion-status disabled">
-                                <i class="bi bi-circle text-secondary"></i>
-                                <span class="text-secondary ms-1">請先儲存計畫</span>
-                            </div>
-                        `;
-                    }
-                    
-                    container.appendChild(completionButton);
-                }
+                // 已移除重複的完成狀態按鈕（避免顯示兩個）
             });
             updateStats();
         }
@@ -2269,7 +2264,10 @@
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload)
-            }).then(r => r.json()).then(async (res) => {
+            }).then(async (r) => {
+                const text = await r.text();
+                let res;
+                try { res = JSON.parse(text); } catch(e) { console.error('完成API回應非JSON:', text); throw new Error('完成API回應非JSON'); }
                 if (!res.success) throw new Error(res.error || '更新失敗');
                 // 更新快取並重繪
                 dayCompletionFromDb[day] = newStatus ? 1 : 0;
@@ -2727,7 +2725,7 @@
                 dayCompletionFromDb = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
                 json.rows.forEach(r => { dayCompletionFromDb[r.day_of_week] = Number(r.is_completed) || 0; });
 
-                // 渲染表格
+                // 渲染表格（下方統計表）
                 if (body) {
                     body.innerHTML = '';
                     json.rows.forEach(r => {
@@ -2747,6 +2745,27 @@
                     });
                 }
 
+                // 渲染上方「完成記錄」表（若存在）
+                const topTable = document.querySelector('#completionRecordsTable tbody');
+                if (topTable) {
+                    topTable.innerHTML = '';
+                    const cnDay = {monday:'週一',tuesday:'週二',wednesday:'週三',thursday:'週四',friday:'週五',saturday:'週六',sunday:'週日'};
+                    json.rows.forEach(r => {
+                        if (!r.total_exercises) return;
+                        const completedDate = r.completed_at ? new Date(r.completed_at).toLocaleString('zh-TW') : '-';
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>第${currentWeek + 1}週</td>
+                            <td>${cnDay[r.day_of_week] || r.day_of_week}</td>
+                            <td>${r.total_exercises} 個動作</td>
+                            <td><span class="badge ${Number(r.is_completed)===1 ? 'bg-success' : 'bg-secondary'}">${Number(r.is_completed)===1 ? '已完成' : '未完成'}</span></td>
+                            <td>${completedDate}</td>
+                            <td></td>
+                        `;
+                        topTable.appendChild(row);
+                    });
+                }
+
                 // 計算完成率
                 const totalDays = json.rows.length || 7;
                 const completedDays = json.rows.filter(r => Number(r.is_completed) === 1).length;
@@ -2754,8 +2773,9 @@
                 const rate = document.getElementById('weekly-completion-rate');
                 if (rate) rate.textContent = `完成率：${completionRate}%（${completedDays}/${totalDays}）`;
 
-                // 依 DB 狀態重新渲染週菜單的勾勾
+                // 依 DB 狀態重新渲染週菜單與完成度
                 renderWeeklyPlan();
+                updateWeekCompletion();
 
             } catch (err) {
                 console.error('loadPlanCompletionStats error:', err);
@@ -4671,15 +4691,15 @@
         document.getElementById('exerciseSearch').addEventListener('input', renderExerciseList);
         document.getElementById('muscleGroupFilter').addEventListener('change', renderExerciseList);
 
-        // 完成記錄相關功能
-        let completionRecords = JSON.parse(localStorage.getItem('completionRecords') || '[]');
+        // 完成記錄相關功能（以資料庫為主）
         let hasUnsavedChanges = false; // 追蹤是否有未儲存的變更
 
-        // 檢查某一天是否已完成
+        // 檢查某一天是否已完成（以 DB 快取 dayCompletionFromDb 為主）
         function isDayCompleted(day) {
-            return completionRecords.some(record => 
-                record.day === day && record.weekNumber === currentWeek
-            );
+            if (dayCompletionFromDb && typeof dayCompletionFromDb[day] === 'number') {
+                return Number(dayCompletionFromDb[day]) === 1;
+            }
+            return false;
         }
 
         // 檢查當前週是否有儲存到資料庫
@@ -4711,41 +4731,7 @@
             }
         }
 
-        // 切換每天完成狀態
-        function toggleDayCompletion(day) {
-            // 防呆機制：檢查是否已儲存
-            if (!isCurrentWeekSaved()) {
-                showSuccessMessage('請先儲存計畫後再標記完成！', 'warning');
-                return;
-            }
-
-            const dayCompleted = isDayCompleted(day);
-            
-            if (dayCompleted) {
-                // 移除這一天的完成記錄
-                completionRecords = completionRecords.filter(record => 
-                    !(record.day === day && record.weekNumber === currentWeek)
-                );
-                localStorage.setItem('completionRecords', JSON.stringify(completionRecords));
-                showSuccessMessage(`${getDayName(day)} 已取消完成標記！`);
-            } else {
-                // 記錄這一天完成
-                const completionRecord = {
-                    id: Date.now(),
-                    day: day,
-                    weekNumber: currentWeek,
-                    completedAt: new Date().toISOString(),
-                    exerciseCount: weeklyPlan[day].length
-                };
-                completionRecords.push(completionRecord);
-                localStorage.setItem('completionRecords', JSON.stringify(completionRecords));
-                showSuccessMessage(`${getDayName(day)} 已標記為完成！`);
-            }
-            
-            // 重新渲染以更新按鈕狀態
-            renderWeeklyPlan();
-            updateWeekCompletion();
-        }
+        // 切換每天完成狀態（使用前面的 DB 版本，這裡移除舊的 localStorage 實作）
         // 刪除本週計畫
         function deleteCurrentWeekPlan() {
             if (confirm('確定要刪除本週的訓練計畫嗎？此操作無法復原！')) {
@@ -4785,24 +4771,23 @@
             }
         }
 
-        // 更新底部每週完成度
+        // 更新每週完成度（以 DB dayCompletionFromDb 為主）
         function updateWeekCompletion() {
             const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-            const totalDaysWithPlan = days.filter(d => (weeklyPlan[d] && weeklyPlan[d].length > 0)).length;
-            if (totalDaysWithPlan === 0) {
-                document.getElementById('week-completion-text').textContent = '0%';
-                document.getElementById('week-completion-bar').style.width = '0%';
-                document.getElementById('week-completion-bar').setAttribute('aria-valuenow', '0');
-                showWeekRecords(currentWeek); // 更新記錄表格
-                return;
+            // 僅計入有實際訓練（非休息日）的天數
+            const totalDaysWithPlan = days.filter(d => Array.isArray(weeklyPlan[d]) && weeklyPlan[d].some(ex => Number(ex.id) !== 0)).length;
+            let percent = 0;
+            if (totalDaysWithPlan > 0) {
+                const completedDays = days.filter(d => Number(dayCompletionFromDb?.[d] || 0) === 1).length;
+                percent = Math.round((completedDays / totalDaysWithPlan) * 100);
             }
-            const completedDays = completionRecords.filter(r => r.weekNumber === currentWeek).map(r => r.day);
-            const uniqueCompletedDays = Array.from(new Set(completedDays));
-            const percent = Math.round((uniqueCompletedDays.length / totalDaysWithPlan) * 100);
-            document.getElementById('week-completion-text').textContent = percent + '%';
-            document.getElementById('week-completion-bar').style.width = percent + '%';
-            document.getElementById('week-completion-bar').setAttribute('aria-valuenow', String(percent));
-            showWeekRecords(currentWeek); // 更新記錄表格
+            const txt = document.getElementById('week-completion-text');
+            const bar = document.getElementById('week-completion-bar');
+            if (txt) txt.textContent = percent + '%';
+            if (bar) {
+                bar.style.width = percent + '%';
+                bar.setAttribute('aria-valuenow', String(percent));
+            }
         }
 
         // 渲染完成記錄表格
@@ -4841,70 +4826,13 @@
             });
         }
 
-        // 顯示指定週的記錄
-        function showWeekRecords(weekNumber) {
-            const tbody = document.querySelector('#completionRecordsTable tbody');
-            tbody.innerHTML = '';
-
-            const weekRecords = completionRecords.filter(r => r.weekNumber === weekNumber);
-            if (weekRecords.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">該週暫無完成記錄</td></tr>';
-                return;
-            }
-
-            const sortedRecords = weekRecords.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-            sortedRecords.forEach(record => {
-                const completedDate = new Date(record.completedAt);
-                const dayName = getDayName(record.day);
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>第${record.weekNumber + 1}週</td>
-                    <td>${dayName}</td>
-                    <td>${record.exerciseCount} 個動作</td>
-                    <td><span class="badge bg-success">已完成</span></td>
-                    <td>${completedDate.toLocaleString('zh-TW')}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCompletionRecord(${record.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
+        // 顯示指定週的記錄（改為 DB，在 loadPlanCompletionStats 取得 rows 後由該函式渲染）
+        function showWeekRecords() {
+            // 由 loadPlanCompletionStats 來渲染
+            loadPlanCompletionStats();
         }
 
-        // 顯示所有週的記錄
-        function showAllWeekRecords() {
-            const tbody = document.querySelector('#completionRecordsTable tbody');
-            tbody.innerHTML = '';
-
-            if (completionRecords.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">暫無完成記錄</td></tr>';
-                return;
-            }
-
-            const sortedRecords = completionRecords.sort((a, b) => new Date(b.completedAt) - new Date(a.completedAt));
-            sortedRecords.forEach(record => {
-                const completedDate = new Date(record.completedAt);
-                const dayName = getDayName(record.day);
-                
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>第${record.weekNumber + 1}週</td>
-                    <td>${dayName}</td>
-                    <td>${record.exerciseCount} 個動作</td>
-                    <td><span class="badge bg-success">已完成</span></td>
-                    <td>${completedDate.toLocaleString('zh-TW')}</td>
-                    <td>
-                        <button class="btn btn-sm btn-outline-danger" onclick="deleteCompletionRecord(${record.id})">
-                            <i class="bi bi-trash"></i>
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
+        function showAllWeekRecords() { loadPlanCompletionStats(); }
 
         // 刪除單個完成記錄
         function deleteCompletionRecord(recordId) {
