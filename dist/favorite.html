@@ -497,33 +497,53 @@
         .compact-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 16px;
         }
 
         .compact-item {
-            display: flex;
-            align-items: center;
-            padding: 16px 12px;
-            background: #e4e9ec;
+            background: white;
             border: 1px solid var(--morandi-light-gray);
-            border-radius: 12px;
-            transition: all 0.2s ease;
+            border-radius: 16px;
+            transition: all 0.3s ease;
             cursor: pointer;
-            gap: 2px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
         }
 
         .compact-item:hover {
             transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .compact-item.expanded {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .compact-item-header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            gap: 16px;
+        }
+
+        .compact-item-content {
+            padding: 0 20px 20px 20px;
+            display: none;
+            border-top: 1px solid var(--morandi-light-gray);
+            background: #f8f9fa;
+        }
+
+        .compact-item.expanded .compact-item-content {
+            display: block;
         }
 
         .compact-thumbnail {
-            width: 40px;
-            height: 30px;
-            border-radius: 6px;
+            width: 80px;
+            height: 60px;
+            border-radius: 12px;
             overflow: hidden;
-            margin-right: 2px;
             flex-shrink: 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         }
 
         .compact-thumbnail video {
@@ -532,55 +552,65 @@
             object-fit: cover;
         }
 
-        .compact-content {
+        .compact-main-info {
             flex: 1;
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            gap: 16px;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .compact-info h6 {
-            margin: 0 0 4px 0;
-            font-size: 1rem;
-            font-weight: 600;
+        .compact-title {
+            font-size: 1.1rem;
+            font-weight: 700;
             color: var(--morandi-text);
-            text-align: left;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
         }
 
-        .compact-info p {
-            margin: 0;
-            font-size: 0.8rem;
-            color: var(--morandi-dark-gray);
-            text-align: left;
+        .compact-title i {
+            color: #e74c3c;
+            font-size: 0.9rem;
         }
+
+        .compact-subtitle {
+            font-size: 0.9rem;
+            color: var(--morandi-dark-gray);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
 
         .compact-meta {
             display: flex;
             gap: 8px;
-            margin-right: 0;
             flex-shrink: 0;
         }
 
         .compact-badge {
-            padding: 4px 8px;
-            background: rgba(255, 255, 255, 0.8);
-            border: 1px solid rgba(255, 255, 255, 0.9);
-            border-radius: 12px;
-            font-size: 0.7rem;
-            font-weight: 500;
-            color: #2c3e50;
+            padding: 6px 12px;
+            background: linear-gradient(135deg, var(--morandi-blue), var(--morandi-light-blue));
+            border: none;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: white;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         .compact-actions {
             display: flex;
             gap: 8px;
+            flex-shrink: 0;
         }
 
         .compact-action-btn {
-            padding: 6px 12px;
+            padding: 8px 16px;
             border: 1px solid var(--morandi-blue);
-            border-radius: 20px;
+            border-radius: 25px;
             background: var(--morandi-blue);
             color: white;
             font-size: 0.8rem;
@@ -589,13 +619,93 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 4px;
+            gap: 6px;
+            font-weight: 500;
         }
 
         .compact-action-btn:hover {
             background: var(--morandi-dark-blue);
             border-color: var(--morandi-dark-blue);
             color: white;
+            transform: translateY(-1px);
+        }
+
+        .compact-expand-icon {
+            color: var(--morandi-text);
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .compact-item.expanded .compact-expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 詳細內容區域樣式 */
+        .compact-detail-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .compact-detail-section {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid var(--morandi-light-gray);
+        }
+
+        .compact-detail-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--morandi-text);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .compact-detail-content {
+            font-size: 0.8rem;
+            color: var(--morandi-dark-gray);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .compact-left-section {
+            grid-column: 1;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .compact-video-section {
+            width: 100%;
+        }
+
+        .compact-params-section {
+            width: 100%;
+        }
+
+        .compact-info-section {
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .compact-video-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .compact-video-container video {
+            width: 100%;
+            height: 400px;
+            object-fit: cover;
         }
 
 
@@ -691,31 +801,48 @@
                 min-width: 200px;
             }
 
-            .compact-item {
-                flex-direction: column;
-                align-items: stretch;
-            }
-
-            .compact-thumbnail {
-                width: 100%;
-                height: 120px;
-                margin-right: 0;
-                margin-bottom: 12px;
-            }
-
-            .compact-content {
+            .compact-item-header {
                 flex-direction: column;
                 align-items: stretch;
                 gap: 12px;
             }
 
+            .compact-thumbnail {
+                width: 100%;
+                height: 120px;
+                align-self: center;
+            }
+
+            .compact-main-info {
+                text-align: center;
+            }
+
+
             .compact-meta {
-                margin-right: 0;
                 justify-content: center;
             }
 
             .compact-actions {
                 justify-content: center;
+            }
+
+            .compact-detail-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .compact-left-section {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .compact-info-section {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .compact-video-container video {
+                height: 300px;
             }
         }
 
@@ -1168,18 +1295,26 @@
             filteredFavorites.forEach((ex, i) => {
                 const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
                 const hypertrophyWeightMax = hypertrophyWeightMin + 15;
+                const fatlossWeightMin = hypertrophyWeightMin - 20;
+                const fatlossWeightMax = hypertrophyWeightMin - 5;
 
                 html += `
-      <div class="compact-item" onclick="openExerciseModal(${JSON.stringify(ex).replace(/"/g, '&quot;')}, ${i})">
-        <div class="compact-thumbnail">
-          <video muted playsinline preload="metadata">
-            <source src="${ex.video_url || ''}" type="video/mp4">
-          </video>
-        </div>
-        <div class="compact-content">
-          <div class="compact-info">
-            <h6>${ex.name || '未命名動作'}</h6>
-            <p>${ex.target_muscle || '—'} • 增肌 ${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}組 • 減脂 ${ex.fatloss_sets_min}-${ex.fatloss_sets_max}組</p>
+      <div class="compact-item" onclick="toggleCompactItem(this)">
+        <div class="compact-item-header">
+          <div class="compact-thumbnail">
+            <video muted playsinline preload="metadata">
+              <source src="${ex.video_url || ''}" type="video/mp4">
+            </video>
+          </div>
+          <div class="compact-main-info">
+            <h6 class="compact-title">
+              <i class="bi bi-heart-fill"></i>
+              ${ex.name || '未命名動作'}
+            </h6>
+            <p class="compact-subtitle">
+              <i class="bi bi-person-arms-up"></i>
+              ${ex.target_muscle || '—'}
+            </p>
           </div>
           <div class="compact-meta">
             <span class="compact-badge">💪 增肌</span>
@@ -1187,8 +1322,89 @@
           </div>
           <div class="compact-actions" onclick="event.stopPropagation()">
             <button class="compact-action-btn" onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
-              <i class="bi bi-trash"></i>移除
+              <i class="bi bi-trash"></i>移除收藏
             </button>
+          </div>
+          <i class="bi bi-chevron-down compact-expand-icon"></i>
+        </div>
+        
+        <div class="compact-item-content">
+          <div class="compact-detail-grid">
+            <div class="compact-left-section">
+              <div class="compact-video-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-play-circle"></i>
+                  示範影片
+                </div>
+                <div class="compact-video-container">
+                  <video controls playsinline preload="metadata">
+                    <source src="${ex.video_url || ''}" type="video/mp4">
+                    您的瀏覽器不支援影片播放。
+                  </video>
+                </div>
+              </div>
+              
+              <div class="compact-params-section">
+                <div class="compact-detail-section">
+                  <div class="compact-detail-title">
+                    <i class="bi bi-graph-up"></i>
+                    訓練參數
+                  </div>
+                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌組數</div>
+                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌次數</div>
+                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌重量</div>
+                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂組數</div>
+                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂次數</div>
+                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</div>
+                    </div>
+                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂重量</div>
+                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${fatlossWeightMin}-${fatlossWeightMax}%</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="compact-info-section">
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-info-circle"></i>
+                  動作解說
+                </div>
+                <p class="compact-detail-content">${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
+              </div>
+              
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-person-check"></i>
+                  適用對象
+                </div>
+                <p class="compact-detail-content">${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
+              </div>
+              
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  注意事項
+                </div>
+                <p class="compact-detail-content">${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
+              </div>
+            </div>
           </div>
         </div>
       </div>`;
@@ -1343,6 +1559,11 @@
             } catch (e) {
                 alert('移除失敗，請稍後再試');
             }
+        }
+
+        // 切換緊湊項目展開/收合
+        function toggleCompactItem(element) {
+            element.classList.toggle('expanded');
         }
 
         // 詳細說明 Modal（跟 training.html 一致）
