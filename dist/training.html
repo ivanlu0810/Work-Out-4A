@@ -1041,17 +1041,39 @@
             const videoContainer = document.getElementById('exerciseVideoContainer');
             videoContainer.innerHTML = "";
 
+            // 檢查是否為 cable上斜臥推，使用 YouTube 嵌入影片
+            let videoContent = '';
+            if (exercise.name && exercise.name.includes('cable上斜臥推')) {
+                // 使用 YouTube 嵌入影片
+                videoContent = `
+                    <div class="ratio ratio-16x9">
+                        <iframe id="exerciseVideo" 
+                                src="https://www.youtube.com/embed/_ibiWfQHnio?autoplay=0&rel=0&modestbranding=1" 
+                                title="cable上斜臥推示範影片"
+                                frameborder="0" 
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                `;
+            } else {
+                // 使用原本的 video 標籤
+                videoContent = `
+                    <div class="ratio ratio-16x9">
+                        <video id="exerciseVideo" controls playsinline preload="auto">
+                            <source src="${exercise.video_url || ''}" type="video/mp4">
+                            您的瀏覽器不支援影片播放。
+                        </video>
+                    </div>
+                `;
+            }
+
             // 動態插入內容
             videoContainer.innerHTML = `
         <!-- 示範影片 -->
         <div class="mb-3">
             <h6 style="color:#2c3e50; font-weight:600; font-size:1rem;">示範影片：</h6>
-            <div class="ratio ratio-16x9">
-                <video id="exerciseVideo" controls playsinline preload="auto">
-                    <source src="${exercise.video_url || ''}" type="video/mp4">
-                    您的瀏覽器不支援影片播放。
-                </video>
-            </div>
+            ${videoContent}
         </div>
 
         <!-- 動作解說 -->
@@ -1084,10 +1106,13 @@
             const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
             modal.show();
 
-            // 關閉時重置影片
+            // 關閉時重置影片（僅對 video 標籤有效）
             modalEl.addEventListener("hidden.bs.modal", () => {
                 const v = document.getElementById("exerciseVideo");
-                if (v) { v.pause(); try { v.currentTime = 0; } catch (e) { } }
+                if (v && v.tagName === 'VIDEO') { 
+                    v.pause(); 
+                    try { v.currentTime = 0; } catch (e) { } 
+                }
             }, { once: true });
         }
 
