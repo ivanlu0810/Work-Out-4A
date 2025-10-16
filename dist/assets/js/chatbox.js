@@ -112,31 +112,110 @@ function appendMessage(text, sender = "user") {
   body.scrollTop = body.scrollHeight;
 }
 
+// === 打字中小點點 ===
+let typingBubble = null;
+
+function showTyping() {
+  // 建立一個「正在輸出」的訊息泡泡
+  typingBubble = document.createElement("div");
+  typingBubble.classList.add("message", "bot", "typing");
+  typingBubble.innerHTML = `
+    <span>教練正在輸出</span>
+    <span class="typing-indicator">
+      <span class="dot"></span><span class="dot"></span><span class="dot"></span>
+    </span>
+  `;
+  body.appendChild(typingBubble);
+  body.scrollTop = body.scrollHeight;
+}
+
+function hideTyping() {
+  if (typingBubble && typingBubble.parentNode) {
+    typingBubble.parentNode.removeChild(typingBubble);
+  }
+  typingBubble = null;
+}
+
+// === 打字機效果：先逐字顯示純文字，最後再轉 Markdown ===
+async function typeWriterMarkdown(fullText, speed = 12) {
+  // 建立一個目標訊息泡泡（暫以純文字顯示）
+  const msg = document.createElement("div");
+  msg.classList.add("message", "bot", "typing-target");
+  msg.textContent = ""; // 從空字串開始打
+  body.appendChild(msg);
+  body.scrollTop = body.scrollHeight;
+
+  // 逐字顯示
+  for (let i = 0; i < fullText.length; i++) {
+    msg.textContent += fullText[i];
+    // 微調速率：換行與標點稍作停頓更自然
+    const ch = fullText[i];
+    const pause = (ch === "\n") ? 10 : (/[，。！？,.]/.test(ch) ? speed + 30 : speed);
+    await new Promise(r => setTimeout(r, pause));
+    body.scrollTop = body.scrollHeight;
+  }
+
+  // 完成後把純文字轉成 Markdown（維持你原本使用 marked 的做法）
+  msg.classList.remove("typing-target");
+  msg.innerHTML = marked.parse(fullText);
+  body.scrollTop = body.scrollHeight;
+}
+
+
 async function sendMessage() {
   const text = input.value.trim();
   if (!text) return;
 
   appendMessage(text, "user");
   input.value = "";
+
+  // 立刻顯示「打字中」微動畫（降低空窗焦慮）
+  showTyping();
+
   const userId = document.getElementById("user-id").textContent;
+
   try {
-    const response = await fetch("http://localhost/chatbox.php", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        user_id: userId, // 帶上 userId
-        messages: [{ role: "user", content: text }],
-      }),
+    const payload = JSON.stringify({
+      user_id: userId,
+      messages: [{ role: "user", content: text }],
     });
+
+    // 1) 優先打同資料夾的 chatbox.php（自動適配 ngrok / localhost）
+    const siblingEndpoint = new URL("chatbox.php", window.location.href).href;
+
+    let response;
+    try {
+      response = await fetch(siblingEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    } catch (e1) {
+      // 2) 失敗時回退到固定 ngrok 端點（當你用 ngrok 測試時仍可用）
+      const ngrokEndpoint = "https://jianshen.ngrok.app/%E5%81%A5%E7%BF%92%E7%94%9F/dist/chatbox.php";
+      response = await fetch(ngrokEndpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: payload,
+      });
+    }
 
     const data = await response.json();
     const aiReply = data.reply || "❌ 無法取得回覆";
-    appendMessage(aiReply, "bot");
+
+    // 關掉點點動畫，改用打字機效果輸出 AI 內容
+    hideTyping();
+    await typeWriterMarkdown(aiReply, 12);
+
   } catch (err) {
     console.error("錯誤：", err);
+    hideTyping();
     appendMessage("❌ 發送失敗，請稍後再試", "bot");
   }
 }
+
+
 
 // --------- 發送事件 ----------
 button.addEventListener("click", sendMessage);

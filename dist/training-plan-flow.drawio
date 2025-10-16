@@ -1,0 +1,101 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36" version="28.2.5">
+  <diagram id="training-plan-flow" name="Training Plan Flow (User Actions)">
+    <mxGraphModel dx="1554" dy="815" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" value="開啟訓練計畫頁面" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="160" y="40" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="templateTitle" value="看到三個訓練分化選項" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="120" y="110" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="cardFull" value="全身訓練" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="60" y="180" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cardUL" value="二分化（上下分離）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="240" y="180" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="cardPPL" value="三分化（推/拉/腿）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="440" y="180" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="modeDialog" value="選擇模式：\n• 推薦菜單\n• 隨機菜單" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="260" y="270" width="240" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="applySettings" value="套用你的設定\n（每日動作數、肌群比例、強度/組次）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="260" y="380" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="randomOutcome" value="隨機菜單\n→ 依設定產生本週每日 6–8 個動作\n→ 上半身含上/中/下胸與上/中背；下半身含股四/股二/臀/核心\n→ 畫面即時更新" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="560" y="360" width="420" height="120" as="geometry" />
+        </mxCell>
+        <mxCell id="recoOutcome" value="推薦菜單\n→ 套用 Level 1 設計並依你的設定微調（動作數/比例/強度）\n→ 立即填入並更新畫面" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="820" y="510" width="420" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="dragOutcome" value="拖拽某一模板到『某一天』\n→ 只更新該日（6–8 動作），依你的設定產生\n→ 該日卡片立即更新" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="60" y="480" width="420" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="addBtn" value="點『新增動作』\n→ 開啟選擇（搜尋/肌群篩選）\n→ 設定組次/強度\n→ 加入該日" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="60" y="600" width="300" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="deleteBtn" value="點『垃圾桶』\n→ 移除該動作\n→ 畫面同步更新" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="380" y="600" width="260" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="saveBtn" value="點『儲存計畫』\n→ 儲存本週訓練計畫\n→ 成功提示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="660" y="640" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="weekNav" value="點『上週/下週』\n→ 切換週區間\n→ 載入該週計畫並更新畫面" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="660" y="740" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" parent="1" source="start" target="templateTitle" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2a" parent="1" source="templateTitle" target="cardFull" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2b" parent="1" source="templateTitle" target="cardUL" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2c" parent="1" source="templateTitle" target="cardPPL" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3a" parent="1" source="cardFull" target="modeDialog" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3b" parent="1" source="cardUL" target="modeDialog" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3c" parent="1" source="cardPPL" target="modeDialog" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" parent="1" source="modeDialog" target="applySettings" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" parent="1" source="applySettings" target="randomOutcome" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="360" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e6" parent="1" source="applySettings" target="recoOutcome" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="560" y="510" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e7" parent="1" source="applySettings" target="dragOutcome" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" parent="1" source="randomOutcome" target="saveBtn" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e9" parent="1" source="recoOutcome" target="saveBtn" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e10" parent="1" source="dragOutcome" target="saveBtn" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e11" parent="1" source="saveBtn" target="weekNav" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

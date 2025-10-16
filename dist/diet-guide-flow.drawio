@@ -1,0 +1,150 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36" version="28.2.5">
+  <diagram id="diet-guide-flow" name="Diet Guide Flow (User Actions)">
+    <mxGraphModel dx="1554" dy="815" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1920" pageHeight="1080" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="start" value="開啟飲食指南頁面" style="ellipse;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="140" y="40" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="title" value="看到本週餐單與營養目標" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="100" y="110" width="300" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="modeDialog" value="選擇模式：\n• 規則產生\n• 推薦菜單\n• 單品替換" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=14;" parent="1" vertex="1">
+          <mxGeometry x="240" y="190" width="260" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="applyTargets" value="套用目標/偏好\n（kcal/三大營養素/餐次/飲食型態/過敏）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=13;" parent="1" vertex="1">
+          <mxGeometry x="240" y="310" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="ruleOutcome" value="規則產生\n→ 依配額分配至各餐\n→ 偏好與限制過濾\n→ 即時更新畫面" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="560" y="300" width="360" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="recoOutcome" value="推薦菜單\n→ 減脂/增肌/均衡模板\n→ 依目標微調份量\n→ 立即填入" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="780" y="440" width="340" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="swapOutcome" value="單品替換\n→ 保持營養結構\n→ 挑選同類食物替代\n→ 回算份量" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="60" y="430" width="360" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="saveBtn" value="點『儲存餐單』\n→ 儲存本週餐單\n→ 成功提示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="600" y="560" width="260" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="weekNav" value="點『上週/下週』\n→ 切換週區間\n→ 載入該週餐單並更新畫面" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="600" y="660" width="320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="e1" parent="1" source="start" target="title" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" parent="1" source="title" target="modeDialog" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" parent="1" source="modeDialog" target="applyTargets" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" parent="1" source="applyTargets" target="ruleOutcome" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" parent="1" source="applyTargets" target="recoOutcome" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e6" parent="1" source="applyTargets" target="swapOutcome" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7a" parent="1" source="ruleOutcome" target="saveBtn" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7b" parent="1" source="recoOutcome" target="saveBtn" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e7c" parent="1" source="swapOutcome" target="saveBtn" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e8" parent="1" source="saveBtn" target="weekNav" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="inbodyBanner" value="InBody 匯入成功提示" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#eaffd6;strokeColor=#a1cf5f;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1180" y="50" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="fillForm" value="填入/確認基本資料\n年齡/性別/身高/體重/活動強度/目標" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1140" y="120" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="calcNeeds" value="點『計算營養需求』\n→ 取得 kcal/蛋白/碳水/脂肪 目標" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1140" y="220" width="300" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="searchFood" value="搜尋食物關鍵字" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1140" y="320" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="filterCat" value="類別篩選" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1340" y="320" width="140" height="60" as="geometry" />
+        </mxCell>
+         <mxCell id="manualInput" value="手動輸入自訂食材/營養" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" parent="1" vertex="1">
+           <mxGeometry x="1540" y="320" width="200" height="60" as="geometry" />
+         </mxCell>
+        <mxCell id="addToMeal" value="加入餐次/設定份量" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1140" y="400" width="220" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="adjustServing" value="調整份量（克/份）" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffffff;strokeColor=#666666;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1380" y="400" width="180" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="recalc" value="即時更新：每日/每週 kcal、蛋白、碳水、脂肪" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1140" y="480" width="380" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="meetTargets" value="是否達標？" style="rhombus;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1250" y="570" width="160" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="suggestAlt" value="推薦高蛋白/高纖或同類替代品" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1140" y="660" width="260" height="70" as="geometry" />
+        </mxCell>
+        <mxCell id="goSave" value="點『儲存餐單』" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=12;" parent="1" vertex="1">
+          <mxGeometry x="1430" y="660" width="160" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="ue1" parent="1" source="start" target="inbodyBanner" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue2" parent="1" source="inbodyBanner" target="fillForm" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue3" parent="1" source="fillForm" target="calcNeeds" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue4a" parent="1" source="calcNeeds" target="searchFood" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue4b" parent="1" source="calcNeeds" target="filterCat" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue5a" parent="1" source="searchFood" target="addToMeal" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue5b" parent="1" source="filterCat" target="addToMeal" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+         <mxCell id="ue5c" parent="1" source="manualInput" target="addToMeal" edge="1">
+           <mxGeometry relative="1" as="geometry" />
+         </mxCell>
+        <mxCell id="ue6" parent="1" source="addToMeal" target="adjustServing" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue7a" parent="1" source="addToMeal" target="recalc" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue7b" parent="1" source="adjustServing" target="recalc" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue8" parent="1" source="recalc" target="meetTargets" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue9a" parent="1" source="meetTargets" target="suggestAlt" edge="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1270" y="695" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ue9b" parent="1" source="meetTargets" target="goSave" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="ue10" parent="1" source="suggestAlt" target="searchFood" edge="1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>
