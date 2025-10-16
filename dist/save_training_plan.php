@@ -70,6 +70,11 @@ try {
                 $deleteStmt = $conn->prepare("DELETE FROM training_plan_exercises WHERE plan_id = ?");
                 $deleteStmt->bind_param("i", $plan_id);
                 $deleteStmt->execute();
+                
+                // 刪除舊的完成記錄（重要！）
+                $deleteCompletionStmt = $conn->prepare("DELETE FROM training_plan_completion WHERE plan_id = ?");
+                $deleteCompletionStmt->bind_param("i", $plan_id);
+                $deleteCompletionStmt->execute();
             } else {
                 // 建立新計畫
                 $insertStmt = $conn->prepare("INSERT INTO training_plans (user_id, week_start_date, week_number, plan_name) VALUES (?, ?, ?, ?)");

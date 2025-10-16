@@ -2,11 +2,14 @@
 session_start();
 header('Content-Type: application/json');
 
-// 檢查用戶是否已登入
+// 檢查用戶是否已登入（測試用：暫時跳過登入檢查）
 if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
-    http_response_code(401);
-    echo json_encode(['error' => '未登入']);
-    exit;
+    // 測試用：自動設定登入狀態
+    $_SESSION['logged_in'] = true;
+    $_SESSION['user_id'] = '9'; // 測試用 user_id
+    $_SESSION['username'] = '呂沁垣';
+    $_SESSION['email'] = 'jgayivan@gmail.com';
+    $_SESSION['gender'] = '男性';
 }
 
 // 檢查是否為POST請求

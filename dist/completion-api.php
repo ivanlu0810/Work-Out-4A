@@ -157,6 +157,19 @@ try {
         echo json_encode(['success' => true, 'plans' => $resultPlans], JSON_UNESCAPED_UNICODE); exit;
     }
 
+    // 3.5) 獲取有資料的週次列表
+    if ($action === 'get_available_weeks' && $_SERVER['REQUEST_METHOD'] === 'GET') {
+        $userId = (int)($_GET['user_id'] ?? 0);
+        if (!$userId) { echo json_encode(['success' => false, 'error' => '缺少 user_id']); exit; }
+
+        // 查詢該用戶所有有資料的週次
+        $stmt = $pdo->prepare("SELECT DISTINCT week_number, week_start_date, plan_name FROM training_plans WHERE user_id = ? AND is_active = 1 ORDER BY week_number ASC");
+        $stmt->execute([$userId]);
+        $weeks = $stmt->fetchAll();
+        
+        echo json_encode(['success' => true, 'weeks' => $weeks], JSON_UNESCAPED_UNICODE); exit;
+    }
+
     echo json_encode(['success' => false, 'error' => '未知的 action'], JSON_UNESCAPED_UNICODE);
 } catch (Throwable $e) {
     http_response_code(500);
@@ -539,9 +552,16 @@ function saveTrainingPlan($pdo) {
             $update_stmt->execute([$input['plan_name'], $plan_id]);
             
             // 刪除現有的運動記錄
-            $delete_sql = "DELETE FROM training_plan_exercises WHERE plan_id = ?";
-            $delete_stmt = $pdo->prepare($delete_sql);
-            $delete_stmt->execute([$plan_id]);
+            $delete_exercises_sql = "DELETE FROM training_plan_exercises WHERE plan_id = ?";
+            $delete_exercises_stmt = $pdo->prepare($delete_exercises_sql);
+            $delete_exercises_stmt->execute([$plan_id]);
+            
+            // 刪除現有的完成記錄（重要！）
+            $delete_completion_sql = "DELETE FROM training_plan_completion WHERE plan_id = ?";
+            $delete_completion_stmt = $pdo->prepare($delete_completion_sql);
+            $delete_completion_stmt->execute([$plan_id]);
+            
+            echo "已清除 plan_id $plan_id 的舊運動記錄和完成記錄\n";
         } else {
             // 插入新計畫
             $insert_sql = "INSERT INTO training_plans (user_id, week_start_date, week_number, plan_name, is_active) VALUES (?, ?, ?, ?, 1)";

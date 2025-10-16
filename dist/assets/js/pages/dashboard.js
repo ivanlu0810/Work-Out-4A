@@ -103,14 +103,27 @@ let optionsIndonesia = {
 
 
 
-var chartProfileVisit = new ApexCharts(document.querySelector("#chart-profile-visit"), optionsProfileVisit);
-var chartVisitorsProfile = new ApexCharts(document.getElementById('chart-visitors-profile'), optionsVisitorsProfile)
-var chartEurope = new ApexCharts(document.querySelector("#chart-europe"), optionsEurope);
-var chartAmerica = new ApexCharts(document.querySelector("#chart-america"), optionsAmerica);
-var chartIndonesia = new ApexCharts(document.querySelector("#chart-indonesia"), optionsIndonesia);
+// 檢查元素是否存在再創建圖表
+function createChartIfElementExists(selector, options, chartName) {
+    const element = document.querySelector(selector);
+    if (element) {
+        try {
+            const chart = new ApexCharts(element, options);
+            chart.render();
+            console.log(`${chartName} 圖表渲染成功`);
+            return chart;
+        } catch (error) {
+            console.warn(`${chartName} 圖表渲染失敗:`, error);
+        }
+    } else {
+        console.log(`${chartName} 元素不存在，跳過渲染`);
+    }
+    return null;
+}
 
-chartIndonesia.render();
-chartAmerica.render();
-chartEurope.render();
-chartProfileVisit.render();
-chartVisitorsProfile.render()
+// 安全地創建圖表
+createChartIfElementExists("#chart-profile-visit", optionsProfileVisit, "Profile Visit");
+createChartIfElementExists("#chart-visitors-profile", optionsVisitorsProfile, "Visitors Profile");
+createChartIfElementExists("#chart-europe", optionsEurope, "Europe");
+createChartIfElementExists("#chart-america", optionsAmerica, "America");
+createChartIfElementExists("#chart-indonesia", optionsIndonesia, "Indonesia");

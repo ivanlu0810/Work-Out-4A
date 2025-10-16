@@ -274,7 +274,7 @@
                         <li class="sidebar-item active">
                             <a href="index.html" class='sidebar-link'>
                                 <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>健康儀表板1111</span>
+                                <span>健康儀表板</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
@@ -677,7 +677,7 @@
     <script src="assets/js/bootstrap.bundle.min.js"></script>
 
     <script src="assets/vendors/apexcharts/apexcharts.js"></script>
-    <script src="assets/js/pages/dashboard.js"></script>
+    <script src="assets/js/pages/dashboard.js?v=2"></script>
 
     <script src="assets/js/main.js"></script>
 
@@ -954,6 +954,10 @@
             color = '#2c3e50'
         } = {}) {
             const el = document.querySelector(containerSelector);
+            if (!el) {
+                console.error(`找不到 ${containerSelector} 元素`);
+                return;
+            }
             el.innerHTML = '';
 
             let start, end;
@@ -997,12 +1001,23 @@
                 },
                 colors: ['#d0d4dc']
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log(`${containerSelector} 空圖表渲染成功`);
+            } catch (error) {
+                console.error(`${containerSelector} 空圖表渲染失敗:`, error);
+                showPlaceholder(containerSelector, 390);
+            }
         }
 
         // ============ 1) 體重變化趨勢 ============
         function createWeightChart(data) {
             const el = document.querySelector("#weight-chart");
+            if (!el) {
+                console.error('找不到 #weight-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1035,12 +1050,23 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('體重變化趨勢圖表渲染成功');
+            } catch (error) {
+                console.error('體重變化趨勢圖表渲染失敗:', error);
+                showPlaceholder("#weight-chart", 390);
+            }
         }
 
         // ============ 2) 身體組成變化 ============
         function createBodyCompositionChart(data) {
             const el = document.querySelector("#body-composition-chart");
+            if (!el) {
+                console.error('找不到 #body-composition-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1077,12 +1103,23 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('身體組成變化圖表渲染成功');
+            } catch (error) {
+                console.error('身體組成變化圖表渲染失敗:', error);
+                showPlaceholder("#body-composition-chart", 390);
+            }
         }
 
         // ============ 3) 體脂率變化趨勢 ============
         function createFatPercentageChart(data) {
             const el = document.querySelector("#fat-percentage-chart");
+            if (!el) {
+                console.error('找不到 #fat-percentage-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1115,12 +1152,23 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('體脂率變化趨勢圖表渲染成功');
+            } catch (error) {
+                console.error('體脂率變化趨勢圖表渲染失敗:', error);
+                showPlaceholder("#fat-percentage-chart", 390);
+            }
         }
 
         // ============ 4) BMI 變化趨勢 ============
         function createBMIChart(data) {
             const el = document.querySelector("#bmi-chart");
+            if (!el) {
+                console.error('找不到 #bmi-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1153,7 +1201,14 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('BMI變化趨勢圖表渲染成功');
+            } catch (error) {
+                console.error('BMI變化趨勢圖表渲染失敗:', error);
+                showPlaceholder("#bmi-chart", 390);
+            }
         }
 
         // 初始化時間範圍選擇器
@@ -1344,6 +1399,10 @@
         function createBodyCompositionPieChart() {
             // 清除舊的圖表
             const chartContainer = document.querySelector("#body-composition-pie-chart");
+            if (!chartContainer) {
+                console.error('找不到 #body-composition-pie-chart 元素');
+                return;
+            }
             chartContainer.innerHTML = '';
 
             fetch('get_health_stats.php')
@@ -1392,8 +1451,13 @@
                         }
                     };
 
-                    const chart = new ApexCharts(chartContainer, options);
-                    chart.render();
+                    try {
+                        const chart = new ApexCharts(chartContainer, options);
+                        chart.render();
+                        console.log('身體組成比例圓餅圖渲染成功');
+                    } catch (error) {
+                        console.error('身體組成比例圓餅圖渲染失敗:', error);
+                    }
                 })
                 .catch(error => {
                     console.error('Error creating body composition pie chart:', error);
