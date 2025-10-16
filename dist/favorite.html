@@ -40,175 +40,240 @@
             margin-bottom: 2.1rem !important;
         }
 
-        /* 簡潔莫蘭迪風格手風琴卡片設計 */
-        .accordion .card {
-            border: 1px solid var(--morandi-light-gray);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            margin-bottom: 16px;
-            background: var(--morandi-light-blue);
-            transition: all 0.2s ease;
-        }
-
-        .accordion .card:hover {
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-        }
-
-        .accordion .card-header {
-            background: var(--morandi-dark-blue);
-            padding: 0;
-            border-bottom: 1px solid var(--morandi-gray);
-        }
-
-        .accordion .btn-toggle {
-            width: 100%;
-            text-align: left;
-            padding: 16px 20px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            font-weight: 600;
-            color: #ffffff;
-            background: transparent;
-            border: none;
-            font-size: 1rem;
-        }
-
-        .accordion .btn-toggle:focus {
-            box-shadow: none;
-            outline: none;
-        }
-
-        .accordion .btn-toggle i {
-            font-size: 1rem;
-            transition: transform 0.2s ease;
-            color: #ffffff;
-        }
-
-        .accordion .btn-toggle[aria-expanded="true"] i {
-            transform: rotate(90deg);
-        }
-
-        .acc-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-            margin-left: auto;
-            font-weight: 500;
-        }
-
-        .badge-soft {
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 500;
-            background: rgba(255, 255, 255, 0.2);
-            color: #ffffff;
-            transition: all 0.2s ease;
-        }
-
-
-        .badge-hyper {
-            background: var(--morandi-dark-blue);
-            color: #ffffff;
-            border-color: var(--morandi-dark-blue);
-        }
-
-        .badge-fat {
-            background: var(--morandi-dark-blue);
-            color: #ffffff;
-            border-color: var(--morandi-dark-blue);
-        }
-
-        .badge-muscle {
-            background: var(--morandi-dark-blue);
-            color: #ffffff;
-            border-color: var(--morandi-dark-blue);
-        }
-
-        .acc-body {
-            background: var(--morandi-light-blue);
-            padding: 24px 20px;
-            border-top: 1px solid var(--morandi-light-gray);
-        }
-
-        .acc-grid {
+        /* 卡片式網格佈局 */
+        .favorites-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .favorites-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
         }
 
         @media (max-width: 768px) {
-            .acc-grid {
+            .favorites-grid {
                 grid-template-columns: repeat(2, 1fr);
             }
         }
 
         @media (max-width: 576px) {
-            .acc-grid {
+            .favorites-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        .acc-stat {
-            background: rgba(255, 255, 255, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.8);
+        /* 運動卡片樣式 */
+        .exercise-card {
+            background: white;
+            border: 1px solid var(--morandi-light-gray);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .exercise-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+        }
+
+        /* 卡片頭部 */
+        .card-header-section {
+            background: #e0d9e0;
+            padding: 20px;
+            color: #2c3e50;
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .meta-badge {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* 卡片內容區域 */
+        .card-content {
+            padding: 24px;
+            background: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 影片區域 */
+        .video-section {
+            margin-bottom: 20px;
+        }
+
+        .video-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--morandi-light-gray);
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        /* 統計數據網格 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
             border-radius: 8px;
-            padding: 12px 8px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--morandi-light-gray);
+            border-radius: 10px;
+            padding: 16px 12px;
             text-align: center;
             transition: all 0.2s ease;
         }
 
-        .acc-stat:hover {
-            background: rgba(255, 255, 255, 0.8);
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
         }
 
-        .acc-stat strong {
+        .stat-label {
             display: block;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: #6c757d;
             margin-bottom: 6px;
-            color: var(--morandi-text);
-            font-size: 0.85rem;
-            font-weight: 600;
         }
 
-        .acc-stat span {
-            color: var(--morandi-dark-gray);
-            font-weight: 600;
-            font-size: 1rem;
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #6c757d;
         }
 
-        .acc-actions {
+        /* 資訊區塊 */
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--morandi-dark-blue);
+        }
+
+        .info-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 8px;
             display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            margin-top: 16px;
+            align-items: center;
+            gap: 6px;
         }
 
-        /* 簡潔按鈕樣式 */
-        .btn-remove {
-            background: var(--morandi-gray);
-            border: 1px solid var(--morandi-gray);
-            color: var(--morandi-text);
-            padding: 8px 16px;
-            border-radius: 20px;
+        .info-title i {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .info-content {
+            font-size: 0.85rem;
+            color: #6c757d;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* 操作按鈕 */
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--morandi-light-gray);
+        }
+
+        .btn-detail {
+            background: var(--morandi-blue);
+            border: 1px solid var(--morandi-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
             font-weight: 500;
             font-size: 0.9rem;
             transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-detail:hover {
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-remove {
+            background: var(--morandi-blue);
+            border: 1px solid var(--morandi-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-remove:hover {
-            background: var(--morandi-gray);
-            border-color: var(--morandi-gray);
-            color: var(--morandi-text);
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+            transform: translateY(-1px);
         }
 
-        .btn-remove:focus {
-            outline: none;
-            box-shadow: 0 0 0 2px rgba(168, 181, 192, 0.3);
-        }
 
         /* 簡潔展開區塊的段落樣式 */
         .acc-section {
@@ -305,26 +370,352 @@
             50% { opacity: 0.4; }
         }
 
+        /* 視圖控制工具列 */
+        .view-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .view-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .view-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* 搜尋框 */
+        .search-box {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--morandi-gray);
+            border-radius: 25px;
+            background: white;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--morandi-blue);
+            box-shadow: 0 0 0 2px rgba(168, 181, 192, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--morandi-text);
+            font-size: 0.9rem;
+        }
+
+        /* 篩選器 */
+        .filter-select {
+            padding: 10px 16px;
+            border: 1px solid var(--morandi-gray);
+            border-radius: 25px;
+            background: white;
+            font-size: 0.9rem;
+            color: var(--morandi-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--morandi-blue);
+        }
+
+        /* 視圖切換按鈕 */
+        .view-toggle {
+            display: flex;
+            background: white;
+            border: 1px solid var(--morandi-gray);
+            border-radius: 25px;
+            overflow: hidden;
+        }
+
+        .view-btn {
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: var(--morandi-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn.active {
+            background: var(--morandi-blue);
+            color: white;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn:hover:not(.active) {
+            background: var(--morandi-light-blue);
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn:active {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* 緊湊列表模式 */
+        .compact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .compact-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 12px;
+            background: #e4e9ec;
+            border: 1px solid var(--morandi-light-gray);
+            border-radius: 12px;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            gap: 2px;
+        }
+
+        .compact-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .compact-thumbnail {
+            width: 40px;
+            height: 30px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-right: 2px;
+            flex-shrink: 0;
+        }
+
+        .compact-thumbnail video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .compact-content {
+            flex: 1;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .compact-info h6 {
+            margin: 0 0 4px 0;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--morandi-text);
+            text-align: left;
+        }
+
+        .compact-info p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--morandi-dark-gray);
+            text-align: left;
+        }
+
+        .compact-meta {
+            display: flex;
+            gap: 8px;
+            margin-right: 0;
+            flex-shrink: 0;
+        }
+
+        .compact-badge {
+            padding: 4px 8px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .compact-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .compact-action-btn {
+            padding: 6px 12px;
+            border: 1px solid var(--morandi-blue);
+            border-radius: 20px;
+            background: var(--morandi-blue);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
+        .compact-action-btn:hover {
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+        }
+
+
+        /* 分頁控制樣式 */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .pagination-info {
+            color: var(--morandi-text);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .page-btn {
+            background: var(--morandi-light-blue);
+            border: 1px solid var(--morandi-gray);
+            color: var(--morandi-text);
+            padding: 8px 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--morandi-blue);
+            border-color: var(--morandi-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .page-btn.active {
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .page-btn i {
+            font-size: 0.8rem;
+        }
+
         /* 響應式設計優化 */
         @media (max-width: 768px) {
-            .accordion .btn-toggle {
-                padding: 14px 16px;
+            .pagination-container {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
+                gap: 15px;
             }
 
-            .acc-meta {
-                margin-left: 0;
+            .pagination-controls {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .page-btn {
+                padding: 6px 10px;
+                font-size: 0.8rem;
+                min-width: 35px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .view-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .view-controls-left,
+            .view-controls-right {
+                justify-content: center;
+            }
+
+            .search-box {
+                min-width: 200px;
+            }
+
+            .compact-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .compact-thumbnail {
                 width: 100%;
+                height: 120px;
+                margin-right: 0;
+                margin-bottom: 12px;
             }
 
-            .acc-body {
-                padding: 20px 16px;
+            .compact-content {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
             }
 
-            .acc-section {
-                padding: 14px;
+            .compact-meta {
+                margin-right: 0;
+                justify-content: center;
+            }
+
+            .compact-actions {
+                justify-content: center;
             }
         }
 
@@ -453,7 +844,62 @@
             <!-- 收藏清單 -->
             <div class="container">
                 <section class="section">
+                    <!-- 視圖控制工具列 -->
+                    <div class="view-controls">
+                        <div class="view-controls-left">
+                            <!-- 搜尋框 -->
+                            <div class="search-box">
+                                <i class="bi bi-search search-icon"></i>
+                                <input type="text" class="search-input" id="search-input" placeholder="搜尋運動項目...">
+                            </div>
+                            
+                            <!-- 篩選器 -->
+                            <select class="filter-select" id="muscle-filter">
+                                <option value="">所有部位</option>
+                                <option value="胸肌">胸肌</option>
+                                <option value="背肌">背肌</option>
+                                <option value="肩膀">肩膀</option>
+                                <option value="手臂">手臂</option>
+                                <option value="腿部">腿部</option>
+                                <option value="核心">核心</option>
+                            </select>
+                        </div>
+                        
+                        <div class="view-controls-right">
+                            <!-- 視圖切換 -->
+                            <div class="view-toggle">
+                                <button class="view-btn active" data-view="cards" onclick="switchView('cards')">
+                                    <i class="bi bi-grid-3x3-gap"></i>卡片
+                                </button>
+                                <button class="view-btn" data-view="compact" onclick="switchView('compact')">
+                                    <i class="bi bi-list"></i>列表
+                                </button>
+                            </div>
+                            
+                            <!-- 結果計數 -->
+                            <div class="pagination-info">
+                                <span id="results-count">共 0 項</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div id="favorite-list"></div>
+                    
+                    <!-- 分頁控制 -->
+                    <div id="pagination-container" class="pagination-container" style="display: none;">
+                        <div class="pagination-info">
+                            <span id="pagination-info-text">顯示第 1-4 項，共 0 項</span>
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="page-btn" id="prev-page" onclick="changePage(-1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <div id="page-numbers"></div>
+                            <button class="page-btn" id="next-page" onclick="changePage(1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -496,6 +942,13 @@
     <!-- 收藏頁面邏輯 -->
     <script>
         const API_FAVORITES = 'api/favorites.php';
+        
+        // 全域變數
+        let allFavorites = [];
+        let filteredFavorites = [];
+        let currentView = 'cards'; // cards, compact
+        let currentPage = 1;
+        const ITEMS_PER_PAGE = 4; // 每頁顯示4個卡片
 
         document.addEventListener("DOMContentLoaded", async function () {
             const list = document.getElementById("favorite-list");
@@ -508,15 +961,322 @@
             const serverFavorites = await fetchFavoritesFromServer();
             if (!serverFavorites || serverFavorites.length === 0) {
                 list.innerHTML = `<div class="empty-state"><p>目前沒有收藏任何器材</p></div>`;
-                // 清空快取
                 localStorage.setItem("favorites", JSON.stringify([]));
                 return;
             }
 
+            // 儲存所有收藏資料
+            allFavorites = serverFavorites;
+            filteredFavorites = [...allFavorites];
+            
             // 同步快取
             localStorage.setItem("favorites", JSON.stringify(serverFavorites));
-            renderFavorites(serverFavorites);
+            
+            // 初始化事件監聽器
+            initializeEventListeners();
+            
+            // 渲染內容
+            renderContent();
         });
+
+        // 初始化事件監聽器
+        function initializeEventListeners() {
+            // 搜尋功能
+            document.getElementById('search-input').addEventListener('input', handleSearch);
+            
+            // 篩選功能
+            document.getElementById('muscle-filter').addEventListener('change', handleFilter);
+        }
+
+        // 搜尋處理
+        function handleSearch() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            const muscleFilter = document.getElementById('muscle-filter').value;
+            
+            filteredFavorites = allFavorites.filter(exercise => {
+                const matchesSearch = !searchTerm || 
+                    exercise.name.toLowerCase().includes(searchTerm) ||
+                    (exercise.target_muscle && exercise.target_muscle.toLowerCase().includes(searchTerm)) ||
+                    (exercise.description && exercise.description.toLowerCase().includes(searchTerm));
+                
+                const matchesMuscle = !muscleFilter || 
+                    (exercise.target_muscle && exercise.target_muscle.includes(muscleFilter));
+                
+                return matchesSearch && matchesMuscle;
+            });
+            
+            renderContent();
+        }
+
+        // 篩選處理
+        function handleFilter() {
+            handleSearch(); // 重新執行搜尋和篩選
+        }
+
+        // 視圖切換
+        function switchView(viewType) {
+            currentView = viewType;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${viewType}"]`).classList.add('active');
+            
+            renderContent();
+        }
+
+        // 渲染內容
+        function renderContent() {
+            const list = document.getElementById("favorite-list");
+            
+            if (!filteredFavorites?.length) {
+                list.innerHTML = `<div class="empty-state"><p>沒有找到符合條件的運動項目</p></div>`;
+                document.getElementById('results-count').textContent = '共 0 項';
+                document.getElementById('pagination-container').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('results-count').textContent = `共 ${filteredFavorites.length} 項`;
+
+            // 初始化分頁
+            initializePagination();
+
+            switch (currentView) {
+                case 'cards':
+                    renderCardsView();
+                    break;
+                case 'compact':
+                    renderCompactView();
+                    break;
+            }
+        }
+
+        // 卡片視圖渲染
+        function renderCardsView() {
+            const list = document.getElementById("favorite-list");
+            
+            // 計算當前頁面的項目
+            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+            const endIndex = startIndex + ITEMS_PER_PAGE;
+            const currentPageFavorites = filteredFavorites.slice(startIndex, endIndex);
+            
+            let html = `<div class="favorites-grid">`;
+            
+            currentPageFavorites.forEach((ex, i) => {
+                const globalIndex = startIndex + i;
+                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
+                const hypertrophyWeightMax = hypertrophyWeightMin + 15;
+                const fatlossWeightMin = hypertrophyWeightMin - 20;
+                const fatlossWeightMax = hypertrophyWeightMin - 5;
+
+                html += `
+      <div class="exercise-card">
+        <div class="card-header-section">
+          <div class="card-title">
+            <i class="bi bi-heart-fill"></i>
+            <span>${ex.name || '未命名動作'}</span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-badge">
+              <i class="bi bi-person-arms-up me-1"></i>${ex.target_muscle || '—'}
+            </span>
+            <span class="meta-badge">💪 增肌</span>
+            <span class="meta-badge">🔥 減脂</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="video-section">
+            <div class="video-container">
+              <video controls playsinline preload="metadata">
+                <source src="${ex.video_url || ''}" type="video/mp4">
+                您的瀏覽器不支援影片播放。
+              </video>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">增肌 組數</span>
+              <span class="stat-value">${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">增肌 次數</span>
+              <span class="stat-value">${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">增肌 重量</span>
+              <span class="stat-value">${hypertrophyWeightMin}-${hypertrophyWeightMax}%</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">減脂 組數</span>
+              <span class="stat-value">${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">減脂 次數</span>
+              <span class="stat-value">${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">減脂 重量</span>
+              <span class="stat-value">${fatlossWeightMin}-${fatlossWeightMax}%</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">
+              <i class="bi bi-info-circle"></i>
+              動作解說
+            </div>
+            <p class="info-content">${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">
+              <i class="bi bi-person-check"></i>
+              適用對象
+            </div>
+            <p class="info-content">${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">
+              <i class="bi bi-exclamation-triangle"></i>
+              注意事項
+            </div>
+            <p class="info-content">${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-remove" onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
+              <i class="bi bi-trash"></i>移除收藏
+            </button>
+          </div>
+        </div>
+      </div>`;
+            });
+
+            html += `</div>`;
+            list.innerHTML = html;
+        }
+
+        // 緊湊列表視圖渲染
+        function renderCompactView() {
+            const list = document.getElementById("favorite-list");
+            let html = `<div class="compact-list">`;
+            
+            filteredFavorites.forEach((ex, i) => {
+                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
+                const hypertrophyWeightMax = hypertrophyWeightMin + 15;
+
+                html += `
+      <div class="compact-item" onclick="openExerciseModal(${JSON.stringify(ex).replace(/"/g, '&quot;')}, ${i})">
+        <div class="compact-thumbnail">
+          <video muted playsinline preload="metadata">
+            <source src="${ex.video_url || ''}" type="video/mp4">
+          </video>
+        </div>
+        <div class="compact-content">
+          <div class="compact-info">
+            <h6>${ex.name || '未命名動作'}</h6>
+            <p>${ex.target_muscle || '—'} • 增肌 ${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}組 • 減脂 ${ex.fatloss_sets_min}-${ex.fatloss_sets_max}組</p>
+          </div>
+          <div class="compact-meta">
+            <span class="compact-badge">💪 增肌</span>
+            <span class="compact-badge">🔥 減脂</span>
+          </div>
+          <div class="compact-actions" onclick="event.stopPropagation()">
+            <button class="compact-action-btn" onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
+              <i class="bi bi-trash"></i>移除
+            </button>
+          </div>
+        </div>
+      </div>`;
+            });
+
+            html += `</div>`;
+            list.innerHTML = html;
+        }
+
+
+        // 初始化分頁
+        function initializePagination() {
+            const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+            const paginationContainer = document.getElementById('pagination-container');
+            
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+            
+            paginationContainer.style.display = 'flex';
+            updatePaginationInfo();
+            renderPageNumbers(totalPages);
+            updatePageButtons(totalPages);
+        }
+
+        // 更新分頁資訊
+        function updatePaginationInfo() {
+            const start = (currentPage - 1) * ITEMS_PER_PAGE + 1;
+            const end = Math.min(currentPage * ITEMS_PER_PAGE, filteredFavorites.length);
+            document.getElementById('pagination-info-text').textContent = 
+                `顯示第 ${start}-${end} 項，共 ${filteredFavorites.length} 項`;
+        }
+
+        // 渲染頁碼按鈕
+        function renderPageNumbers(totalPages) {
+            const pageNumbersContainer = document.getElementById('page-numbers');
+            let html = '';
+            
+            // 最多顯示5個頁碼
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // 調整起始頁面
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                         onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            pageNumbersContainer.innerHTML = html;
+        }
+
+        // 更新上一頁/下一頁按鈕狀態
+        function updatePageButtons(totalPages) {
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        // 切換頁面
+        function changePage(direction) {
+            const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                renderContent();
+                
+                // 滾動到頂部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 跳轉到指定頁面
+        function goToPage(page) {
+            const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderContent();
+                
+                // 滾動到頂部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
 
         async function fetchFavoritesFromServer() {
             try {
@@ -553,103 +1313,6 @@
             localStorage.setItem('favorites', JSON.stringify([]));
         }
 
-        function renderFavorites(favorites) {
-            const list = document.getElementById("favorite-list");
-            if (!favorites?.length) {
-                list.innerHTML = `<div class="empty-state"><p>目前沒有收藏任何器材</p></div>`;
-                return;
-            }
-
-            let html = `<div class="accordion" id="favAccordion">`;
-            favorites.forEach((ex, i) => {
-                const id = `favItem${i}`;
-                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
-                const hypertrophyWeightMax = hypertrophyWeightMin + 15;
-                const fatlossWeightMin = hypertrophyWeightMin - 20;
-                const fatlossWeightMax = hypertrophyWeightMin - 5;
-
-                html += `
-      <div class="card">
-        <div class="card-header" id="heading-${id}">
-          <button class="btn btn-toggle" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapse-${id}" aria-expanded="false" aria-controls="collapse-${id}">
-            <i class="bi bi-caret-right-fill"></i>
-            <span>${ex.name || '未命名動作'}</span>
-            <div class="acc-meta">
-              <span class="badge-soft badge-muscle"><i class="bi bi-person-arms-up me-1"></i>${ex.target_muscle || '—'}</span>
-              <span class="badge-soft badge-hyper">💪 增肌：${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max} 組 / ${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max} 次 / ${hypertrophyWeightMin}-${hypertrophyWeightMax}%</span>
-              <span class="badge-soft badge-fat">🔥 減脂：${ex.fatloss_sets_min}-${ex.fatloss_sets_max} 組 / ${ex.fatloss_reps_min}-${ex.fatloss_reps_max} 次 / ${fatlossWeightMin}-${fatlossWeightMax}%</span>
-            </div>
-          </button>
-        </div>
-
-        <div id="collapse-${id}" class="collapse" aria-labelledby="heading-${id}" data-bs-parent="#favAccordion">
-          <div class="acc-body">
-            <div class="row g-4">
-              <!-- 示範影片 -->
-              <div class="col-12 col-md-6">
-                <div class="ratio ratio-16x9">
-                  <video controls playsinline preload="metadata">
-                    <source src="${ex.video_url || ''}" type="video/mp4">
-                    您的瀏覽器不支援影片播放。
-                  </video>
-                </div>
-              </div>
-
-              <!-- 指標與文字說明 -->
-              <div class="col-12 col-md-6">
-                <div class="acc-grid">
-                  <div class="acc-stat"><strong>增肌 組數</strong><span>${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</span></div>
-                  <div class="acc-stat"><strong>增肌 次數</strong><span>${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</span></div>
-                  <div class="acc-stat"><strong>增肌 重量</strong><span>${hypertrophyWeightMin}-${hypertrophyWeightMax}%</span></div>
-                  <div class="acc-stat"><strong>減脂 組數</strong><span>${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</span></div>
-                  <div class="acc-stat"><strong>減脂 次數</strong><span>${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</span></div>
-                  <div class="acc-stat"><strong>減脂 重量</strong><span>${fatlossWeightMin}-${fatlossWeightMax}%</span></div>
-                </div>
-
-                <!-- 動作解說 -->
-                <div class="acc-section">
-                  <h6>動作解說</h6>
-                  <p>${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
-                </div>
-
-                <!-- 適用對象 -->
-                <div class="acc-section">
-                  <h6>適用對象</h6>
-                  <p>${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
-                </div>
-
-                <!-- 注意事項 -->
-                <div class="acc-section">
-                  <h6>注意事項</h6>
-                  <p>${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
-                </div>
-
-                <div class="acc-actions">                  
-                  <button class="btn btn-remove"
-                          onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
-                    <i class="bi bi-heartbreak me-1"></i>移除收藏
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-            });
-
-            html += `</div>`;
-            list.innerHTML = html;
-
-            // 展開時換箭頭
-            list.querySelectorAll('.btn-toggle').forEach(btn => {
-                const icon = btn.querySelector('.bi');
-                const target = btn.getAttribute('data-bs-target');
-                const el = document.querySelector(target);
-                el?.addEventListener('show.bs.collapse', () => { icon.classList.replace('bi-caret-right-fill', 'bi-caret-down-fill'); });
-                el?.addEventListener('hide.bs.collapse', () => { icon.classList.replace('bi-caret-down-fill', 'bi-caret-right-fill'); });
-            });
-        }
 
         // 移除收藏（改為呼叫 API）
         async function removeFavorite(name) {
@@ -661,10 +1324,22 @@
                     credentials: 'include',
                     body: 'name=' + encodeURIComponent(name)
                 });
+                
                 // 重新載入列表
                 const serverFavorites = await fetchFavoritesFromServer();
                 localStorage.setItem('favorites', JSON.stringify(serverFavorites));
-                renderFavorites(serverFavorites);
+                
+                // 更新資料並重新渲染
+                allFavorites = serverFavorites;
+                
+                // 重新執行搜尋和篩選
+                handleSearch();
+                
+                // 如果當前頁面超出範圍，回到最後一頁
+                const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                }
             } catch (e) {
                 alert('移除失敗，請稍後再試');
             }
