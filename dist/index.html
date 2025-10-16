@@ -224,6 +224,22 @@
             border-color: #4e567d !important;
         }
 
+        /* 提示框按鈕顏色與基本資料頁面一致 */
+        #successModal .btn-primary,
+        #errorModal .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #ffffff !important;
+        }
+        #successModal .btn-primary:hover,
+        #successModal .btn-primary:focus,
+        #errorModal .btn-primary:hover,
+        #errorModal .btn-primary:focus {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+            color: #ffffff !important;
+        }
+
         #weight-chart,
         #body-composition-chart,
         #fat-percentage-chart,
@@ -861,6 +877,16 @@
                     userAvatar.src = 'assets/images/faces/1.jpg';
                     userAvatar.alt = '預設大頭貼';
                 }
+
+                // 載入並套用已儲存的健康目標（依使用者）
+                try {
+                    const stored = loadGoalsFromStorage();
+                    if (stored) {
+                        applyGoalsToUI(stored);
+                    }
+                } catch (e) {
+                    console.error('載入已儲存目標失敗:', e);
+                }
             })
             .catch(error => {
                 console.error('Error loading user info:', error);
@@ -1478,6 +1504,13 @@
             document.getElementById('goal-fat-percentage-display').textContent = goalFatPercentage;
             document.getElementById('goal-muscle-display').textContent = goalMuscle;
 
+            // 儲存到 localStorage（依使用者）
+            saveGoalsToStorage({
+                goal_weight: goalWeight,
+                goal_fat_percentage: goalFatPercentage,
+                goal_muscle: goalMuscle
+            });
+
             // 關閉設定目標視窗
             const setGoalModal = bootstrap.Modal.getInstance(document.getElementById('setGoalModal'));
             setGoalModal.hide();
@@ -1641,6 +1674,54 @@
             if (titleEl) titleEl.textContent = title;
             if (msgEl) msgEl.textContent = message;
             new bootstrap.Modal(document.getElementById('successModal')).show();
+        }
+
+        // ========= 目標儲存/載入（依使用者） =========
+        function getCurrentUserId() {
+            const el = document.getElementById('user-id');
+            const uid = el ? (el.textContent || '').trim() : '';
+            return uid || 'guest';
+        }
+
+        function saveGoalsToStorage(goals) {
+            try {
+                const key = 'healthGoals_' + getCurrentUserId();
+                localStorage.setItem(key, JSON.stringify(goals));
+            } catch (e) {
+                console.error('保存目標到 localStorage 失敗:', e);
+            }
+        }
+
+        function loadGoalsFromStorage() {
+            const key = 'healthGoals_' + getCurrentUserId();
+            const raw = localStorage.getItem(key);
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch { return null; }
+        }
+
+        function applyGoalsToUI(goals) {
+            if (!goals) return;
+            const { goal_weight, goal_fat_percentage, goal_muscle } = goals;
+
+            if (goal_weight !== undefined && goal_weight !== null && goal_weight !== '') {
+                document.getElementById('goal-weight-display').textContent = goal_weight;
+                const input = document.getElementById('goal_weight');
+                if (input) input.value = goal_weight;
+            }
+            if (goal_fat_percentage !== undefined && goal_fat_percentage !== null && goal_fat_percentage !== '') {
+                document.getElementById('goal-fat-percentage-display').textContent = goal_fat_percentage;
+                const input = document.getElementById('goal_fat_percentage');
+                if (input) input.value = goal_fat_percentage;
+            }
+            if (goal_muscle !== undefined && goal_muscle !== null && goal_muscle !== '') {
+                document.getElementById('goal-muscle-display').textContent = goal_muscle;
+                const input = document.getElementById('goal_muscle');
+                if (input) input.value = goal_muscle;
+            }
+
+            if (window.goalProgressChart) {
+                window.goalProgressChart.update();
+            }
         }
     </script>
 </body>

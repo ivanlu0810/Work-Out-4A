@@ -10,8 +10,8 @@
     <!-- 字體 & Bootstrap -->
     <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="assets/css/bootstrap.css">
-    <!-- Bootstrap Icons CDN -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <!-- Bootstrap Icons (align with index.html for consistent icon baseline) -->
+    <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/app.css">
 
     <!-- 自訂樣式 -->
@@ -1308,16 +1308,11 @@
                         </div>
                         <h4 class="text-muted mb-3">尚無訓練計畫</h4>
                         <p class="text-muted mb-4">您還沒有建立任何週次訓練計畫</p>
-                        <button class="btn btn-primary" id="create-first-week-btn">
+                        <button class="btn btn-primary" onclick="createFirstWeek()">
                             <i class="bi bi-plus-circle me-2"></i>建立第一週計畫
                         </button>
-                        <p class="text-muted mt-3 mb-0" style="font-size: 0.95rem;">
-                            或直接點選上方「訓練模組」，系統會自動建立第一週
-                        </p>
                     </div>
                 `;
-                const btn = document.getElementById('create-first-week-btn');
-                if (btn) btn.addEventListener('click', createFirstWeek);
             }
         }
 
@@ -3239,12 +3234,6 @@
         function applyTemplate(templateId) {
             const template = trainingTemplates.find(t => t.id === templateId);
             if (template) {
-                // 防呆：目前若是空狀態（沒有週課表容器），自動建立骨架
-                if (!document.getElementById('monday-exercises')) {
-                    restoreWeekScheduleSkeleton();
-                    renderWeeklyPlan();
-                    updateWeekDates();
-                }
                 // 顯示選項對話框
                 showTemplateOptions(template);
             }
@@ -4876,7 +4865,6 @@
 
         // 完成記錄相關功能（以資料庫為主）
         let hasUnsavedChanges = false; // 追蹤是否有未儲存的變更
-        let completionRecords = []; // 完成記錄陣列
 
         // 檢查某一天是否已完成（以 DB 快取 dayCompletionFromDb 為主）
         function isDayCompleted(day) {
@@ -4924,17 +4912,9 @@
                     weeklyPlan[day] = [];
                 });
                 
-                // 清除本週的完成記錄（從 localStorage 載入）
-                try {
-                    const savedRecords = localStorage.getItem('completionRecords');
-                    if (savedRecords) {
-                        completionRecords = JSON.parse(savedRecords);
-                        completionRecords = completionRecords.filter(record => record.weekNumber !== currentWeek);
-                        localStorage.setItem('completionRecords', JSON.stringify(completionRecords));
-                    }
-                } catch (e) {
-                    console.warn('清除完成記錄失敗:', e);
-                }
+                // 清除本週的完成記錄
+                completionRecords = completionRecords.filter(record => record.weekNumber !== currentWeek);
+                localStorage.setItem('completionRecords', JSON.stringify(completionRecords));
                 
                 // 清除本週的 localStorage
                 const saved = localStorage.getItem('allTrainingPlans');
@@ -5061,16 +5041,7 @@
         // 渲染完成記錄表格
         function renderCompletionRecordsTable() {
             const tbody = document.querySelector('#completionRecordsTable tbody');
-            if (!tbody) return;
             tbody.innerHTML = '';
-
-            // 從 localStorage 載入完成記錄
-            try {
-                const savedRecords = localStorage.getItem('completionRecords');
-                completionRecords = savedRecords ? JSON.parse(savedRecords) : [];
-            } catch (e) {
-                completionRecords = [];
-            }
 
             if (completionRecords.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">暫無完成記錄</td></tr>';
@@ -5114,14 +5085,6 @@
         // 刪除單個完成記錄
         function deleteCompletionRecord(recordId) {
             if (confirm('確定要刪除此完成記錄嗎？')) {
-                // 從 localStorage 載入完成記錄
-                try {
-                    const savedRecords = localStorage.getItem('completionRecords');
-                    completionRecords = savedRecords ? JSON.parse(savedRecords) : [];
-                } catch (e) {
-                    completionRecords = [];
-                }
-                
                 completionRecords = completionRecords.filter(record => record.id !== recordId);
                 localStorage.setItem('completionRecords', JSON.stringify(completionRecords));
                 renderCompletionRecordsTable();

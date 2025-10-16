@@ -39,8 +39,8 @@ try {
 
     $user_id = $_SESSION['user_id'];
 
-    // 查詢用戶基本資料
-    $user_stmt = $conn->prepare("SELECT username, email, gender, role FROM user WHERE user_id = ?");
+    // 查詢用戶基本資料（包含 avatar）
+    $user_stmt = $conn->prepare("SELECT username, email, gender, role, avatar FROM user WHERE user_id = ?");
     $user_stmt->bind_param('s', $user_id);
     $user_stmt->execute();
     $user_result = $user_stmt->get_result();
@@ -63,7 +63,8 @@ try {
         'email' => $user_data['email'] ?? $_SESSION['email'] ?? 'No email',
         'gender' => $user_data['gender'] ?? $_SESSION['gender'] ?? 'Unknown',
         'role' => $user_data['role'] ?? $_SESSION['role'] ?? 'user',
-        'avatar' => $_SESSION['avatar'] ?? null,
+        // 優先使用資料庫中的 avatar，若無則回退到 session
+        'avatar' => $user_data['avatar'] ?? $_SESSION['avatar'] ?? null,
         'has_inbody_data' => !empty($inbody_data)
     ];
 

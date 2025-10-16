@@ -28,8 +28,8 @@ if (!$data) {
     exit;
 }
 
-// 驗證必要字段
-$required_fields = ['name', 'email', 'password', 'gender'];
+// 驗證必要字段（密碼改為可選）
+$required_fields = ['name', 'email', 'gender'];
 foreach ($required_fields as $field) {
     if (!isset($data[$field]) || empty($data[$field])) {
         http_response_code(400);
@@ -80,13 +80,15 @@ try {
         exit;
     }
     
-    // 密碼加密
+// 根據是否提供密碼決定是否更新密碼
+$should_update_password = isset($data['password']) && strlen(trim($data['password'])) > 0;
+
+// 密碼長度不再限制
+
+if ($should_update_password) {
     $password_hash = password_hash($data['password'], PASSWORD_DEFAULT);
-    
-    // 更新用戶資料
     $update_sql = "UPDATE user SET username = :username, email = :email, password_hash = :password_hash, gender = :gender WHERE user_id = :user_id";
     $update_stmt = $pdo->prepare($update_sql);
-    
     $result = $update_stmt->execute([
         ':username' => $data['name'],
         ':email' => $data['email'],
@@ -94,6 +96,16 @@ try {
         ':gender' => $data['gender'],
         ':user_id' => $user_id
     ]);
+} else {
+    $update_sql = "UPDATE user SET username = :username, email = :email, gender = :gender WHERE user_id = :user_id";
+    $update_stmt = $pdo->prepare($update_sql);
+    $result = $update_stmt->execute([
+        ':username' => $data['name'],
+        ':email' => $data['email'],
+        ':gender' => $data['gender'],
+        ':user_id' => $user_id
+    ]);
+}
     
     if ($result) {
         // 更新session中的用戶資訊
@@ -103,7 +115,7 @@ try {
         
         echo json_encode([
             'success' => true, 
-            'message' => '資料更新成功！',
+            'message' => $should_update_password ? '資料與密碼已更新！' : '資料已更新！',
             'user_data' => [
                 'username' => $data['name'],
                 'email' => $data['email'],
