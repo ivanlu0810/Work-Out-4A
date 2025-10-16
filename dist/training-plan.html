@@ -765,9 +765,7 @@
         }
 
         .template-option-card:hover {
-            border-color: #5A628C;
-            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-            transform: translateY(-5px);
+            background-color: #e9ecef !important;
         }
 
         .template-option-card .card-body {
@@ -891,7 +889,7 @@
                     <div class="card">
                         <div class="card-header">
                             <h4><i class="bi bi-grid-3x3-gap me-2"></i>訓練分化模板</h4>
-                            <p class="text-muted mb-0">選擇適合的訓練分化方式，拖拽到下方時間框框快速建立訓練計畫</p>
+                            <p class="text-muted mb-0">選擇想要的訓練分化方式，並選擇訓練計畫生成方式</p>
                         </div>
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3"
@@ -909,7 +907,7 @@
                     <div class="week-schedule">
                         <div class="week-nav">
                             <div>
-                                <h3>本週訓練計畫</h3>
+                                <h5>本週訓練計畫</h5>
                                 <p class="text-muted mb-0" id="week-date-range">規劃您的每週訓練內容</p>
                             </div>
                             <div>
@@ -1323,7 +1321,7 @@
             weekSchedule.innerHTML = `
                 <div class="week-nav">
                     <div>
-                        <h3>本週訓練計畫</h3>
+                        <h5>本週訓練計畫</h5>
                         <p class="text-muted mb-0" id="week-date-range">規劃您的每週訓練內容</p>
                     </div>
                     <div>
@@ -1383,7 +1381,7 @@
                 name: '全身訓練',
                 description: '每次訓練所有主要肌群，適合初學者',
                 difficulty: 'beginner',
-                icon: 'bi bi-activity',
+                icon: 'bi bi-person-check',
                 schedule: ['週一', '週三', '週五'],
                 exercisesPerDay: 8,
                 totalDays: 3,
@@ -3243,8 +3241,8 @@
         function showTemplateOptions(template) {
             const modalHtml = `
                 <div class="modal fade" id="templateOptionsModal" tabindex="-1" aria-labelledby="templateOptionsModalLabel" aria-hidden="true">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div class="modal-content">
+                    <div class="modal-dialog modal-dialog-centered modal-lg">
+                        <div class="modal-content" style="max-height: 90vh; overflow-y: auto;">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="templateOptionsModalLabel">選擇 ${template.name} 模式</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -3254,21 +3252,21 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <div class="card h-100 template-option-card" onclick="selectTemplateMode('${template.id}', 'random')" style="cursor: pointer;">
-                                            <div class="card-body text-center">
-                                                <i class="bi bi-shuffle" style="font-size: 3rem; color: #5A628C; margin-bottom: 1rem;"></i>
+                                            <div class="card-body text-center d-flex flex-column align-items-center">
+                                                <i class="bi bi-shuffle" style="font-size: 1.5rem; color: #5A628C; margin-bottom: 2rem;"></i>
                                                 <h5 class="card-title">隨機給出菜單</h5>
-                                                <p class="card-text">系統會隨機從資料庫中選擇適合的動作，每次點擊都會產生不同的訓練計畫。</p>
-                                                <div class="badge bg-primary">推薦給想要多樣化訓練的使用者</div>
+                                                <p class="card-text flex-grow-1">系統會隨機從資料庫中選擇適合的動作，每次點擊都會產生不同的訓練計畫。</p>
+                                                <div class="badge mt-auto" style="background-color: #e9ecef; color: #495057;">推薦給想要多樣化訓練的使用者</div>
                                             </div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="card h-100 template-option-card" onclick="selectTemplateMode('${template.id}', 'recommended')" style="cursor: pointer;">
-                                            <div class="card-body text-center">
-                                                <i class="bi bi-star-fill" style="font-size: 3rem; color: #ffc107; margin-bottom: 1rem;"></i>
+                                            <div class="card-body text-center d-flex flex-column align-items-center">
+                                                <i class="bi bi-star-fill" style="font-size: 1.5rem; color: #ffc107; margin-bottom: 2rem;"></i>
                                                 <h5 class="card-title">推薦菜單</h5>
-                                                <p class="card-text">系統會根據您的程度和目標，推薦最適合的動作組合，確保訓練效果最佳。</p>
-                                                <div class="badge bg-warning text-dark">推薦給新手和想要系統化訓練的使用者</div>
+                                                <p class="card-text flex-grow-1">系統會根據您的程度和目標，推薦最適合的動作組合，確保訓練效果最佳。</p>
+                                                <div class="badge mt-auto" style="background-color: #e9ecef; color: #495057;">推薦給新手和想要系統化訓練的使用者</div>
                                             </div>
                                         </div>
                                     </div>
@@ -3295,19 +3293,6 @@
             const modal = new bootstrap.Modal(document.getElementById('templateOptionsModal'));
             modal.show();
 
-            // 添加卡片懸停效果
-            document.querySelectorAll('.template-option-card').forEach(card => {
-                card.addEventListener('mouseenter', function() {
-                    this.style.transform = 'translateY(-5px)';
-                    this.style.boxShadow = '0 8px 25px rgba(0,0,0,0.15)';
-                    this.style.transition = 'all 0.3s ease';
-                });
-                
-                card.addEventListener('mouseleave', function() {
-                    this.style.transform = 'translateY(0)';
-                    this.style.boxShadow = '0 4px 15px rgba(0,0,0,0.08)';
-                });
-            });
         }
 
         // 選擇模板模式

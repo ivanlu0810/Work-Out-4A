@@ -561,7 +561,8 @@ function saveTrainingPlan($pdo) {
             $delete_completion_stmt = $pdo->prepare($delete_completion_sql);
             $delete_completion_stmt->execute([$plan_id]);
             
-            echo "已清除 plan_id $plan_id 的舊運動記錄和完成記錄\n";
+            // 移除這行 echo，因為它會破壞 JSON 響應
+            // echo "已清除 plan_id $plan_id 的舊運動記錄和完成記錄\n";
         } else {
             // 插入新計畫
             $insert_sql = "INSERT INTO training_plans (user_id, week_start_date, week_number, plan_name, is_active) VALUES (?, ?, ?, ?, 1)";
