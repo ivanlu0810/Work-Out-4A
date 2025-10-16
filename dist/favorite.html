@@ -501,7 +501,7 @@
         }
 
         .compact-item {
-            background: white;
+            background: #e8ecee;
             border: 1px solid var(--morandi-light-gray);
             border-radius: 16px;
             transition: all 0.3s ease;
@@ -530,27 +530,13 @@
             padding: 0 20px 20px 20px;
             display: none;
             border-top: 1px solid var(--morandi-light-gray);
-            background: #f8f9fa;
+            background: white;
         }
 
         .compact-item.expanded .compact-item-content {
             display: block;
         }
 
-        .compact-thumbnail {
-            width: 80px;
-            height: 60px;
-            border-radius: 12px;
-            overflow: hidden;
-            flex-shrink: 0;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        .compact-thumbnail video {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
 
         .compact-main-info {
             flex: 1;
@@ -592,12 +578,12 @@
 
         .compact-badge {
             padding: 6px 12px;
-            background: linear-gradient(135deg, var(--morandi-blue), var(--morandi-light-blue));
-            border: none;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 600;
-            color: white;
+            color: var(--morandi-text);
             box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -643,7 +629,7 @@
         /* 詳細內容區域樣式 */
         .compact-detail-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr;
+            grid-template-columns: 1fr 2fr;
             gap: 24px;
             margin-top: 20px;
         }
@@ -678,17 +664,17 @@
             display: flex;
             flex-direction: column;
             gap: 20px;
+            height: 100%;
         }
 
         .compact-video-section {
             width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
-        .compact-params-section {
-            width: 100%;
-        }
-
-        .compact-info-section {
+        .compact-right-section {
             grid-column: 2;
             grid-row: 1;
             display: flex;
@@ -700,11 +686,15 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
         }
 
         .compact-video-container video {
             width: 100%;
-            height: 400px;
+            height: 100%;
+            min-height: 400px;
             object-fit: cover;
         }
 
@@ -726,7 +716,14 @@
 
         .pagination-controls {
             display: flex;
-            gap: 8px;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        #page-numbers {
+            display: flex;
+            gap: 12px;
             align-items: center;
         }
 
@@ -734,14 +731,18 @@
             background: var(--morandi-light-blue);
             border: 1px solid var(--morandi-gray);
             color: var(--morandi-text);
-            padding: 8px 12px;
-            border-radius: 8px;
+            padding: 8px;
+            border-radius: 50%;
             font-weight: 500;
             font-size: 0.9rem;
             transition: all 0.2s ease;
             cursor: pointer;
-            min-width: 40px;
+            width: 40px;
+            height: 40px;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .page-btn:hover:not(:disabled) {
@@ -775,14 +776,15 @@
             }
 
             .pagination-controls {
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 justify-content: center;
             }
 
             .page-btn {
-                padding: 6px 10px;
+                padding: 6px;
                 font-size: 0.8rem;
-                min-width: 35px;
+                width: 35px;
+                height: 35px;
             }
         }
 
@@ -807,11 +809,6 @@
                 gap: 12px;
             }
 
-            .compact-thumbnail {
-                width: 100%;
-                height: 120px;
-                align-self: center;
-            }
 
             .compact-main-info {
                 text-align: center;
@@ -836,13 +833,13 @@
                 grid-row: 1;
             }
 
-            .compact-info-section {
+            .compact-right-section {
                 grid-column: 1;
                 grid-row: 2;
             }
 
             .compact-video-container video {
-                height: 300px;
+                min-height: 300px;
             }
         }
 
@@ -863,16 +860,16 @@
         }
 
         .breadcrumb-item a {
-            color: var(--morandi-blue);
+            color: #0d6efd !important;
             text-decoration: none;
         }
 
         .breadcrumb-item a:hover {
-            color: var(--morandi-gray);
+            color: #0a58ca !important;
         }
 
         .breadcrumb-item.active {
-            color: var(--morandi-text);
+            color: #6c757d !important;
         }
     </style>
 </head>
@@ -1075,7 +1072,7 @@
         let filteredFavorites = [];
         let currentView = 'cards'; // cards, compact
         let currentPage = 1;
-        const ITEMS_PER_PAGE = 4; // 每頁顯示4個卡片
+        const ITEMS_PER_PAGE = 5; // 每頁顯示5個列表項目
 
         document.addEventListener("DOMContentLoaded", async function () {
             const list = document.getElementById("favorite-list");
@@ -1183,9 +1180,10 @@
         function renderCardsView() {
             const list = document.getElementById("favorite-list");
             
-            // 計算當前頁面的項目
-            const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-            const endIndex = startIndex + ITEMS_PER_PAGE;
+            // 計算當前頁面的項目（卡片模式每頁4個）
+            const CARDS_PER_PAGE = 4;
+            const startIndex = (currentPage - 1) * CARDS_PER_PAGE;
+            const endIndex = startIndex + CARDS_PER_PAGE;
             const currentPageFavorites = filteredFavorites.slice(startIndex, endIndex);
             
             let html = `<div class="favorites-grid">`;
@@ -1290,9 +1288,17 @@
         // 緊湊列表視圖渲染
         function renderCompactView() {
             const list = document.getElementById("favorite-list");
+            
+            // 計算當前頁面的項目（列表模式每頁5個）
+            const LIST_PER_PAGE = 5;
+            const startIndex = (currentPage - 1) * LIST_PER_PAGE;
+            const endIndex = startIndex + LIST_PER_PAGE;
+            const currentPageFavorites = filteredFavorites.slice(startIndex, endIndex);
+            
             let html = `<div class="compact-list">`;
             
-            filteredFavorites.forEach((ex, i) => {
+            currentPageFavorites.forEach((ex, i) => {
+                const globalIndex = startIndex + i;
                 const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
                 const hypertrophyWeightMax = hypertrophyWeightMin + 15;
                 const fatlossWeightMin = hypertrophyWeightMin - 20;
@@ -1301,11 +1307,6 @@
                 html += `
       <div class="compact-item" onclick="toggleCompactItem(this)">
         <div class="compact-item-header">
-          <div class="compact-thumbnail">
-            <video muted playsinline preload="metadata">
-              <source src="${ex.video_url || ''}" type="video/mp4">
-            </video>
-          </div>
           <div class="compact-main-info">
             <h6 class="compact-title">
               <i class="bi bi-heart-fill"></i>
@@ -1343,44 +1344,42 @@
                   </video>
                 </div>
               </div>
-              
-              <div class="compact-params-section">
-                <div class="compact-detail-section">
-                  <div class="compact-detail-title">
-                    <i class="bi bi-graph-up"></i>
-                    訓練參數
+            </div>
+            
+            <div class="compact-right-section">
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-graph-up"></i>
+                  訓練參數
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌組數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</div>
                   </div>
-                  <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
-                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
-                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌組數</div>
-                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</div>
-                    </div>
-                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
-                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌次數</div>
-                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</div>
-                    </div>
-                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
-                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌重量</div>
-                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
-                    </div>
-                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
-                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂組數</div>
-                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</div>
-                    </div>
-                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
-                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂次數</div>
-                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</div>
-                    </div>
-                    <div style="text-align: center; padding: 8px; background: #f8f9fa; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
-                      <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂重量</div>
-                      <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${fatlossWeightMin}-${fatlossWeightMax}%</div>
-                    </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌次數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌重量</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂組數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂次數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂重量</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${fatlossWeightMin}-${fatlossWeightMax}%</div>
                   </div>
                 </div>
               </div>
-            </div>
-            
-            <div class="compact-info-section">
+              
               <div class="compact-detail-section">
                 <div class="compact-detail-title">
                   <i class="bi bi-info-circle"></i>
@@ -1417,7 +1416,8 @@
 
         // 初始化分頁
         function initializePagination() {
-            const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+            const itemsPerPage = currentView === 'cards' ? 4 : 5; // 卡片模式4個，列表模式5個
+            const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
             const paginationContainer = document.getElementById('pagination-container');
             
             if (totalPages <= 1) {
@@ -1426,15 +1426,15 @@
             }
             
             paginationContainer.style.display = 'flex';
-            updatePaginationInfo();
+            updatePaginationInfo(itemsPerPage);
             renderPageNumbers(totalPages);
             updatePageButtons(totalPages);
         }
 
         // 更新分頁資訊
-        function updatePaginationInfo() {
-            const start = (currentPage - 1) * ITEMS_PER_PAGE + 1;
-            const end = Math.min(currentPage * ITEMS_PER_PAGE, filteredFavorites.length);
+        function updatePaginationInfo(itemsPerPage) {
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredFavorites.length);
             document.getElementById('pagination-info-text').textContent = 
                 `顯示第 ${start}-${end} 項，共 ${filteredFavorites.length} 項`;
         }
@@ -1470,7 +1470,8 @@
 
         // 切換頁面
         function changePage(direction) {
-            const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+            const itemsPerPage = currentView === 'cards' ? 4 : 5;
+            const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
             const newPage = currentPage + direction;
             
             if (newPage >= 1 && newPage <= totalPages) {
@@ -1484,7 +1485,8 @@
 
         // 跳轉到指定頁面
         function goToPage(page) {
-            const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+            const itemsPerPage = currentView === 'cards' ? 4 : 5;
+            const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
             if (page >= 1 && page <= totalPages) {
                 currentPage = page;
                 renderContent();
@@ -1552,7 +1554,8 @@
                 handleSearch();
                 
                 // 如果當前頁面超出範圍，回到最後一頁
-                const totalPages = Math.ceil(filteredFavorites.length / ITEMS_PER_PAGE);
+                const itemsPerPage = currentView === 'cards' ? 4 : 5;
+                const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
                 if (currentPage > totalPages && totalPages > 0) {
                     currentPage = totalPages;
                 }
