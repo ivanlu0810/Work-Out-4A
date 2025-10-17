@@ -122,7 +122,7 @@
 
         .calendar-weekdays {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(7, 1fr) 96px; /* 7 天 + 1 週動作欄對齊 */
             gap: 1px;
             margin-bottom: 1px;
         }
@@ -138,12 +138,43 @@
 
         .calendar-days {
             display: grid;
-            grid-template-columns: repeat(7, 1fr);
+            grid-template-columns: repeat(7, 1fr) 96px; /* 7 天 + 1 週動作欄 */
             gap: 1px;
             background: #e9ecef;
             border-radius: 8px;
             overflow: hidden;
         }
+
+        /* 每週動作欄位 */
+        .calendar-week-action {
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-left: 1px solid #e9ecef;
+            padding: 6px; /* 讓按鈕遠離邊緣 */
+        }
+        .calendar-week-action .btn-week-delete {
+            padding: 0.3rem 0.55rem; /* 再縮小 */
+            font-size: 0.8rem; /* 再縮小字體避免換行 */
+            border-radius: 8px;
+            background: #8B9DC3; /* 莫蘭迪藍灰 */
+            color: #fff;
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.28rem; /* 再縮小圖示與文字間距 */
+            box-shadow: none; /* 移除外框陰影 */
+            outline: none;
+            line-height: 1; 
+            white-space: nowrap; /* 禁止換行 */
+            margin: 0 auto; /* 水平置中並留白 */
+        }
+        .calendar-week-action .btn-week-delete:hover {
+            background: #7A8BB0;
+            color: #fff;
+        }
+        .calendar-week-action .btn-week-delete:focus { box-shadow: none; outline: none; }
 
         .calendar-day {
             background: #fff;
@@ -1056,27 +1087,60 @@
             justify-content: center !important;
         }
 
+        /* 今天按鈕圖示與文字間距微調 */
+        .btn.btn-primary i.bi-calendar-check {
+            margin-right: 6px; /* 原本 me-2 約 8px，縮小間距 */
+        }
+
         /* 行事曆工具列刪除鈕尺寸微調 - 使用更強的選擇器 */
         .calendar-legend .legend-right .btn.btn-outline-danger.btn-sm {
-            padding: 0.5rem 1rem !important;
-            font-size: 0.9rem !important;
+            padding: 0.6rem 1.2rem !important;
+            font-size: 1rem !important;
             border-radius: 6px !important;
-            min-width: 140px !important;
-            border: 2px solid #dc3545 !important;
-            color: #dc3545 !important;
-            background-color: #fff !important;
+            min-width: 150px !important;
+            border: none !important;
+            color: #ffffff !important;
+            background-color: #8B9DC3 !important;
             font-weight: 600 !important;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
             display: inline-flex !important;
             visibility: visible !important;
             opacity: 1 !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 0.5rem !important;
+        }
+        
+        .calendar-legend .legend-right .btn.btn-outline-danger.btn-sm i {
+            font-size: 1rem !important;
+            line-height: 0 !important; /* 移除行高影響，避免垂直偏移 */
+            color: #ffffff !important;
+            position: relative;
+            top: 0.5px; /* 微幅校正，讓圖示與文字視覺置中 */
         }
         
         .calendar-legend .legend-right .btn.btn-outline-danger.btn-sm:hover {
-            background-color: #dc3545 !important;
-            color: #fff !important;
+            background-color: #7A8BB0 !important;
+            color: #ffffff !important;
             transform: translateY(-1px) !important;
             box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+        
+        .calendar-legend .legend-right .btn.btn-outline-danger.btn-sm:hover i {
+            color: #ffffff !important;
+        }
+
+        /* 週刪除模態框標題 icon 與文字同色並放大 */
+        #weekDeleteModal .modal-title { 
+            color: #2f3b64; /* 與標題同色的深莫蘭迪藍 */
+            font-weight: 700;
+        }
+        #weekDeleteModal .modal-title .week-delete-title-icon {
+            color: currentColor; /* 跟隨標題色 */
+            font-size: 1.25rem; /* 放大 */
+            line-height: 1;
+            position: relative;
+            top: 1px; /* 微校正垂直視覺 */
         }
         
         /* 確保行事曆圖例區域正確顯示 */
@@ -1380,10 +1444,9 @@
             z-index: 9999;
         }
         .custom-alert-success {
-            background: #e6f4ea;
-            /* 淺綠 */
-            color: #1e4620;
-            border-left: 6px solid #718d79;
+            background: #e8ebf3; /* 淺莫蘭迪藍灰 */
+            color: #2f3b64; /* 深莫蘭迪藍，與標題一致 */
+            border-left: 6px solid #8B9DC3; /* 與按鈕同系色 */
         }
         .custom-alert-danger {
             background: #fdecea;
@@ -1402,6 +1465,7 @@
             /* 垂直置中 */
             justify-content: center;
             /* 水平置中 */
+            color: inherit; /* icon 跟文字同色 */
         }
 
         .custom-alert .btn-close {
@@ -1716,7 +1780,7 @@
                                     <i class="bi bi-chevron-right"></i>
                                 </button>
                                 <button class="btn btn-primary ms-3" onclick="goToToday()">
-                                    <i class="bi bi-calendar-check me-2"></i>今天
+                                    <i class="bi bi-calendar-check"></i>今天
                                 </button>
                             </div>
                         </div>
@@ -1730,6 +1794,7 @@
                                 <div class="weekday">週四</div>
                                 <div class="weekday">週五</div>
                                 <div class="weekday">週六</div>
+                                <div class="weekday text-center">操作</div>
                             </div>
                             <div class="calendar-days" id="calendar-days">
                                 <!-- 日期將由JavaScript動態生成 -->
@@ -1740,11 +1805,7 @@
                             <div class="legend-left">
                                 <!-- 左側可放置圖例或其他內容 -->
                             </div>
-                            <div class="legend-right">
-                                <button class="btn btn-outline-danger btn-sm" onclick="showWeekDeleteModal()" style="display: block !important; visibility: visible !important; z-index: 9999 !important;">
-                                    <i class="bi bi-trash"></i> 刪除週計畫
-                                </button>
-                            </div>
+                            <div class="legend-right"></div>
                         </div>
                     </div>
                 </section>
@@ -2875,46 +2936,40 @@
         function renderCalendar() {
             const calendarDays = document.getElementById('calendar-days');
             const monthYear = document.getElementById('calendar-month-year');
-            
             if (!calendarDays || !monthYear) return;
 
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
-            
+
             // 更新月份年份顯示
             monthYear.textContent = `${year}年${month + 1}月`;
-            
-            // 獲取當月第一天和最後一天
-            const firstDay = new Date(year, month, 1);
-            const lastDay = new Date(year, month + 1, 0);
-            const firstDayOfWeek = firstDay.getDay(); // 0 = 週日, 1 = 週一, ...
-            
-            // 清空行事曆
+
+            // 以 6 週 * 7 天 的方式產生方格，並在每週尾端加 1 欄動作
+            const firstOfMonth = new Date(year, month, 1);
+            const gridStart = new Date(firstOfMonth);
+            gridStart.setDate(firstOfMonth.getDate() - firstOfMonth.getDay()); // 回到該月第一列的週日
+
             calendarDays.innerHTML = '';
-            
-            // 添加上個月的日期（灰色顯示）
-            const prevMonth = new Date(year, month - 1, 0);
-            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
-                const day = prevMonth.getDate() - i;
-                const dayElement = createCalendarDay(day, true, year, month - 1);
-                calendarDays.appendChild(dayElement);
-            }
-            
-            // 添加當月的日期
-            for (let day = 1; day <= lastDay.getDate(); day++) {
-                const dayElement = createCalendarDay(day, false, year, month);
-                calendarDays.appendChild(dayElement);
-            }
-            
-            // 添加下個月的日期（填滿剩餘格子）
-            const remainingDays = 42 - (firstDayOfWeek + lastDay.getDate());
-            for (let day = 1; day <= remainingDays; day++) {
-                const dayElement = createCalendarDay(day, true, year, month + 1);
-                calendarDays.appendChild(dayElement);
+
+            for (let week = 0; week < 6; week++) {
+                const weekStart = new Date(gridStart);
+                weekStart.setDate(gridStart.getDate() + week * 7);
+
+                for (let d = 0; d < 7; d++) {
+                    const date = new Date(weekStart);
+                    date.setDate(weekStart.getDate() + d);
+                    const isOtherMonth = date.getMonth() !== month;
+                    const dayEl = createCalendarDayByDate(date, isOtherMonth);
+                    calendarDays.appendChild(dayEl);
+                }
+
+                // 週尾動作欄
+                const actionEl = createWeekActionCell(weekStart, month);
+                calendarDays.appendChild(actionEl);
             }
         }
 
-        function createCalendarDay(day, isOtherMonth, year, month) {
+        function createCalendarDayByDate(dayDate, isOtherMonth) {
             const dayElement = document.createElement('div');
             dayElement.className = 'calendar-day';
             
@@ -2924,13 +2979,12 @@
             
             // 檢查是否為今天
             const today = new Date();
-            const dayDate = new Date(year, month, day);
             if (dayDate.toDateString() === today.toDateString()) {
                 dayElement.classList.add('today');
             }
             
             // 檢查是否為訓練日
-            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
             if (calendarTrainingData[dateKey]) {
                 dayElement.classList.add('training-day');
             }
@@ -2938,7 +2992,7 @@
             // 創建日期內容
             const dayNumber = document.createElement('div');
             dayNumber.className = 'calendar-day-number';
-            dayNumber.textContent = day;
+            dayNumber.textContent = dayDate.getDate();
             dayElement.appendChild(dayNumber);
             
             // 添加訓練內容顯示
@@ -2994,6 +3048,123 @@
             });
             
             return dayElement;
+        }
+
+        // 產生每週尾端的刪除欄位
+        function createWeekActionCell(weekStartDate, currentMonth) {
+            const cell = document.createElement('div');
+            cell.className = 'calendar-week-action';
+            
+            // 計算該週是否包含當月（避免前後月多餘按鈕，但仍允許刪除）
+            const containsCurrentMonth = new Array(7).some((_, i) => {
+                const d = new Date(weekStartDate);
+                d.setDate(weekStartDate.getDate() + i);
+                return d.getMonth() === currentMonth;
+            });
+
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'btn-week-delete';
+            btn.innerHTML = '<i class="bi bi-trash"></i><span>刪除本週</span>';
+            btn.title = '刪除此列所對應的一週之日曆訓練動作';
+            btn.onclick = (e) => {
+                e.stopPropagation();
+                handleDeleteWeekFromCalendar(weekStartDate);
+            };
+
+            if (!containsCurrentMonth) {
+                btn.classList.add('disabled');
+                btn.disabled = false; // 仍允許操作，以便刪除跨月週
+            }
+
+            cell.appendChild(btn);
+            return cell;
+        }
+
+        // 刪除該週（周日到周六）的 dailyTrainingData
+        function handleDeleteWeekFromCalendar(weekStartDate) {
+            const weekStart = new Date(weekStartDate);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            const label = `${formatDate(weekStart)} - ${formatDate(weekEnd)}`;
+
+            // 先檢查該週是否有任何資料，沒有就顯示提示並返回
+            const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+            let hasAnyData = false;
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(weekStart);
+                d.setDate(weekStart.getDate() + i);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                const dayData = dailyTrainingData[key];
+                if (Array.isArray(dayData) && dayData.length > 0) {
+                    // 若有非休息日的動作則視為有資料
+                    if (dayData.some(ex => ex && ex.id !== 0)) { hasAnyData = true; break; }
+                }
+            }
+            if (!hasAnyData) {
+                showSuccessMessage('本週沒有可刪除的行事曆訓練動作');
+                return;
+            }
+
+            showWeekDeleteConfirm(label, weekStart.toISOString());
+        }
+
+        // 顯示與單筆刪除一致樣式的確認彈窗
+        function showWeekDeleteConfirm(label, weekStartIso) {
+            clearAllModalBackdrops();
+
+            const html = `
+                <div class="modal fade" id="confirmWeekDeleteModal" tabindex="-1" aria-labelledby="confirmWeekDeleteLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmWeekDeleteLabel">提示！</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                確定要刪除 ${label} 的行事曆訓練動作嗎？此操作無法復原。
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="confirmDeleteWeekFromCalendar('${weekStartIso}')">確定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            const existing = document.getElementById('confirmWeekDeleteModal');
+            if (existing) existing.remove();
+            document.body.insertAdjacentHTML('beforeend', html);
+            const modal = new bootstrap.Modal(document.getElementById('confirmWeekDeleteModal'));
+            modal.show();
+
+            document.getElementById('confirmWeekDeleteModal').addEventListener('hidden.bs.modal', function() {
+                clearAllModalBackdrops();
+                this.remove();
+            });
+        }
+
+        // 真的執行刪除週（供確認彈窗呼叫）
+        function confirmDeleteWeekFromCalendar(weekStartIso) {
+            const weekStart = new Date(weekStartIso);
+            const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+
+            for (let i = 0; i < 7; i++) {
+                const d = new Date(weekStart);
+                d.setDate(weekStart.getDate() + i);
+                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (dailyTrainingData[key]) delete dailyTrainingData[key];
+            }
+
+            localStorage.setItem('dailyTrainingData', JSON.stringify(dailyTrainingData));
+
+            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmWeekDeleteModal'));
+            if (modal) modal.hide();
+            setTimeout(() => {
+                clearAllModalBackdrops();
+                updateCalendarTrainingData();
+                showSuccessMessage('已刪除該週的行事曆訓練動作');
+            }, 50);
         }
 
         function previousMonth() {
@@ -7084,7 +7255,7 @@
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title" id="weekDeleteModalLabel">
-                                    <i class="bi bi-trash text-danger me-2"></i>刪除週訓練計畫
+                                    <i class="bi bi-trash me-2 week-delete-title-icon"></i>刪除週訓練計畫
                                 </h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                             </div>
