@@ -164,19 +164,23 @@
         }
 
         .calendar-day.today {
-            background: #e3f2fd;
-            color: #1976d2;
+            background: #ffffff; /* 與一般日期相同的白底 */
+            color: inherit; /* 沒有特別改字色，維持整體樣式 */
             font-weight: 600;
         }
 
         .calendar-day.training-day {
-            background: #e8eaed;
+            background: #e8eaed; /* 恢復滿格背景 */
             color: #333333;
+            position: relative;
+            border: 2px solid #ffffff; /* 白色邊框分隔 */
         }
 
         .calendar-day.training-day.today {
-            background: #e8eaed;
+            background: #e8eaed; /* 恢復滿格背景 */
             color: #333333;
+            position: relative;
+            border: 2px solid #ffffff; /* 白色邊框分隔 */
         }
 
         .calendar-day.rest-day {
@@ -200,6 +204,12 @@
             text-align: center;
         }
 
+         /* 今天的日期號碼特殊樣式 */
+         .calendar-day.today .calendar-day-number {
+             color: #D4A5A5 !important; /* 淺紅色 */
+             font-weight: 800; /* 更粗的字體 */
+         }
+
         .calendar-day-indicator {
             width: 6px;
             height: 6px;
@@ -216,10 +226,16 @@
         }
 
         .calendar-legend {
-            display: flex;
-            justify-content: center;
+            display: flex !important;
+            justify-content: space-between !important;
+            align-items: center !important;
             gap: 2rem;
             flex-wrap: wrap;
+            margin-top: 1rem;
+            padding: 0.5rem 0;
+            min-height: 50px;
+            background-color: #f8f9fa;
+            border-top: 1px solid #dee2e6;
         }
 
         .legend-item {
@@ -241,16 +257,27 @@
             border: 1px solid #ff9800;
         }
 
-        .calendar-day:not(.other-month):hover {
+        /* 只有非訓練日的 hover 效果 */
+        .calendar-day:not(.other-month):not(.training-day):not(.has-training):hover {
             background: #dadce0 !important;
+            border: 2px solid #ffffff !important; /* 添加白色邊框分隔 */
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             cursor: pointer;
         }
 
-        .calendar-day:not(.other-month):hover .calendar-day-number {
+        .calendar-day:not(.other-month):not(.training-day):not(.has-training):hover .calendar-day-number {
             color: #333333;
             font-weight: 600;
+        }
+
+        /* 訓練日的 hover 效果（保持原有樣式） */
+        .calendar-day.training-day:hover,
+        .calendar-day.has-training:hover {
+            background: #e8eaed !important; /* 保持訓練日背景 */
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
         }
 
         .calendar-day.other-month {
@@ -276,7 +303,7 @@
             border-radius: 8px;
             padding: 4px 8px;
             margin: 0 auto;
-            border: 1px solid #e0e0e0;
+            border: 1px solid #f0f0f0;
             width: fit-content;
             min-width: 60px;
             text-align: center;
@@ -331,11 +358,13 @@
         }
 
         .calendar-day.has-training {
-            background: #e8eaed;
+            background: #e8eaed; /* 恢復滿格背景 */
+            border: 2px solid #ffffff; /* 白色邊框分隔 */
         }
 
         .calendar-day.has-training.today {
-            background: #e8eaed;
+            background: #e8eaed; /* 恢復滿格背景 */
+            border: 2px solid #ffffff; /* 白色邊框分隔 */
         }
 
         /* 訓練內容詳情彈出視窗樣式 */
@@ -466,7 +495,6 @@
             outline: none !important;
             box-shadow: none !important;
         }
-
         .btn-remove-exercise {
             background-color: #94696d !important;
             border: none !important;
@@ -479,7 +507,6 @@
             padding: 0 0.75rem;
             line-height: 1;
         }
-
         .btn-remove-exercise:hover,
         .btn-remove-exercise:active,
         .btn-remove-exercise:focus {
@@ -602,7 +629,6 @@
             box-shadow: none !important;
             color: #495057 !important;
         }
-
         .list-group-item.active:hover {
             background-color: #dee2e6 !important;
             border: none !important;
@@ -615,7 +641,6 @@
             outline: none !important;
             box-shadow: none !important;
         }
-
         .list-group-item.active:active {
             border: none !important;
             outline: none !important;
@@ -720,6 +745,11 @@
         /* 日曆選擇菜單模態視窗位置調整 */
         #calendarDayModal .modal-dialog {
             margin-top: 1vh;
+        }
+
+        /* 無訓練內容提示視窗位置調整 */
+        #noTrainingModal .modal-dialog {
+            margin-top: 2vh;
         }
 
         .modal-body {
@@ -965,7 +995,6 @@
             font-weight: 500;
             margin-left: 0.5rem;
         }
-
         /* 動作卡片 */
         .exercise-card {
             border: 1px solid #e9ecef;
@@ -979,7 +1008,6 @@
             box-shadow: 0 4px 15px rgba(127, 144, 169, 0.1);
             transform: translateY(-2px);
         }
-
         .exercise-card .card-title {
             color: #495057;
             font-weight: 600;
@@ -1026,6 +1054,41 @@
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
+        }
+
+        /* 行事曆工具列刪除鈕尺寸微調 - 使用更強的選擇器 */
+        .calendar-legend .legend-right .btn.btn-outline-danger.btn-sm {
+            padding: 0.5rem 1rem !important;
+            font-size: 0.9rem !important;
+            border-radius: 6px !important;
+            min-width: 140px !important;
+            border: 2px solid #dc3545 !important;
+            color: #dc3545 !important;
+            background-color: #fff !important;
+            font-weight: 600 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+            display: inline-flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+        }
+        
+        .calendar-legend .legend-right .btn.btn-outline-danger.btn-sm:hover {
+            background-color: #dc3545 !important;
+            color: #fff !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15) !important;
+        }
+        
+        /* 確保行事曆圖例區域正確顯示 */
+        .legend-right {
+            display: flex !important;
+            align-items: center !important;
+        }
+        
+        .legend-right .btn {
+            display: inline-flex !important;
+            visibility: visible !important;
+            opacity: 1 !important;
         }
 
         .btn-outline-danger {
@@ -1255,12 +1318,10 @@
             margin-top: auto;
             /* 推到底部 */
         }
-
         .template-footer .template-stats {
             margin-bottom: 1.25rem;
             /* 底下留 8px 空間 */
         }
-
         /* 完成狀態樣式 */
         .completion-status {
             cursor: pointer;
@@ -1460,7 +1521,6 @@
             border-radius: 12px !important;
             background: #fff !important;
         }
-
         #trainingTemplates .template-card:hover {
             transform: translateY(-6px) scale(1.02) !important;
             /* 上浮 + 微放大 */
@@ -1480,7 +1540,6 @@
             /* 卡片間距 */
             padding-bottom: 1rem;
         }
-
         .week-schedule .col-md-6,
         .week-schedule .col-lg-4 {
             flex: 0 0 auto;
@@ -1657,7 +1716,7 @@
                                     <i class="bi bi-chevron-right"></i>
                                 </button>
                                 <button class="btn btn-primary ms-3" onclick="goToToday()">
-                                    <i class="bi bi-calendar-check"></i> 今天
+                                    <i class="bi bi-calendar-check me-2"></i>今天
                                 </button>
                             </div>
                         </div>
@@ -1677,7 +1736,15 @@
                             </div>
                         </div>
                         
-                        <div class="calendar-legend">
+                        <div class="calendar-legend d-flex align-items-center justify-content-between">
+                            <div class="legend-left">
+                                <!-- 左側可放置圖例或其他內容 -->
+                            </div>
+                            <div class="legend-right">
+                                <button class="btn btn-outline-danger btn-sm" onclick="showWeekDeleteModal()" style="display: block !important; visibility: visible !important; z-index: 9999 !important;">
+                                    <i class="bi bi-trash"></i> 刪除週計畫
+                                </button>
+                            </div>
                         </div>
                     </div>
                 </section>
@@ -1892,7 +1959,6 @@
             </footer>
         </div>
     </div>
-
     <!-- 選擇動作彈出視窗 -->
     <div class="modal fade exercise-modal" id="exerciseModal" tabindex="-1" aria-labelledby="exerciseModalLabel">
         <div class="modal-dialog modal-lg">
@@ -2039,6 +2105,57 @@
         let currentWeekIndex = 0; // 當前週次在 availableWeeks 中的索引
         let currentWeekStart = null; // 當前週次的開始日期
         let currentWeekEnd = null; // 當前週次的結束日期
+        
+        // 全域變數定義
+        let allTrainingPlans = {}; // 儲存所有週的訓練計畫
+        let completionRecords = []; // 儲存完成記錄
+        let planIds = {}; // 儲存計畫ID
+        
+        // 初始化全域變數
+        function initializeGlobalVariables() {
+            try {
+                // 載入 allTrainingPlans
+                const savedPlans = localStorage.getItem('allTrainingPlans');
+                if (savedPlans) {
+                    allTrainingPlans = JSON.parse(savedPlans);
+                }
+                
+                // 載入 completionRecords
+                const savedRecords = localStorage.getItem('completionRecords');
+                if (savedRecords) {
+                    completionRecords = JSON.parse(savedRecords);
+                }
+                
+                // 載入 planIds
+                const savedPlanIds = localStorage.getItem('planIds');
+                if (savedPlanIds) {
+                    planIds = JSON.parse(savedPlanIds);
+                }
+                
+                console.log('全域變數初始化完成:', {
+                    allTrainingPlans: Object.keys(allTrainingPlans).length,
+                    completionRecords: completionRecords.length,
+                    planIds: Object.keys(planIds).length
+                });
+            } catch (error) {
+                console.error('初始化全域變數失敗:', error);
+            }
+        }
+        
+        // 獲取週鍵值
+        function getWeekKey(date) {
+            const d = new Date(date);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+        
+        // 獲取當前週的鍵值
+        function getCurrentWeekKey() {
+            const today = new Date();
+            return getWeekKey(today);
+        }
 
         // 載入有資料的週次列表
         async function loadAvailableWeeks() {
@@ -2386,7 +2503,6 @@
             const rangeEl = document.getElementById('week-date-range');
             if (rangeEl) rangeEl.textContent = `${startStr} - ${endStr}`;
         }
-
         // 儲存計畫到資料庫
         async function savePlan() {
             const btn = event.target;
@@ -2884,12 +3000,10 @@
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
             renderCalendar();
         }
-
         function nextMonth() {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
             renderCalendar();
         }
-
         function goToToday() {
             currentCalendarDate = new Date();
             renderCalendar();
@@ -3100,6 +3214,9 @@
                 </div>
             `;
             
+            // 清除所有現有的backdrop
+            clearAllModalBackdrops();
+            
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('trainingDetailsModal');
             if (existingModal) {
@@ -3113,8 +3230,11 @@
             const modal = new bootstrap.Modal(document.getElementById('trainingDetailsModal'));
             modal.show();
             
-            // 模態框關閉時移除DOM元素
+            // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('trainingDetailsModal').addEventListener('hidden.bs.modal', function () {
+                // 清除backdrop
+                clearAllModalBackdrops();
+                // 移除DOM元素
                 this.remove();
             });
         }
@@ -3182,6 +3302,9 @@
                 </div>
             `;
             
+            // 清除所有現有的backdrop
+            clearAllModalBackdrops();
+            
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('calendarDayModal');
             if (existingModal) {
@@ -3195,8 +3318,11 @@
             const modal = new bootstrap.Modal(document.getElementById('calendarDayModal'));
             modal.show();
             
-            // 模態框關閉時移除DOM元素
+            // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('calendarDayModal').addEventListener('hidden.bs.modal', function () {
+                // 清除backdrop
+                clearAllModalBackdrops();
+                // 移除DOM元素
                 this.remove();
             });
         }
@@ -3298,14 +3424,17 @@
             // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('editExerciseModal').addEventListener('hidden.bs.modal', function () {
                 // 清除backdrop
-                const backdrop = document.querySelector('.modal-backdrop');
-                if (backdrop) {
-                    backdrop.remove();
-                }
-                // 移除body上的modal-open類別
-                document.body.classList.remove('modal-open');
+                clearAllModalBackdrops();
                 // 移除DOM元素
                 this.remove();
+                // 重新顯示訓練內容詳情（確保有正確的backdrop）
+                setTimeout(() => {
+                    const date = new Date(dateString);
+                    const dayTrainingData = getDayTrainingData(date);
+                    if (dayTrainingData && dayTrainingData.length > 0) {
+                        showDayTrainingDetails(date, dayTrainingData);
+                    }
+                }, 100);
             });
         }
 
@@ -3332,29 +3461,28 @@
             // 儲存到localStorage
             saveDailyTrainingData(date, dayTrainingData);
             
+            // 更新行事曆
+            updateCalendarTrainingData();
+            
+            // 顯示成功訊息
+            showSuccessMessage('訓練動作已更新');
+            
             // 關閉模態框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editExerciseModal'));
             if (modal) {
                 modal.hide();
                 // 確保backdrop被清除
                 setTimeout(() => {
-                    const backdrop = document.querySelector('.modal-backdrop');
-                    if (backdrop) {
-                        backdrop.remove();
-                    }
-                    document.body.classList.remove('modal-open');
-                }, 100);
+                    clearAllModalBackdrops();
+                    // 重新顯示訓練內容詳情
+                    showDayTrainingDetails(date, dayTrainingData);
+                }, 150);
+            } else {
+                // 如果沒有找到模態框實例，直接清除並重新顯示
+                clearAllModalBackdrops();
+                showDayTrainingDetails(date, dayTrainingData);
             }
-            
-            // 重新顯示訓練內容詳情
-            showDayTrainingDetails(date, dayTrainingData);
-            
-            // 更新行事曆
-            updateCalendarTrainingData();
-            
-            showSuccessMessage('訓練動作已更新');
         }
-
         // 移除單個訓練動作
         function removeSingleExercise(dateString, exerciseIndex) {
             // 創建確認模態框
@@ -3391,46 +3519,84 @@
             const modal = new bootstrap.Modal(document.getElementById('confirmRemoveModal'));
             modal.show();
             
-            // 模態框關閉時移除DOM元素
-            document.getElementById('confirmRemoveModal').addEventListener('hidden.bs.modal', function () {
-                this.remove();
-            });
+             // 模態框關閉時移除DOM元素和清除backdrop
+             document.getElementById('confirmRemoveModal').addEventListener('hidden.bs.modal', function () {
+                 // 清除backdrop
+                 clearAllModalBackdrops();
+                 // 移除DOM元素
+                 this.remove();
+                 // 重新顯示訓練內容詳情（確保有正確的backdrop）
+                 setTimeout(() => {
+                     const date = new Date(dateString);
+                     const dayTrainingData = getDayTrainingData(date);
+                     if (dayTrainingData && dayTrainingData.length > 0) {
+                         showDayTrainingDetails(date, dayTrainingData);
+                     }
+                 }, 100);
+             });
         }
 
-        // 確認移除訓練動作
-        function confirmRemoveExercise(dateString, exerciseIndex) {
-            const date = new Date(dateString);
-            const dayTrainingData = getDayTrainingData(date);
-            
-            if (!dayTrainingData || !dayTrainingData[exerciseIndex]) {
-                alert('找不到要移除的訓練動作');
-                return;
-            }
-            
-            // 移除指定索引的訓練動作
-            dayTrainingData.splice(exerciseIndex, 1);
-            
-            // 儲存到localStorage
-            saveDailyTrainingData(date, dayTrainingData);
-            
-            // 關閉確認模態框
-            const modal = bootstrap.Modal.getInstance(document.getElementById('confirmRemoveModal'));
-            if (modal) modal.hide();
-            
-            // 重新顯示訓練內容詳情
-            if (dayTrainingData.length > 0) {
-                showDayTrainingDetails(date, dayTrainingData);
+         // 確認移除訓練動作
+         function confirmRemoveExercise(dateString, exerciseIndex) {
+             const date = new Date(dateString);
+             const dayTrainingData = getDayTrainingData(date);
+             
+             if (!dayTrainingData || !dayTrainingData[exerciseIndex]) {
+                 alert('找不到要移除的訓練動作');
+                 return;
+             }
+             
+             // 移除指定索引的訓練動作
+             dayTrainingData.splice(exerciseIndex, 1);
+             
+             // 儲存到localStorage
+             saveDailyTrainingData(date, dayTrainingData);
+             
+            // 關閉確認模態框並清除backdrop
+            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmRemoveModal'));
+            if (confirmModal) {
+                confirmModal.hide();
+                // 確保backdrop被清除
+                setTimeout(() => {
+                    clearAllModalBackdrops();
+                    // 重新顯示訓練內容詳情
+                    if (dayTrainingData.length > 0) {
+                        showDayTrainingDetails(date, dayTrainingData);
+                    } else {
+                        // 如果沒有訓練動作了，關閉模態框並清除backdrop
+                        const detailsModal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
+                        if (detailsModal) {
+                            detailsModal.hide();
+                            // 確保backdrop被清除
+                            setTimeout(() => {
+                                clearAllModalBackdrops();
+                            }, 100);
+                        }
+                    }
+                }, 150);
             } else {
-                // 如果沒有訓練動作了，關閉模態框
-                const modal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
-                if (modal) modal.hide();
+                // 如果沒有找到模態框實例，直接清除並重新顯示
+                clearAllModalBackdrops();
+                if (dayTrainingData.length > 0) {
+                    showDayTrainingDetails(date, dayTrainingData);
+                } else {
+                    // 如果沒有訓練動作了，關閉模態框並清除backdrop
+                    const detailsModal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
+                    if (detailsModal) {
+                        detailsModal.hide();
+                        setTimeout(() => {
+                            clearAllModalBackdrops();
+                        }, 100);
+                    }
+                }
             }
-            
-            // 更新行事曆
-            updateCalendarTrainingData();
-            
-            showSuccessMessage('訓練動作已移除');
-        }
+             
+             // 更新行事曆
+             updateCalendarTrainingData();
+             
+             // 顯示成功訊息
+             showSuccessMessage('訓練動作已移除');
+         }
 
         // 為某一天新增訓練動作（獨立於週次）
         function addTraining(dateString) {
@@ -3443,7 +3609,6 @@
             // 直接為該日期新增訓練動作，不依賴週次
             openExerciseModalForDate(date);
         }
-
         // 為特定日期打開動作選擇視窗
         async function openExerciseModalForDate(targetDate) {
             console.log('為日期新增訓練動作:', targetDate);
@@ -3887,6 +4052,9 @@
                 </div>
             `;
             
+            // 清除所有現有的backdrop
+            clearAllModalBackdrops();
+            
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('dateExerciseModal');
             if (existingModal) {
@@ -3914,8 +4082,11 @@
                 }, 200);
             });
             
-            // 模態框關閉時移除DOM元素
+            // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('dateExerciseModal').addEventListener('hidden.bs.modal', function () {
+                // 清除backdrop
+                clearAllModalBackdrops();
+                // 移除DOM元素
                 this.remove();
             });
         }
@@ -4048,7 +4219,6 @@
             });
             event.target.closest('.list-group-item').classList.add('active');
         }
-
         // 為特定日期新增訓練動作
         function addExerciseToSpecificDate(dateString) {
             const targetDate = new Date(dateString);
@@ -4151,6 +4321,9 @@
                 </div>
             `;
             
+            // 清除所有現有的backdrop
+            clearAllModalBackdrops();
+            
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('noTrainingModal');
             if (existingModal) {
@@ -4164,8 +4337,11 @@
             const modal = new bootstrap.Modal(document.getElementById('noTrainingModal'));
             modal.show();
             
-            // 模態框關閉時移除DOM元素
+            // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('noTrainingModal').addEventListener('hidden.bs.modal', function () {
+                // 清除backdrop
+                clearAllModalBackdrops();
+                // 移除DOM元素
                 this.remove();
             });
         }
@@ -4185,6 +4361,9 @@
         // 頁面載入時初始化
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('頁面載入完成，開始初始化...');
+            
+            // 初始化全域變數
+            initializeGlobalVariables();
             
             // 顯示載入指示器
             showLoadingIndicator();
@@ -4310,7 +4489,6 @@
             
             console.log('最終動作資料載入完成，總數:', exercises.length);
         }
-
         // 備用動作資料
         function getBackupExercises() {
             return [
@@ -4697,7 +4875,6 @@
             const modal = new bootstrap.Modal(document.getElementById('exerciseModal'));
             modal.show();
         }
-
         // 渲染動作列表
         function renderExerciseList() {
             const container = document.getElementById('exerciseList');
@@ -4748,7 +4925,6 @@
                 container.appendChild(exerciseDiv);
             });
         }
-
         // 選擇動作
         function selectExercise(exerciseId, exerciseName, muscleGroup) {
             document.getElementById('selectedExerciseId').value = exerciseId;
@@ -5233,7 +5409,6 @@
                 showSuccessMessage('已切換到下週');
             }
         }
-
         // 刪除本週計畫（含明細與完成紀錄）
         async function deleteCurrentPlan() {
             try {
@@ -5312,12 +5487,38 @@
                     } catch (e) {}
                 }
 
+                // 額外：清除此週在行事曆（dailyTrainingData）中的每日資料
+                try {
+                    const today = new Date();
+                    const startOfWeek = new Date(today);
+                    startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
+                    const dailyStr = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+                    let changed = false;
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date(startOfWeek);
+                        d.setDate(startOfWeek.getDate() + i);
+                        const key = dailyStr(d);
+                        if (dailyTrainingData[key]) {
+                            delete dailyTrainingData[key];
+                            changed = true;
+                        }
+                    }
+                    if (changed) {
+                        localStorage.setItem('dailyTrainingData', JSON.stringify(dailyTrainingData));
+                    }
+                } catch (e) {
+                    console.warn('清除 weekly dailyTrainingData 失敗', e);
+                }
+
                 // 重置當週資料與畫面
                 resetWeeklyPlan();
                 renderWeeklyPlan();
                 await loadPlanCompletionStats();
                 await loadPlanHistoryOptions();
                 updateStats();
+                // 同步更新行事曆顯示
+                try { if (typeof updateCalendarTrainingData === 'function') updateCalendarTrainingData(); } catch (e) {}
                 
                 showSuccessMessage('本週計畫已刪除');
             } catch (err) {
@@ -5325,7 +5526,6 @@
                 showSuccessMessage('刪除本週計畫失敗：' + err.message, 'danger');
             }
         }
-
         // 載入歷史週次選單（以資料庫訓練歷史為準）
         async function loadPlanHistoryOptions() {
             const select = document.getElementById('history-plan-select');
@@ -5537,6 +5737,9 @@
                 </div>
             `;
 
+            // 清除所有現有的backdrop
+            clearAllModalBackdrops();
+            
             // 移除現有的模態視窗（如果存在）
             const existingModal = document.getElementById('templateOptionsModal');
             if (existingModal) {
@@ -5712,7 +5915,6 @@
             });
             console.log(`總共生成了 ${totalExercises} 個動作`);
         }
-
         // 已使用的動作追蹤（避免重複）
         let usedExercises = new Set();
         
@@ -5721,7 +5923,6 @@
         
         // 本週已使用的動作追蹤（避免同一週重複）
         let weeklyUsedExercises = new Set();
-
         // 應用固定的全身推薦菜單（基於ACSM和NSCA專業建議）
         function applyFixedFullbodyRecommendations() {
             console.log('應用固定的全身推薦菜單');
@@ -6151,7 +6352,6 @@
             
             console.log('二分化隨機菜單生成完成');
         }
-
         // 三分化（推/拉/腿）隨機菜單生成
         function generatePushPullLegsRandom() {
             console.log('生成三分化隨機菜單（推/拉/腿）');
@@ -6503,7 +6703,7 @@
                     { muscleGroup: '中胸', exerciseName: '胸推', sets: 3, reps: 12 },
                     { muscleGroup: '上胸', exerciseName: '上胸推', sets: 3, reps: 12 },
                     { muscleGroup: '上背', exerciseName: '背闊下拉', sets: 3, reps: 12 },
-                    { muscleGroup: '中背', exerciseName: '划船', sets: 3, reps: 12 },
+                    { muscleGroup: '中背', exerciseGroup: '划船', sets: 3, reps: 12 },
                     { muscleGroup: '肩膀前束', exerciseName: '啞鈴肩推', sets: 3, reps: 12 },
                     { muscleGroup: '肩膀中束', exerciseName: '側平舉', sets: 3, reps: 12 },
                     { muscleGroup: '二頭肌', exerciseName: '二頭彎舉', sets: 3, reps: 12 },
@@ -6659,321 +6859,6 @@
             
             console.log('Level 1兩天連續練菜單應用完成');
         }
-        
-        // 為特定肌群獲取隨機動作用
-        function getRandomExerciseForMuscle(muscleGroup, mode = 'random') {
-            if (!exercises || exercises.length === 0) {
-                console.error('動作資料未載入！');
-                return null;
-            }
-            
-            console.log(`尋找 ${muscleGroup} 動作，總動作數: ${exercises.length}`);
-            
-            // 獲取該肌群的所有動作（先不做全週去重，以確保數量充足）
-            let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
-            console.log(`${muscleGroup} 可用動作數: ${availableExercises.length}`);
-
-            // 若沒有精確匹配，嘗試使用映射（寬鬆匹配）
-            if (availableExercises.length === 0) {
-                const muscleMapping = {
-                    // 胸部細分
-                    '上胸': '上胸',
-                    '中胸': '中胸',
-                    '下胸': '下胸',
-
-                    // 背部細分
-                    '背': '中背',
-                    '上背': '上背',
-                    '中背': '中背',
-                    '下背': '下背',
-
-                    // 肩膀細分
-                    '肩膀': '肩膀前束',
-                    '肩膀前束': '肩膀前束',
-                    '肩膀中束': '肩膀中束',
-                    '肩膀後束': '肩膀後束',
-
-                    // 腿部細分
-                    '腿': '股四頭肌',
-                    '股四頭肌': '股四頭肌',
-                    '股二頭肌': '股二頭肌',
-                    '臀肌': '臀肌',
-
-                    // 核心/腹部
-                    '腹部': '核心',
-                    '核心': '核心',
-                    '上腹': '上腹',
-                    '下腹': '下腹',
-                    '側腹': '側腹',
-
-                    // 手臂
-                    '二頭肌': '二頭肌',
-                    '三頭肌': '三頭肌'
-                };
-
-                const mapped = muscleMapping[muscleGroup];
-                if (mapped) {
-                    console.log(`映射 ${muscleGroup} -> ${mapped}`);
-                    availableExercises = exercises.filter(ex => ex.muscle_group === mapped);
-                }
-            }
-            
-            // 先過濾掉今天已經使用的動作
-            availableExercises = availableExercises.filter(ex => !dailyUsedExercises.has(ex.id));
-            
-            // 額外過濾：確保動作名稱與目標肌群匹配
-            availableExercises = availableExercises.filter(ex => {
-                const name = ex.name.toLowerCase();
-                
-                // 如果是拉日相關肌群，過濾掉練胸和練腿的動作
-                if (muscleGroup.includes('背') || muscleGroup.includes('二頭') || muscleGroup.includes('肩膀中') || muscleGroup.includes('肩膀後')) {
-                    if (name.includes('臥推') || name.includes('推') || name.includes('夾胸') || name.includes('飛鳥') || name.includes('擠壓')) {
-                        console.log(`過濾掉練胸動作: ${ex.name} (目標: ${muscleGroup})`);
-                        return false;
-                    }
-                    if (name.includes('腿') || name.includes('深蹲') || name.includes('硬舉') || name.includes('彎舉') || name.includes('腿推') || name.includes('登階') || name.includes('弓箭步') || name.includes('臀推') || name.includes('腿彎舉') || name.includes('腿舉')) {
-                        console.log(`過濾掉練腿動作: ${ex.name} (目標: ${muscleGroup})`);
-                        return false;
-                    }
-                    if (name.includes('平板') || name.includes('支撐') || name.includes('捲腹') || name.includes('仰臥') || name.includes('腹')) {
-                        console.log(`過濾掉練核心動作: ${ex.name} (目標: ${muscleGroup})`);
-                        return false;
-                    }
-                }
-                
-                // 如果是推日相關肌群，過濾掉練背的動作
-                if (muscleGroup.includes('胸') || muscleGroup.includes('三頭') || muscleGroup.includes('肩膀前')) {
-                    if (name.includes('下拉') || name.includes('划船') || name.includes('拉') || name.includes('反向')) {
-                        console.log(`過濾掉練背動作: ${ex.name} (目標: ${muscleGroup})`);
-                        return false;
-                    }
-                }
-                
-                return true;
-            });
-            
-            // 如果有可用動作就直接使用，不進行新手過濾（避免過濾太嚴格）
-            // 新手友善過濾僅作為輔助參考
-            
-            console.log(`${muscleGroup} 過濾後可用動作數: ${availableExercises.length}`);
-
-            // 若仍然沒有，放寬到名稱關鍵字搜尋（例如 二頭/彎舉、三頭/下壓）
-            if (availableExercises.length === 0) {
-                const name = (s) => s.toLowerCase();
-                const keywordsByGroup = {
-                    '二頭肌': ['二頭', '彎舉', '錘式'],
-                    '三頭肌': ['三頭', '下壓', '撐體', '伸展'],
-                    '核心': ['平板', '支撐', '仰臥', '捲腹', '腹'],
-                    '上腹': ['捲腹', '仰臥', '腹'],
-                    '下腹': ['抬腿', '下腹', '仰臥'],
-                    '側腹': ['側', '俄羅斯', '轉體'],
-                    '上背': ['下拉', '高位', '拉'],
-                    '中背': ['划船', '坐姿', '划', '拉'],
-                    '股四頭肌': ['深蹲', '腿推', '腿舉', '登階'],
-                    '股二頭肌': ['腿彎舉', '羅馬尼亞', '硬舉'],
-                    '臀肌': ['深蹲', '弓箭步', '臀推'],
-                    '肩膀前束': ['肩推', '槓鈴', '史密斯', '推舉', '前束', '前平舉'],
-                    '肩膀中束': ['側平舉', '中束', '側舉', '側平'],
-                    '肩膀後束': ['後束', '後平舉', '反向', '後飛鳥']
-                };
-
-                const kw = keywordsByGroup[muscleGroup] || [];
-                if (kw.length > 0) {
-                    availableExercises = exercises.filter(ex => kw.some(k => name(ex.name).includes(k)));
-                    console.log(`使用關鍵字放寬搜尋，找到 ${availableExercises.length} 個`);
-                }
-            }
-            
-            if (availableExercises.length === 0) {
-                console.log(`沒有可用的 ${muscleGroup} 動作`);
-                return null;
-            }
-            
-            // 隨機選擇一個動作
-            const randomIndex = Math.floor(Math.random() * availableExercises.length);
-            const selectedExercise = availableExercises[randomIndex];
-            
-            console.log(`選擇 ${muscleGroup} 動作: ${selectedExercise.name} (ID: ${selectedExercise.id})`);
-            return selectedExercise;
-        }
-
-        // 獲取隨機動作（只使用資料庫中的動作，找不到就跳過，避免重複）
-        function getRandomExercise(muscleGroup, mode = 'random') {
-            console.log(`尋找 ${muscleGroup} 動作，總動作數: ${exercises.length}`);
-            
-            if (!exercises || exercises.length === 0) {
-                console.error('動作資料未載入！');
-                return null;
-            }
-            
-            // 先嘗試直接匹配
-            let availableExercises = exercises.filter(ex => ex.muscle_group === muscleGroup);
-            console.log(`直接匹配找到 ${availableExercises.length} 個動作`);
-
-            // 如果沒有找到對應肌群的動作，嘗試映射到相近的肌群
-            if (availableExercises.length === 0) {
-                const muscleMapping = {
-                    // 胸部細分
-                    '上胸': '上胸',
-                    '中胸': '中胸',
-                    '下胸': '下胸',
-                    
-                    // 肩膀細分
-                    '肩膀': '肩膀前束',  // 預設映射到肩膀前束
-                    '前束': '肩膀前束',
-                    '中束': '肩膀中束',
-                    '後束': '肩膀後束',
-                    '肩膀前束': '肩膀前束',
-                    '肩膀中束': '肩膀中束',
-                    '肩膀後束': '肩膀後束',
-                    
-                    // 背部細分
-                    '背': '中背',  // 預設映射到中背
-                    '上背': '上背',
-                    '中背': '中背',
-                    '下背': '下背',
-                    
-                    // 手臂細分
-                    '三頭': '三頭肌',
-                    '二頭': '二頭肌',
-                    '三頭肌': '三頭肌',
-                    '二頭肌': '二頭肌',
-                    
-                    // 腿部細分
-                    '腿': '股四頭肌',  // 預設映射到股四頭肌
-                    '股四頭肌': '股四頭肌',
-                    '股二頭肌': '股二頭肌',
-                    '臀肌': '臀肌',
-                    '小腿': '小腿',
-                    
-                    // 腹部細分
-                    '腹部': '核心',  // 預設映射到核心
-                    '上腹': '上腹',
-                    '下腹': '下腹',
-                    '側腹': '側腹',
-                    '核心': '核心'
-                };
-
-                const mappedMuscle = muscleMapping[muscleGroup] || muscleGroup;
-                console.log(`映射 ${muscleGroup} 到 ${mappedMuscle}`);
-                availableExercises = exercises.filter(ex => ex.muscle_group === mappedMuscle);
-                console.log(`映射後找到 ${availableExercises.length} 個動作`);
-
-                // 如果是三頭或二頭，需要進一步篩選動作名稱
-                if (muscleGroup === '三頭' || muscleGroup === '二頭') {
-                    const targetMuscle = muscleGroup;
-                    const originalCount = availableExercises.length;
-                    availableExercises = availableExercises.filter(ex => {
-                        const name = ex.name.toLowerCase();
-                        if (targetMuscle === '三頭') {
-                            return name.includes('三頭') || name.includes('撐體') || name.includes('下壓') || name.includes('伸展');
-                        } else if (targetMuscle === '二頭') {
-                            return name.includes('二頭') || name.includes('彎舉') || name.includes('錘式');
-                        }
-                        return false;
-                    });
-                    console.log(`篩選後從 ${originalCount} 個減少到 ${availableExercises.length} 個動作`);
-                }
-
-                // 如果還是沒有找到，嘗試更寬鬆的搜尋
-                if (availableExercises.length === 0) {
-                    console.log(`嘗試更寬鬆的搜尋 ${muscleGroup}`);
-                    if (muscleGroup === '三頭肌') {
-                        availableExercises = exercises.filter(ex => {
-                            const name = ex.name.toLowerCase();
-                            return name.includes('三頭') || name.includes('撐體') || name.includes('下壓') || name.includes('伸展');
-                        });
-                    } else if (muscleGroup === '二頭肌') {
-                        availableExercises = exercises.filter(ex => {
-                            const name = ex.name.toLowerCase();
-                            return name.includes('二頭') || name.includes('彎舉') || name.includes('錘式');
-                        });
-                    }
-                    console.log(`寬鬆搜尋後找到 ${availableExercises.length} 個動作`);
-                }
-
-                // 如果還是沒有找到，嘗試使用相近肌群
-                if (availableExercises.length === 0) {
-                    console.log(`嘗試相近肌群搜尋 ${muscleGroup}`);
-                    const fallbackMapping = {
-                        '上胸': '中胸',
-                        '中胸': '上胸',
-                        '下胸': '中胸',
-                        '上背': '中背',
-                        '中背': '上背',
-                        '下背': '中背',
-                        '肩膀前束': '肩膀中束',
-                        '肩膀中束': '肩膀前束',
-                        '肩膀後束': '肩膀中束',
-                        '三頭肌': '二頭肌',
-                        '二頭肌': '三頭肌',
-                        '股四頭肌': '股二頭肌',
-                        '股二頭肌': '股四頭肌',
-                        '上腹': '下腹',
-                        '下腹': '上腹',
-                        '側腹': '上腹'
-                    };
-                    
-                    const fallbackMuscle = fallbackMapping[muscleGroup];
-                    if (fallbackMuscle) {
-                        console.log(`嘗試相近肌群: ${fallbackMuscle}`);
-                        availableExercises = exercises.filter(ex => ex.muscle_group === fallbackMuscle);
-                        console.log(`相近肌群找到 ${availableExercises.length} 個動作`);
-                    }
-                }
-
-                // 如果還是沒有找到，就跳過（不使用備用動作）
-                if (availableExercises.length === 0) {
-                    console.log(`資料庫中沒有找到 ${muscleGroup} 的動作，跳過此肌群`);
-                    return null;
-                }
-            }
-
-            // 優先選擇初級動作（適合新手）
-            const beginnerExercises = availableExercises.filter(ex => (ex.difficulty_level || '初級') === '初級');
-            const intermediateExercises = availableExercises.filter(ex => (ex.difficulty_level || '初級') === '中級');
-            
-            if (beginnerExercises.length > 0) {
-                availableExercises = beginnerExercises;
-                console.log(`優先選擇 ${availableExercises.length} 個初級動作（適合新手）`);
-            } else if (intermediateExercises.length > 0) {
-                availableExercises = intermediateExercises;
-                console.log(`初級動作不足，選擇 ${availableExercises.length} 個中級動作`);
-            } else {
-                console.log('沒有找到初級或中級動作，使用所有可用動作');
-            }
-            
-            // 根據模式進一步篩選
-            if (mode === 'recommended') {
-                // 推薦模式：保持初級優先的選擇
-                console.log(`推薦模式：使用已篩選的 ${availableExercises.length} 個動作`);
-            } else {
-                // 隨機模式：在初級動作中進行智能選擇
-                availableExercises = getSmartRandomExercises(availableExercises, muscleGroup);
-            }
-
-            // 過濾掉已經使用過的動作（避免同一天內重複）
-            const unusedExercises = availableExercises.filter(ex => !dailyUsedExercises.has(ex.id));
-            console.log(`過濾當天已使用動作後剩餘 ${unusedExercises.length} 個動作`);
-
-            // 優先未使用，其次允許重複（避免數量不足）
-            availableExercises = unusedExercises.length > 0 ? unusedExercises : availableExercises;
-
-            if (availableExercises.length === 0) {
-                console.log(`最終沒有找到任何 ${muscleGroup} 動作`);
-                return null;
-            }
-            
-            const selectedExercise = availableExercises[Math.floor(Math.random() * availableExercises.length)];
-            
-            // 記錄已使用的動作（全局和當天）
-            usedExercises.add(selectedExercise.id);
-            dailyUsedExercises.add(selectedExercise.id);
-            
-            console.log(`選擇了動作: ${selectedExercise.name} (${selectedExercise.muscle_group}, ${selectedExercise.difficulty_level})`);
-            return selectedExercise;
-        }
-
         // 智能隨機動作選擇（根據動作類型優先選擇，適合新手）
         function getSmartRandomExercises(availableExercises, muscleGroup) {
             console.log(`智能選擇 ${muscleGroup} 動作，可用動作數: ${availableExercises.length}`);
@@ -7188,6 +7073,190 @@
                 showSuccessMessage('本週訓練計畫已刪除！');
             }
         }
+
+        // 顯示週計畫刪除選擇模態框
+        function showWeekDeleteModal() {
+            clearAllModalBackdrops();
+            
+            const modalHtml = `
+                <div class="modal fade" id="weekDeleteModal" tabindex="-1" aria-labelledby="weekDeleteModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="weekDeleteModalLabel">
+                                    <i class="bi bi-trash text-danger me-2"></i>刪除週訓練計畫
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p class="mb-3">請選擇要刪除的週訓練計畫：</p>
+                                <div id="weekDeleteOptions">
+                                    <!-- 週選項將由JavaScript動態生成 -->
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            const modal = new bootstrap.Modal(document.getElementById('weekDeleteModal'));
+            
+            // 生成週選項
+            generateWeekDeleteOptions();
+            
+            modal.show();
+            
+            // 清理模態框
+            document.getElementById('weekDeleteModal').addEventListener('hidden.bs.modal', function() {
+                clearAllModalBackdrops();
+                this.remove();
+            });
+        }
+        
+        // 生成週刪除選項
+        function generateWeekDeleteOptions() {
+            const container = document.getElementById('weekDeleteOptions');
+            container.innerHTML = '';
+            
+            // 獲取所有可用的週
+            const availableWeeks = getAvailableWeeks();
+            
+            if (availableWeeks.length === 0) {
+                container.innerHTML = '<p class="text-muted">目前沒有可刪除的週訓練計畫</p>';
+                return;
+            }
+            
+            availableWeeks.forEach(weekKey => {
+                const weekDate = new Date(weekKey);
+                const weekLabel = formatWeekLabel(weekDate);
+                const isCurrentWeek = weekKey === getCurrentWeekKey();
+                
+                const optionHtml = `
+                    <div class="week-delete-option mb-2">
+                        <button class="btn btn-outline-danger w-100 d-flex justify-content-between align-items-center" 
+                                onclick="confirmDeleteWeek('${weekKey}')">
+                            <div>
+                                <i class="bi bi-calendar-week me-2"></i>
+                                ${weekLabel}
+                                ${isCurrentWeek ? '<span class="badge bg-primary ms-2">本週</span>' : ''}
+                            </div>
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </div>
+                `;
+                container.insertAdjacentHTML('beforeend', optionHtml);
+            });
+        }
+        
+        // 確認刪除特定週
+        async function confirmDeleteWeek(weekKey) {
+            const weekDate = new Date(weekKey);
+            const weekLabel = formatWeekLabel(weekDate);
+            
+            if (!confirm(`確定要刪除「${weekLabel}」的訓練計畫嗎？此操作無法復原！`)) return;
+            
+            try {
+                // 刪除該週的計畫資料
+                await deleteSpecificWeekPlan(weekKey);
+                
+                // 關閉模態框
+                const modal = bootstrap.Modal.getInstance(document.getElementById('weekDeleteModal'));
+                if (modal) {
+                    modal.hide();
+                }
+                
+                showSuccessMessage(`已成功刪除「${weekLabel}」的訓練計畫`);
+                
+            } catch (error) {
+                console.error('刪除週計畫失敗:', error);
+                showErrorMessage('刪除週計畫失敗，請稍後再試');
+            }
+        }
+        
+        // 刪除特定週的計畫
+        async function deleteSpecificWeekPlan(weekKey) {
+            // 清除該週的訓練計畫資料
+            if (allTrainingPlans[weekKey]) {
+                delete allTrainingPlans[weekKey];
+                localStorage.setItem('allTrainingPlans', JSON.stringify(allTrainingPlans));
+            }
+            
+            // 清除該週的計畫ID
+            if (planIds[weekKey]) {
+                delete planIds[weekKey];
+                localStorage.setItem('planIds', JSON.stringify(planIds));
+            }
+            
+            // 清除該週的完成記錄
+            const weekCompletionRecords = completionRecords.filter(record => {
+                const recordDate = new Date(record.date);
+                const recordWeekKey = getWeekKey(recordDate);
+                return recordWeekKey !== weekKey;
+            });
+            completionRecords = weekCompletionRecords;
+            localStorage.setItem('completionRecords', JSON.stringify(completionRecords));
+            
+            // 如果是當前週，也要清除週計畫顯示
+            if (weekKey === getCurrentWeekKey()) {
+                weeklyPlan = {
+                    monday: [], tuesday: [], wednesday: [], thursday: [], friday: [], saturday: [], sunday: []
+                };
+                markAsDirty();
+                renderWeeklyPlan();
+                updateStats();
+            }
+            
+            // 刷新可用週列表
+            loadAvailableWeeks();
+            
+            // 刷新行事曆顯示
+            try { 
+                if (typeof updateCalendarTrainingData === 'function') updateCalendarTrainingData(); 
+            } catch (e) {}
+        }
+        
+        // 獲取可用週列表
+        function getAvailableWeeks() {
+            const weeks = [];
+            
+            // 從 allTrainingPlans 獲取週
+            Object.keys(allTrainingPlans).forEach(weekKey => {
+                if (allTrainingPlans[weekKey] && Object.keys(allTrainingPlans[weekKey]).length > 0) {
+                    weeks.push(weekKey);
+                }
+            });
+            
+            // 從 planIds 獲取週
+            Object.keys(planIds).forEach(weekKey => {
+                if (planIds[weekKey] && !weeks.includes(weekKey)) {
+                    weeks.push(weekKey);
+                }
+            });
+            
+            // 從 completionRecords 獲取週
+            completionRecords.forEach(record => {
+                const recordDate = new Date(record.date);
+                const weekKey = getWeekKey(recordDate);
+                if (!weeks.includes(weekKey)) {
+                    weeks.push(weekKey);
+                }
+            });
+            
+            // 排序週（最新的在前）
+            return weeks.sort((a, b) => new Date(b) - new Date(a));
+        }
+        
+        // 格式化週標籤
+        function formatWeekLabel(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            return `${year}年${month}月${day}日週`;
+        }
         // 正規化週計畫資料結構
         function normalizeWeeklyPlan(data) {
             if (!data || typeof data !== 'object') {
@@ -7342,7 +7411,6 @@
                 showSuccessMessage('所有完成記錄已清除！');
             }
         }
-
         // 由表單提交加入（避免瀏覽器或事件參數造成的不一致）
         function handleAddExerciseClick() {
             console.log('=== handleAddExerciseClick 開始執行 ===');
