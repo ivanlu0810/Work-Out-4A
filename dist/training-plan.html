@@ -37,6 +37,467 @@
             color: #495057;
         }
 
+        /* 行事曆容器 */
+        .calendar-container {
+            background: #fff;
+            border-radius: 16px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .calendar-nav .btn {
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            border: 2px solid #dee2e6;
+            background: #ffffff;
+            color: #6c757d;
+            transition: all 0.3s ease;
+        }
+
+        .calendar-nav .btn:hover {
+            background: #f8f9fa;
+            border-color: #adb5bd;
+            color: #495057;
+            transform: scale(1.05);
+        }
+
+        .calendar-nav .btn-primary {
+            border-radius: 16px;
+            width: auto;
+            height: 32px;
+            padding: 0 12px;
+            background: #007bff;
+            border-color: #007bff;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            font-size: 0.8rem;
+        }
+
+        .calendar-nav .btn-primary i {
+            font-size: 0.8rem;
+            line-height: 1;
+        }
+
+        .calendar-nav .btn-primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+            transform: none;
+        }
+
+        .calendar-month-year {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #495057;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .calendar-grid {
+            margin-bottom: 1.5rem;
+        }
+
+        .calendar-weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            margin-bottom: 1px;
+        }
+
+        .weekday {
+            background: #f8f9fa;
+            padding: 0.75rem;
+            text-align: center;
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.875rem;
+        }
+
+        .calendar-days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 1px;
+            background: #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .calendar-day {
+            background: #fff;
+            padding: 0.5rem;
+            min-height: 80px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: #f8f9fa;
+            transform: translateY(-1px);
+        }
+
+        .calendar-day.today {
+            background: #e3f2fd;
+            color: #1976d2;
+            font-weight: 600;
+        }
+
+        .calendar-day.training-day {
+            background: #e8eaed;
+            color: #333333;
+        }
+
+        .calendar-day.training-day.today {
+            background: #e8eaed;
+            color: #333333;
+        }
+
+        .calendar-day.rest-day {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .calendar-day.rest-day.today {
+            background: #ffe0b2;
+            color: #e65100;
+        }
+
+        .calendar-day.other-month {
+            color: #adb5bd;
+            background: #f8f9fa;
+        }
+
+        .calendar-day-number {
+            font-size: 0.875rem;
+            font-weight: 500;
+            text-align: center;
+        }
+
+        .calendar-day-indicator {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-top: 2px;
+        }
+
+        .calendar-day-indicator.training {
+            background: #333333;
+        }
+
+        .calendar-day-indicator.rest {
+            background: #ff9800;
+        }
+
+        .calendar-legend {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            font-size: 0.875rem;
+            color: #6c757d;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 4px;
+        }
+
+        .legend-color.training-day {
+            background: #e8eaed;
+            border: 1px solid #4caf50;
+        }
+
+        .legend-color.rest-day {
+            background: #fff3e0;
+            border: 1px solid #ff9800;
+        }
+
+        .legend-color.today {
+            background: #e3f2fd;
+            border: 1px solid #1976d2;
+        }
+
+        .calendar-day:not(.other-month):hover {
+            background: #dadce0 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+
+        .calendar-day:not(.other-month):hover .calendar-day-number {
+            color: #333333;
+            font-weight: 600;
+        }
+
+        .calendar-day.other-month {
+            cursor: default;
+        }
+
+        .calendar-training-content {
+            margin-top: 4px;
+            font-size: 0.7rem;
+            line-height: 1.3;
+            max-height: 32px;
+            overflow: hidden;
+            width: 100%;
+            text-align: center;
+        }
+
+        .training-count {
+            display: block;
+            color: #333333;
+            font-weight: 600;
+            font-size: 0.75rem;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin: 0 auto;
+            border: 1px solid #e0e0e0;
+            width: fit-content;
+            min-width: 60px;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .training-count i {
+            font-size: 0.7rem;
+            margin-right: 2px;
+        }
+
+        .training-count span {
+            font-size: 0.75rem;
+        }
+
+        .exercise-name {
+            background: rgba(76, 175, 80, 0.15);
+            color: #2e7d32;
+            padding: 2px 4px;
+            margin: 1px 0;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            border: 1px solid rgba(76, 175, 80, 0.2);
+            font-weight: 500;
+        }
+
+        .more-exercises {
+            background: rgba(33, 150, 243, 0.15);
+            color: #1976d2;
+            padding: 2px 4px;
+            margin: 1px 0;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-align: center;
+            border: 1px solid rgba(33, 150, 243, 0.2);
+        }
+
+        .rest-indicator {
+            background: rgba(255, 152, 0, 0.15);
+            color: #f57c00;
+            padding: 2px 4px;
+            margin: 1px 0;
+            border-radius: 3px;
+            font-size: 0.65rem;
+            text-align: center;
+            border: 1px solid rgba(255, 152, 0, 0.2);
+            font-weight: 500;
+        }
+
+        .calendar-day.has-training {
+            background: #e8eaed;
+        }
+
+        .calendar-day.has-training.today {
+            background: #e8eaed;
+        }
+
+        /* 訓練內容詳情彈出視窗樣式 */
+        .day-training-details {
+            text-align: left;
+        }
+
+        .training-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .training-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 12px;
+            margin-bottom: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .training-item:hover {
+            background: #e9ecef;
+            transform: translateY(-1px);
+        }
+
+        .training-item-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 6px;
+        }
+
+        .training-number {
+            background: #007bff;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .training-name {
+            font-weight: 600;
+            color: #495057;
+            flex: 1;
+        }
+
+        .muscle-group-badge {
+            background: #28a745;
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+        }
+
+        .training-item-details {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .detail-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .detail-item i {
+            color: #007bff;
+        }
+
+        /* 行事曆選擇菜單樣式 */
+        .calendar-day-menu {
+            text-align: center;
+        }
+
+        .menu-header {
+            margin-bottom: 1rem;
+        }
+
+        .calendar-day-menu h5 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .calendar-day-menu h5 i {
+            font-size: 1.1rem;
+            margin-right: 8px;
+        }
+
+        .menu-header h6 {
+            color: #495057;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .menu-options .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .menu-options .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .menu-options .btn i {
+            font-size: 1rem;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        /* 沒有訓練內容時的按鈕樣式 */
+        .text-center .btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1rem;
+            margin: 0 auto;
+        }
+
+        .text-center .btn i {
+            font-size: 1rem;
+            line-height: 1;
+            vertical-align: middle;
+        }
+
+        /* 模態視窗標題中的圖標樣式 */
+        .modal-header h5 i,
+        #dateExerciseModalLabel i {
+            font-size: inherit;
+            line-height: inherit;
+            margin-right: 8px;
+            vertical-align: middle;
+            position: relative;
+            top: 1px;
+        }
+
         /* 週課表容器 */
         .week-schedule {
             background: #fff;
@@ -44,6 +505,65 @@
             padding: 2rem;
             margin-bottom: 2rem;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        }
+
+        /* 被選中的動作項目樣式 */
+        .list-group-item.active {
+            background-color: #e9ecef !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            color: #495057 !important;
+        }
+
+        .list-group-item.active:hover {
+            background-color: #dee2e6 !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .list-group-item.active:focus {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .list-group-item.active:active {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .list-group-item.active:focus-visible {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 移除所有list-group-item的外框 */
+        .list-group-item {
+            border: none !important;
+            outline: none !important;
+            border-bottom: 1px solid #e9ecef !important;
+        }
+
+        .list-group-item:last-child {
+            border-bottom: none !important;
+        }
+
+        .list-group-item:focus {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            border-bottom: 1px solid #e9ecef !important;
+        }
+
+        .list-group-item:active {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            border-bottom: 1px solid #e9ecef !important;
         }
 
         /* 日期卡片 */
@@ -96,6 +616,105 @@
             color: #495057;
             font-weight: 600;
             margin-bottom: 1rem;
+        }
+
+        /* 改善動作選擇視窗的布局 */
+        .modal-lg {
+            max-width: 900px;
+        }
+
+        .modal-dialog {
+            margin-top: 3vh;
+            margin-bottom: 5vh;
+        }
+
+        /* 訓練內容詳情模態視窗位置調整 */
+        #trainingDetailsModal .modal-dialog {
+            margin-top: 5vh;
+        }
+
+        .modal-body {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        /* 動作列表容器 */
+        #dateExerciseList {
+            max-height: 400px;
+            overflow-y: auto;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            background: #fff;
+        }
+
+        /* 搜尋和篩選區域 */
+        #exerciseSearchInput {
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            padding: 0.5rem 0.75rem;
+        }
+
+        #exerciseSearchInput:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        #muscleGroupFilter {
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        #muscleGroupFilter:focus {
+            border-color: #007bff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        }
+
+        /* 莫蘭迪色系標籤 */
+        .badge.bg-morandi-beginner {
+            background-color: #8B9DC3 !important;
+            color: white;
+        }
+
+        .badge.bg-morandi-intermediate {
+            background-color: #A8C8A8 !important;
+            color: white;
+        }
+
+        /* 動作設定區域 */
+        .exercise-settings {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid #e9ecef;
+        }
+
+        /* 改善按鈕樣式 */
+        .btn-add-exercise,
+        .btn-primary {
+            background: #007bff;
+            border-color: #007bff;
+            color: #fff;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-add-exercise i,
+        .btn-primary i {
+            font-size: 1rem;
+            line-height: 1;
+            margin-right: 8px;
+        }
+
+        .btn-add-exercise:hover,
+        .btn-primary:hover {
+            background: #0056b3;
+            border-color: #0056b3;
+            transform: translateY(-1px);
         }
 
         /* 動作項目 */
@@ -901,6 +1520,58 @@
                 </section>
             </div>
 
+            <!-- 行事曆 -->
+            <div class="container">
+                <section class="section">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <div>
+                                <h5>訓練行事曆</h5>
+                                <p class="text-muted mb-0">查看您的訓練安排與進度</p>
+                            </div>
+                            <div class="calendar-nav">
+                                <button class="btn btn-outline-secondary" onclick="previousMonth()">
+                                    <i class="bi bi-chevron-left"></i>
+                                </button>
+                                <span class="calendar-month-year" id="calendar-month-year">2024年1月</span>
+                                <button class="btn btn-outline-secondary" onclick="nextMonth()">
+                                    <i class="bi bi-chevron-right"></i>
+                                </button>
+                                <button class="btn btn-primary ms-3" onclick="goToToday()">
+                                    <i class="bi bi-calendar-check"></i> 今天
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div class="calendar-grid">
+                            <div class="calendar-weekdays">
+                                <div class="weekday">週日</div>
+                                <div class="weekday">週一</div>
+                                <div class="weekday">週二</div>
+                                <div class="weekday">週三</div>
+                                <div class="weekday">週四</div>
+                                <div class="weekday">週五</div>
+                                <div class="weekday">週六</div>
+                            </div>
+                            <div class="calendar-days" id="calendar-days">
+                                <!-- 日期將由JavaScript動態生成 -->
+                            </div>
+                        </div>
+                        
+                        <div class="calendar-legend">
+                            <div class="legend-item">
+                                <div class="legend-color training-day"></div>
+                                <span>訓練日</span>
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-color today"></div>
+                                <span>今天</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
             <!-- 週課表 -->
             <div class="container">
                 <section class="section">
@@ -1116,7 +1787,7 @@
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h5 class="modal-title" id="exerciseModalLabel">選擇訓練動作</h5>
+                    <h5 class="modal-title" id="exerciseModalLabel">新增訓練動作</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
@@ -1256,6 +1927,8 @@
         };
         let availableWeeks = []; // 儲存有資料的週次列表
         let currentWeekIndex = 0; // 當前週次在 availableWeeks 中的索引
+        let currentWeekStart = null; // 當前週次的開始日期
+        let currentWeekEnd = null; // 當前週次的結束日期
 
         // 載入有資料的週次列表
         async function loadAvailableWeeks() {
@@ -1579,6 +2252,11 @@
             const startOfWeek = new Date(today);
             startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7)); // 週一開始
 
+            // 更新週次日期變數
+            currentWeekStart = new Date(startOfWeek);
+            currentWeekEnd = new Date(startOfWeek);
+            currentWeekEnd.setDate(startOfWeek.getDate() + 6);
+
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
             days.forEach((day, index) => {
@@ -1692,6 +2370,9 @@
                     
                     // 重新載入週次列表，因為可能新增了新的週次
                     await loadAvailableWeeks();
+                    
+                    // 更新行事曆數據
+                    updateCalendarTrainingData();
                 } else {
                     throw new Error(result.error || '儲存失敗');
                 }
@@ -1961,6 +2642,1221 @@
             return result;
         }
 
+        // 行事曆相關變數
+        let currentCalendarDate = new Date();
+        let calendarTrainingData = {};
+
+        // 行事曆功能
+        function renderCalendar() {
+            const calendarDays = document.getElementById('calendar-days');
+            const monthYear = document.getElementById('calendar-month-year');
+            
+            if (!calendarDays || !monthYear) return;
+
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+            
+            // 更新月份年份顯示
+            monthYear.textContent = `${year}年${month + 1}月`;
+            
+            // 獲取當月第一天和最後一天
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            const firstDayOfWeek = firstDay.getDay(); // 0 = 週日, 1 = 週一, ...
+            
+            // 清空行事曆
+            calendarDays.innerHTML = '';
+            
+            // 添加上個月的日期（灰色顯示）
+            const prevMonth = new Date(year, month - 1, 0);
+            for (let i = firstDayOfWeek - 1; i >= 0; i--) {
+                const day = prevMonth.getDate() - i;
+                const dayElement = createCalendarDay(day, true, year, month - 1);
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // 添加當月的日期
+            for (let day = 1; day <= lastDay.getDate(); day++) {
+                const dayElement = createCalendarDay(day, false, year, month);
+                calendarDays.appendChild(dayElement);
+            }
+            
+            // 添加下個月的日期（填滿剩餘格子）
+            const remainingDays = 42 - (firstDayOfWeek + lastDay.getDate());
+            for (let day = 1; day <= remainingDays; day++) {
+                const dayElement = createCalendarDay(day, true, year, month + 1);
+                calendarDays.appendChild(dayElement);
+            }
+        }
+
+        function createCalendarDay(day, isOtherMonth, year, month) {
+            const dayElement = document.createElement('div');
+            dayElement.className = 'calendar-day';
+            
+            if (isOtherMonth) {
+                dayElement.classList.add('other-month');
+            }
+            
+            // 檢查是否為今天
+            const today = new Date();
+            const dayDate = new Date(year, month, day);
+            if (dayDate.toDateString() === today.toDateString()) {
+                dayElement.classList.add('today');
+            }
+            
+            // 檢查是否為訓練日
+            const dateKey = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            if (calendarTrainingData[dateKey]) {
+                dayElement.classList.add('training-day');
+            }
+            
+            // 創建日期內容
+            const dayNumber = document.createElement('div');
+            dayNumber.className = 'calendar-day-number';
+            dayNumber.textContent = day;
+            dayElement.appendChild(dayNumber);
+            
+            // 添加訓練內容顯示
+            if (!isOtherMonth) {
+                const trainingContent = document.createElement('div');
+                trainingContent.className = 'calendar-training-content';
+                
+                // 獲取該日期的訓練內容
+                const dayTrainingData = getDayTrainingData(dayDate);
+                if (dayTrainingData && dayTrainingData.length > 0) {
+                    // 顯示訓練動作數量
+                    const exerciseCount = dayTrainingData.length;
+                    trainingContent.innerHTML = `
+                        <div class="training-count">
+                            <i class="bi bi-dumbbell"></i>
+                            <span>${exerciseCount}個動作</span>
+                        </div>
+                    `;
+                    
+                    dayElement.classList.add('has-training');
+                }
+                // 移除自動標記為休息日的邏輯
+                
+                dayElement.appendChild(trainingContent);
+            }
+            
+            // 添加指示器
+            if (calendarTrainingData[dateKey]) {
+                const indicator = document.createElement('div');
+                indicator.className = 'calendar-day-indicator training';
+                dayElement.appendChild(indicator);
+            }
+            // 移除自動添加休息日指示器的邏輯
+            
+            // 為可點擊的日期添加提示文字
+            if (!isOtherMonth) {
+                const dayTrainingData = getDayTrainingData(dayDate);
+                if (dayTrainingData && dayTrainingData.length > 0) {
+                    dayElement.title = '點擊選擇操作：查看或新增訓練動作';
+                } else {
+                    dayElement.title = '點擊選擇操作：新增訓練動作';
+                }
+            }
+            
+            // 添加點擊事件
+            dayElement.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isOtherMonth) {
+                    console.log('行事曆日期被點擊:', dayDate);
+                    selectCalendarDay(dayDate);
+                }
+            });
+            
+            return dayElement;
+        }
+
+        function previousMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+            renderCalendar();
+        }
+
+        function goToToday() {
+            currentCalendarDate = new Date();
+            renderCalendar();
+        }
+
+        function selectCalendarDay(date) {
+            console.log('=== selectCalendarDay 開始 ===');
+            console.log('選擇的日期:', date);
+            console.log('currentWeekStart:', currentWeekStart);
+            console.log('currentWeekEnd:', currentWeekEnd);
+            
+            // 計算該日期是星期幾
+            const dayOfWeek = date.getDay(); // 0 = 週日, 1 = 週一, ...
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dayName = dayNames[dayOfWeek];
+            
+            console.log('對應星期:', dayName);
+            
+            // 獲取該日期的訓練內容
+            const dayTrainingData = getDayTrainingData(date);
+            console.log('獲取的訓練數據:', dayTrainingData);
+            
+            // 顯示選擇菜單
+            try {
+                showCalendarDayMenu(date, dayName, dayTrainingData);
+            } catch (error) {
+                console.error('顯示選擇菜單時發生錯誤:', error);
+                // 如果出錯，至少嘗試打開動作選擇視窗
+                openExerciseModal(dayName);
+            }
+        }
+
+        function getWeekStart(date) {
+            const day = date.getDay();
+            const weekStart = new Date(date);
+            weekStart.setDate(date.getDate() - day);
+            return weekStart;
+        }
+
+        function getWeekEnd(date) {
+            const weekStart = getWeekStart(date);
+            const weekEnd = new Date(weekStart);
+            weekEnd.setDate(weekStart.getDate() + 6);
+            return weekEnd;
+        }
+
+        function jumpToWeek(targetDate) {
+            // 計算目標週次
+            const weekStart = getWeekStart(targetDate);
+            const weekEnd = getWeekEnd(targetDate);
+            
+            // 更新當前週次
+            currentWeekStart = weekStart;
+            currentWeekEnd = weekEnd;
+            
+            // 重新渲染週課表
+            renderWeeklyPlan();
+            updateWeekDates();
+            
+            // 更新行事曆數據
+            updateCalendarTrainingData();
+            
+            // 選中對應的日期卡片
+            const dayOfWeek = targetDate.getDay();
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dayName = dayNames[dayOfWeek];
+            selectDay(dayName);
+            
+            showSuccessMessage(`已跳轉到 ${formatDate(weekStart)} - ${formatDate(weekEnd)} 的訓練計畫`);
+        }
+
+        function updateCalendarTrainingData() {
+            console.log('=== updateCalendarTrainingData 開始 ===');
+            
+            // 從本地儲存中獲取所有每日訓練數據
+            const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+            console.log('每日訓練數據:', dailyTrainingData);
+            
+            // 更新行事曆數據
+            calendarTrainingData = {};
+            
+            // 將所有有訓練內容的日期標記為訓練日
+            Object.keys(dailyTrainingData).forEach(dateKey => {
+                const exercises = dailyTrainingData[dateKey];
+                if (exercises && exercises.length > 0) {
+                    // 檢查是否有非休息日的動作
+                    const hasTraining = exercises.some(exercise => exercise.id !== 0);
+                    if (hasTraining) {
+                        calendarTrainingData[dateKey] = true;
+                        console.log(`標記 ${dateKey} 為訓練日`);
+                    }
+                }
+            });
+            
+            console.log('更新後的 calendarTrainingData:', calendarTrainingData);
+            
+            // 重新渲染行事曆
+            renderCalendar();
+            console.log('=== updateCalendarTrainingData 結束 ===');
+        }
+
+        function formatDate(date) {
+            return `${date.getMonth() + 1}/${date.getDate()}`;
+        }
+
+        // 儲存每日訓練數據到本地儲存
+        function saveDailyTrainingData(date, exercises) {
+            const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+            
+            // 獲取現有的每日訓練數據
+            const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+            
+            // 更新該日期的訓練數據
+            dailyTrainingData[dateKey] = exercises;
+            
+            // 儲存回本地儲存
+            localStorage.setItem('dailyTrainingData', JSON.stringify(dailyTrainingData));
+            
+            console.log('已儲存每日訓練數據:', dateKey, exercises);
+        }
+
+        // 獲取特定日期的訓練數據（獨立於週次）
+        function getDayTrainingData(targetDate) {
+            const dateKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+            
+            // 從本地儲存中獲取該日期的訓練數據
+            const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+            
+            if (dailyTrainingData[dateKey]) {
+                return dailyTrainingData[dateKey].filter(exercise => exercise.id !== 0); // 排除休息日
+            }
+            
+            return [];
+        }
+
+        // 顯示某一天的詳細訓練內容
+        function showDayTrainingDetails(date, trainingData) {
+            const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+            const dayName = dayNames[date.getDay()];
+            
+            let content = `
+                <div class="day-training-details">
+                    <h6 class="mb-3">
+                        <i class="bi bi-calendar-check me-2"></i>
+                        ${dateStr} (${dayName}) 的訓練內容
+                    </h6>
+                    <div class="training-list">
+            `;
+            
+            trainingData.forEach((exercise, index) => {
+                const sets = exercise.setsMin && exercise.setsMax && exercise.setsMax !== exercise.setsMin
+                    ? `${exercise.setsMin}-${exercise.setsMax}`
+                    : (exercise.sets || '');
+                const reps = exercise.repsMin && exercise.repsMax && exercise.repsMax !== exercise.repsMin
+                    ? `${exercise.repsMin}-${exercise.repsMax}`
+                    : (exercise.reps || '');
+                const weight = exercise.weight ? `${exercise.weight}kg` : '';
+                
+                content += `
+                    <div class="training-item">
+                        <div class="training-item-header">
+                            <span class="training-number">${index + 1}</span>
+                            <span class="training-name">${exercise.name}</span>
+                            <span class="muscle-group-badge">${exercise.muscleGroup}</span>
+                        </div>
+                        <div class="training-item-details">
+                            ${sets ? `<span class="detail-item"><i class="bi bi-hash"></i> ${sets} 組</span>` : ''}
+                            ${reps ? `<span class="detail-item"><i class="bi bi-arrow-repeat"></i> ${reps} 次</span>` : ''}
+                            ${weight ? `<span class="detail-item"><i class="bi bi-speedometer2"></i> ${weight}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            content += `
+                    </div>
+                    <div class="mt-3 text-center">
+                        <button class="btn btn-primary" onclick="editDayTraining('${date.toISOString()}')">
+                            <i class="bi bi-pencil"></i> 編輯訓練內容
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // 創建詳細內容模態框
+            const modalHtml = `
+                <div class="modal fade" id="trainingDetailsModal" tabindex="-1" aria-labelledby="trainingDetailsModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="trainingDetailsModalLabel">訓練內容詳情</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${content}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除現有的模態框（如果有的話）
+            const existingModal = document.getElementById('trainingDetailsModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框到頁面
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('trainingDetailsModal'));
+            modal.show();
+            
+            // 模態框關閉時移除DOM元素
+            document.getElementById('trainingDetailsModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }
+
+        // 編輯某一天的訓練內容
+        function editDayTraining(dateString) {
+            const date = new Date(dateString);
+            const dayOfWeek = date.getDay();
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dayName = dayNames[dayOfWeek];
+            
+            // 關閉當前的模態框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('calendarDayModal'));
+            if (modal) modal.hide();
+            
+            // 選中對應的日期並打開動作選擇視窗
+            selectDay(dayName);
+            setTimeout(() => {
+                openExerciseModal(dayName);
+            }, 100);
+        }
+
+        // 顯示日期選擇菜單
+        function showCalendarDayMenu(date, dayName, dayTrainingData) {
+            const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+            const dayDisplayName = dayNames[date.getDay()];
+            
+            const hasTraining = dayTrainingData && dayTrainingData.length > 0;
+            
+            // 創建模態框
+            const modalHtml = `
+                <div class="modal fade" id="calendarDayModal" tabindex="-1" aria-labelledby="calendarDayModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="calendarDayModalLabel">
+                                    <i class="bi bi-calendar-check me-2"></i>
+                                    ${dateStr} (${dayDisplayName})
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="calendar-day-menu">
+                                    <div class="menu-options">
+                                        ${hasTraining ? `
+                                            <button class="btn btn-secondary w-100 mb-2" onclick="viewDayTraining('${date.toISOString()}')">
+                                                <i class="bi bi-eye me-2"></i>查看已新增的動作 (${dayTrainingData.length}個)
+                                            </button>
+                                            <button class="btn btn-primary w-100 mb-2" onclick="addMoreTraining('${date.toISOString()}')">
+                                                <i class="bi bi-plus-circle me-2"></i>新增更多動作
+                                            </button>
+                                        ` : `
+                                            <button class="btn btn-primary w-100 mb-2" onclick="addTraining('${date.toISOString()}')">
+                                                <i class="bi bi-plus-circle me-2"></i>新增訓練動作
+                                            </button>
+                                            <button class="btn btn-secondary w-100 mb-2" onclick="viewDayTraining('${date.toISOString()}')">
+                                                <i class="bi bi-eye me-2"></i>查看已新增的動作
+                                            </button>
+                                        `}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除現有的模態框（如果有的話）
+            const existingModal = document.getElementById('calendarDayModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框到頁面
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('calendarDayModal'));
+            modal.show();
+            
+            // 模態框關閉時移除DOM元素
+            document.getElementById('calendarDayModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }
+
+        // 查看某一天的訓練內容
+        function viewDayTraining(dateString) {
+            const date = new Date(dateString);
+            const dayTrainingData = getDayTrainingData(date);
+            
+            // 關閉選擇菜單
+            const modal = bootstrap.Modal.getInstance(document.getElementById('calendarDayModal'));
+            if (modal) modal.hide();
+            
+            // 檢查是否有訓練內容
+            if (dayTrainingData && dayTrainingData.length > 0) {
+                // 顯示詳細訓練內容
+                showDayTrainingDetails(date, dayTrainingData);
+            } else {
+                // 顯示沒有訓練內容的提示
+                showNoTrainingContent(date);
+            }
+        }
+
+        // 為某一天新增訓練動作（獨立於週次）
+        function addTraining(dateString) {
+            const date = new Date(dateString);
+            
+            // 關閉選擇菜單
+            const modal = bootstrap.Modal.getInstance(document.getElementById('calendarDayModal'));
+            if (modal) modal.hide();
+            
+            // 直接為該日期新增訓練動作，不依賴週次
+            openExerciseModalForDate(date);
+        }
+
+        // 為特定日期打開動作選擇視窗
+        async function openExerciseModalForDate(targetDate) {
+            console.log('為日期新增訓練動作:', targetDate);
+            
+            // 確保動作資料已載入
+            if (exercises.length === 0) {
+                console.log('動作資料未載入，正在載入...');
+                await loadExercises();
+            }
+            
+            // 創建一個特殊的模態框，用於為特定日期新增動作
+            const modalHtml = `
+                <div class="modal fade" id="dateExerciseModal" tabindex="-1" aria-labelledby="dateExerciseModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="dateExerciseModalLabel">
+                                    <i class="bi bi-plus-circle me-2"></i>
+                                    為 ${targetDate.getFullYear()}年${targetDate.getMonth() + 1}月${targetDate.getDate()}日 新增訓練動作
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="exercise-list">
+                                            <h6>選擇動作</h6>
+                                            
+                                            <!-- 搜尋框 -->
+                                            <div class="mb-3">
+                                                <input type="text" class="form-control" id="exerciseSearchInput" 
+                                                       placeholder="搜尋動作名稱..." onkeyup="filterExercises()">
+                                            </div>
+                                            
+                                            <!-- 肌群篩選 -->
+                                            <div class="mb-3">
+                                                <select class="form-select" id="muscleGroupFilter" onchange="filterExercises()">
+                                                    <option value="">選擇肌群...</option>
+                                                    <option value="休息">休息</option>
+                                                    <option value="上胸">上胸</option>
+                                                    <option value="中胸">中胸</option>
+                                                    <option value="下胸">下胸</option>
+                                                    <option value="背部">背部</option>
+                                                    <option value="二頭肌">二頭肌</option>
+                                                    <option value="三頭肌">三頭肌</option>
+                                                    <option value="腿部">腿部</option>
+                                                    <option value="核心">核心</option>
+                                                </select>
+                                            </div>
+                                            
+                                            <div class="list-group" id="dateExerciseList">
+                                                <!-- 動作列表將由JavaScript動態生成 -->
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(2, '上斜槓鈴臥推', '上胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <div>
+                                                            <h6 class="mb-1">上斜槓鈴臥推</h6>
+                                                            <p class="mb-1 text-muted small">針對上胸部的槓鈴臥推，角度30-45度</p>
+                                                            <small class="badge bg-warning">中級</small>
+                                                        </div>
+                                                        <small class="text-muted">上胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(3, '上斜啞鈴飛鳥', '上胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <div>
+                                                            <h6 class="mb-1">上斜啞鈴飛鳥</h6>
+                                                            <p class="mb-1 text-muted small">上斜角度的啞鈴飛鳥，專注上胸拉伸</p>
+                                                            <small class="badge bg-success">初級</small>
+                                                        </div>
+                                                        <small class="text-muted">上胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(4, '上斜胸推機', '上胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <div>
+                                                            <h6 class="mb-1">上斜胸推機</h6>
+                                                            <p class="mb-1 text-muted small">使用上斜胸推機的訓練，安全且有效</p>
+                                                            <small class="badge bg-success">初級</small>
+                                                        </div>
+                                                        <small class="text-muted">上胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(5, '上斜纜繩夾胸', '上胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <div>
+                                                            <h6 class="mb-1">上斜纜繩夾胸</h6>
+                                                            <p class="mb-1 text-muted small">上斜角度的纜繩夾胸，鍛鍊上胸</p>
+                                                            <small class="badge bg-success">初級</small>
+                                                        </div>
+                                                        <small class="text-muted">上胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(6, '平板啞鈴臥推', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">平板啞鈴臥推</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(7, '平板槓鈴臥推', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">平板槓鈴臥推</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(8, '平板啞鈴飛鳥', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">平板啞鈴飛鳥</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(9, '胸推機', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">胸推機</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(10, '蝴蝶機', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">蝴蝶機</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(11, '伏地挺身', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">伏地挺身</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(12, '史密斯機臥推', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">史密斯機臥推</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(13, '平板纜繩夾胸', '中胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">平板纜繩夾胸</h6>
+                                                        <small class="text-muted">中胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(14, '下斜啞鈴臥推', '下胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">下斜啞鈴臥推</h6>
+                                                        <small class="text-muted">下胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(15, '下斜槓鈴臥推', '下胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">下斜槓鈴臥推</h6>
+                                                        <small class="text-muted">下胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(16, '下斜啞鈴飛鳥', '下胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">下斜啞鈴飛鳥</h6>
+                                                        <small class="text-muted">下胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(17, '下斜胸推機', '下胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">下斜胸推機</h6>
+                                                        <small class="text-muted">下胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(18, '雙槓撐體', '下胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">雙槓撐體</h6>
+                                                        <small class="text-muted">下胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(19, '下斜纜繩夾胸', '下胸')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">下斜纜繩夾胸</h6>
+                                                        <small class="text-muted">下胸</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(20, '反向划船', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">反向划船</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(21, '啞鈴划船', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">啞鈴划船</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(22, '纜繩划船', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">纜繩划船</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(23, '高位下拉', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">高位下拉</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(24, '坐姿划船', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">坐姿划船</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(25, '反向飛鳥', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">反向飛鳥</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(26, '引體向上', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">引體向上</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(27, '槓鈴划船', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">槓鈴划船</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(28, '單臂划船', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">單臂划船</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(29, 'T槓划船', '背部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">T槓划船</h6>
+                                                        <small class="text-muted">背部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(30, '深蹲', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">深蹲</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(31, '弓箭步', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">弓箭步</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(32, '啞鈴深蹲', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">啞鈴深蹲</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(33, '腿舉', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">腿舉</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(34, '側蹲', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">側蹲</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(35, '登階', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">登階</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(36, '相撲深蹲', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">相撲深蹲</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(37, '腿推機', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">腿推機</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(38, '腿彎舉', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">腿彎舉</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(39, '槓鈴深蹲', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">槓鈴深蹲</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(40, '保加利亞分腿蹲', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">保加利亞分腿蹲</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(41, '羅馬尼亞硬舉', '腿部')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">羅馬尼亞硬舉</h6>
+                                                        <small class="text-muted">腿部</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(42, '二頭彎舉', '二頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">二頭彎舉</h6>
+                                                        <small class="text-muted">二頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(43, '三頭撐體', '三頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">三頭撐體</h6>
+                                                        <small class="text-muted">三頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(44, '三頭下壓', '三頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">三頭下壓</h6>
+                                                        <small class="text-muted">三頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(45, '錘式彎舉', '二頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">錘式彎舉</h6>
+                                                        <small class="text-muted">二頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(46, '過頭三頭伸展', '三頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">過頭三頭伸展</h6>
+                                                        <small class="text-muted">三頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(47, '纜繩彎舉', '二頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">纜繩彎舉</h6>
+                                                        <small class="text-muted">二頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(48, '啞鈴三頭伸展', '三頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">啞鈴三頭伸展</h6>
+                                                        <small class="text-muted">三頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(49, '纜繩三頭下壓', '三頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">纜繩三頭下壓</h6>
+                                                        <small class="text-muted">三頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(50, '槓鈴彎舉', '二頭肌')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">槓鈴彎舉</h6>
+                                                        <small class="text-muted">二頭肌</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(51, '平板支撐', '核心')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">平板支撐</h6>
+                                                        <small class="text-muted">核心</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(52, '仰臥起坐', '核心')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">仰臥起坐</h6>
+                                                        <small class="text-muted">核心</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(53, '捲腹', '核心')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">捲腹</h6>
+                                                        <small class="text-muted">核心</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(54, '俄羅斯轉體', '核心')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">俄羅斯轉體</h6>
+                                                        <small class="text-muted">核心</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(55, '死蟲式', '核心')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">死蟲式</h6>
+                                                        <small class="text-muted">核心</small>
+                                                    </div>
+                                                </button>
+                                                <button type="button" class="list-group-item list-group-item-action" onclick="selectExerciseForDate(56, '自行車捲腹', '核心')">
+                                                    <div class="d-flex w-100 justify-content-between">
+                                                        <h6 class="mb-1">自行車捲腹</h6>
+                                                        <small class="text-muted">核心</small>
+                                                    </div>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="exercise-form">
+                                            <h6>動作設定</h6>
+                                            <form id="dateExerciseForm">
+                                                <div class="mb-3">
+                                                    <label class="form-label">動作名稱</label>
+                                                    <input type="text" class="form-control" id="dateSelectedExerciseName" readonly>
+                                                    <input type="hidden" id="dateSelectedExerciseId">
+                                                </div>
+                                                <div class="mb-3">
+                                                    <label class="form-label">肌群</label>
+                                                    <input type="text" class="form-control" id="dateMuscleGroup" readonly>
+                                                </div>
+                                                <div class="row">
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">組數</label>
+                                                        <input type="number" class="form-control" id="dateSets" value="3" min="1">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">次數</label>
+                                                        <input type="number" class="form-control" id="dateReps" value="12" min="1">
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <label class="form-label">重量(kg)</label>
+                                                        <input type="number" class="form-control" id="dateWeight" value="0" min="0" step="0.5">
+                                                    </div>
+                                                </div>
+                                                <div class="mt-3">
+                                                    <button type="button" class="btn btn-primary w-100" onclick="addExerciseToSpecificDate('${targetDate.toISOString()}')">
+                                                        <i class="bi bi-plus-circle me-2"></i>加入訓練行事曆
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除現有的模態框（如果有的話）
+            const existingModal = document.getElementById('dateExerciseModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框到頁面
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 載入動作列表
+            console.log('準備載入動作列表...');
+            setTimeout(() => {
+                loadExerciseListForDate();
+            }, 100);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('dateExerciseModal'));
+            modal.show();
+            
+            // 模態框顯示後再次嘗試載入動作列表
+            modal._element.addEventListener('shown.bs.modal', function () {
+                console.log('模態框已顯示，再次嘗試載入動作列表...');
+                setTimeout(() => {
+                    loadExerciseListForDate();
+                }, 200);
+            });
+            
+            // 模態框關閉時移除DOM元素
+            document.getElementById('dateExerciseModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }
+
+        // 載入動作列表（用於特定日期）
+        function loadExerciseListForDate() {
+            const exerciseList = document.getElementById('dateExerciseList');
+            if (!exerciseList) {
+                console.error('找不到 dateExerciseList 元素');
+                return;
+            }
+            
+            console.log('loadExerciseListForDate 被調用');
+            
+            // 使用完整的備用動作數據
+            const fullExercises = getBackupExercises();
+            console.log('完整動作列表載入完成，動作數量:', fullExercises.length);
+            renderExerciseListWithDetails(fullExercises);
+        }
+
+        // 渲染動作列表（帶說明和級別）
+        function renderExerciseListWithDetails(exerciseArray) {
+            const exerciseList = document.getElementById('dateExerciseList');
+            if (!exerciseList) {
+                console.error('找不到 dateExerciseList 元素');
+                return;
+            }
+            
+            console.log('renderExerciseListWithDetails 被調用，動作數量:', exerciseArray ? exerciseArray.length : 'undefined');
+            
+            if (!exerciseArray || exerciseArray.length === 0) {
+                console.log('動作數組為空，顯示無動作訊息');
+                exerciseList.innerHTML = '<div class="text-center text-muted">沒有找到符合條件的動作</div>';
+                return;
+            }
+            
+            console.log('開始生成帶詳細信息的HTML');
+            exerciseList.innerHTML = exerciseArray.map(exercise => {
+                // 根據難度級別選擇badge顏色（莫蘭迪色系）
+                let badgeClass = 'bg-secondary';
+                if (exercise.difficulty_level === '初級') {
+                    badgeClass = 'bg-morandi-beginner';
+                } else if (exercise.difficulty_level === '中級') {
+                    badgeClass = 'bg-morandi-intermediate';
+                } else if (exercise.difficulty_level === '高級') {
+                    badgeClass = 'bg-danger';
+                }
+                
+                return `
+                    <button type="button" class="list-group-item list-group-item-action" 
+                            onclick="selectExerciseForDate(${exercise.id}, '${exercise.name}', '${exercise.muscle_group}')">
+                        <div class="d-flex w-100 justify-content-between">
+                            <div>
+                                <h6 class="mb-1">${exercise.name}</h6>
+                                <p class="mb-1 text-muted small">${exercise.description}</p>
+                                <small class="badge ${badgeClass}">${exercise.difficulty_level}</small>
+                            </div>
+                            <small class="text-muted">${exercise.muscle_group}</small>
+                        </div>
+                    </button>
+                `;
+            }).join('');
+            
+            console.log('帶詳細信息的動作列表HTML生成完成');
+        }
+
+        // 渲染動作列表（簡化版，用於篩選）
+        function renderExerciseList(exerciseArray) {
+            const exerciseList = document.getElementById('dateExerciseList');
+            if (!exerciseList) {
+                console.error('找不到 dateExerciseList 元素');
+                return;
+            }
+            
+            console.log('renderExerciseList 被調用，動作數量:', exerciseArray ? exerciseArray.length : 'undefined');
+            
+            if (!exerciseArray || exerciseArray.length === 0) {
+                console.log('動作數組為空，顯示無動作訊息');
+                exerciseList.innerHTML = '<div class="text-center text-muted">沒有找到符合條件的動作</div>';
+                return;
+            }
+            
+            console.log('開始生成HTML，第一個動作:', exerciseArray[0]);
+            exerciseList.innerHTML = exerciseArray.map(exercise => `
+                <button type="button" class="list-group-item list-group-item-action" 
+                        onclick="selectExerciseForDate(${exercise.id}, '${exercise.name}', '${exercise.muscle_group}')">
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${exercise.name}</h6>
+                        <small class="text-muted">${exercise.muscle_group}</small>
+                    </div>
+                </button>
+            `).join('');
+            
+            console.log('動作列表HTML生成完成');
+        }
+
+        // 篩選動作
+        function filterExercises() {
+            console.log('filterExercises 被調用');
+            
+            const searchTerm = document.getElementById('exerciseSearchInput').value.toLowerCase();
+            const muscleGroupFilter = document.getElementById('muscleGroupFilter').value;
+            
+            console.log('搜尋條件:', searchTerm);
+            console.log('肌群篩選:', muscleGroupFilter);
+            
+            // 使用完整的備用動作數據進行篩選
+            const fullExercises = getBackupExercises();
+            
+            let filteredExercises = fullExercises.filter(exercise => {
+                const matchesSearch = !searchTerm || exercise.name.toLowerCase().includes(searchTerm);
+                const matchesMuscleGroup = !muscleGroupFilter || exercise.muscle_group === muscleGroupFilter;
+                
+                return matchesSearch && matchesMuscleGroup;
+            });
+            
+            console.log('篩選後動作數量:', filteredExercises.length);
+            renderExerciseListWithDetails(filteredExercises);
+        }
+
+        // 選擇動作（用於特定日期）
+        function selectExerciseForDate(exerciseId, exerciseName, muscleGroup) {
+            document.getElementById('dateSelectedExerciseId').value = exerciseId;
+            document.getElementById('dateSelectedExerciseName').value = exerciseName;
+            document.getElementById('dateMuscleGroup').value = muscleGroup;
+            
+            // 高亮選中的動作
+            document.querySelectorAll('#dateExerciseList .list-group-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event.target.closest('.list-group-item').classList.add('active');
+        }
+
+        // 為特定日期新增訓練動作
+        function addExerciseToSpecificDate(dateString) {
+            const targetDate = new Date(dateString);
+            const exerciseId = document.getElementById('dateSelectedExerciseId').value;
+            const exerciseName = document.getElementById('dateSelectedExerciseName').value;
+            const muscleGroup = document.getElementById('dateMuscleGroup').value;
+            const sets = parseInt(document.getElementById('dateSets').value);
+            const reps = parseInt(document.getElementById('dateReps').value);
+            const weight = parseFloat(document.getElementById('dateWeight').value);
+            
+            if (!exerciseId || !exerciseName || !muscleGroup || !sets || !reps) {
+                showSuccessMessage('請填寫所有必要欄位', 'danger');
+                return;
+            }
+            
+            // 創建動作對象
+            const exercise = {
+                id: parseInt(exerciseId),
+                name: exerciseName,
+                muscleGroup: muscleGroup,
+                sets: sets,
+                reps: reps,
+                weight: weight || null,
+                restTime: null
+            };
+            
+            // 獲取該日期的現有訓練數據
+            const dateKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
+            const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+            
+            // 確保該日期有訓練數組
+            if (!dailyTrainingData[dateKey]) {
+                dailyTrainingData[dateKey] = [];
+            }
+            
+            // 添加新動作
+            dailyTrainingData[dateKey].push(exercise);
+            
+            // 儲存回本地儲存
+            localStorage.setItem('dailyTrainingData', JSON.stringify(dailyTrainingData));
+            
+            console.log('已為日期新增動作:', dateKey, exercise);
+            
+            // 關閉模態框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('dateExerciseModal'));
+            if (modal) modal.hide();
+            
+            // 更新行事曆顯示
+            updateCalendarTrainingData();
+            
+            // 顯示成功訊息
+            showSuccessMessage(`已為 ${targetDate.getMonth() + 1}月${targetDate.getDate()}日 新增 ${exerciseName}`);
+        }
+
+        // 為某一天新增更多訓練動作
+        function addMoreTraining(dateString) {
+            const date = new Date(dateString);
+            
+            // 關閉選擇菜單
+            const modal = bootstrap.Modal.getInstance(document.getElementById('calendarDayModal'));
+            if (modal) modal.hide();
+            
+            // 直接為該日期新增更多訓練動作
+            openExerciseModalForDate(date);
+        }
+
+        // 顯示沒有訓練內容的提示
+        function showNoTrainingContent(date) {
+            const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
+            const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
+            const dayDisplayName = dayNames[date.getDay()];
+            
+            const content = `
+                <div class="no-training-content">
+                    <div class="text-center py-4">
+                        <i class="bi bi-calendar-x text-muted" style="font-size: 3rem;"></i>
+                        <h6 class="mt-3 mb-2">${dateStr} (${dayDisplayName})</h6>
+                        <p class="text-muted mb-3">這一天還沒有安排任何訓練動作</p>
+                        <button class="btn btn-primary" onclick="addTrainingFromNoContent('${date.toISOString()}')">
+                            <i class="bi bi-plus-circle me-2"></i>立即新增訓練動作
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            // 創建模態框
+            const modalHtml = `
+                <div class="modal fade" id="noTrainingModal" tabindex="-1" aria-labelledby="noTrainingModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="noTrainingModalLabel">訓練內容</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                ${content}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除現有的模態框（如果有的話）
+            const existingModal = document.getElementById('noTrainingModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框到頁面
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('noTrainingModal'));
+            modal.show();
+            
+            // 模態框關閉時移除DOM元素
+            document.getElementById('noTrainingModal').addEventListener('hidden.bs.modal', function () {
+                this.remove();
+            });
+        }
+
+        // 從沒有訓練內容的提示中新增訓練動作
+        function addTrainingFromNoContent(dateString) {
+            const date = new Date(dateString);
+            
+            // 關閉當前模態框
+            const modal = bootstrap.Modal.getInstance(document.getElementById('noTrainingModal'));
+            if (modal) modal.hide();
+            
+            // 直接為該日期新增訓練動作
+            openExerciseModalForDate(date);
+        }
+
         // 頁面載入時初始化
         document.addEventListener('DOMContentLoaded', async function () {
             console.log('頁面載入完成，開始初始化...');
@@ -1983,6 +3879,16 @@
                     renderWeeklyPlan();
                     updateStats();
                     updateWeekCompletion(); // 初始化完成度
+                    
+                    // 初始化行事曆
+                    renderCalendar();
+                    updateCalendarTrainingData();
+                } else {
+                    // 如果沒有資料，顯示空狀態
+                    showEmptyState();
+                    
+                    // 初始化行事曆（空狀態）
+                    renderCalendar();
                 }
                 
                 renderTrainingTemplates();
@@ -2059,20 +3965,22 @@
                     console.log('胸部動作數量:', exercises.filter(ex => ex.muscle_group === '胸').length);
                     console.log('所有肌群:', [...new Set(exercises.map(ex => ex.muscle_group))]);
                 } else {
-                    console.warn('API 回應無效或無資料，清空動作列表');
-                    exercises = [];
-                    console.log('沒有可用的動作資料');
+                    console.warn('API 回應無效或無資料，使用備用動作資料');
+                    exercises = getBackupExercises();
+                    console.log('備用動作資料載入完成，總數:', exercises.length);
                 }
             } catch (error) {
                 console.error('載入動作時發生錯誤:', error);
-                // 如果網路錯誤，清空動作列表
-                exercises = [];
-                console.log('網路錯誤，清空動作列表');
+                console.log('使用備用動作資料...');
+                // 如果API失敗，使用備用動作資料
+                exercises = getBackupExercises();
+                console.log('備用動作資料載入完成，總數:', exercises.length);
             }
             
             // 確保 exercises 陣列存在（即使為空）
-            if (!exercises) {
-                exercises = [];
+            if (!exercises || exercises.length === 0) {
+                console.log('exercises 為空，使用備用資料');
+                exercises = getBackupExercises();
             }
             
             console.log('最終動作資料載入完成，總數:', exercises.length);
@@ -2112,62 +4020,62 @@
                 { id: 19, name: "下斜纜繩夾胸", muscle_group: "下胸", description: "下斜角度的纜繩夾胸，鍛鍊下胸", difficulty_level: "初級", equipment_needed: "纜繩機" },
                 
                 // 特殊胸部動作
-                { id: 20, name: "窄握臥推", muscle_group: "胸", description: "窄握距的臥推，主要鍛鍊胸肌內側和三頭肌", difficulty_level: "中級", equipment_needed: "槓鈴" },
-                { id: 21, name: "寬握臥推", muscle_group: "胸", description: "寬握距的臥推，主要鍛鍊胸肌外側", difficulty_level: "中級", equipment_needed: "槓鈴" },
-                { id: 22, name: "啞鈴擠壓推", muscle_group: "胸", description: "啞鈴擠壓推，鍛鍊胸肌內側", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 23, name: "單臂啞鈴臥推", muscle_group: "胸", description: "單臂啞鈴臥推，改善肌肉不平衡", difficulty_level: "中級", equipment_needed: "啞鈴" },
-                { id: 24, name: "啞鈴地板臥推", muscle_group: "胸", description: "在地板上進行的啞鈴臥推，限制動作範圍", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 20, name: "窄握臥推", muscle_group: "中胸", description: "窄握距的臥推，主要鍛鍊胸肌內側和三頭肌", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 21, name: "寬握臥推", muscle_group: "中胸", description: "寬握距的臥推，主要鍛鍊胸肌外側", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 22, name: "啞鈴擠壓推", muscle_group: "中胸", description: "啞鈴擠壓推，鍛鍊胸肌內側", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 23, name: "單臂啞鈴臥推", muscle_group: "中胸", description: "單臂啞鈴臥推，改善肌肉不平衡", difficulty_level: "中級", equipment_needed: "啞鈴" },
+                { id: 24, name: "啞鈴地板臥推", muscle_group: "中胸", description: "在地板上進行的啞鈴臥推，限制動作範圍", difficulty_level: "初級", equipment_needed: "啞鈴" },
 
                 // 背部動作 - 適合新手和有基礎使用者
-                { id: 16, name: "反向划船", muscle_group: "背", description: "背部訓練動作，適合初學者", difficulty_level: "初級", equipment_needed: "槓鈴或TRX" },
-                { id: 17, name: "啞鈴划船", muscle_group: "背", description: "使用啞鈴的划船動作，適合初學者", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 18, name: "纜繩划船", muscle_group: "背", description: "使用纜繩機的划船動作", difficulty_level: "初級", equipment_needed: "纜繩機" },
-                { id: 19, name: "高位下拉", muscle_group: "背", description: "背部訓練動作，類似引體向上但更容易", difficulty_level: "初級", equipment_needed: "高位下拉機" },
-                { id: 20, name: "坐姿划船", muscle_group: "背", description: "坐姿的划船動作，安全且容易上手", difficulty_level: "初級", equipment_needed: "划船機" },
-                { id: 21, name: "反向飛鳥", muscle_group: "背", description: "針對後三角肌和菱形肌的訓練", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 22, name: "引體向上", muscle_group: "背", description: "背部訓練的黃金動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "單槓" },
-                { id: 23, name: "槓鈴划船", muscle_group: "背", description: "使用槓鈴的划船動作", difficulty_level: "中級", equipment_needed: "槓鈴" },
-                { id: 24, name: "單臂划船", muscle_group: "背", description: "單側背部訓練動作，改善肌肉不平衡", difficulty_level: "中級", equipment_needed: "啞鈴" },
-                { id: 25, name: "T槓划船", muscle_group: "背", description: "使用T槓的划船動作", difficulty_level: "中級", equipment_needed: "T槓" },
+                { id: 25, name: "反向划船", muscle_group: "背", description: "背部訓練動作，適合初學者", difficulty_level: "初級", equipment_needed: "槓鈴或TRX" },
+                { id: 26, name: "啞鈴划船", muscle_group: "背", description: "使用啞鈴的划船動作，適合初學者", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 27, name: "纜繩划船", muscle_group: "背", description: "使用纜繩機的划船動作", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 28, name: "高位下拉", muscle_group: "背", description: "背部訓練動作，類似引體向上但更容易", difficulty_level: "初級", equipment_needed: "高位下拉機" },
+                { id: 29, name: "坐姿划船", muscle_group: "背", description: "坐姿的划船動作，安全且容易上手", difficulty_level: "初級", equipment_needed: "划船機" },
+                { id: 30, name: "反向飛鳥", muscle_group: "背", description: "針對後三角肌和菱形肌的訓練", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 31, name: "引體向上", muscle_group: "背", description: "背部訓練的黃金動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "單槓" },
+                { id: 32, name: "槓鈴划船", muscle_group: "背", description: "使用槓鈴的划船動作", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 33, name: "單臂划船", muscle_group: "背", description: "單側背部訓練動作，改善肌肉不平衡", difficulty_level: "中級", equipment_needed: "啞鈴" },
+                { id: 34, name: "T槓划船", muscle_group: "背", description: "使用T槓的划船動作", difficulty_level: "中級", equipment_needed: "T槓" },
 
                 // 腿部動作 - 適合新手和有基礎使用者
-                { id: 26, name: "深蹲", muscle_group: "腿", description: "腿部訓練的基礎動作，鍛鍊股四頭肌、臀肌和核心肌群", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 27, name: "弓箭步", muscle_group: "腿", description: "單腿訓練動作，鍛鍊股四頭肌、臀肌和平衡感", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 28, name: "啞鈴深蹲", muscle_group: "腿", description: "使用啞鈴的深蹲動作，適合初學者", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 29, name: "腿舉", muscle_group: "腿", description: "腿部訓練的器械動作，安全且容易上手", difficulty_level: "初級", equipment_needed: "腿舉機" },
-                { id: 30, name: "側蹲", muscle_group: "腿", description: "側向的深蹲動作，鍛鍊內收肌群", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 31, name: "登階", muscle_group: "腿", description: "登階動作，鍛鍊股四頭肌和臀肌", difficulty_level: "初級", equipment_needed: "階梯或平台" },
-                { id: 32, name: "相撲深蹲", muscle_group: "腿", description: "寬站距的深蹲，主要鍛鍊內收肌群", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 33, name: "腿推機", muscle_group: "腿", description: "使用腿推機的訓練動作", difficulty_level: "初級", equipment_needed: "腿推機" },
-                { id: 34, name: "腿彎舉", muscle_group: "腿", description: "針對後腿肌群的孤立訓練", difficulty_level: "初級", equipment_needed: "腿彎舉機" },
-                { id: 35, name: "槓鈴深蹲", muscle_group: "腿", description: "使用槓鈴的深蹲動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "槓鈴" },
-                { id: 36, name: "保加利亞分腿蹲", muscle_group: "腿", description: "單腿訓練動作，鍛鍊股四頭肌和臀肌", difficulty_level: "中級", equipment_needed: "椅子或平台" },
-                { id: 37, name: "羅馬尼亞硬舉", muscle_group: "腿", description: "針對後腿肌群的訓練動作", difficulty_level: "中級", equipment_needed: "槓鈴或啞鈴" },
+                { id: 35, name: "深蹲", muscle_group: "腿", description: "腿部訓練的基礎動作，鍛鍊股四頭肌、臀肌和核心肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 36, name: "弓箭步", muscle_group: "腿", description: "單腿訓練動作，鍛鍊股四頭肌、臀肌和平衡感", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 37, name: "啞鈴深蹲", muscle_group: "腿", description: "使用啞鈴的深蹲動作，適合初學者", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 38, name: "腿舉", muscle_group: "腿", description: "腿部訓練的器械動作，安全且容易上手", difficulty_level: "初級", equipment_needed: "腿舉機" },
+                { id: 39, name: "側蹲", muscle_group: "腿", description: "側向的深蹲動作，鍛鍊內收肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 40, name: "登階", muscle_group: "腿", description: "登階動作，鍛鍊股四頭肌和臀肌", difficulty_level: "初級", equipment_needed: "階梯或平台" },
+                { id: 41, name: "相撲深蹲", muscle_group: "腿", description: "寬站距的深蹲，主要鍛鍊內收肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 42, name: "腿推機", muscle_group: "腿", description: "使用腿推機的訓練動作", difficulty_level: "初級", equipment_needed: "腿推機" },
+                { id: 43, name: "腿彎舉", muscle_group: "腿", description: "針對後腿肌群的孤立訓練", difficulty_level: "初級", equipment_needed: "腿彎舉機" },
+                { id: 44, name: "槓鈴深蹲", muscle_group: "腿", description: "使用槓鈴的深蹲動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 45, name: "保加利亞分腿蹲", muscle_group: "腿", description: "單腿訓練動作，鍛鍊股四頭肌和臀肌", difficulty_level: "中級", equipment_needed: "椅子或平台" },
+                { id: 46, name: "羅馬尼亞硬舉", muscle_group: "腿", description: "針對後腿肌群的訓練動作", difficulty_level: "中級", equipment_needed: "槓鈴或啞鈴" },
 
                 // 手臂動作 - 適合新手和有基礎使用者
-                { id: 38, name: "二頭彎舉", muscle_group: "手臂", description: "針對肱二頭肌的孤立訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 39, name: "三頭撐體", muscle_group: "手臂", description: "鍛鍊肱三頭肌的經典動作", difficulty_level: "初級", equipment_needed: "椅子或板凳" },
-                { id: 40, name: "三頭下壓", muscle_group: "手臂", description: "三頭肌訓練的孤立動作", difficulty_level: "初級", equipment_needed: "纜繩機" },
-                { id: 41, name: "錘式彎舉", muscle_group: "手臂", description: "針對前臂和二頭肌的訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 42, name: "過頭三頭伸展", muscle_group: "手臂", description: "過頭的三頭肌伸展動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 43, name: "纜繩彎舉", muscle_group: "手臂", description: "使用纜繩機的二頭肌訓練", difficulty_level: "初級", equipment_needed: "纜繩機" },
-                { id: 44, name: "啞鈴三頭伸展", muscle_group: "手臂", description: "使用啞鈴的三頭肌伸展", difficulty_level: "初級", equipment_needed: "啞鈴" },
-                { id: 45, name: "纜繩三頭下壓", muscle_group: "手臂", description: "使用纜繩機的三頭肌下壓", difficulty_level: "初級", equipment_needed: "纜繩機" },
-                { id: 46, name: "槓鈴彎舉", muscle_group: "手臂", description: "二頭肌訓練的複合動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "槓鈴" },
-                { id: 47, name: "窄握臥推", muscle_group: "手臂", description: "窄握距的臥推，主要鍛鍊三頭肌", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 47, name: "二頭彎舉", muscle_group: "手臂", description: "針對肱二頭肌的孤立訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 48, name: "三頭撐體", muscle_group: "手臂", description: "鍛鍊肱三頭肌的經典動作", difficulty_level: "初級", equipment_needed: "椅子或板凳" },
+                { id: 49, name: "三頭下壓", muscle_group: "手臂", description: "三頭肌訓練的孤立動作", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 50, name: "錘式彎舉", muscle_group: "手臂", description: "針對前臂和二頭肌的訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 51, name: "過頭三頭伸展", muscle_group: "手臂", description: "過頭的三頭肌伸展動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 52, name: "纜繩彎舉", muscle_group: "手臂", description: "使用纜繩機的二頭肌訓練", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 53, name: "啞鈴三頭伸展", muscle_group: "手臂", description: "使用啞鈴的三頭肌伸展", difficulty_level: "初級", equipment_needed: "啞鈴" },
+                { id: 54, name: "纜繩三頭下壓", muscle_group: "手臂", description: "使用纜繩機的三頭肌下壓", difficulty_level: "初級", equipment_needed: "纜繩機" },
+                { id: 55, name: "槓鈴彎舉", muscle_group: "手臂", description: "二頭肌訓練的複合動作，適合有基礎者", difficulty_level: "中級", equipment_needed: "槓鈴" },
+                { id: 56, name: "窄握臥推", muscle_group: "手臂", description: "窄握距的臥推，主要鍛鍊三頭肌", difficulty_level: "中級", equipment_needed: "槓鈴" },
 
                 // 腹部動作 - 適合新手和有基礎使用者
-                { id: 48, name: "平板支撐", muscle_group: "腹部", description: "核心肌群訓練的基礎動作，鍛鍊腹肌和背部肌群", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 49, name: "仰臥起坐", muscle_group: "腹部", description: "傳統的腹部訓練動作，主要鍛鍊腹直肌", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 50, name: "捲腹", muscle_group: "腹部", description: "腹部訓練動作，主要鍛鍊腹直肌", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 51, name: "俄羅斯轉體", muscle_group: "腹部", description: "腹部訓練動作，鍛鍊腹斜肌", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 52, name: "死蟲式", muscle_group: "腹部", description: "核心肌群訓練動作，改善穩定性", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 53, name: "自行車捲腹", muscle_group: "腹部", description: "腹部訓練動作，鍛鍊腹斜肌", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 54, name: "仰臥抬腿", muscle_group: "腹部", description: "針對下腹部的訓練動作", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 55, name: "側捲腹", muscle_group: "腹部", description: "針對腹斜肌的訓練動作", difficulty_level: "初級", equipment_needed: "無" },
-                { id: 56, name: "側平板支撐", muscle_group: "腹部", description: "核心肌群訓練動作，鍛鍊腹斜肌", difficulty_level: "中級", equipment_needed: "無" },
-                { id: 57, name: "登山者", muscle_group: "腹部", description: "全身性的有氧動作，鍛鍊核心肌群", difficulty_level: "中級", equipment_needed: "無" },
-                { id: 58, name: "V字支撐", muscle_group: "腹部", description: "核心肌群訓練動作，鍛鍊腹直肌", difficulty_level: "中級", equipment_needed: "無" },
+                { id: 57, name: "平板支撐", muscle_group: "腹部", description: "核心肌群訓練的基礎動作，鍛鍊腹肌和背部肌群", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 58, name: "仰臥起坐", muscle_group: "腹部", description: "傳統的腹部訓練動作，主要鍛鍊腹直肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 59, name: "捲腹", muscle_group: "腹部", description: "腹部訓練動作，主要鍛鍊腹直肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 60, name: "俄羅斯轉體", muscle_group: "腹部", description: "腹部訓練動作，鍛鍊腹斜肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 61, name: "死蟲式", muscle_group: "腹部", description: "核心肌群訓練動作，改善穩定性", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 62, name: "自行車捲腹", muscle_group: "腹部", description: "腹部訓練動作，鍛鍊腹斜肌", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 63, name: "仰臥抬腿", muscle_group: "腹部", description: "針對下腹部的訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 64, name: "側捲腹", muscle_group: "腹部", description: "針對腹斜肌的訓練動作", difficulty_level: "初級", equipment_needed: "無" },
+                { id: 65, name: "側平板支撐", muscle_group: "腹部", description: "核心肌群訓練動作，鍛鍊腹斜肌", difficulty_level: "中級", equipment_needed: "無" },
+                { id: 66, name: "登山者", muscle_group: "腹部", description: "全身性的有氧動作，鍛鍊核心肌群", difficulty_level: "中級", equipment_needed: "無" },
+                { id: 67, name: "V字支撐", muscle_group: "腹部", description: "核心肌群訓練動作，鍛鍊腹直肌", difficulty_level: "中級", equipment_needed: "無" },
 
                 // 肩膀動作 - 適合新手和有基礎使用者
                 { id: 59, name: "側平舉", muscle_group: "肩膀", description: "針對三角肌中束的孤立訓練動作", difficulty_level: "初級", equipment_needed: "啞鈴" },
@@ -2311,6 +4219,9 @@
                 // 已移除重複的完成狀態按鈕（避免顯示兩個）
             });
             updateStats();
+            
+            // 更新行事曆數據
+            updateCalendarTrainingData();
         }
 
         // 切換每天完成狀態
@@ -2686,6 +4597,26 @@
             saveWeeklyPlan();
             renderWeeklyPlan();
 
+            console.log('=== 準備更新行事曆數據 ===');
+            console.log('新增動作後的 weeklyPlan:', weeklyPlan);
+            console.log('selectedDay:', selectedDay);
+
+            // 同時儲存到每日訓練數據中
+            const dayOfWeek = selectedDay;
+            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+            const dayIndex = dayNames.indexOf(dayOfWeek);
+            
+            if (dayIndex !== -1 && currentWeekStart) {
+                const dayDate = new Date(currentWeekStart);
+                dayDate.setDate(currentWeekStart.getDate() + dayIndex);
+                
+                // 儲存該日期的訓練數據
+                saveDailyTrainingData(dayDate, weeklyPlan[dayOfWeek]);
+            }
+
+            // 更新行事曆數據
+            updateCalendarTrainingData();
+
             // 同步到資料庫
             try {
                 await syncToDatabase();
@@ -2707,6 +4638,10 @@
             // 更新顯示
             saveWeeklyPlan();
             renderWeeklyPlan();
+            
+            // 更新行事曆數據
+            updateCalendarTrainingData();
+            
             showSuccessMessage('動作已移除，請記得儲存計畫！');
         }
 
