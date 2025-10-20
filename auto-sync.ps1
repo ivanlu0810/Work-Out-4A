@@ -45,3 +45,4 @@ finally {
     $watcher.Dispose()
     Get-EventSubscriber | Unregister-Event
 }
+
