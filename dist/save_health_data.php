@@ -34,12 +34,27 @@ foreach ($required_fields as $field) {
     }
 }
 
-// 數據庫連接配置 - 適配現有的數據庫結構
-$host = '1.tcp.jp.ngrok.io';
-$dbname = 'test'; // 使用現有的數據庫
-$username = 'root';
-$password = '';
-$port = '20959'; // 使用現有的端口
+// 根據環境選擇資料庫配置
+$isLocal = !isset($_SERVER['HTTP_HOST']) || 
+           strpos($_SERVER['HTTP_HOST'], 'ngrok') === false ||
+           strpos($_SERVER['HTTP_HOST'], 'localhost') !== false ||
+           strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false;
+
+if ($isLocal) {
+    // 本地 XAMPP 配置
+    $host = 'localhost';
+    $dbname = 'test';
+    $username = 'root';
+    $password = '';
+    $port = '3306';
+} else {
+    // 遠端 ngrok 配置
+    $host = '1.tcp.jp.ngrok.io';
+    $dbname = 'test';
+    $username = 'root';
+    $password = '';
+    $port = '20959';
+}
 
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $username, $password);

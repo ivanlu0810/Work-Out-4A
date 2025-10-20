@@ -8,12 +8,27 @@ if (!isset($_SESSION['logged_in']) || !$_SESSION['logged_in']) {
     exit;
 }
 
-// 數據庫連接配置
-$host = '1.tcp.jp.ngrok.io';
-$dbname = 'test';
-$username = 'root';
-$password = '';
-$port = 20959;
+// 根據環境選擇資料庫配置
+$isLocal = !isset($_SERVER['HTTP_HOST']) || 
+           strpos($_SERVER['HTTP_HOST'], 'ngrok') === false ||
+           strpos($_SERVER['HTTP_HOST'], 'localhost') !== false ||
+           strpos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false;
+
+if ($isLocal) {
+    // 本地 XAMPP 配置
+    $host = 'localhost';
+    $dbname = 'test';
+    $username = 'root';
+    $password = '';
+    $port = 3306;
+} else {
+    // 遠端 ngrok 配置
+    $host = '1.tcp.jp.ngrok.io';
+    $dbname = 'test';
+    $username = 'root';
+    $password = '';
+    $port = 20959;
+}
 
 try {
     $pdo = new PDO("mysql:host=$host;port=$port;dbname=$dbname;charset=utf8mb4", $username, $password);

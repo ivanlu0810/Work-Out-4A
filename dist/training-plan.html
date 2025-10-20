@@ -41,11 +41,11 @@
 
         /* 行事曆容器 */
         .calendar-container {
-            background: #fff;
-            border-radius: 16px;
-            padding: 2rem;
-            margin-bottom: 2rem;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            background: transparent;
+            border-radius: 0;
+            padding: 0;
+            margin-bottom: 0;
+            box-shadow: none;
         }
 
         .calendar-header {
@@ -1591,24 +1591,27 @@
             <!-- 行事曆 -->
             <div class="container">
                 <section class="section">
-                    <div class="calendar-container">
-                        <div class="calendar-header">
-                            <div>
-                                <h5>訓練行事曆</h5>
-                                <p class="text-muted mb-0">查看您的訓練安排與進度</p>
-                            </div>
-                            <div class="calendar-nav">
-                                <button class="btn btn-outline-secondary" onclick="previousMonth()">
-                                    <i class="bi bi-chevron-left"></i>
-                                </button>
-                                <span class="calendar-month-year" id="calendar-month-year">2024年1月</span>
-                                <button class="btn btn-outline-secondary" onclick="nextMonth()">
-                                    <i class="bi bi-chevron-right"></i>
-                                </button>
-                                <button class="btn btn-primary ms-3" onclick="goToToday()">
-                                    <i class="bi bi-calendar-check"></i>今天
-                                </button>
-                            </div>
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-calendar3 me-2"></i>訓練行事曆</h4>
+                            <p class="text-muted mb-0">查看您的訓練安排與進度</p>
+                        </div>
+                        <div class="card-body">
+                            <div class="calendar-container">
+                                <div class="calendar-header">
+                                    <div class="calendar-nav">
+                                        <button class="btn btn-outline-secondary" onclick="previousMonth()">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+                                        <span class="calendar-month-year" id="calendar-month-year">2024年1月</span>
+                                        <button class="btn btn-outline-secondary" onclick="nextMonth()">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                        <button class="btn btn-primary ms-3" onclick="goToToday()">
+                                            <i class="bi bi-calendar-check"></i>今天
+                                        </button>
+                                    </div>
+                                </div>
                         </div>
                         
                         <div class="calendar-grid">
@@ -1634,10 +1637,11 @@
                             <div class="legend-right"></div>
                         </div>
                     </div>
-                </section>
-            </div>
+                </div>
+            </section>
+        </div>
 
-            <!-- 週課表 -->
+        <!-- 週課表 -->
             <div class="container">
                 <section class="section">
                 </section>
