@@ -2109,7 +2109,7 @@
                     <div class="card-header bg-light">
                         <div class="row align-items-center">
                             <div class="col-md-6">
-                                <h4 class="mb-1"><i class="bi bi-graph-up me-2 text-primary"></i>訓練完成度統計</h4>
+                                <h4 class="mb-1"><i class="bi bi-graph-up me-2"></i>訓練完成度統計</h4>
                                 <p class="text-muted mb-0 small">查看您的訓練進度和完成情況</p>
                             </div>
                             <div class="col-md-6">
@@ -2118,17 +2118,17 @@
                                     <div class="btn-group" role="group" aria-label="統計模式選擇" style="border-radius: 20px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                         <input type="radio" class="btn-check" name="statsMode" id="weekMode" value="week" autocomplete="off" checked onclick="changeStatsMode('week')">
                                         <label class="btn btn-outline-secondary rounded-0 px-3 py-2" for="weekMode" style="border: none; background: #007bff; color: white; font-weight: 500;">
-                                            <i class="bi bi-calendar-week me-1"></i>週統計
+                                            週統計
                                         </label>
 
                                         <input type="radio" class="btn-check" name="statsMode" id="monthMode" value="month" autocomplete="off" onclick="changeStatsMode('month')">
                                         <label class="btn btn-outline-secondary rounded-0 px-3 py-2" for="monthMode" style="border: none; background: white; color: #6c757d; font-weight: 500;">
-                                            <i class="bi bi-calendar-month me-1"></i>月統計
+                                            月統計
                                         </label>
 
                                         <input type="radio" class="btn-check" name="statsMode" id="yearMode" value="year" autocomplete="off" onclick="changeStatsMode('year')">
                                         <label class="btn btn-outline-secondary rounded-0 px-3 py-2" for="yearMode" style="border: none; background: white; color: #6c757d; font-weight: 500;">
-                                            <i class="bi bi-calendar-year me-1"></i>年統計
+                                            年統計
                                         </label>
                                     </div>
                                 </div>
@@ -2142,7 +2142,7 @@
                             <div class="tab-pane fade show active" id="week-tab" role="tabpanel">
                                 <div class="row align-items-center mb-4">
                                     <div class="col-md-8">
-                                        <h5 class="mb-2"><i class="bi bi-calendar-week me-2 text-primary"></i>週統計設定</h5>
+                                        <h6 class="mb-2">週統計設定</h6>
                                         <p class="text-muted mb-0 small">選擇要查看的年份、月份和週數</p>
                                     </div>
                                     <div class="col-md-4">
@@ -2230,7 +2230,7 @@
                             <div class="tab-pane fade" id="month-tab" role="tabpanel">
                                 <div class="row align-items-center mb-4">
                                     <div class="col-md-8">
-                                        <h5 class="mb-2"><i class="bi bi-calendar-month me-2 text-primary"></i>月統計設定</h5>
+                                        <h6 class="mb-2">月統計設定</h6>
                                         <p class="text-muted mb-0 small">選擇要查看的年份和月份</p>
                                     </div>
                                     <div class="col-md-4">
@@ -2312,7 +2312,7 @@
                             <div class="tab-pane fade" id="year-tab" role="tabpanel">
                                 <div class="row align-items-center mb-4">
                                     <div class="col-md-8">
-                                        <h5 class="mb-2"><i class="bi bi-calendar-year me-2 text-primary"></i>年統計設定</h5>
+                                        <h6 class="mb-2">年統計設定</h6>
                                         <p class="text-muted mb-0 small">選擇要查看的年份</p>
                                     </div>
                                     <div class="col-md-4">
@@ -2322,11 +2322,6 @@
                                                 <select class="form-select rounded-pill border-primary" id="year-year-select" onchange="updateCompletionStats()">
                                                     <!-- 動態生成年份選項 -->
                                                 </select>
-                                            </div>
-                                            <div class="stats-control-item">
-                                                <button class="btn btn-primary rounded-pill px-3 py-2 shadow-sm" onclick="updateCompletionStats()">
-                                                    <i class="bi bi-search me-1"></i>查詢
-                                                </button>
                                             </div>
                                         </div>
                                     </div>
@@ -2863,7 +2858,7 @@
                 for (let year = currentYear - 5; year <= currentYear + 2; year++) {
                     const option = document.createElement('option');
                     option.value = year;
-                    option.textContent = year + '年';
+                    option.textContent = year + '年  ';
                     yearSelect.appendChild(option);
                 }
                 
