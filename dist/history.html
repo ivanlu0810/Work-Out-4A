@@ -232,9 +232,10 @@
             /* 保持底部留白 */
         }
 
-        /* ✅ footer 與卡片群組之間留白統一 */
-        #history-list {
-            margin-bottom: 60px;
+        /* ✅ footer 與上方保持適當間距 - 增加間距 */
+        footer {
+            margin-top: 50px;
+            margin-bottom: 30px;
         }
 
         .alert-morandi {
@@ -394,17 +395,16 @@
             color: #ffffff !important;
         }
 
-        /* 分頁控制樣式 - 水平排列 */
+        /* 分頁控制樣式 - 移除背景色，參考 favorite.html */
         .pagination-controls {
             display: flex;
             justify-content: center;
             align-items: center;
-            margin-top: 20px;
+            margin-top: 30px;
             padding: 15px;
-            background: #f8f9fa;
-            border-radius: 8px;
             gap: 5px;
             flex-wrap: wrap;
+            background: transparent; /* 移除背景色 */
         }
 
         #pagination-controls {

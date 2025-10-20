@@ -430,7 +430,6 @@ $email = $_SESSION['email'] ?? 'No email';
 
         #food-list {
             margin-bottom: 60px;
-            /* 控制內容與 footer 的距離 */
         }
     </style>
 </head>
@@ -1176,12 +1175,10 @@ $email = $_SESSION['email'] ?? 'No email';
                 </div>
             </div>
 
-            <!-- 精簡模式：移除 Toast 與緊急修復按鈕 -->
-
-            <footer>
+            <footer style="display: block !important; visibility: visible !important; opacity: 1 !important;">
                 <div class="footer clearfix mb-0 text-muted">
-                    <div class="float-start">
-                        <p>健習生</p>
+                    <div class="float-start" style="display: block !important; visibility: visible !important;">
+                        <p style="display: block !important; visibility: visible !important; color: #6c757d !important; margin: 0 !important; padding: 0 !important;">健習生</p>
                     </div>
                     <div class="float-end">
                         <p>謝昀倢 黃詠翰 呂沁垣 游博翔</p>

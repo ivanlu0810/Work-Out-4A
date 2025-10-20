@@ -2140,46 +2140,60 @@
                         <div class="tab-content">
                             <!-- 週統計分頁 -->
                             <div class="tab-pane fade show active" id="week-tab" role="tabpanel">
-                                <div class="row align-items-center mb-4">
-                                    <div class="col-md-8">
-                                        <h6 class="mb-2">週統計設定</h6>
-                                        <p class="text-muted mb-0 small">選擇要查看的年份、月份和週數</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="stats-controls-container">
-                                            <div class="stats-control-item">
-                                                <label for="week-year-select" class="form-label me-2 mb-0 fw-semibold">年份：</label>
-                                                <select class="form-select rounded-pill border-primary" id="week-year-select" onchange="updateCompletionStats()">
-                                                    <!-- 動態生成年份選項 -->
-                                                </select>
-                                            </div>
-                                            <div class="stats-control-item">
-                                                <label for="week-month-select" class="form-label me-2 mb-0 fw-semibold">月份：</label>
-                                                <select class="form-select rounded-pill border-primary" id="week-month-select" onchange="initializeWeekSelector(); updateCompletionStats()">
-                                                    <option value="1">1月</option>
-                                                    <option value="2">2月</option>
-                                                    <option value="3">3月</option>
-                                                    <option value="4">4月</option>
-                                                    <option value="5">5月</option>
-                                                    <option value="6">6月</option>
-                                                    <option value="7">7月</option>
-                                                    <option value="8">8月</option>
-                                                    <option value="9">9月</option>
-                                                    <option value="10">10月</option>
-                                                    <option value="11">11月</option>
-                                                    <option value="12">12月</option>
-                                                </select>
-                                            </div>
-                                            <div class="stats-control-item">
-                                                <label for="week-week-select" class="form-label me-2 mb-0 fw-semibold">週數：</label>
-                                                <select class="form-select rounded-pill border-primary" id="week-week-select" onchange="updateCompletionStats()">
-                                                    <!-- 動態生成週數選項 -->
-                                                </select>
-                                            </div>
-                                            <div class="stats-control-item">
-                                                <button class="btn btn-primary rounded-pill px-3 py-2 shadow-sm" onclick="updateCompletionStats()">
-                                                    <i class="bi bi-search me-1"></i>查詢
-                                                </button>
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body p-4">
+                                                <div class="row align-items-center mb-3">
+                                                    <div class="col-md-6">
+                                                        <h6 class="mb-1">週統計設定</h6>
+                                                        <p class="text-muted mb-0 small">選擇要查看的年份、月份和週數</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row g-3">
+                                                    <div class="col-md-3">
+                                                        <div class="form-floating">
+                                                            <select class="form-select border-0 bg-light" id="week-year-select" onchange="updateCompletionStats()">
+                                                                <!-- 動態生成年份選項 -->
+                                                            </select>
+                                                            <label for="week-year-select" class="text-muted">年份</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-floating">
+                                                            <select class="form-select border-0 bg-light" id="week-month-select" onchange="initializeWeekSelector(); updateCompletionStats()">
+                                                                <option value="1">1月</option>
+                                                                <option value="2">2月</option>
+                                                                <option value="3">3月</option>
+                                                                <option value="4">4月</option>
+                                                                <option value="5">5月</option>
+                                                                <option value="6">6月</option>
+                                                                <option value="7">7月</option>
+                                                                <option value="8">8月</option>
+                                                                <option value="9">9月</option>
+                                                                <option value="10">10月</option>
+                                                                <option value="11">11月</option>
+                                                                <option value="12">12月</option>
+                                                            </select>
+                                                            <label for="week-month-select" class="text-muted">月份</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="form-floating">
+                                                            <select class="form-select border-0 bg-light" id="week-week-select" onchange="updateCompletionStats()">
+                                                                <!-- 動態生成週數選項 -->
+                                                            </select>
+                                                            <label for="week-week-select" class="text-muted">週數</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-3">
+                                                        <div class="d-flex align-items-center h-100">
+                                                            <button class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats()">
+                                                                <i class="bi bi-search me-2"></i>查詢統計
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -2190,35 +2204,48 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="d-flex flex-column h-100">
-                                            <div class="stats-card p-3 rounded-3" style="background: linear-gradient(135deg, #8B9DC3 0%, #A8B5A0 100%); color: white;">
+                                            <div class="stats-card p-3 rounded-3" style="background: #F8F9FA; color: #495057; border: 1px solid #E9ECEF;">
                                                 <div class="d-flex align-items-center mb-3">
-                                                    <i class="bi bi-graph-up-arrow me-2 fs-4"></i>
-                                                    <h6 class="mb-0 fw-semibold">統計概覽</h6>
+                                                    <i class="bi bi-graph-up-arrow me-2 fs-5" style="color: #6C757D;"></i>
+                                                    <h6 class="mb-0 fw-semibold" style="color: #495057;">週統計概覽</h6>
                                                 </div>
                                                 <div class="stats-grid">
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2 mb-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">總訓練天數</span>
-                                                            <span class="fw-bold fs-5" id="total-training-days">0</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">總訓練天數</span>
+                                                            <span class="fw-semibold" id="total-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2 mb-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">已完成天數</span>
-                                                            <span class="fw-bold fs-5 text-success" id="completed-training-days">0</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">已完成天數</span>
+                                                            <span class="fw-semibold" id="completed-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">完成率</span>
-                                                            <span class="fw-bold fs-5 text-warning" id="completion-rate">0%</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">完成率</span>
+                                                            <span class="fw-semibold" id="completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="mt-auto">
-                                                <div class="progress" style="height: 8px; background-color: rgba(255,255,255,0.2);">
-                                                    <div id="completion-progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background: linear-gradient(90deg, #9CAF88 0%, #C4A484 100%);"></div>
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">連續訓練</span>
+                                                            <span class="fw-semibold" id="consecutive-days" style="color: #495057; font-size: 0.875rem;">0天</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">平均時長</span>
+                                                            <span class="fw-semibold" id="avg-duration" style="color: #495057; font-size: 0.875rem;">0分鐘</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="stat-card rounded-2 p-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">本週目標</span>
+                                                            <span class="fw-semibold" id="weekly-goal" style="color: #495057; font-size: 0.875rem;">7天</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -2228,40 +2255,52 @@
                             
                             <!-- 月統計分頁 -->
                             <div class="tab-pane fade" id="month-tab" role="tabpanel">
-                                <div class="row align-items-center mb-4">
-                                    <div class="col-md-8">
-                                        <h6 class="mb-2">月統計設定</h6>
-                                        <p class="text-muted mb-0 small">選擇要查看的年份和月份</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="stats-controls-container">
-                                            <div class="stats-control-item">
-                                                <label for="month-year-select" class="form-label me-2 mb-0 fw-semibold">年份：</label>
-                                                <select class="form-select rounded-pill border-primary" id="month-year-select" onchange="updateCompletionStats()">
-                                                    <!-- 動態生成年份選項 -->
-                                                </select>
-                                            </div>
-                                            <div class="stats-control-item">
-                                                <label for="month-month-select" class="form-label me-2 mb-0 fw-semibold">月份：</label>
-                                                <select class="form-select rounded-pill border-primary" id="month-month-select" onchange="updateCompletionStats()">
-                                                    <option value="1">1月</option>
-                                                    <option value="2">2月</option>
-                                                    <option value="3">3月</option>
-                                                    <option value="4">4月</option>
-                                                    <option value="5">5月</option>
-                                                    <option value="6">6月</option>
-                                                    <option value="7">7月</option>
-                                                    <option value="8">8月</option>
-                                                    <option value="9">9月</option>
-                                                    <option value="10">10月</option>
-                                                    <option value="11">11月</option>
-                                                    <option value="12">12月</option>
-                                                </select>
-                                            </div>
-                                            <div class="stats-control-item">
-                                                <button class="btn btn-primary rounded-pill px-3 py-2 shadow-sm" onclick="updateCompletionStats()">
-                                                    <i class="bi bi-search me-1"></i>查詢
-                                                </button>
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body p-4">
+                                                <div class="row align-items-center mb-3">
+                                                    <div class="col-md-6">
+                                                        <h6 class="mb-1">月統計設定</h6>
+                                                        <p class="text-muted mb-0 small">選擇要查看的年份和月份</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row g-3">
+                                                    <div class="col-md-4">
+                                                        <div class="form-floating">
+                                                            <select class="form-select border-0 bg-light" id="month-year-select" onchange="updateCompletionStats()">
+                                                                <!-- 動態生成年份選項 -->
+                                                            </select>
+                                                            <label for="month-year-select" class="text-muted">年份</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="form-floating">
+                                                            <select class="form-select border-0 bg-light" id="month-month-select" onchange="updateCompletionStats()">
+                                                                <option value="1">1月</option>
+                                                                <option value="2">2月</option>
+                                                                <option value="3">3月</option>
+                                                                <option value="4">4月</option>
+                                                                <option value="5">5月</option>
+                                                                <option value="6">6月</option>
+                                                                <option value="7">7月</option>
+                                                                <option value="8">8月</option>
+                                                                <option value="9">9月</option>
+                                                                <option value="10">10月</option>
+                                                                <option value="11">11月</option>
+                                                                <option value="12">12月</option>
+                                                            </select>
+                                                            <label for="month-month-select" class="text-muted">月份</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-4">
+                                                        <div class="d-flex align-items-center h-100">
+                                                            <button class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats()">
+                                                                <i class="bi bi-search me-2"></i>查詢統計
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -2272,35 +2311,48 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="d-flex flex-column h-100">
-                                            <div class="stats-card p-3 rounded-3" style="background: linear-gradient(135deg, #8B9DC3 0%, #A8B5A0 100%); color: white;">
+                                            <div class="stats-card p-3 rounded-3" style="background: #F8F9FA; color: #495057; border: 1px solid #E9ECEF;">
                                                 <div class="d-flex align-items-center mb-3">
-                                                    <i class="bi bi-graph-up-arrow me-2 fs-4"></i>
-                                                    <h6 class="mb-0 fw-semibold">統計概覽</h6>
+                                                    <i class="bi bi-graph-up-arrow me-2 fs-5" style="color: #6C757D;"></i>
+                                                    <h6 class="mb-0 fw-semibold" style="color: #495057;">月統計概覽</h6>
                                                 </div>
                                                 <div class="stats-grid">
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2 mb-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">總訓練天數</span>
-                                                            <span class="fw-bold fs-5" id="total-training-days">0</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">總訓練天數</span>
+                                                            <span class="fw-semibold" id="total-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2 mb-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">已完成天數</span>
-                                                            <span class="fw-bold fs-5 text-success" id="completed-training-days">0</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">已完成天數</span>
+                                                            <span class="fw-semibold" id="completed-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">完成率</span>
-                                                            <span class="fw-bold fs-5 text-warning" id="completion-rate">0%</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">完成率</span>
+                                                            <span class="fw-semibold" id="completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="mt-auto">
-                                                <div class="progress" style="height: 8px; background-color: rgba(255,255,255,0.2);">
-                                                    <div id="completion-progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background: linear-gradient(90deg, #9CAF88 0%, #C4A484 100%);"></div>
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">連續訓練</span>
+                                                            <span class="fw-semibold" id="consecutive-days" style="color: #495057; font-size: 0.875rem;">0天</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">平均時長</span>
+                                                            <span class="fw-semibold" id="avg-duration" style="color: #495057; font-size: 0.875rem;">0分鐘</span>
+                                                        </div>
+                                                    </div>
+                                                    <div class="stat-card rounded-2 p-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">本週目標</span>
+                                                            <span class="fw-semibold" id="weekly-goal" style="color: #495057; font-size: 0.875rem;">7天</span>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </div>
@@ -2310,18 +2362,33 @@
                             
                             <!-- 年統計分頁 -->
                             <div class="tab-pane fade" id="year-tab" role="tabpanel">
-                                <div class="row align-items-center mb-4">
-                                    <div class="col-md-8">
-                                        <h6 class="mb-2">年統計設定</h6>
-                                        <p class="text-muted mb-0 small">選擇要查看的年份</p>
-                                    </div>
-                                    <div class="col-md-4">
-                                        <div class="stats-controls-container">
-                                            <div class="stats-control-item">
-                                                <label for="year-year-select" class="form-label me-2 mb-0 fw-semibold">年份：</label>
-                                                <select class="form-select rounded-pill border-primary" id="year-year-select" onchange="updateCompletionStats()">
-                                                    <!-- 動態生成年份選項 -->
-                                                </select>
+                                <div class="row mb-4">
+                                    <div class="col-12">
+                                        <div class="card border-0 shadow-sm">
+                                            <div class="card-body p-4">
+                                                <div class="row align-items-center mb-3">
+                                                    <div class="col-md-6">
+                                                        <h6 class="mb-1">年統計設定</h6>
+                                                        <p class="text-muted mb-0 small">選擇要查看的年份</p>
+                                                    </div>
+                                                </div>
+                                                <div class="row g-3">
+                                                    <div class="col-md-6">
+                                                        <div class="form-floating">
+                                                            <select class="form-select border-0 bg-light" id="year-year-select" onchange="updateCompletionStats()">
+                                                                <!-- 動態生成年份選項 -->
+                                                            </select>
+                                                            <label for="year-year-select" class="text-muted">年份</label>
+                                                        </div>
+                                                    </div>
+                                                    <div class="col-md-6">
+                                                        <div class="d-flex align-items-center h-100">
+                                                            <button class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats()">
+                                                                <i class="bi bi-search me-2"></i>查詢統計
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
@@ -2332,35 +2399,30 @@
                                     </div>
                                     <div class="col-md-4">
                                         <div class="d-flex flex-column h-100">
-                                            <div class="stats-card p-3 rounded-3" style="background: linear-gradient(135deg, #8B9DC3 0%, #A8B5A0 100%); color: white;">
+                                            <div class="stats-card p-3 rounded-3" style="background: #F8F9FA; color: #495057; border: 1px solid #E9ECEF;">
                                                 <div class="d-flex align-items-center mb-3">
-                                                    <i class="bi bi-graph-up-arrow me-2 fs-4"></i>
-                                                    <h6 class="mb-0 fw-semibold">統計概覽</h6>
+                                                    <i class="bi bi-graph-up-arrow me-2 fs-5" style="color: #6C757D;"></i>
+                                                    <h6 class="mb-0 fw-semibold" style="color: #495057;">年統計概覽</h6>
                                                 </div>
                                                 <div class="stats-grid">
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2 mb-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">總訓練天數</span>
-                                                            <span class="fw-bold fs-5" id="year-total-training-days">0</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">總訓練天數</span>
+                                                            <span class="fw-semibold" id="year-total-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2 mb-2">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">已完成天數</span>
-                                                            <span class="fw-bold fs-5 text-success" id="year-completed-training-days">0</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">已完成天數</span>
+                                                            <span class="fw-semibold" id="year-completed-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
-                                                    <div class="stat-card bg-white bg-opacity-20 rounded-2 p-2">
+                                                    <div class="stat-card rounded-2 p-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small">完成率</span>
-                                                            <span class="fw-bold fs-5 text-warning" id="year-completion-rate">0%</span>
+                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">完成率</span>
+                                                            <span class="fw-semibold" id="year-completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
                                                         </div>
                                                     </div>
-                                                </div>
-                                            </div>
-                                            <div class="mt-auto">
-                                                <div class="progress" style="height: 8px; background-color: rgba(255,255,255,0.2);">
-                                                    <div id="year-completion-progress-bar" class="progress-bar" role="progressbar" style="width: 0%; background: linear-gradient(90deg, #9CAF88 0%, #C4A484 100%);"></div>
                                                 </div>
                                             </div>
                                         </div>
@@ -3003,9 +3065,8 @@
             const totalDaysEl = document.getElementById('total-training-days');
             const completedDaysEl = document.getElementById('completed-training-days');
             const completionRateEl = document.getElementById('completion-rate');
-            const progressBarEl = document.getElementById('completion-progress-bar');
             
-            if (!totalDaysEl || !completedDaysEl || !completionRateEl || !progressBarEl) return;
+            if (!totalDaysEl || !completedDaysEl || !completionRateEl) return;
             
             let totalDays = 0;
             let completedDays = 0;
@@ -3275,12 +3336,6 @@
                 document.getElementById('total-training-days').textContent = totalDays;
                 document.getElementById('completed-training-days').textContent = completedDays;
                 document.getElementById('completion-rate').textContent = completionRate + '%';
-                
-                // 更新進度條
-                const progressBar = document.getElementById('completion-progress-bar');
-                if (progressBar) {
-                    progressBar.style.width = completionRate + '%';
-                }
             }
 
             // 更新月統計圖表（模擬數據）
@@ -3299,11 +3354,6 @@
                 document.getElementById('month-total-training-days').textContent = monthTotalDays;
                 document.getElementById('month-completed-training-days').textContent = monthCompletedDays;
                 document.getElementById('month-completion-rate').textContent = monthCompletionRate + '%';
-                
-                const monthProgressBar = document.getElementById('month-completion-progress-bar');
-                if (monthProgressBar) {
-                    monthProgressBar.style.width = monthCompletionRate + '%';
-                }
             }
 
             // 更新年統計圖表（模擬數據）
@@ -3322,11 +3372,6 @@
                 document.getElementById('year-total-training-days').textContent = yearTotalDays;
                 document.getElementById('year-completed-training-days').textContent = yearCompletedDays;
                 document.getElementById('year-completion-rate').textContent = yearCompletionRate + '%';
-                
-                const yearProgressBar = document.getElementById('year-completion-progress-bar');
-                if (yearProgressBar) {
-                    yearProgressBar.style.width = yearCompletionRate + '%';
-                }
             }
         }
         // 獲取週鍵值
