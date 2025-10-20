@@ -323,9 +323,9 @@
         .empty-state {
             text-align: center;
             padding: 40px 20px;
-            background: var(--morandi-cream);
+            background: #f8f9fa;
             border-radius: 12px;
-            border: 2px dashed var(--morandi-gray);
+            border: 2px dashed var(--morandi-light-blue);
         }
 
         .empty-state p {
@@ -856,7 +856,6 @@
 
         /* 改善整體視覺層次 */
         .page-heading h3 {
-            color: var(--morandi-text);
             font-weight: 700;
         }
 
@@ -871,12 +870,7 @@
         }
 
         .breadcrumb-item a {
-            color: #0d6efd !important;
             text-decoration: none;
-        }
-
-        .breadcrumb-item a:hover {
-            color: #0a58ca !important;
         }
 
         .breadcrumb-item.active {
@@ -960,9 +954,7 @@
                     <div class="row">
                         <div class="col-12 col-md-6 order-md-1 order-last">
                             <h3 class="mb-4-3 me-3">我的最愛🤍</h3>
-                            <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
-                                以下是您收藏的訓練動作，可作為專屬健身計畫的參考依據，方便快速查看與管理。
-                            </p>
+                            <p class="text-muted mt-2 mb-4" style="font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">以下是您收藏的訓練動作，可作為專屬健身計畫的參考依據，方便快速查看與管理。</p>
                         </div>
                         <div class="col-12 col-md-6 order-md-2 order-first">
                             <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
