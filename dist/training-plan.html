@@ -445,9 +445,24 @@
             transition: all 0.2s ease;
         }
 
-        .training-item:hover {
-            background: #e9ecef !important;
-            transform: translateY(-1px);
+        .training-item.completed {
+            background: #d4edda !important;
+            border-color: #c3e6cb;
+            opacity: 0.8;
+        }
+
+        .training-item.completed .training-name {
+            text-decoration: line-through;
+            color: #6c757d;
+        }
+
+        .training-item.completed .muscle-group-badge {
+            background-color: #6c757d !important;
+            color: white !important;
+        }
+
+        .training-item.completed .training-item-details {
+            opacity: 0.7;
         }
 
         .training-item-header {
@@ -2354,7 +2369,7 @@
                                                     <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="small" style="color: #6C757D; font-size: 0.75rem;">總訓練天數</span>
-                                                            <span class="fw-semibold" id="total-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
+                                                            <span class="fw-semibold" id="week-total-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
                                                     <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
@@ -2461,7 +2476,7 @@
                                                     <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="small" style="color: #6C757D; font-size: 0.75rem;">總訓練天數</span>
-                                                            <span class="fw-semibold" id="total-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
+                                                            <span class="fw-semibold" id="month-total-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
                                                     <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
@@ -2723,7 +2738,6 @@
         let currentWeek = 0;
         let selectedDay = '';
         let exercises = [];
-        let dayCompletionFromDb = { monday: null, tuesday: null, wednesday: null, thursday: null, friday: null, saturday: null, sunday: null };
         let completionChart = null; // ApexCharts 圖表實例
         let completionWeek = 0; // 完成度統計顯示的週數
         let weeklyPlan = {
@@ -3205,9 +3219,21 @@
 
         // 更新統計概覽
         function updateStatsOverview(data, timeUnit) {
-            const totalDaysEl = document.getElementById('total-training-days');
-            const completedDaysEl = document.getElementById('completed-training-days');
-            const completionRateEl = document.getElementById('completion-rate');
+            let totalDaysEl, completedDaysEl, completionRateEl;
+            
+            if (timeUnit === 'week') {
+                totalDaysEl = document.getElementById('week-total-training-days');
+                completedDaysEl = document.getElementById('completed-training-days');
+                completionRateEl = document.getElementById('completion-rate');
+            } else if (timeUnit === 'month') {
+                totalDaysEl = document.getElementById('month-total-training-days');
+                completedDaysEl = document.getElementById('month-completed-training-days');
+                completionRateEl = document.getElementById('month-completion-rate');
+            } else if (timeUnit === 'year') {
+                totalDaysEl = document.getElementById('year-total-training-days');
+                completedDaysEl = document.getElementById('year-completed-training-days');
+                completionRateEl = document.getElementById('year-completion-rate');
+            }
             
             if (!totalDaysEl || !completedDaysEl || !completionRateEl) return;
             
@@ -3215,16 +3241,19 @@
             let completedDays = 0;
             
             if (timeUnit === 'week') {
-                // 週模式：計算7天
-                totalDays = 7;
+                // 週模式：只計算有訓練計畫的天數
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                totalDays = days.filter(day => data[day] !== undefined && data[day] !== -1).length;
                 completedDays = Object.values(data).filter(val => val === 1).length;
             } else if (timeUnit === 'month') {
-                // 月模式：計算4週
-                totalDays = 4;
-                completedDays = Object.values(data).filter(val => val === 1).length;
+                // 月模式：計算有訓練計畫的週數
+                const weeks = ['week1', 'week2', 'week3', 'week4'];
+                totalDays = weeks.filter(week => data[week] !== undefined).length;
+                completedDays = Object.values(data).filter(val => val > 0).length;
             } else if (timeUnit === 'year') {
-                // 年模式：計算12個月
-                totalDays = 12;
+                // 年模式：計算有訓練計畫的月數
+                const months = Object.keys(data).filter(key => key.startsWith('month_'));
+                totalDays = months.length;
                 completedDays = Object.values(data).filter(val => val > 0).length;
             }
             
@@ -3233,7 +3262,14 @@
             totalDaysEl.textContent = totalDays;
             completedDaysEl.textContent = completedDays;
             completionRateEl.textContent = completionRate + '%';
-            progressBarEl.style.width = completionRate + '%';
+            
+            // 更新進度條
+            const progressBarEl = document.querySelector('.progress-bar');
+            if (progressBarEl) {
+                progressBarEl.style.width = completionRate + '%';
+            }
+            
+            console.log(`統計概覽更新: ${completedDays}/${totalDays} (${completionRate}%)`);
         }
 
         // 載入週完成度數據
@@ -3243,18 +3279,31 @@
                 const weekEnd = new Date(weekStart);
                 weekEnd.setDate(weekStart.getDate() + 6);
                 
-                const response = await fetch('completion-api.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'getCompletionByDateRange',
-                        startDate: formatDateForInput(weekStart),
-                        endDate: formatDateForInput(weekEnd)
-                    })
-                });
+                // 從localStorage讀取完成狀態數據
+                const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+                const completionData = {};
                 
-                const data = await response.json();
-                return data.success ? data.completion : {};
+                // 計算該週每天的完成狀態
+                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(weekStart);
+                    date.setDate(weekStart.getDate() + i);
+                    const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    
+                    const dayExercises = dailyTrainingData[dateKey] || [];
+                    if (dayExercises.length > 0) {
+                        // 檢查是否所有動作都已完成
+                        const allCompleted = dayExercises.every(exercise => exercise.completed === true);
+                        completionData[days[i]] = allCompleted ? 1 : 0;
+                    } else {
+                        // 沒有訓練計畫的天數不包含在統計中
+                        completionData[days[i]] = -1; // 使用-1表示沒有訓練計畫
+                    }
+                }
+                
+                console.log('週完成度數據:', completionData);
+                return completionData;
             } catch (error) {
                 console.error('載入週數據失敗:', error);
                 return {};
@@ -3267,18 +3316,45 @@
                 const monthStart = new Date(year, month - 1, 1);
                 const monthEnd = new Date(year, month, 0);
                 
-                const response = await fetch('completion-api.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'getMonthlyCompletion',
-                        year: year,
-                        month: month
-                    })
-                });
+                // 從localStorage讀取完成狀態數據
+                const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+                const completionData = {};
                 
-                const data = await response.json();
-                return data.success ? data.completion : {};
+                // 計算該月每週的完成狀態
+                const weeks = ['week1', 'week2', 'week3', 'week4'];
+                
+                for (let weekIndex = 0; weekIndex < 4; weekIndex++) {
+                    const weekStart = new Date(monthStart);
+                    weekStart.setDate(monthStart.getDate() + (weekIndex * 7));
+                    const weekEnd = new Date(weekStart);
+                    weekEnd.setDate(weekStart.getDate() + 6);
+                    
+                    let weekCompletedDays = 0;
+                    let weekTotalDays = 0;
+                    
+                    // 計算該週每天的完成狀態
+                    for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
+                        const date = new Date(weekStart);
+                        date.setDate(weekStart.getDate() + dayOffset);
+                        
+                        // 確保不超過月份範圍
+                        if (date.getMonth() !== month - 1) continue;
+                        
+                        const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                        const dayExercises = dailyTrainingData[dateKey] || [];
+                        
+                        if (dayExercises.length > 0) {
+                            weekTotalDays++;
+                            const allCompleted = dayExercises.every(exercise => exercise.completed === true);
+                            if (allCompleted) weekCompletedDays++;
+                        }
+                    }
+                    
+                    completionData[weeks[weekIndex]] = weekTotalDays > 0 ? Math.round((weekCompletedDays / weekTotalDays) * 100) : 0;
+                }
+                
+                console.log('月完成度數據:', completionData);
+                return completionData;
             } catch (error) {
                 console.error('載入月數據失敗:', error);
                 return {};
@@ -3288,17 +3364,38 @@
         // 載入年完成度數據
         async function loadYearCompletionData(year) {
             try {
-                const response = await fetch('completion-api.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'getYearlyCompletion',
-                        year: year
-                    })
-                });
+                // 從localStorage讀取完成狀態數據
+                const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+                const completionData = {};
                 
-                const data = await response.json();
-                return data.success ? data.completion : {};
+                // 計算該年每月的完成狀態
+                for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
+                    const monthStart = new Date(year, monthIndex - 1, 1);
+                    const monthEnd = new Date(year, monthIndex, 0);
+                    
+                    let monthCompletedDays = 0;
+                    let monthTotalDays = 0;
+                    
+                    // 計算該月每天的完成狀態
+                    for (let dayOffset = 0; dayOffset < monthEnd.getDate(); dayOffset++) {
+                        const date = new Date(monthStart);
+                        date.setDate(monthStart.getDate() + dayOffset);
+                        
+                        const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                        const dayExercises = dailyTrainingData[dateKey] || [];
+                        
+                        if (dayExercises.length > 0) {
+                            monthTotalDays++;
+                            const allCompleted = dayExercises.every(exercise => exercise.completed === true);
+                            if (allCompleted) monthCompletedDays++;
+                        }
+                    }
+                    
+                    completionData[`month_${monthIndex}`] = monthTotalDays > 0 ? Math.round((monthCompletedDays / monthTotalDays) * 100) : 0;
+                }
+                
+                console.log('年完成度數據:', completionData);
+                return completionData;
             } catch (error) {
                 console.error('載入年數據失敗:', error);
                 return {};
@@ -3315,84 +3412,6 @@
         }
 
         // 載入指定日期範圍的完成度數據
-        async function loadDateRangeCompletionData(startDate, endDate) {
-            try {
-                console.log('載入日期範圍完成度數據：', startDate, '至', endDate);
-                
-                // 從資料庫載入指定日期範圍的完成度數據
-                const response = await fetch('completion-api.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        action: 'getCompletionByDateRange',
-                        startDate: formatDateForInput(startDate),
-                        endDate: formatDateForInput(endDate)
-                    })
-                });
-                
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.success) {
-                        dayCompletionFromDb = data.completion || {};
-                        console.log('載入日期範圍完成度數據成功:', dayCompletionFromDb);
-                    } else {
-                        console.log('載入日期範圍完成度數據失敗:', data.message);
-                        dayCompletionFromDb = {};
-                    }
-                } else {
-                    console.log('載入日期範圍完成度數據失敗，HTTP狀態:', response.status);
-                    dayCompletionFromDb = {};
-                }
-                
-            } catch (error) {
-                console.error('載入日期範圍完成度數據時發生錯誤:', error);
-                dayCompletionFromDb = {};
-            }
-        }
-
-        // 載入指定週數的完成度數據
-        async function loadCompletionWeekData(weekNumber) {
-            try {
-                // 從 localStorage 取得該週的 planId
-                const saved = localStorage.getItem('allTrainingPlans');
-                let planId = null;
-                if (saved) {
-                    try {
-                        const parsed = JSON.parse(saved);
-                        if (parsed && parsed[weekNumber] && parsed[weekNumber].planId) {
-                            planId = parsed[weekNumber].planId;
-                        }
-                    } catch (e) {}
-                }
-
-                if (!planId) {
-                    console.log('第', weekNumber + 1, '週沒有儲存的計畫，清空完成度數據');
-                    dayCompletionFromDb = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
-                    return;
-                }
-
-                // 從資料庫載入該週的完成度數據
-                const res = await fetch(`completion-api.php?action=get_plan_completion_detail&plan_id=${planId}`);
-                const json = await res.json();
-                if (!json.success || !Array.isArray(json.rows)) {
-                    throw new Error(json.error || '讀取完成紀錄失敗');
-                }
-
-                // 重置完成度數據
-                dayCompletionFromDb = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
-                json.rows.forEach(r => { 
-                    dayCompletionFromDb[r.day_of_week] = Number(r.is_completed) || 0; 
-                });
-
-                console.log('第', weekNumber + 1, '週完成度數據已載入:', dayCompletionFromDb);
-            } catch (err) {
-                console.error('載入第', weekNumber + 1, '週完成度數據失敗:', err);
-                dayCompletionFromDb = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
-            }
-        }
-
         // 使用莫蘭迪色系的圖表更新函式
         function updateCompletionChartWithData(data, timeUnit) {
             if (!completionChart) return;
@@ -3416,13 +3435,18 @@
                 categories = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
                 chartData = categories.map((day, index) => {
                     const dayKey = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][index];
-                    return data[dayKey] === 1 ? 1 : 0;
+                    const value = data[dayKey];
+                    // -1表示沒有訓練計畫，不顯示在圖表中
+                    return value === -1 ? null : (value === 1 ? 1 : 0);
                 });
                 colors = [morandiColors.primary];
             } else if (timeUnit === 'month') {
                 // 月模式：顯示4週的完成度
                 categories = ['第1週', '第2週', '第3週', '第4週'];
-                chartData = [0, 0, 0, 0]; // 這裡需要根據實際數據計算
+                chartData = categories.map((week, index) => {
+                    const weekKey = `week${index + 1}`;
+                    return data[weekKey] || 0;
+                });
                 colors = [morandiColors.secondary];
             } else if (timeUnit === 'year') {
                 // 年模式：顯示12個月的完成度
@@ -3432,6 +3456,8 @@
                 });
                 colors = [morandiColors.accent];
             }
+
+            console.log('圖表數據更新:', { timeUnit, chartData, categories });
 
             // 更新圖表
             completionChart.updateOptions({
@@ -3444,78 +3470,6 @@
                     data: chartData
                 }]
             });
-        }
-
-        // 更新完成度圖表
-        function updateCompletionChart() {
-            // 更新週統計圖表
-            if (weekCompletionChart) {
-                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                const chartData = days.map(day => {
-                    // 檢查該天是否有訓練計畫（優先檢查 dayCompletionFromDb）
-                    const hasPlan = dayCompletionFromDb.hasOwnProperty(day) || (weeklyPlan[day] && weeklyPlan[day].length > 0);
-                    if (!hasPlan) return 0; // 沒有計畫的天數不顯示
-                    
-                    // 檢查是否已完成
-                    const isCompleted = dayCompletionFromDb[day] === 1;
-                    return isCompleted ? 1 : 0;
-                });
-
-                // 更新圖表數據
-                weekCompletionChart.updateSeries([{
-                    name: '完成度',
-                    data: chartData
-                }]);
-
-                // 更新統計數據
-                const totalDays = days.filter(day => weeklyPlan[day] && weeklyPlan[day].length > 0).length;
-                const completedDays = days.filter(day => {
-                    const hasPlan = weeklyPlan[day] && weeklyPlan[day].length > 0;
-                    return hasPlan && dayCompletionFromDb[day] === 1;
-                }).length;
-                const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
-
-                // 更新統計顯示
-                document.getElementById('total-training-days').textContent = totalDays;
-                document.getElementById('completed-training-days').textContent = completedDays;
-                document.getElementById('completion-rate').textContent = completionRate + '%';
-            }
-
-            // 更新月統計圖表（模擬數據）
-            if (monthCompletionChart) {
-                const monthData = [0, 0, 0, 0]; // 第1-4週的完成度
-                monthCompletionChart.updateSeries([{
-                    name: '完成度',
-                    data: monthData
-                }]);
-
-                // 更新月統計顯示
-                const monthTotalDays = 28; // 假設一個月有28天訓練
-                const monthCompletedDays = monthData.reduce((sum, val) => sum + val, 0) * 7; // 每週7天
-                const monthCompletionRate = Math.round((monthCompletedDays / monthTotalDays) * 100);
-
-                document.getElementById('month-total-training-days').textContent = monthTotalDays;
-                document.getElementById('month-completed-training-days').textContent = monthCompletedDays;
-                document.getElementById('month-completion-rate').textContent = monthCompletionRate + '%';
-            }
-
-            // 更新年統計圖表（模擬數據）
-            if (yearCompletionChart) {
-                const yearData = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]; // 1-12月的完成度
-                yearCompletionChart.updateSeries([{
-                    name: '完成度',
-                    data: yearData
-                }]);
-
-                // 更新年統計顯示
-                const yearTotalDays = 365; // 假設一年有365天訓練
-                const yearCompletedDays = yearData.reduce((sum, val) => sum + val, 0) * 30; // 每月30天
-                const yearCompletionRate = Math.round((yearCompletedDays / yearTotalDays) * 100);
-
-                document.getElementById('year-total-training-days').textContent = yearTotalDays;
-                document.getElementById('year-completed-training-days').textContent = yearCompletedDays;
-                document.getElementById('year-completion-rate').textContent = yearCompletionRate + '%';
-            }
         }
         // 獲取週鍵值
         function getWeekKey(date) {
@@ -3868,7 +3822,6 @@
                     
                     // 清除本週的完成狀態（因為重新儲存了新的訓練計畫）
                     console.log('清除本週完成狀態，因為重新儲存了訓練計畫');
-                    dayCompletionFromDb = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
                     
                     // 清除所有運動的完成狀態
                     const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
@@ -3885,7 +3838,6 @@
                     updateWeekCompletion();
                     
                     // 重新載入完成統計（會顯示新的狀態）
-                    await loadPlanCompletionStats();
                     
                     // 更新行事曆數據
                     updateCalendarTrainingData();
@@ -4562,7 +4514,7 @@
                 const weight = exercise.weight ? `${exercise.weight}kg` : '';
                 
                 content += `
-                    <div class="training-item">
+                    <div class="training-item ${exercise.completed ? 'completed' : ''}">
                         <div class="training-item-header">
                             <div class="training-item-left">
                                 <span class="training-number">${index + 1}</span>
@@ -4570,6 +4522,9 @@
                                 <span class="muscle-group-badge">${exercise.muscleGroup}</span>
                             </div>
                             <div class="training-item-actions">
+                                <button class="btn btn-sm btn-complete-exercise ${exercise.completed ? 'btn-success' : 'btn-outline-success'}" onclick="toggleExerciseCompletion('${date.toISOString()}', ${index})">
+                                    <i class="bi bi-check-circle"></i> ${exercise.completed ? '已完成' : '標記完成'}
+                                </button>
                                 <button class="btn btn-sm btn-edit-exercise" onclick="editSingleExercise('${date.toISOString()}', ${index})">
                                     <i class="bi bi-pencil"></i> 編輯
                                 </button>
@@ -4995,6 +4950,167 @@
              // 顯示成功訊息
              showSuccessMessage('訓練動作已移除');
          }
+
+        // 切換訓練動作完成狀態
+        function toggleExerciseCompletion(dateString, exerciseIndex) {
+            const date = new Date(dateString);
+            const dayTrainingData = getDayTrainingData(date);
+            
+            if (!dayTrainingData || !dayTrainingData[exerciseIndex]) {
+                alert('找不到要標記的訓練動作');
+                return;
+            }
+            
+            // 切換完成狀態
+            dayTrainingData[exerciseIndex].completed = !dayTrainingData[exerciseIndex].completed;
+            
+            // 儲存到localStorage
+            saveDailyTrainingData(date, dayTrainingData);
+            
+            // 更新行事曆
+            updateCalendarTrainingData();
+            
+            // 顯示成功訊息
+            const status = dayTrainingData[exerciseIndex].completed ? '已完成' : '未完成';
+            showSuccessMessage(`訓練動作已標記為${status}`);
+            
+            // 重新顯示訓練內容詳情
+            showDayTrainingDetails(date, dayTrainingData);
+            
+            // 更新進度統計
+            updateTrainingProgressStats();
+            
+            // 更新統計圖表
+            updateCompletionStats();
+        }
+
+        // 更新訓練進度統計
+        function updateTrainingProgressStats() {
+            const now = new Date();
+            
+            // 計算週完成度
+            const weekProgress = calculateWeekProgress(now);
+            updateWeekProgressDisplay(weekProgress);
+            
+            // 計算月完成度
+            const monthProgress = calculateMonthProgress(now);
+            updateMonthProgressDisplay(monthProgress);
+            
+            // 計算年完成度
+            const yearProgress = calculateYearProgress(now);
+            updateYearProgressDisplay(yearProgress);
+        }
+
+        // 計算週完成度
+        function calculateWeekProgress(currentDate) {
+            const startOfWeek = new Date(currentDate);
+            startOfWeek.setDate(currentDate.getDate() - currentDate.getDay() + 1); // 週一開始
+            
+            let totalExercises = 0;
+            let completedExercises = 0;
+            
+            // 計算本週7天的完成度
+            for (let i = 0; i < 7; i++) {
+                const date = new Date(startOfWeek);
+                date.setDate(startOfWeek.getDate() + i);
+                
+                const dayTrainingData = getDayTrainingData(date);
+                if (dayTrainingData && dayTrainingData.length > 0) {
+                    totalExercises += dayTrainingData.length;
+                    completedExercises += dayTrainingData.filter(exercise => exercise.completed).length;
+                }
+            }
+            
+            return {
+                total: totalExercises,
+                completed: completedExercises,
+                percentage: totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0
+            };
+        }
+
+        // 計算月完成度
+        function calculateMonthProgress(currentDate) {
+            const startOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+            const endOfMonth = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0);
+            
+            let totalExercises = 0;
+            let completedExercises = 0;
+            
+            // 計算本月每天的完成度
+            for (let date = new Date(startOfMonth); date <= endOfMonth; date.setDate(date.getDate() + 1)) {
+                const dayTrainingData = getDayTrainingData(date);
+                if (dayTrainingData && dayTrainingData.length > 0) {
+                    totalExercises += dayTrainingData.length;
+                    completedExercises += dayTrainingData.filter(exercise => exercise.completed).length;
+                }
+            }
+            
+            return {
+                total: totalExercises,
+                completed: completedExercises,
+                percentage: totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0
+            };
+        }
+
+        // 計算年完成度
+        function calculateYearProgress(currentDate) {
+            const startOfYear = new Date(currentDate.getFullYear(), 0, 1);
+            const endOfYear = new Date(currentDate.getFullYear(), 11, 31);
+            
+            let totalExercises = 0;
+            let completedExercises = 0;
+            
+            // 計算今年每天的完成度
+            for (let date = new Date(startOfYear); date <= endOfYear; date.setDate(date.getDate() + 1)) {
+                const dayTrainingData = getDayTrainingData(date);
+                if (dayTrainingData && dayTrainingData.length > 0) {
+                    totalExercises += dayTrainingData.length;
+                    completedExercises += dayTrainingData.filter(exercise => exercise.completed).length;
+                }
+            }
+            
+            return {
+                total: totalExercises,
+                completed: completedExercises,
+                percentage: totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0
+            };
+        }
+
+        // 更新週進度顯示
+        function updateWeekProgressDisplay(progress) {
+            const completionRateEl = document.getElementById('completion-rate');
+            if (completionRateEl) {
+                completionRateEl.textContent = progress.percentage + '%';
+            }
+            
+            // 更新進度條
+            const progressBarEl = document.querySelector('.progress-bar');
+            if (progressBarEl) {
+                progressBarEl.style.width = progress.percentage + '%';
+            }
+            
+            console.log(`本週完成度: ${progress.completed}/${progress.total} (${progress.percentage}%)`);
+        }
+
+        // 更新月進度顯示
+        function updateMonthProgressDisplay(progress) {
+            const monthCompletionRateEl = document.getElementById('month-completion-rate');
+            if (monthCompletionRateEl) {
+                monthCompletionRateEl.textContent = progress.percentage + '%';
+            }
+            
+            console.log(`本月完成度: ${progress.completed}/${progress.total} (${progress.percentage}%)`);
+        }
+
+        // 更新年進度顯示
+        function updateYearProgressDisplay(progress) {
+            const yearCompletionRateEl = document.getElementById('year-completion-rate');
+            if (yearCompletionRateEl) {
+                yearCompletionRateEl.textContent = progress.percentage + '%';
+            }
+            
+            console.log(`今年完成度: ${progress.completed}/${progress.total} (${progress.percentage}%)`);
+        }
 
         // 為某一天新增訓練動作（獨立於週次）
         function addTraining(dateString) {
@@ -5778,7 +5894,6 @@
                 
                 // 載入當前週次的計畫
                 await loadPlan();
-                await loadPlanCompletionStats();
                 updateWeekDates();
                 renderWeeklyPlan();
                 updateStats();
@@ -5787,6 +5902,9 @@
                 // 初始化行事曆
                 renderCalendar();
                 updateCalendarTrainingData();
+                
+                // 初始化進度統計
+                updateTrainingProgressStats();
                 
                 renderTrainingTemplates();
                 
@@ -6074,7 +6192,7 @@
             }
 
             // 以資料庫狀態為準
-            const isCompleted = (dayCompletionFromDb && typeof dayCompletionFromDb[day] === 'number') ? (dayCompletionFromDb[day] === 1) : weeklyPlan[day].some(exercise => exercise.completed);
+            const isCompleted = weeklyPlan[day].some(exercise => exercise.completed);
             const newStatus = !isCompleted;
             console.log('isCompleted:', isCompleted, 'newStatus:', newStatus);
 
@@ -6132,9 +6250,7 @@
                 try { res = JSON.parse(text); } catch(e) { console.error('完成API回應非JSON:', text); throw new Error('完成API回應非JSON'); }
                 if (!res.success) throw new Error(res.error || '更新失敗');
                 // 更新快取並重繪
-                dayCompletionFromDb[day] = newStatus ? 1 : 0;
                 renderWeeklyPlan();
-                await loadPlanCompletionStats();
                 console.log(`${day} 完成狀態已更新(資料庫): ${newStatus ? '已完成' : '未完成'}`);
             }).catch(err => {
                 console.error('儲存日完成狀態失敗:', err);
@@ -6584,47 +6700,6 @@
                 document.getElementById('total-sets').textContent = 0;
             }
         }
-        // 依據 training_plan_completion 顯示本週每日完成清單與完成率
-        async function loadPlanCompletionStats(overridePlanId = null) {
-            try {
-                // 由於完成統計表格已刪除，這個函數現在只載入數據到變數中
-                console.log('載入完成統計數據...');
-
-                // 取得目前週的 planId：優先 override，其次 localStorage
-                let planId = overridePlanId || null;
-                const saved = localStorage.getItem('allTrainingPlans');
-                if (saved) {
-                    try {
-                        const parsed = JSON.parse(saved);
-                        if (!planId && parsed && parsed[currentWeek] && parsed[currentWeek].planId) {
-                            planId = parsed[currentWeek].planId;
-                        }
-                    } catch (e) {}
-                }
-
-                if (!planId) {
-                    console.log('尚未儲存本週計畫，無完成紀錄');
-                    return;
-                }
-
-                const res = await fetch(`completion-api.php?action=get_plan_completion_detail&plan_id=${planId}`);
-                const json = await res.json();
-                if (!json.success || !Array.isArray(json.rows)) {
-                    throw new Error(json.error || '讀取完成紀錄失敗');
-                }
-
-                // 快取 DB 狀態供週菜單渲染
-                dayCompletionFromDb = { monday: 0, tuesday: 0, wednesday: 0, thursday: 0, friday: 0, saturday: 0, sunday: 0 };
-                json.rows.forEach(r => { dayCompletionFromDb[r.day_of_week] = Number(r.is_completed) || 0; });
-
-                console.log('完成統計數據已載入:', dayCompletionFromDb);
-                
-                // 更新圖表
-                updateCompletionChart();
-            } catch (err) {
-                console.error('loadPlanCompletionStats error:', err);
-            }
-        }
 
         // 刪除本週計畫（含明細與完成紀錄）
         async function deleteCurrentPlan() {
@@ -6731,7 +6806,6 @@
                 // 重置當週資料與畫面
                 resetWeeklyPlan();
                 renderWeeklyPlan();
-                await loadPlanCompletionStats();
                 await loadPlanHistoryOptions();
                 updateStats();
                 // 同步更新行事曆顯示
@@ -6767,7 +6841,6 @@
                 select.onchange = async function () {
                     const chosenPlanId = this.value;
                     if (!chosenPlanId) return;
-                    await loadPlanCompletionStats(chosenPlanId);
                 };
 
                 // 預設帶入 localStorage 的當前週 planId
@@ -8347,12 +8420,9 @@
         // 完成記錄相關功能（以資料庫為主）
         let hasUnsavedChanges = false; // 追蹤是否有未儲存的變更
 
-        // 檢查某一天是否已完成（以 DB 快取 dayCompletionFromDb 為主）
+        // 檢查某一天是否已完成
         function isDayCompleted(day) {
-            if (dayCompletionFromDb && typeof dayCompletionFromDb[day] === 'number') {
-                return Number(dayCompletionFromDb[day]) === 1;
-            }
-            return false;
+            return weeklyPlan[day] && weeklyPlan[day].some(exercise => exercise.completed);
         }
 
         // 檢查當前週是否有儲存到資料庫
@@ -8637,14 +8707,14 @@
             document.getElementById('total-sets').textContent = totalSets;
         }
 
-        // 更新每週完成度（以 DB dayCompletionFromDb 為主）
+        // 更新每週完成度
         function updateWeekCompletion() {
             const days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
             // 僅計入有實際訓練（非休息日）的天數
             const totalDaysWithPlan = days.filter(d => Array.isArray(weeklyPlan[d]) && weeklyPlan[d].some(ex => Number(ex.id) !== 0)).length;
             let percent = 0;
             if (totalDaysWithPlan > 0) {
-                const completedDays = days.filter(d => Number(dayCompletionFromDb?.[d] || 0) === 1).length;
+                const completedDays = days.filter(d => weeklyPlan[d] && weeklyPlan[d].some(exercise => exercise.completed)).length;
                 percent = Math.round((completedDays / totalDaysWithPlan) * 100);
             }
             
@@ -8691,10 +8761,9 @@
         // 顯示指定週的記錄（改為 DB，在 loadPlanCompletionStats 取得 rows 後由該函式渲染）
         function showWeekRecords() {
             // 由 loadPlanCompletionStats 來渲染
-            loadPlanCompletionStats();
         }
 
-        function showAllWeekRecords() { loadPlanCompletionStats(); }
+        function showAllWeekRecords() { }
 
         // 刪除單個完成記錄
         function deleteCompletionRecord(recordId) {
