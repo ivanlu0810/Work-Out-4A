@@ -1211,7 +1211,7 @@ $email = $_SESSION['email'] ?? 'No email';
             const mainContent = document.querySelector("#main");
             if(mainContent) {
                 const mainScroll = new PerfectScrollbar(mainContent, {
-                    wheelPropagation: false
+                    wheelPropagation: true
                 });
             }
         }

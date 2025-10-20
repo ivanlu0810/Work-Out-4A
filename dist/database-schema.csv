@@ -1,0 +1,81 @@
+資料表名稱,欄位名稱,資料型態,是否必填,預設值,說明,索引類型
+users,user_id,VARCHAR(36),是,,使用者唯一識別碼,PRIMARY KEY
+users,username,VARCHAR(50),是,,使用者名稱,
+users,email,VARCHAR(100),是,,登入用電子信箱,UNIQUE
+users,password_hash,VARCHAR(255),是,,加密後的密碼,
+users,role,VARCHAR(20),是,user,使用者角色 (user admin staff),
+users,gender,VARCHAR(10),是,,性別 (male female other),
+users,age,INT,是,,年齡,
+users,height_cm,FLOAT,是,,身高 (公分),
+users,weight_kg,FLOAT,是,,體重 (公斤),
+users,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+users,updated_at,TIMESTAMP,是,CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,最後更新時間,
+inbody_records,record_id,VARCHAR(36),是,,記錄唯一識別碼,PRIMARY KEY
+inbody_records,user_id,VARCHAR(36),是,,對應 users 表的 user_id,FOREIGN KEY
+inbody_records,test_date,DATETIME,是,,測量日期時間,
+inbody_records,skeletal_muscle,FLOAT,是,,骨骼肌重量 (kg),
+inbody_records,body_fat,FLOAT,是,,體脂肪重量 (kg),
+inbody_records,fat_percentage,FLOAT,是,,體脂率 (%),
+inbody_records,basal_metabolism,FLOAT,是,,基礎代謝量 (kcal),
+inbody_records,bmi,FLOAT,否,,身體質量指數,
+inbody_records,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+exercises,id,INT AUTO_INCREMENT,是,,動作唯一識別碼,PRIMARY KEY
+exercises,name,VARCHAR(100),是,,動作名稱,
+exercises,muscle_group,VARCHAR(50),是,,主要訓練肌群,
+exercises,target_muscle,VARCHAR(100),否,,目標肌群詳細說明,
+exercises,description,TEXT,否,,動作描述,
+exercises,difficulty_level,VARCHAR(20),是,beginner,難度等級 (beginner intermediate advanced),
+exercises,equipment_needed,VARCHAR(100),否,,所需器材,
+exercises,instructions,TEXT,否,,動作指導,
+exercises,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+exercises,updated_at,TIMESTAMP,是,CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,最後更新時間,
+training_plans,id,VARCHAR(36),是,,計畫唯一識別碼,PRIMARY KEY
+training_plans,user_id,VARCHAR(36),是,,對應 users 表的 user_id,FOREIGN KEY
+training_plans,week_start_date,DATE,是,,週開始日期,
+training_plans,week_number,INT,是,,週數編號,
+training_plans,plan_name,VARCHAR(100),是,,計畫名稱,
+training_plans,exercises,JSON,是,,週訓練計畫 (JSON 格式),
+training_plans,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+training_plans,updated_at,TIMESTAMP,是,CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,最後更新時間,
+meal_plans,id,VARCHAR(36),是,,餐單唯一識別碼,PRIMARY KEY
+meal_plans,user_id,VARCHAR(36),是,,對應 users 表的 user_id,FOREIGN KEY
+meal_plans,week_start_date,DATE,是,,週開始日期,
+meal_plans,week_number,INT,是,,週數編號,
+meal_plans,plan_name,VARCHAR(100),是,,餐單名稱,
+meal_plans,meals,JSON,是,,週餐單計畫 (JSON 格式),
+meal_plans,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+meal_plans,updated_at,TIMESTAMP,是,CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,最後更新時間,
+foods,id,INT AUTO_INCREMENT,是,,食物唯一識別碼,PRIMARY KEY
+foods,name,VARCHAR(100),是,,食物名稱,
+foods,brand,VARCHAR(50),否,,品牌名稱,
+foods,serving_size_g,FLOAT,是,,每份重量 (公克),
+foods,kcal,FLOAT,是,,卡路里 (kcal),
+foods,protein_g,FLOAT,是,,蛋白質 (公克),
+foods,carb_g,FLOAT,是,,碳水化合物 (公克),
+foods,fat_g,FLOAT,是,,脂肪 (公克),
+foods,sugar_g,FLOAT,否,,糖分 (公克),
+foods,fiber_g,FLOAT,否,,纖維 (公克),
+foods,sodium_mg,FLOAT,否,,鈉 (毫克),
+foods,tags,JSON,否,,食物標籤 (JSON 陣列),
+foods,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+foods,updated_at,TIMESTAMP,是,CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,最後更新時間,
+user_targets,id,VARCHAR(36),是,,目標唯一識別碼,PRIMARY KEY
+user_targets,user_id,VARCHAR(36),是,,對應 users 表的 user_id,FOREIGN KEY
+user_targets,kcal_target,FLOAT,是,,目標卡路里攝取量,
+user_targets,protein_target_g,FLOAT,是,,目標蛋白質攝取量 (公克),
+user_targets,carb_target_g,FLOAT,是,,目標碳水化合物攝取量 (公克),
+user_targets,fat_target_g,FLOAT,是,,目標脂肪攝取量 (公克),
+user_targets,meals_per_day,INT,是,3,每日餐次數,
+user_targets,diet_type,VARCHAR(50),是,balanced,飲食型態 (balanced cutting bulking),
+user_targets,allergens,JSON,否,,過敏原清單 (JSON 陣列),
+user_targets,dislikes,JSON,否,,不喜歡的食物 (JSON 陣列),
+user_targets,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+user_targets,updated_at,TIMESTAMP,是,CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,最後更新時間,
+user_preferences,id,VARCHAR(36),是,,偏好唯一識別碼,PRIMARY KEY
+user_preferences,user_id,VARCHAR(36),是,,對應 users 表的 user_id,FOREIGN KEY
+user_preferences,budget_level,VARCHAR(20),是,medium,預算等級 (low medium high),
+user_preferences,cooking_time_min,INT,是,30,可接受烹調時間 (分鐘),
+user_preferences,cuisine,VARCHAR(50),否,,偏好菜系,
+user_preferences,avoid_ingredients,JSON,否,,避免的食材 (JSON 陣列),
+user_preferences,created_at,TIMESTAMP,是,CURRENT_TIMESTAMP,建立時間,
+user_preferences,updated_at,TIMESTAMP,是,CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,最後更新時間,

@@ -48,20 +48,19 @@
 
         /* 確保主要內容區域可以滾動 */
         #main {
-            height: 100vh !important;
+            min-height: 100vh !important;
             overflow-y: auto !important;
         }
 
-        /* 確保內容足夠長以觸發滾動 */
+        /* 確保內容有適當的間距 */
         .page-content {
-            min-height: 120vh !important;
-            padding-bottom: 50px !important;
+            padding-bottom: 20px !important;
         }
 
         html,
         body {
             height: 100%;
-            overflow: hidden;
+            overflow: auto;
         }
 
         .card {
@@ -224,6 +223,22 @@
             border-color: #4e567d !important;
         }
 
+        /* 提示框按鈕顏色與基本資料頁面一致 */
+        #successModal .btn-primary,
+        #errorModal .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #ffffff !important;
+        }
+        #successModal .btn-primary:hover,
+        #successModal .btn-primary:focus,
+        #errorModal .btn-primary:hover,
+        #errorModal .btn-primary:focus {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+            color: #ffffff !important;
+        }
+
         #weight-chart,
         #body-composition-chart,
         #fat-percentage-chart,
@@ -247,7 +262,7 @@
 
         <div id="chat-container" class="position-relative">
             <div id="chat-icon" class="chat-icon">
-                <img src="assets/images/chat-icon.png" alt="chat icon" />`
+                <img src="assets/images/chat-icon.png" alt="chat icon" />
             </div>
             <div id="chat-window" class="chat-window">
                 <div class="header">AI健習生</div>
@@ -274,7 +289,7 @@
                         <li class="sidebar-item active">
                             <a href="index.html" class='sidebar-link'>
                                 <i class="bi bi-file-earmark-medical-fill"></i>
-                                <span>健康儀表板1111</span>
+                                <span>健康儀表板</span>
                             </a>
                         </li>
                         <li class="sidebar-item">
@@ -677,7 +692,7 @@
     <script src="assets/js/bootstrap.bundle.min.js"></script>
 
     <script src="assets/vendors/apexcharts/apexcharts.js"></script>
-    <script src="assets/js/pages/dashboard.js"></script>
+    <script src="assets/js/pages/dashboard.js?v=2"></script>
 
     <script src="assets/js/main.js"></script>
 
@@ -861,6 +876,16 @@
                     userAvatar.src = 'assets/images/faces/1.jpg';
                     userAvatar.alt = '預設大頭貼';
                 }
+
+                // 載入並套用已儲存的健康目標（依使用者）
+                try {
+                    const stored = loadGoalsFromStorage();
+                    if (stored) {
+                        applyGoalsToUI(stored);
+                    }
+                } catch (e) {
+                    console.error('載入已儲存目標失敗:', e);
+                }
             })
             .catch(error => {
                 console.error('Error loading user info:', error);
@@ -954,6 +979,10 @@
             color = '#2c3e50'
         } = {}) {
             const el = document.querySelector(containerSelector);
+            if (!el) {
+                console.error(`找不到 ${containerSelector} 元素`);
+                return;
+            }
             el.innerHTML = '';
 
             let start, end;
@@ -997,12 +1026,23 @@
                 },
                 colors: ['#d0d4dc']
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log(`${containerSelector} 空圖表渲染成功`);
+            } catch (error) {
+                console.error(`${containerSelector} 空圖表渲染失敗:`, error);
+                showPlaceholder(containerSelector, 390);
+            }
         }
 
         // ============ 1) 體重變化趨勢 ============
         function createWeightChart(data) {
             const el = document.querySelector("#weight-chart");
+            if (!el) {
+                console.error('找不到 #weight-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1035,12 +1075,23 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('體重變化趨勢圖表渲染成功');
+            } catch (error) {
+                console.error('體重變化趨勢圖表渲染失敗:', error);
+                showPlaceholder("#weight-chart", 390);
+            }
         }
 
         // ============ 2) 身體組成變化 ============
         function createBodyCompositionChart(data) {
             const el = document.querySelector("#body-composition-chart");
+            if (!el) {
+                console.error('找不到 #body-composition-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1077,12 +1128,23 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('身體組成變化圖表渲染成功');
+            } catch (error) {
+                console.error('身體組成變化圖表渲染失敗:', error);
+                showPlaceholder("#body-composition-chart", 390);
+            }
         }
 
         // ============ 3) 體脂率變化趨勢 ============
         function createFatPercentageChart(data) {
             const el = document.querySelector("#fat-percentage-chart");
+            if (!el) {
+                console.error('找不到 #fat-percentage-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1115,12 +1177,23 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('體脂率變化趨勢圖表渲染成功');
+            } catch (error) {
+                console.error('體脂率變化趨勢圖表渲染失敗:', error);
+                showPlaceholder("#fat-percentage-chart", 390);
+            }
         }
 
         // ============ 4) BMI 變化趨勢 ============
         function createBMIChart(data) {
             const el = document.querySelector("#bmi-chart");
+            if (!el) {
+                console.error('找不到 #bmi-chart 元素');
+                return;
+            }
             el.innerHTML = '';
 
             const colorY = '#2c3e50';
@@ -1153,7 +1226,14 @@
                 },
                 tooltip: { x: { format: 'dd/MM/yyyy' } }
             };
-            new ApexCharts(el, options).render();
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('BMI變化趨勢圖表渲染成功');
+            } catch (error) {
+                console.error('BMI變化趨勢圖表渲染失敗:', error);
+                showPlaceholder("#bmi-chart", 390);
+            }
         }
 
         // 初始化時間範圍選擇器
@@ -1344,6 +1424,10 @@
         function createBodyCompositionPieChart() {
             // 清除舊的圖表
             const chartContainer = document.querySelector("#body-composition-pie-chart");
+            if (!chartContainer) {
+                console.error('找不到 #body-composition-pie-chart 元素');
+                return;
+            }
             chartContainer.innerHTML = '';
 
             fetch('get_health_stats.php')
@@ -1392,8 +1476,13 @@
                         }
                     };
 
-                    const chart = new ApexCharts(chartContainer, options);
-                    chart.render();
+                    try {
+                        const chart = new ApexCharts(chartContainer, options);
+                        chart.render();
+                        console.log('身體組成比例圓餅圖渲染成功');
+                    } catch (error) {
+                        console.error('身體組成比例圓餅圖渲染失敗:', error);
+                    }
                 })
                 .catch(error => {
                     console.error('Error creating body composition pie chart:', error);
@@ -1413,6 +1502,13 @@
             document.getElementById('goal-weight-display').textContent = goalWeight;
             document.getElementById('goal-fat-percentage-display').textContent = goalFatPercentage;
             document.getElementById('goal-muscle-display').textContent = goalMuscle;
+
+            // 儲存到 localStorage（依使用者）
+            saveGoalsToStorage({
+                goal_weight: goalWeight,
+                goal_fat_percentage: goalFatPercentage,
+                goal_muscle: goalMuscle
+            });
 
             // 關閉設定目標視窗
             const setGoalModal = bootstrap.Modal.getInstance(document.getElementById('setGoalModal'));
@@ -1577,6 +1673,54 @@
             if (titleEl) titleEl.textContent = title;
             if (msgEl) msgEl.textContent = message;
             new bootstrap.Modal(document.getElementById('successModal')).show();
+        }
+
+        // ========= 目標儲存/載入（依使用者） =========
+        function getCurrentUserId() {
+            const el = document.getElementById('user-id');
+            const uid = el ? (el.textContent || '').trim() : '';
+            return uid || 'guest';
+        }
+
+        function saveGoalsToStorage(goals) {
+            try {
+                const key = 'healthGoals_' + getCurrentUserId();
+                localStorage.setItem(key, JSON.stringify(goals));
+            } catch (e) {
+                console.error('保存目標到 localStorage 失敗:', e);
+            }
+        }
+
+        function loadGoalsFromStorage() {
+            const key = 'healthGoals_' + getCurrentUserId();
+            const raw = localStorage.getItem(key);
+            if (!raw) return null;
+            try { return JSON.parse(raw); } catch { return null; }
+        }
+
+        function applyGoalsToUI(goals) {
+            if (!goals) return;
+            const { goal_weight, goal_fat_percentage, goal_muscle } = goals;
+
+            if (goal_weight !== undefined && goal_weight !== null && goal_weight !== '') {
+                document.getElementById('goal-weight-display').textContent = goal_weight;
+                const input = document.getElementById('goal_weight');
+                if (input) input.value = goal_weight;
+            }
+            if (goal_fat_percentage !== undefined && goal_fat_percentage !== null && goal_fat_percentage !== '') {
+                document.getElementById('goal-fat-percentage-display').textContent = goal_fat_percentage;
+                const input = document.getElementById('goal_fat_percentage');
+                if (input) input.value = goal_fat_percentage;
+            }
+            if (goal_muscle !== undefined && goal_muscle !== null && goal_muscle !== '') {
+                document.getElementById('goal-muscle-display').textContent = goal_muscle;
+                const input = document.getElementById('goal_muscle');
+                if (input) input.value = goal_muscle;
+            }
+
+            if (window.goalProgressChart) {
+                window.goalProgressChart.update();
+            }
         }
     </script>
 </body>

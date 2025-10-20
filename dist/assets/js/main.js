@@ -50,14 +50,14 @@ if (sidebarHide) {
 if(typeof PerfectScrollbar == 'function') {
     const container = document.querySelector(".sidebar-wrapper");
     const ps = new PerfectScrollbar(container, {
-        wheelPropagation: false
+        wheelPropagation: true
     });
     
     // 為主要內容區域添加 PerfectScrollbar
     const mainContent = document.querySelector("#main");
     if(mainContent) {
         const mainScroll = new PerfectScrollbar(mainContent, {
-            wheelPropagation: false
+            wheelPropagation: true
         });
     }
 }

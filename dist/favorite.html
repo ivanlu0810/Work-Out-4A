@@ -15,207 +15,872 @@
 
     <!-- 自訂樣式 -->
     <style>
-        #favorite-list table {
-            border: 4px double #212529 !important;
-            border-collapse: collapse;
+        /* 簡潔莫蘭迪色系變數 */
+        :root {
+            --morandi-beige: #e5e0d6;
+            --morandi-gray: #b8b8b8;
+            --morandi-blue: #a8b5c0;
+            --morandi-light-blue: #c8d5e0;
+            --morandi-dark-blue: #6b7c8a;
+            --morandi-green: #b5c0a8;
+            --morandi-brown: #c4b8a0;
+            --morandi-pink: #c8b8b8;
+            --morandi-cream: #f7f5f0;
+            --morandi-light-gray: #e8e5e0;
+            --morandi-dark-gray: #6b6b6b;
+            --morandi-text: #5a5a5a;
         }
 
-        #favorite-list table th,
-        #favorite-list table td {
-            border: 3px double #495057 !important;
-            vertical-align: middle;
-        }
-
-        /* 統一「名稱」與「目標肌群」字體樣式 (顏色與訓練細節相同灰色) */
-        #favorite-list td:nth-child(2),
-        #favorite-list td:nth-child(3) {
-            font-family: 'Nunito', sans-serif !important;
-            font-size: 1rem !important;
-            font-weight: 600 !important;
-            color: #6c757d !important;
-            /* ✅ 統一為灰色 */
-        }
-
-        /* 表格內所有細節統一灰色 */
-        #favorite-list td {
-            color: #6c757d !important;
-        }
-
-        .training-details {
-            display: flex;
-            justify-content: space-between;
-            text-align: center;
-        }
-
-        .training-details div {
-            flex: 1;
-            padding: 4px 6px;
-            border-right: 3px double #495057;
-        }
-
-        .training-details div:last-child {
-            border-right: none;
-        }
-
-        .training-details strong {
-            display: block;
-            margin-bottom: 4px;
-        }
-
-        /* 動作詳情：莫蘭迪藍灰 */
-        .btn-detail {
-            background-color: #7f90a9 !important;
-            border: none;
-            color: #fff !important;
-        }
-
-        .btn-detail:hover,
-        .btn-detail:active,
-        .btn-detail:focus {
-            background-color: #67798f !important;
-            color: #fff !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-
-        /* 移除：莫蘭迪紫紅 */
-        .btn-remove {
-            background-color: #94696d !important;
-            border: none;
-            color: #fff !important;
-        }
-
-        .btn-remove:hover,
-        .btn-remove:active,
-        .btn-remove:focus {
-            background-color: #7a5558 !important;
-            color: #fff !important;
-            outline: none !important;
-            box-shadow: none !important;
-        }
-
-        /* 表格與 footer 間距 */
+        /* 整體容器樣式 */
         #favorite-list {
             margin-bottom: 60px;
         }
 
         .mb-4-3 {
             margin-bottom: 2.1rem !important;
-            /* 40px */
         }
 
-        /* 手風琴卡片：莫蘭迪風格 */
-        .accordion .card {
-            border: 2px solid #e6ddd9;
-            border-radius: 14px;
-            overflow: hidden;
-            box-shadow: 0 6px 16px rgba(0, 0, 0, .06);
-            margin-bottom: 14px;
-        }
-
-        .accordion .card-header {
-            background: linear-gradient(135deg, #f9fbfc 0%, #e6eaf0 100%);
-            padding: 0;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .accordion .btn-toggle {
-            width: 100%;
-            text-align: left;
-            padding: 14px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            font-weight: 700;
-            color: #2c3e50;
-        }
-
-        .accordion .btn-toggle:focus {
-            box-shadow: none;
-        }
-
-        .acc-meta {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 8px 12px;
-            margin-left: auto;
-            font-weight: 600;
-        }
-
-        .badge-soft {
-            border: 1px solid rgba(0, 0, 0, .06);
-            padding: 6px 10px;
-            border-radius: 10px;
-            font-size: .85rem;
-            background: #fff;
-            color: #6c757d;
-        }
-
-        .badge-hyper {
-            background: #c8d5db;
-        }
-
-        .badge-fat {
-            background: #e6ddd9;
-        }
-
-        .badge-muscle {
-            background: #b0bccf;
-        }
-
-        .acc-body {
-            background: #fff;
-            padding: 14px 16px;
-        }
-
-        .acc-grid {
+        /* 卡片式網格佈局 */
+        .favorites-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+            padding: 20px 0;
+        }
+
+        @media (max-width: 1200px) {
+            .favorites-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .favorites-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
 
         @media (max-width: 576px) {
-            .acc-grid {
+            .favorites-grid {
                 grid-template-columns: 1fr;
             }
         }
 
-        .acc-stat {
-            border: 2px dashed #e9ecef;
-            border-radius: 12px;
-            padding: 10px 12px;
-            text-align: center;
-        }
-
-        .acc-stat strong {
-            display: block;
-            margin-bottom: 4px;
-            color: #2c3e50;
-        }
-
-        .acc-actions {
+        /* 運動卡片樣式 */
+        .exercise-card {
+            background: white;
+            border: 1px solid var(--morandi-light-gray);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s ease;
+            position: relative;
             display: flex;
-            gap: 8px;
-            justify-content: flex-end;
-            margin-top: 12px;
+            flex-direction: column;
+            height: 100%;
         }
 
-        /* 展開區塊的段落樣式 */
-        .acc-section {
-            margin-top: 10px;
+        .exercise-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
         }
 
-        .acc-section h6 {
+        /* 卡片頭部 */
+        .card-header-section {
+            background: #e0d9e0;
+            padding: 20px;
             color: #2c3e50;
+            position: relative;
+        }
+
+        .card-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title i {
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+
+        .card-meta {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .meta-badge {
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        /* 卡片內容區域 */
+        .card-content {
+            padding: 24px;
+            background: white;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* 影片區域 */
+        .video-section {
+            margin-bottom: 20px;
+        }
+
+        .video-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            border: 1px solid var(--morandi-light-gray);
+        }
+
+        .video-container video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        /* 統計數據網格 */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--morandi-light-gray);
+            border-radius: 10px;
+            padding: 16px 12px;
+            text-align: center;
+            transition: all 0.2s ease;
+        }
+
+        .stat-item:hover {
+            background: rgba(255, 255, 255, 0.9);
+            transform: translateY(-2px);
+        }
+
+        .stat-label {
+            display: block;
+            font-size: 0.8rem;
             font-weight: 600;
-            font-size: 1rem;
+            color: #6c757d;
             margin-bottom: 6px;
         }
 
-        .acc-section p {
+        .stat-value {
+            font-size: 1.1rem;
+            font-weight: 700;
             color: #6c757d;
+        }
+
+        /* 資訊區塊 */
+        .info-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 16px;
+            border-left: 4px solid var(--morandi-dark-blue);
+        }
+
+        .info-title {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #6c757d;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .info-title i {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+
+        .info-content {
+            font-size: 0.85rem;
+            color: #6c757d;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        /* 操作按鈕 */
+        .card-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+            margin-top: auto;
+            padding-top: 16px;
+            border-top: 1px solid var(--morandi-light-gray);
+        }
+
+        .btn-detail {
+            background: var(--morandi-blue);
+            border: 1px solid var(--morandi-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-detail:hover {
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .btn-remove {
+            background: var(--morandi-blue);
+            border: 1px solid var(--morandi-blue);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn-remove:hover {
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+
+        /* 簡潔展開區塊的段落樣式 */
+        .acc-section {
+            margin-top: 16px;
+            padding: 16px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 8px;
+            border-left: 3px solid var(--morandi-dark-blue);
+        }
+
+        .acc-section h6 {
+            color: var(--morandi-text);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .acc-section h6::before {
+            content: '•';
+            font-size: 1.2rem;
+            color: var(--morandi-dark-blue);
+        }
+
+        .acc-section p {
+            color: var(--morandi-dark-gray);
             line-height: 1.6;
             margin: 0;
+            font-size: 0.9rem;
+        }
+
+        /* 簡潔影片容器樣式 */
+        .ratio {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--morandi-light-gray);
+        }
+
+        .ratio video {
+            border-radius: 8px;
+        }
+
+        /* 空狀態樣式 */
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            background: var(--morandi-cream);
+            border-radius: 12px;
+            border: 2px dashed var(--morandi-gray);
+        }
+
+        .empty-state p {
+            font-size: 1.1rem;
+            color: var(--morandi-text);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .empty-state::before {
+            content: '💔';
+            font-size: 2.5rem;
+            display: block;
+            margin-bottom: 16px;
+            opacity: 0.7;
+        }
+
+        /* 載入狀態樣式 */
+        .loading-state {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .loading-state p {
+            font-size: 1rem;
+            color: var(--morandi-text);
+            font-weight: 500;
+            margin: 0;
+        }
+
+        .loading-state::before {
+            content: '⏳';
+            font-size: 2rem;
+            display: block;
+            margin-bottom: 12px;
+            animation: pulse 2s infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 0.4; }
+        }
+
+        /* 視圖控制工具列 */
+        .view-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            padding: 16px 20px;
+            background: #f8f9fa;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .view-controls-left {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+
+        .view-controls-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* 搜尋框 */
+        .search-box {
+            position: relative;
+            min-width: 250px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 10px 16px 10px 40px;
+            border: 1px solid var(--morandi-gray);
+            border-radius: 25px;
+            background: white;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--morandi-blue);
+            box-shadow: 0 0 0 2px rgba(168, 181, 192, 0.2);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--morandi-text);
+            font-size: 0.9rem;
+        }
+
+        /* 篩選器 */
+        .filter-select {
+            padding: 10px 16px;
+            border: 1px solid var(--morandi-gray);
+            border-radius: 25px;
+            background: white;
+            font-size: 0.9rem;
+            color: var(--morandi-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            appearance: none;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236c757d' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6,9 12,15 18,9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 40px;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--morandi-blue);
+        }
+
+        /* 視圖切換按鈕 */
+        .view-toggle {
+            display: flex;
+            background: white;
+            border: 1px solid var(--morandi-gray);
+            border-radius: 25px;
+            overflow: hidden;
+        }
+
+        .view-btn {
+            padding: 10px 16px;
+            border: none;
+            background: transparent;
+            color: var(--morandi-text);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.9rem;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn.active {
+            background: var(--morandi-blue);
+            color: white;
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn:hover:not(.active) {
+            background: var(--morandi-light-blue);
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        .view-btn:active {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* 緊湊列表模式 */
+        .compact-list {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .compact-item {
+            background: #e8ecee;
+            border: 1px solid var(--morandi-light-gray);
+            border-radius: 16px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .compact-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+        }
+
+        .compact-item.expanded {
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+        }
+
+        .compact-item-header {
+            display: flex;
+            align-items: center;
+            padding: 20px;
+            gap: 16px;
+        }
+
+        .compact-item-content {
+            padding: 0 20px 20px 20px;
+            display: none;
+            border-top: 1px solid var(--morandi-light-gray);
+            background: white;
+        }
+
+        .compact-item.expanded .compact-item-content {
+            display: block;
+        }
+
+
+        .compact-main-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .compact-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--morandi-text);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .compact-title i {
+            color: #e74c3c;
+            font-size: 0.9rem;
+        }
+
+        .compact-subtitle {
+            font-size: 0.9rem;
+            color: var(--morandi-dark-gray);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+
+        .compact-meta {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .compact-badge {
+            padding: 6px 12px;
+            background: rgba(255, 255, 255, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--morandi-text);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .compact-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .compact-action-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--morandi-blue);
+            border-radius: 25px;
+            background: var(--morandi-blue);
+            color: white;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            font-weight: 500;
+        }
+
+        .compact-action-btn:hover {
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .compact-expand-icon {
+            color: var(--morandi-text);
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .compact-item.expanded .compact-expand-icon {
+            transform: rotate(180deg);
+        }
+
+        /* 詳細內容區域樣式 */
+        .compact-detail-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 24px;
+            margin-top: 20px;
+        }
+
+        .compact-detail-section {
+            background: white;
+            border-radius: 10px;
+            padding: 14px;
+            border: 1px solid var(--morandi-light-gray);
+        }
+
+        .compact-detail-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--morandi-text);
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .compact-detail-content {
+            font-size: 0.8rem;
+            color: var(--morandi-dark-gray);
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .compact-left-section {
+            grid-column: 1;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            height: 100%;
+        }
+
+        .compact-video-section {
+            width: 100%;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .compact-right-section {
+            grid-column: 2;
+            grid-row: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .compact-video-container {
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .compact-video-container video {
+            width: 100%;
+            height: 100%;
+            min-height: 400px;
+            object-fit: cover;
+        }
+
+
+        /* 分頁控制樣式 */
+        .pagination-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 30px 0;
+            gap: 20px;
+        }
+
+        .pagination-info {
+            color: var(--morandi-text);
+            font-weight: 500;
+            font-size: 0.9rem;
+        }
+
+        .pagination-controls {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: nowrap;
+        }
+
+        #page-numbers {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .page-btn {
+            background: var(--morandi-light-blue);
+            border: 1px solid var(--morandi-gray);
+            color: var(--morandi-text);
+            padding: 8px;
+            border-radius: 50%;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            width: 40px;
+            height: 40px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .page-btn:hover:not(:disabled) {
+            background: var(--morandi-blue);
+            border-color: var(--morandi-blue);
+            color: white;
+            transform: translateY(-1px);
+        }
+
+        .page-btn.active {
+            background: var(--morandi-dark-blue);
+            border-color: var(--morandi-dark-blue);
+            color: white;
+        }
+
+        .page-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .page-btn i {
+            font-size: 0.8rem;
+        }
+
+        /* 響應式設計優化 */
+        @media (max-width: 768px) {
+            .pagination-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .pagination-controls {
+                flex-wrap: nowrap;
+                justify-content: center;
+            }
+
+            .page-btn {
+                padding: 6px;
+                font-size: 0.8rem;
+                width: 35px;
+                height: 35px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .view-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .view-controls-left,
+            .view-controls-right {
+                justify-content: center;
+            }
+
+            .search-box {
+                min-width: 200px;
+            }
+
+            .compact-item-header {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 12px;
+            }
+
+
+            .compact-main-info {
+                text-align: center;
+            }
+
+
+            .compact-meta {
+                justify-content: center;
+            }
+
+            .compact-actions {
+                justify-content: center;
+            }
+
+            .compact-detail-grid {
+                grid-template-columns: 1fr;
+                gap: 16px;
+            }
+
+            .compact-left-section {
+                grid-column: 1;
+                grid-row: 1;
+            }
+
+            .compact-right-section {
+                grid-column: 1;
+                grid-row: 2;
+            }
+
+            .compact-video-container video {
+                min-height: 300px;
+            }
+        }
+
+        /* 改善整體視覺層次 */
+        .page-heading h3 {
+            color: var(--morandi-text);
+            font-weight: 700;
+        }
+
+        .page-heading p {
+            color: var(--morandi-dark-gray);
+        }
+
+        /* 優化 breadcrumb 樣式 */
+        .breadcrumb {
+            background: transparent;
+            padding: 0;
+        }
+
+        .breadcrumb-item a {
+            color: #0d6efd !important;
+            text-decoration: none;
+        }
+
+        .breadcrumb-item a:hover {
+            color: #0a58ca !important;
+        }
+
+        .breadcrumb-item.active {
+            color: #6c757d !important;
         }
     </style>
 </head>
@@ -314,7 +979,62 @@
             <!-- 收藏清單 -->
             <div class="container">
                 <section class="section">
+                    <!-- 視圖控制工具列 -->
+                    <div class="view-controls">
+                        <div class="view-controls-left">
+                            <!-- 搜尋框 -->
+                            <div class="search-box">
+                                <i class="bi bi-search search-icon"></i>
+                                <input type="text" class="search-input" id="search-input" placeholder="搜尋器械名稱...">
+                            </div>
+                            
+                            <!-- 篩選器 -->
+                            <select class="filter-select" id="muscle-filter">
+                                <option value="">所有部位</option>
+                                <option value="胸肌">胸肌</option>
+                                <option value="背肌">背肌</option>
+                                <option value="肩膀">肩膀</option>
+                                <option value="手臂">手臂</option>
+                                <option value="腿部">腿部</option>
+                                <option value="核心">核心</option>
+                            </select>
+                        </div>
+                        
+                        <div class="view-controls-right">
+                            <!-- 視圖切換 -->
+                            <div class="view-toggle">
+                                <button class="view-btn active" data-view="cards" onclick="switchView('cards')">
+                                    <i class="bi bi-grid-3x3-gap"></i>卡片
+                                </button>
+                                <button class="view-btn" data-view="compact" onclick="switchView('compact')">
+                                    <i class="bi bi-list"></i>列表
+                                </button>
+                            </div>
+                            
+                            <!-- 結果計數 -->
+                            <div class="pagination-info">
+                                <span id="results-count">共 0 項</span>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div id="favorite-list"></div>
+                    
+                    <!-- 分頁控制 -->
+                    <div id="pagination-container" class="pagination-container" style="display: none;">
+                        <div class="pagination-info">
+                            <span id="pagination-info-text">顯示第 1-4 項，共 0 項</span>
+                        </div>
+                        <div class="pagination-controls">
+                            <button class="page-btn" id="prev-page" onclick="changePage(-1)">
+                                <i class="bi bi-chevron-left"></i>
+                            </button>
+                            <div id="page-numbers"></div>
+                            <button class="page-btn" id="next-page" onclick="changePage(1)">
+                                <i class="bi bi-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -357,10 +1077,17 @@
     <!-- 收藏頁面邏輯 -->
     <script>
         const API_FAVORITES = 'api/favorites.php';
+        
+        // 全域變數
+        let allFavorites = [];
+        let filteredFavorites = [];
+        let currentView = 'cards'; // cards, compact
+        let currentPage = 1;
+        const ITEMS_PER_PAGE = 5; // 每頁顯示5個列表項目
 
         document.addEventListener("DOMContentLoaded", async function () {
             const list = document.getElementById("favorite-list");
-            list.innerHTML = `<div class="d-flex justify-content-center align-items-center" style="height:200px;"><p class="fs-6 text-muted">載入中…</p></div>`;
+            list.innerHTML = `<div class="loading-state"><p>載入中…</p></div>`;
 
             // 將舊的 localStorage 收藏遷移到資料庫（只做一次）
             try { await migrateLocalFavoritesOnce(); } catch (e) { }
@@ -368,20 +1095,417 @@
             // 從後端載入收藏
             const serverFavorites = await fetchFavoritesFromServer();
             if (!serverFavorites || serverFavorites.length === 0) {
-                list.innerHTML = `
-          <div class="d-flex justify-content-center align-items-center" style="height:200px;">
-            <p class="fs-5" style="color:#58474d;">目前沒有收藏任何器材。</p>
-          </div>
-        `;
-                // 清空快取
+                list.innerHTML = `<div class="empty-state"><p>目前沒有收藏任何器材</p></div>`;
                 localStorage.setItem("favorites", JSON.stringify([]));
                 return;
             }
 
+            // 儲存所有收藏資料
+            allFavorites = serverFavorites;
+            filteredFavorites = [...allFavorites];
+            
             // 同步快取
             localStorage.setItem("favorites", JSON.stringify(serverFavorites));
-            renderFavorites(serverFavorites);
+            
+            // 初始化事件監聽器
+            initializeEventListeners();
+            
+            // 渲染內容
+            renderContent();
         });
+
+        // 初始化事件監聽器
+        function initializeEventListeners() {
+            // 搜尋功能
+            document.getElementById('search-input').addEventListener('input', handleSearch);
+            
+            // 篩選功能
+            document.getElementById('muscle-filter').addEventListener('change', handleFilter);
+        }
+
+        // 搜尋處理
+        function handleSearch() {
+            const searchTerm = document.getElementById('search-input').value.toLowerCase().trim();
+            const muscleFilter = document.getElementById('muscle-filter').value;
+            
+            filteredFavorites = allFavorites.filter(exercise => {
+                const matchesSearch = !searchTerm || 
+                    exercise.name.toLowerCase().includes(searchTerm) ||
+                    (exercise.target_muscle && exercise.target_muscle.toLowerCase().includes(searchTerm)) ||
+                    (exercise.description && exercise.description.toLowerCase().includes(searchTerm));
+                
+                const matchesMuscle = !muscleFilter || 
+                    (exercise.target_muscle && exercise.target_muscle.includes(muscleFilter));
+                
+                return matchesSearch && matchesMuscle;
+            });
+            
+            renderContent();
+        }
+
+        // 篩選處理
+        function handleFilter() {
+            handleSearch(); // 重新執行搜尋和篩選
+        }
+
+        // 視圖切換
+        function switchView(viewType) {
+            currentView = viewType;
+            
+            // 更新按鈕狀態
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            document.querySelector(`[data-view="${viewType}"]`).classList.add('active');
+            
+            renderContent();
+        }
+
+        // 渲染內容
+        function renderContent() {
+            const list = document.getElementById("favorite-list");
+            
+            if (!filteredFavorites?.length) {
+                list.innerHTML = `<div class="empty-state"><p>沒有找到符合條件的運動項目</p></div>`;
+                document.getElementById('results-count').textContent = '共 0 項';
+                document.getElementById('pagination-container').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('results-count').textContent = `共 ${filteredFavorites.length} 項`;
+
+            // 初始化分頁
+            initializePagination();
+
+            switch (currentView) {
+                case 'cards':
+                    renderCardsView();
+                    break;
+                case 'compact':
+                    renderCompactView();
+                    break;
+            }
+        }
+
+        // 卡片視圖渲染
+        function renderCardsView() {
+            const list = document.getElementById("favorite-list");
+            
+            // 計算當前頁面的項目（卡片模式每頁4個）
+            const CARDS_PER_PAGE = 4;
+            const startIndex = (currentPage - 1) * CARDS_PER_PAGE;
+            const endIndex = startIndex + CARDS_PER_PAGE;
+            const currentPageFavorites = filteredFavorites.slice(startIndex, endIndex);
+            
+            let html = `<div class="favorites-grid">`;
+            
+            currentPageFavorites.forEach((ex, i) => {
+                const globalIndex = startIndex + i;
+                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
+                const hypertrophyWeightMax = hypertrophyWeightMin + 15;
+                const fatlossWeightMin = hypertrophyWeightMin - 20;
+                const fatlossWeightMax = hypertrophyWeightMin - 5;
+
+                html += `
+      <div class="exercise-card">
+        <div class="card-header-section">
+          <div class="card-title">
+            <i class="bi bi-heart-fill"></i>
+            <span>${ex.name || '未命名動作'}</span>
+          </div>
+          <div class="card-meta">
+            <span class="meta-badge">
+              <i class="bi bi-person-arms-up me-1"></i>${ex.target_muscle || '—'}
+            </span>
+            <span class="meta-badge">💪 增肌</span>
+            <span class="meta-badge">🔥 減脂</span>
+          </div>
+        </div>
+
+        <div class="card-content">
+          <div class="video-section">
+            <div class="video-container">
+              <video controls playsinline preload="metadata">
+                <source src="${ex.video_url || ''}" type="video/mp4">
+                您的瀏覽器不支援影片播放。
+              </video>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <span class="stat-label">增肌 組數</span>
+              <span class="stat-value">${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">增肌 次數</span>
+              <span class="stat-value">${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">增肌 重量</span>
+              <span class="stat-value">${hypertrophyWeightMin}-${hypertrophyWeightMax}%</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">減脂 組數</span>
+              <span class="stat-value">${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">減脂 次數</span>
+              <span class="stat-value">${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-label">減脂 重量</span>
+              <span class="stat-value">${fatlossWeightMin}-${fatlossWeightMax}%</span>
+            </div>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">
+              <i class="bi bi-info-circle"></i>
+              動作解說
+            </div>
+            <p class="info-content">${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">
+              <i class="bi bi-person-check"></i>
+              適用對象
+            </div>
+            <p class="info-content">${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
+          </div>
+
+          <div class="info-section">
+            <div class="info-title">
+              <i class="bi bi-exclamation-triangle"></i>
+              注意事項
+            </div>
+            <p class="info-content">${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-remove" onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
+              <i class="bi bi-trash"></i>移除收藏
+            </button>
+          </div>
+        </div>
+      </div>`;
+            });
+
+            html += `</div>`;
+            list.innerHTML = html;
+        }
+
+        // 緊湊列表視圖渲染
+        function renderCompactView() {
+            const list = document.getElementById("favorite-list");
+            
+            // 計算當前頁面的項目（列表模式每頁5個）
+            const LIST_PER_PAGE = 5;
+            const startIndex = (currentPage - 1) * LIST_PER_PAGE;
+            const endIndex = startIndex + LIST_PER_PAGE;
+            const currentPageFavorites = filteredFavorites.slice(startIndex, endIndex);
+            
+            let html = `<div class="compact-list">`;
+            
+            currentPageFavorites.forEach((ex, i) => {
+                const globalIndex = startIndex + i;
+                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
+                const hypertrophyWeightMax = hypertrophyWeightMin + 15;
+                const fatlossWeightMin = hypertrophyWeightMin - 20;
+                const fatlossWeightMax = hypertrophyWeightMin - 5;
+
+                html += `
+      <div class="compact-item" onclick="toggleCompactItem(this)">
+        <div class="compact-item-header">
+          <div class="compact-main-info">
+            <h6 class="compact-title">
+              <i class="bi bi-heart-fill"></i>
+              ${ex.name || '未命名動作'}
+            </h6>
+            <p class="compact-subtitle">
+              <i class="bi bi-person-arms-up"></i>
+              ${ex.target_muscle || '—'}
+            </p>
+          </div>
+          <div class="compact-meta">
+            <span class="compact-badge">💪 增肌</span>
+            <span class="compact-badge">🔥 減脂</span>
+          </div>
+          <div class="compact-actions" onclick="event.stopPropagation()">
+            <button class="compact-action-btn" onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
+              <i class="bi bi-trash"></i>移除收藏
+            </button>
+          </div>
+          <i class="bi bi-chevron-down compact-expand-icon"></i>
+        </div>
+        
+        <div class="compact-item-content">
+          <div class="compact-detail-grid">
+            <div class="compact-left-section">
+              <div class="compact-video-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-play-circle"></i>
+                  示範影片
+                </div>
+                <div class="compact-video-container">
+                  <video controls playsinline preload="metadata">
+                    <source src="${ex.video_url || ''}" type="video/mp4">
+                    您的瀏覽器不支援影片播放。
+                  </video>
+                </div>
+              </div>
+            </div>
+            
+            <div class="compact-right-section">
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-graph-up"></i>
+                  訓練參數
+                </div>
+                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;">
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌組數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌次數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">增肌重量</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂組數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂次數</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</div>
+                  </div>
+                  <div style="text-align: center; padding: 8px; background: white; border-radius: 6px; border: 1px solid var(--morandi-light-gray);">
+                    <div style="font-size: 0.65rem; color: #6c757d; margin-bottom: 2px;">減脂重量</div>
+                    <div style="font-size: 0.8rem; font-weight: 600; color: #2c3e50;">${fatlossWeightMin}-${fatlossWeightMax}%</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-info-circle"></i>
+                  動作解說
+                </div>
+                <p class="compact-detail-content">${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
+              </div>
+              
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-person-check"></i>
+                  適用對象
+                </div>
+                <p class="compact-detail-content">${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
+              </div>
+              
+              <div class="compact-detail-section">
+                <div class="compact-detail-title">
+                  <i class="bi bi-exclamation-triangle"></i>
+                  注意事項
+                </div>
+                <p class="compact-detail-content">${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>`;
+            });
+
+            html += `</div>`;
+            list.innerHTML = html;
+        }
+
+
+        // 初始化分頁
+        function initializePagination() {
+            const itemsPerPage = currentView === 'cards' ? 4 : 5; // 卡片模式4個，列表模式5個
+            const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
+            const paginationContainer = document.getElementById('pagination-container');
+            
+            if (totalPages <= 1) {
+                paginationContainer.style.display = 'none';
+                return;
+            }
+            
+            paginationContainer.style.display = 'flex';
+            updatePaginationInfo(itemsPerPage);
+            renderPageNumbers(totalPages);
+            updatePageButtons(totalPages);
+        }
+
+        // 更新分頁資訊
+        function updatePaginationInfo(itemsPerPage) {
+            const start = (currentPage - 1) * itemsPerPage + 1;
+            const end = Math.min(currentPage * itemsPerPage, filteredFavorites.length);
+            document.getElementById('pagination-info-text').textContent = 
+                `顯示第 ${start}-${end} 項，共 ${filteredFavorites.length} 項`;
+        }
+
+        // 渲染頁碼按鈕
+        function renderPageNumbers(totalPages) {
+            const pageNumbersContainer = document.getElementById('page-numbers');
+            let html = '';
+            
+            // 最多顯示5個頁碼
+            const maxVisiblePages = 5;
+            let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+            let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+            
+            // 調整起始頁面
+            if (endPage - startPage + 1 < maxVisiblePages) {
+                startPage = Math.max(1, endPage - maxVisiblePages + 1);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                html += `<button class="page-btn ${i === currentPage ? 'active' : ''}" 
+                         onclick="goToPage(${i})">${i}</button>`;
+            }
+            
+            pageNumbersContainer.innerHTML = html;
+        }
+
+        // 更新上一頁/下一頁按鈕狀態
+        function updatePageButtons(totalPages) {
+            document.getElementById('prev-page').disabled = currentPage === 1;
+            document.getElementById('next-page').disabled = currentPage === totalPages;
+        }
+
+        // 切換頁面
+        function changePage(direction) {
+            const itemsPerPage = currentView === 'cards' ? 4 : 5;
+            const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
+            const newPage = currentPage + direction;
+            
+            if (newPage >= 1 && newPage <= totalPages) {
+                currentPage = newPage;
+                renderContent();
+                
+                // 滾動到頂部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
+
+        // 跳轉到指定頁面
+        function goToPage(page) {
+            const itemsPerPage = currentView === 'cards' ? 4 : 5;
+            const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
+            if (page >= 1 && page <= totalPages) {
+                currentPage = page;
+                renderContent();
+                
+                // 滾動到頂部
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        }
 
         async function fetchFavoritesFromServer() {
             try {
@@ -418,108 +1542,6 @@
             localStorage.setItem('favorites', JSON.stringify([]));
         }
 
-        function renderFavorites(favorites) {
-            const list = document.getElementById("favorite-list");
-            if (!favorites?.length) {
-                list.innerHTML = `
-      <div class="d-flex justify-content-center align-items-center" style="height:200px;">
-        <p class="fs-5" style="color:#58474d;">目前沒有收藏任何器材。</p>
-      </div>`;
-                return;
-            }
-
-            let html = `<div class="accordion" id="favAccordion">`;
-            favorites.forEach((ex, i) => {
-                const id = `favItem${i}`;
-                const hypertrophyWeightMin = Math.round(parseFloat(ex.hypertrophy_load_min_pct) || 0);
-                const hypertrophyWeightMax = hypertrophyWeightMin + 15;
-                const fatlossWeightMin = hypertrophyWeightMin - 20;
-                const fatlossWeightMax = hypertrophyWeightMin - 5;
-
-                html += `
-      <div class="card">
-        <div class="card-header" id="heading-${id}">
-          <button class="btn btn-toggle" type="button" data-bs-toggle="collapse"
-                  data-bs-target="#collapse-${id}" aria-expanded="false" aria-controls="collapse-${id}">
-            <i class="bi bi-caret-right-fill me-1"></i>
-            <span>${ex.name || '未命名動作'}</span>
-            <div class="acc-meta">
-              <span class="badge-soft badge-muscle"><i class="bi bi-person-arms-up me-1"></i>${ex.target_muscle || '—'}</span>
-              <span class="badge-soft badge-hyper">💪 增肌：${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max} 組 / ${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max} 次 / ${hypertrophyWeightMin}-${hypertrophyWeightMax}%</span>
-              <span class="badge-soft badge-fat">🔥 減脂：${ex.fatloss_sets_min}-${ex.fatloss_sets_max} 組 / ${ex.fatloss_reps_min}-${ex.fatloss_reps_max} 次 / ${fatlossWeightMin}-${fatlossWeightMax}%</span>
-            </div>
-          </button>
-        </div>
-
-        <div id="collapse-${id}" class="collapse" aria-labelledby="heading-${id}" data-bs-parent="#favAccordion">
-          <div class="acc-body">
-            <div class="row g-3">
-              <!-- 示範影片 -->
-              <div class="col-12 col-md-6">
-                <div class="acc-section">
-                  <div class="ratio ratio-16x9">
-                    <video controls playsinline preload="metadata">
-                      <source src="${ex.video_url || ''}" type="video/mp4">
-                      您的瀏覽器不支援影片播放。
-                    </video>
-                  </div>
-                </div>
-              </div>
-
-              <!-- 指標與文字說明 -->
-              <div class="col-12 col-md-6">
-                <div class="acc-grid mb-2">
-                  <div class="acc-stat"><strong>增肌 組數</strong>${ex.hypertrophy_sets_min}-${ex.hypertrophy_sets_max}</div>
-                  <div class="acc-stat"><strong>增肌 次數</strong>${ex.hypertrophy_reps_min}-${ex.hypertrophy_reps_max}</div>
-                  <div class="acc-stat"><strong>增肌 重量</strong>${hypertrophyWeightMin}-${hypertrophyWeightMax}%</div>
-                  <div class="acc-stat"><strong>減脂 組數</strong>${ex.fatloss_sets_min}-${ex.fatloss_sets_max}</div>
-                  <div class="acc-stat"><strong>減脂 次數</strong>${ex.fatloss_reps_min}-${ex.fatloss_reps_max}</div>
-                  <div class="acc-stat"><strong>減脂 重量</strong>${fatlossWeightMin}-${fatlossWeightMax}%</div>
-                </div>
-
-                <!-- 動作解說 -->
-                <div class="acc-section">
-                  <h6>動作解說：</h6>
-                  <p>${ex.instruction_full || ex.description || '此動作暫無解說。'}</p>
-                </div>
-
-                <!-- 適用對象 -->
-                <div class="acc-section">
-                  <h6>適用對象：</h6>
-                  <p>${ex.user_level || '不限，請依照自身能力選擇是否執行。'}</p>
-                </div>
-
-                <!-- 注意事項 -->
-                <div class="acc-section">
-                  <h6>注意事項：</h6>
-                  <p>${ex.caution || '請保持正確姿勢，避免受傷。'}</p>
-                </div>
-
-                <div class="acc-actions">                  
-                  <button class="btn btn-remove btn-sm"
-                          onclick="removeFavorite('${(ex.name || '').replace(/'/g, "\\'")}')">
-                    移除
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-            });
-
-            html += `</div>`;
-            list.innerHTML = html;
-
-            // 展開時換箭頭
-            list.querySelectorAll('.btn-toggle').forEach(btn => {
-                const icon = btn.querySelector('.bi');
-                const target = btn.getAttribute('data-bs-target');
-                const el = document.querySelector(target);
-                el?.addEventListener('show.bs.collapse', () => { icon.classList.replace('bi-caret-right-fill', 'bi-caret-down-fill'); });
-                el?.addEventListener('hide.bs.collapse', () => { icon.classList.replace('bi-caret-down-fill', 'bi-caret-right-fill'); });
-            });
-        }
 
         // 移除收藏（改為呼叫 API）
         async function removeFavorite(name) {
@@ -531,13 +1553,31 @@
                     credentials: 'include',
                     body: 'name=' + encodeURIComponent(name)
                 });
+                
                 // 重新載入列表
                 const serverFavorites = await fetchFavoritesFromServer();
                 localStorage.setItem('favorites', JSON.stringify(serverFavorites));
-                renderFavorites(serverFavorites);
+                
+                // 更新資料並重新渲染
+                allFavorites = serverFavorites;
+                
+                // 重新執行搜尋和篩選
+                handleSearch();
+                
+                // 如果當前頁面超出範圍，回到最後一頁
+                const itemsPerPage = currentView === 'cards' ? 4 : 5;
+                const totalPages = Math.ceil(filteredFavorites.length / itemsPerPage);
+                if (currentPage > totalPages && totalPages > 0) {
+                    currentPage = totalPages;
+                }
             } catch (e) {
                 alert('移除失敗，請稍後再試');
             }
+        }
+
+        // 切換緊湊項目展開/收合
+        function toggleCompactItem(element) {
+            element.classList.toggle('expanded');
         }
 
         // 詳細說明 Modal（跟 training.html 一致）

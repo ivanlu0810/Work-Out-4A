@@ -92,6 +92,20 @@
             margin-top: 60px;
         }
 
+        /* 與儀表板一致的主色按鈕樣式 */
+        .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #fff !important;
+        }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+            color: #fff !important;
+        }
+
         /* 載入中狀態 */
         .loading {
             opacity: 0.6;
@@ -285,20 +299,23 @@
                             <div class="col-12 mb-4">
                                 <div class="card shadow-sm">
                                     <div class="card-header bg-light">
-                                        <h6 class="mb-0">帳號安全</h6>
+                                        <h6 class="mb-0">修改密碼</h6>
                                     </div>
                                     <div class="card-body">
-                                        <div class="row">
+                                        <div class="form-check form-switch mb-3">
+                                            <input class="form-check-input" type="checkbox" id="toggleChangePassword">
+                                            <label class="form-check-label" for="toggleChangePassword">修改密碼</label>
+                                        </div>
+                                        <div class="row" id="passwordFields" style="display:none;">
                                             <div class="col-md-6 mb-3">
-                                                <label for="password" class="form-label">密碼<span>*</span></label>
+                                                <label for="password" class="form-label">新密碼</label>
                                                 <input type="password" class="form-control" id="password"
-                                                    name="password" placeholder="********" required>
+                                                    name="password" placeholder="輸入新密碼（可留空不更新）">
                                             </div>
                                             <div class="col-md-6 mb-3">
-                                                <label for="confirmPassword"
-                                                    class="form-label">確認密碼<span>*</span></label>
+                                                <label for="confirmPassword" class="form-label">確認新密碼</label>
                                                 <input type="password" class="form-control" id="confirmPassword"
-                                                    name="confirmPassword" placeholder="********" required>
+                                                    name="confirmPassword" placeholder="再次輸入新密碼">
                                             </div>
                                         </div>
                                     </div>
@@ -421,33 +438,52 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert('大頭貼上傳成功！');
+                    showModal('大頭貼上傳成功！', '提示！');
                     // 更新顯示的大頭貼路徑
                     document.getElementById('avatarPreview').src = result.avatar_path;
                 } else {
-                    alert('上傳失敗：' + result.error);
+                    document.getElementById('errorMessage') && (document.getElementById('errorMessage').textContent = result.error || '上傳失敗');
+                    const errorModalEl = document.getElementById('errorModal');
+                    if (errorModalEl) new bootstrap.Modal(errorModalEl).show();
                     // 恢復原本的大頭貼
                     loadUserProfile();
                 }
             } catch (error) {
                 console.error('上傳大頭貼時發生錯誤:', error);
-                alert('上傳失敗，請稍後再試。');
+                document.getElementById('errorMessage') && (document.getElementById('errorMessage').textContent = '上傳失敗，請稍後再試。');
+                const errorModalEl = document.getElementById('errorModal');
+                if (errorModalEl) new bootstrap.Modal(errorModalEl).show();
                 // 恢復原本的大頭貼
                 loadUserProfile();
             }
+        }
+
+        // 切換「修改密碼」欄位顯示
+        const toggleChangePassword = document.getElementById('toggleChangePassword');
+        const passwordFields = document.getElementById('passwordFields');
+        if (toggleChangePassword) {
+            toggleChangePassword.addEventListener('change', function () {
+                const enabled = this.checked;
+                passwordFields.style.display = enabled ? 'flex' : 'none';
+                // 清空並移除瀏覽器 required 驗證
+                document.getElementById('password').value = '';
+                document.getElementById('confirmPassword').value = '';
+            });
         }
 
         // 表單提交處理
         document.getElementById('profileForm').addEventListener('submit', async function (e) {
             e.preventDefault();
 
-            // 驗證密碼確認
+            // 若有勾選修改密碼才驗證
+            const wantChangePassword = toggleChangePassword && toggleChangePassword.checked;
             const password = document.getElementById('password').value;
             const confirmPassword = document.getElementById('confirmPassword').value;
-
-            if (password !== confirmPassword) {
-                alert('密碼確認不符！');
-                return;
+            if (wantChangePassword) {
+                if (password !== confirmPassword) {
+                    showModal('密碼確認不符！', '提示！');
+                    return;
+                }
             }
 
             // 顯示載入狀態
@@ -464,9 +500,11 @@
                 const formData = {
                     name: document.getElementById('name').value,
                     email: document.getElementById('email').value,
-                    password: password,
                     gender: document.getElementById('gender').value
                 };
+                if (wantChangePassword) {
+                    formData.password = password;
+                }
 
                 // 發送 AJAX 請求到後端 API
                 const response = await fetch('update_profile.php', {
@@ -480,7 +518,7 @@
                 const result = await response.json();
 
                 if (result.success) {
-                    alert(result.message);
+                    showModal(result.message || '資料更新成功！', '提示！');
 
                     // 重新載入用戶資料
                     await loadUserProfile();
@@ -489,12 +527,16 @@
                     document.getElementById('password').value = '';
                     document.getElementById('confirmPassword').value = '';
                 } else {
-                    alert('更新失敗：' + result.error);
+                    document.getElementById('errorMessage') && (document.getElementById('errorMessage').textContent = (result.error ? ('更新失敗：' + result.error) : '更新失敗'));
+                    const errorModalEl = document.getElementById('errorModal');
+                    if (errorModalEl) new bootstrap.Modal(errorModalEl).show();
                 }
 
             } catch (error) {
                 console.error('更新資料時發生錯誤:', error);
-                alert('更新資料失敗，請稍後再試。');
+                document.getElementById('errorMessage') && (document.getElementById('errorMessage').textContent = '更新資料失敗，請稍後再試。');
+                const errorModalEl = document.getElementById('errorModal');
+                if (errorModalEl) new bootstrap.Modal(errorModalEl).show();
             } finally {
                 // 恢復按鈕狀態
                 btnText.style.display = 'inline-block';
@@ -510,6 +552,51 @@
                 loadUserProfile();
             }
         });
+    </script>
+    
+    <!-- 與儀表板一致的提示 Modal -->
+    <div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="successTitle">提示！</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="successMessage">操作成功！</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="errorModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">錯誤</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p id="errorMessage">發生錯誤。</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">確定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showModal(message, title = '提示！') {
+            const titleEl = document.getElementById('successTitle');
+            const msgEl = document.getElementById('successMessage');
+            if (titleEl) titleEl.textContent = title;
+            if (msgEl) msgEl.textContent = message;
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+        }
     </script>
 </body>
 

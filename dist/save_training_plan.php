@@ -52,9 +52,9 @@ try {
         $conn->autocommit(false);
 
         try {
-            // 1. 檢查是否已存在該週的計畫
-            $checkStmt = $conn->prepare("SELECT id FROM training_plans WHERE user_id = ? AND week_number = ?");
-            $checkStmt->bind_param("ii", $user_id, $week_number);
+            // 1. 檢查是否已存在該週(以週起始日)的計畫
+            $checkStmt = $conn->prepare("SELECT id FROM training_plans WHERE user_id = ? AND week_start_date = ?");
+            $checkStmt->bind_param("is", $user_id, $week_start_date);
             $checkStmt->execute();
             $result = $checkStmt->get_result();
             $existingPlan = $result->fetch_assoc();
@@ -70,10 +70,15 @@ try {
                 $deleteStmt = $conn->prepare("DELETE FROM training_plan_exercises WHERE plan_id = ?");
                 $deleteStmt->bind_param("i", $plan_id);
                 $deleteStmt->execute();
+                
+                // 刪除舊的完成記錄（重要！）
+                $deleteCompletionStmt = $conn->prepare("DELETE FROM training_plan_completion WHERE plan_id = ?");
+                $deleteCompletionStmt->bind_param("i", $plan_id);
+                $deleteCompletionStmt->execute();
             } else {
                 // 建立新計畫
                 $insertStmt = $conn->prepare("INSERT INTO training_plans (user_id, week_start_date, week_number, plan_name) VALUES (?, ?, ?, ?)");
-                $insertStmt->bind_param("isss", $user_id, $week_start_date, $week_number, $plan_name);
+                $insertStmt->bind_param("isis", $user_id, $week_start_date, $week_number, $plan_name);
                 $insertStmt->execute();
                 $plan_id = $conn->insert_id;
             }

@@ -16,7 +16,7 @@ $email = $_SESSION['email'] ?? 'No email';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>健習生｜飲食指南</title>
+    <title>健習生｜飲食指南 </title>
     <link rel="icon" href="images/fitness.png" type="image/png">
 
     <!-- 字體 & Bootstrap -->
@@ -34,6 +34,7 @@ $email = $_SESSION['email'] ?? 'No email';
             border: none;
             margin-bottom: 1.5rem;
         }
+        
 
         .card-header {
             background-color: #f8f9fa;
@@ -69,12 +70,27 @@ $email = $_SESSION['email'] ?? 'No email';
             border-radius: 8px;
             border: 1px solid #e9ecef;
             padding: 0.75rem 1rem;
+            transition: all 0.3s ease;
         }
 
         .form-control:focus,
         .form-select:focus {
             border-color: #7f90a9;
             box-shadow: 0 0 0 0.2rem rgba(127, 144, 169, 0.25);
+        }
+
+        /* 自動填入的欄位樣式 */
+        .form-control.auto-filled,
+        .form-select.auto-filled {
+            background-color: #f8f9fa;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .form-control.auto-filled:focus,
+        .form-select.auto-filled:focus {
+            border-color: #28a745;
+            box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
         }
 
         /* 按鈕樣式 */
@@ -95,6 +111,96 @@ $email = $_SESSION['email'] ?? 'No email';
             box-shadow: 0 4px 15px rgba(90, 98, 140, 0.3);
         }
 
+        /* 功能按鈕區域樣式 */
+        .card-header .d-flex {
+            gap: 0.5rem;
+        }
+
+        .card-header .btn {
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+        }
+
+        .card-header .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+        }
+
+        /* 版面佈局修復 */
+        .section {
+            width: 100%;
+            clear: both;
+            margin-bottom: 2rem;
+        }
+
+        .card {
+            width: 100%;
+            margin-bottom: 1rem;
+        }
+
+        /* Toast 通知樣式 */
+        .toast-container {
+            z-index: 9999;
+        }
+
+        .toast {
+            min-width: 300px;
+            max-width: 500px;
+            margin-bottom: 1rem;
+            background-color: white;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            border-radius: 0.375rem;
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+
+        .toast-success {
+            border-left: 4px solid #28a745;
+        }
+
+        .toast-error {
+            border-left: 4px solid #dc3545;
+        }
+
+        .toast-info {
+            border-left: 4px solid #17a2b8;
+        }
+
+        .toast-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem 0.375rem 0 0;
+        }
+
+        .toast-body {
+            padding: 0.75rem;
+        }
+
+        /* 響應式按鈕調整 */
+        @media (max-width: 768px) {
+            .card-header .d-flex {
+                justify-content: center !important;
+            }
+            
+            .card-header .btn {
+                flex: 1;
+                min-width: 120px;
+            }
+        }
+
+        @media (max-width: 576px) {
+            .card-header .d-flex {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .card-header .btn {
+                width: 100%;
+            }
+        }
+
         /* 營養目標顯示 */
         .nutrition-summary {
             background: linear-gradient(135deg, #5A628C 0%, #7f90a9 100%);
@@ -103,6 +209,8 @@ $email = $_SESSION['email'] ?? 'No email';
             padding: 2rem;
             margin-bottom: 2rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            width: 100%;
+            clear: both;
         }
 
         .nutrition-summary h4 {
@@ -228,24 +336,39 @@ $email = $_SESSION['email'] ?? 'No email';
 
         /* 統計卡片 */
         .stats-card {
-            text-align: center;
             padding: 1.5rem;
             border-radius: 16px;
             background: #fff;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             border: 1px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .stats-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats-icon {
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
         }
 
         .stats-number {
-            font-size: 2rem;
+            font-size: 1.8rem;
             font-weight: 700;
             color: #5A628C;
-            margin-bottom: 0.5rem;
+            margin-bottom: 0.25rem;
         }
 
         .stats-label {
             color: #6c757d;
             font-size: 0.9rem;
+            font-weight: 500;
         }
 
         /* 營養標籤 */
@@ -267,6 +390,38 @@ $email = $_SESSION['email'] ?? 'No email';
             min-width: 300px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Toast 提示樣式 */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1060;
+        }
+
+        .toast {
+            min-width: 300px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .toast-success {
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+            color: #155724;
+        }
+
+        .toast-error {
+            background-color: #f8d7da;
+            border-color: #f5c6cb;
+            color: #721c24;
+        }
+
+        .toast-info {
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+            color: #0c5460;
         }
 
         .mb-4-3 {
@@ -355,9 +510,9 @@ $email = $_SESSION['email'] ?? 'No email';
                 <div class="page-title">
                     <div class="row">
                         <div class="col-12 col-md-6 order-md-1 order-last">
-                            <h3 class="mb-4-3 me-3">飲食指南🍎</h3>
+                            <h3 class="mb-4-3 me-3">增肌飲食指南💪</h3>
                             <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
-                                科學計算您的營養需求，制定個人化的飲食計畫，讓增肌減脂更有效率。
+                                專為增肌設計的營養計算，科學制定個人化飲食計畫，讓肌肉增長更有效率。
                             </p>
                         </div>
                         <div class="col-12 col-md-6 order-md-2 order-first">
@@ -382,7 +537,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                 <h5 class="alert-heading mb-2">需要您的身體資料</h5>
                                 <p class="mb-2">為了提供更精確的營養建議，請先填寫您的基本身體資料。</p>
                                 <div class="d-flex gap-2">
-                                    <button class="btn btn-warning btn-sm" onclick="loadUserData()">
+                                    <button class="btn btn-warning btn-sm" onclick="reloadUserData()">
                                         <i class="bi bi-arrow-clockwise me-1"></i>重新載入資料
                                     </button>
                                     <a href="index.php" class="btn btn-primary btn-sm">
@@ -400,9 +555,12 @@ $email = $_SESSION['email'] ?? 'No email';
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <div class="d-flex align-items-center">
                             <i class="bi bi-check-circle-fill me-3" style="font-size: 1.5rem;"></i>
-                            <div>
+                            <div class="flex-grow-1">
                                 <h5 class="alert-heading mb-2">資料載入成功！</h5>
-                                <p class="mb-0" id="dataSourceInfo">已從資料庫載入您的身體資料，系統將自動填入表單。</p>
+                                <p class="mb-2" id="dataSourceInfo">已從資料庫載入您的身體資料，系統將自動填入表單。</p>
+                                <button class="btn btn-outline-success btn-sm" onclick="reloadUserData()">
+                                    <i class="bi bi-arrow-clockwise me-1"></i>重新載入資料
+                                </button>
                             </div>
                         </div>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉"></button>
@@ -413,7 +571,8 @@ $email = $_SESSION['email'] ?? 'No email';
                 <section class="section">
                     <div class="card">
                         <div class="card-header">
-                            <h4><i class="bi bi-calculator me-2"></i>個人營養需求計算</h4>
+                            <h4><i class="bi bi-calculator me-2"></i>增肌營養需求計算</h4>
+                            <small class="text-muted">系統會自動從您的資料庫記錄中載入身體資料，專為增肌設計</small>
                         </div>
                         <div class="card-body">
                             <form id="nutritionForm">
@@ -446,7 +605,6 @@ $email = $_SESSION['email'] ?? 'No email';
                                         <label for="activityLevel" class="form-label">活動強度</label>
                                         <select class="form-select" id="activityLevel" required>
                                             <option value="">請選擇</option>
-                                            <option value="久坐">久坐 (辦公室工作，很少運動)</option>
                                             <option value="輕度活動">輕度活動 (每週1-3次輕度運動)</option>
                                             <option value="中度活動">中度活動 (每週3-5次中等強度運動)</option>
                                             <option value="高度活動">高度活動 (每週6-7次高強度運動)</option>
@@ -455,11 +613,8 @@ $email = $_SESSION['email'] ?? 'No email';
                                     </div>
                                     <div class="col-md-4 mb-3">
                                         <label for="goal" class="form-label">健身目標</label>
-                                        <select class="form-select" id="goal" required>
-                                            <option value="">請選擇</option>
-                                            <option value="減脂">減脂 (減少體脂，塑造線條)</option>
-                                            <option value="增肌">增肌 (增加肌肉量，提升力量)</option>
-                                            <option value="維持">維持 (保持現狀，健康生活)</option>
+                                        <select class="form-select" id="goal" required disabled>
+                                            <option value="增肌" selected>增肌 (增加肌肉量，提升力量)</option>
                                         </select>
                                     </div>
                                     <div class="col-md-4 mb-3 d-flex align-items-end">
@@ -530,8 +685,206 @@ $email = $_SESSION['email'] ?? 'No email';
                     </div>
                 </section>
 
-                <!-- 食物搜尋區域 -->
+                <!-- 小提示框（精簡版） -->
+                <section class="section" id="miniTipsSection">
+                    <div class="row g-3">
+                        <div class="col-md-4">
+                            <div class="alert alert-success mb-0">
+                                <div class="d-flex align-items-center mb-1"><i class="bi bi-lightning-charge-fill me-2"></i><strong>蛋白質重點</strong></div>
+                                <div class="small text-muted">每餐20–30g；訓練後30分鐘內補充</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-info mb-0">
+                                <div class="d-flex align-items-center mb-1"><i class="bi bi-fire me-2"></i><strong>碳水化合物</strong></div>
+                                <div class="small text-muted">選複合碳水；訓練前後補充能量</div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="alert alert-warning mb-0">
+                                <div class="d-flex align-items-center mb-1"><i class="bi bi-heart-fill me-2"></i><strong>健康脂肪</strong></div>
+                                <div class="small text-muted">優先不飽和脂肪；控制用量</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 增肌飲食知識 -->
                 <section class="section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-book me-2"></i>增肌飲食知識</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="mb-3">
+                                            <i class="bi bi-lightning-charge-fill text-primary" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <h6 class="text-primary">💪 蛋白質的重要性</h6>
+                                        <ul class="list-unstyled text-start">
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>修復肌肉組織</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>建議攝取量：1.6-2.2g/kg體重</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>訓練後30分鐘內補充</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>每餐至少20-30g</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="mb-3">
+                                            <i class="bi bi-fire text-warning" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <h6 class="text-warning">⚡ 碳水化合物的作用</h6>
+                                        <ul class="list-unstyled text-start">
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>提供訓練能量</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>促進肌肉合成</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>訓練前後補充</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>選擇複合碳水</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 mb-4">
+                                    <div class="text-center">
+                                        <div class="mb-3">
+                                            <i class="bi bi-heart-fill text-danger" style="font-size: 2rem;"></i>
+                                        </div>
+                                        <h6 class="text-danger">🥑 健康脂肪的價值</h6>
+                                        <ul class="list-unstyled text-start">
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>支持荷爾蒙分泌</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>促進營養吸收</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>提供飽足感</li>
+                                            <li><i class="bi bi-check-circle text-success me-2"></i>選擇不飽和脂肪</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 食物數據一覽 -->
+                <section class="section">
+                    <div class="card">
+                        <div class="card-header" data-bs-toggle="collapse" data-bs-target="#foodDataCollapse" aria-expanded="false" aria-controls="foodDataCollapse" style="cursor: pointer;">
+                            <h4><i class="bi bi-database me-2"></i>食物數據一覽</h4>
+                            <small class="text-muted">點擊展開查看所有食物資料</small>
+                        </div>
+                        <div class="collapse" id="foodDataCollapse">
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <input type="text" class="form-control" id="foodSearchInput" placeholder="搜尋食物名稱..." onkeyup="filterFoodTable()">
+                                        </div>
+                                        <div class="col-md-3">
+                                            <select class="form-select" id="categoryFilter" onchange="filterFoodTable()">
+                                                <option value="">所有類別</option>
+                                                <option value="穀物類">穀物類</option>
+                                                <option value="肉類">肉類</option>
+                                                <option value="蔬菜類">蔬菜類</option>
+                                                <option value="水果類">水果類</option>
+                                                <option value="乳製品">乳製品</option>
+                                                <option value="堅果類">堅果類</option>
+                                            </select>
+                                        </div>
+                                        <div class="col-md-3">
+                                            <button class="btn btn-outline-primary w-100" onclick="loadAllFoods()">
+                                                <i class="bi bi-arrow-clockwise me-1"></i>重新載入
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="table-responsive">
+                                    <table class="table table-hover" id="foodDataTable">
+                                        <thead class="table-primary">
+                                            <tr>
+                                                <th>食物名稱</th>
+                                                <th>類別</th>
+                                                <th class="text-end">熱量(卡/100g)</th>
+                                                <th class="text-end">蛋白質(g)</th>
+                                                <th class="text-end">碳水化合物(g)</th>
+                                                <th class="text-end">脂肪(g)</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="foodDataTableBody">
+                                            <tr>
+                                                <td colspan="6" class="text-center text-muted py-4">
+                                                    <i class="bi bi-hourglass-split me-2"></i>正在載入食物資料...
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 訓練時機飲食 -->
+                <section class="section">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-clock me-2"></i>訓練時機飲食</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-4">
+                                    <div class="meal-card">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-arrow-up-circle-fill text-success me-2" style="font-size: 1.5rem;"></i>
+                                            <h6 class="mb-0 text-success">🏋️ 訓練前 (1-2小時)</h6>
+                                        </div>
+                                        <div class="meal-item">
+                                            <strong>推薦組合：</strong>
+                                            <ul class="mt-2 mb-0">
+                                                <li>香蕉 + 燕麥片 + 少量蛋白質</li>
+                                                <li>全麥吐司 + 花生醬 + 香蕉</li>
+                                                <li>希臘優格 + 莓果 + 蜂蜜</li>
+                                            </ul>
+                                            <small class="text-muted">提供快速能量，避免訓練中低血糖</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-4">
+                                    <div class="meal-card">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <i class="bi bi-arrow-down-circle-fill text-primary me-2" style="font-size: 1.5rem;"></i>
+                                            <h6 class="mb-0 text-primary">💪 訓練後 (30分鐘內)</h6>
+                                        </div>
+                                        <div class="meal-item">
+                                            <strong>推薦組合：</strong>
+                                            <ul class="mt-2 mb-0">
+                                                <li>乳清蛋白 + 香蕉 + 水</li>
+                                                <li>雞胸肉 + 地瓜 + 蔬菜</li>
+                                                <li>希臘優格 + 燕麥 + 堅果</li>
+                                            </ul>
+                                            <small class="text-muted">快速補充蛋白質，促進肌肉修復</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 增肌食譜推薦 -->
+                <section class="section" id="recipesSection" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <h4><i class="bi bi-journal-text me-2"></i>增肌食譜推薦</h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="row" id="recipeCards">
+                                <!-- 食譜將在這裡動態生成 -->
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 食物營養查詢 -->
+                <section class="section" id="foodSearchSection" style="display: none;">
                     <div class="card">
                         <div class="card-header">
                             <h4><i class="bi bi-search me-2"></i>食物營養查詢</h4>
@@ -559,57 +912,212 @@ $email = $_SESSION['email'] ?? 'No email';
                     </div>
                 </section>
 
-                <!-- 餐食建議 -->
-                <section class="section" id="mealSuggestions" style="display: none;">
+                <!-- 快速菜單模板 -->
+                <section class="section" id="quickMenuSection" style="display: none;">
                     <div class="card">
                         <div class="card-header">
-                            <h4><i class="bi bi-egg-fried me-2"></i>餐食建議</h4>
+                            <h4 class="mb-0"><i class="bi bi-lightbulb me-2"></i>健身小提醒</h4>
                         </div>
+                        <div>
                         <div class="card-body">
                             <div class="row" id="mealCards">
                                 <!-- 餐食建議將在這裡動態生成 -->
+                                </div>
                             </div>
                         </div>
                     </div>
                 </section>
 
                 <!-- 三餐客製化 -->
-                <section class="section" id="mealPlannerSection" style="display: none;">
+                <section class="section" id="mealPlannerSection" style="display: block;">
                     <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
+                        <div class="card-header">
                             <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>三餐客製化</h4>
                             <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
                         </div>
                         <div class="card-body">
-                            <div class="row g-3">
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stats-card">
-                                        <div class="stats-number" id="planTotalCalories">0</div>
-                                        <div class="stats-label">今日已選熱量 (卡)</div>
+                            <!-- 日期選擇與功能按鈕 -->
+                            <div class="row mb-4">
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <label for="mealDate" class="form-label fw-semibold">選擇日期：</label>
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="navigateDate(-1)" title="前一天">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+                                        <input type="date" id="mealDate" class="form-control" onchange="changeMealDate()">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="navigateDate(1)" title="後一天">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-info me-2" onclick="goToToday()">今天</button>
+                                        <button class="btn btn-sm btn-outline-warning" onclick="goToTomorrow()">明天</button>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stats-card">
+                                
+                                <div class="col-lg-8 col-md-6">
+                                    <label class="form-label fw-semibold">功能操作：</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-primary" onclick="saveMealPlan()">
+                                            <i class="bi bi-save me-1"></i>儲存餐食
+                                        </button>
+                                        <button class="btn btn-info" onclick="loadMealHistory()">
+                                            <i class="bi bi-clock-history me-1"></i>查詢紀錄
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="clearAllMeals()">
+                                            <i class="bi bi-trash me-1"></i>清空所有
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 營養目標進度追蹤 -->
+                            <div class="row g-4 mb-4">
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-primary text-white rounded-circle me-3">
+                                                <i class="bi bi-fire"></i>
+                                            </div>
+                                            <div>
+                                        <div class="stats-number" id="planTotalCalories">0</div>
+                                                <div class="stats-label">今日已選熱量</div>
+                                    </div>
+                                </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" id="caloriesProgress" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="caloriesTarget">目標: 0 卡</small>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-danger text-white rounded-circle me-3">
+                                                <i class="bi bi-droplet"></i>
+                                            </div>
+                                            <div>
                                         <div class="stats-number" id="planProtein">0g</div>
                                         <div class="stats-label">蛋白質</div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stats-card">
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-danger" id="proteinProgress" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="proteinTarget">目標: 0g</small>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-info text-white rounded-circle me-3">
+                                                <i class="bi bi-basket"></i>
+                                            </div>
+                                            <div>
                                         <div class="stats-number" id="planCarbs">0g</div>
                                         <div class="stats-label">碳水化合物</div>
                                     </div>
                                 </div>
-                                <div class="col-md-6 col-lg-3">
-                                    <div class="stats-card">
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-info" id="carbsProgress" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="carbsTarget">目標: 0g</small>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-warning text-white rounded-circle me-3">
+                                                <i class="bi bi-heart"></i>
+                                            </div>
+                                            <div>
                                         <div class="stats-number" id="planFat">0g</div>
                                         <div class="stats-label">脂肪</div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" id="fatProgress" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="fatTarget">目標: 0g</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 進度圖表 -->
+
+                            <!-- 今日營養完成度（獨立區塊） -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>今日營養完成度</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-primary" id="overallCaloriesProgress" role="progressbar" style="width: 0%">
+                                                                <span class="fw-bold" id="overallCaloriesPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">熱量</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-danger" id="overallProteinProgress" role="progressbar" style="width: 0%">
+                                                                <span class="fw-bold" id="overallProteinPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">蛋白質</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-info" id="overallCarbsProgress" role="progressbar" style="width: 0%">
+                                                                <span class="fw-bold" id="overallCarbsPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">碳水化合物</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-warning" id="overallFatProgress" role="progressbar" style="width: 0%">
+                                                                <span class="fw-bold" id="overallFatPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">脂肪</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                            <!-- 智能建議（動態顯示） -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div id="smartSuggestions" class="alert alert-info" style="display: none;">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-lightbulb me-2"></i>
+                                            <strong>今日建議</strong>
+                                        </div>
+                                        <div id="suggestionContent" class="small"></div>
+                                    </div>
+                                </div>
+                            </div>
                                     </div>
                                 </div>
                             </div>
 
                             <div class="row mt-4" id="plannerMeals">
+                                    <div class="col-12">
                                 <!-- 各餐區塊渲染 -->
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -621,8 +1129,7 @@ $email = $_SESSION['email'] ?? 'No email';
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">新增食材</h5>
-                                <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                    aria-label="關閉"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
                             </div>
                             <div class="modal-body">
                                 <div class="row g-2 mb-3">
@@ -670,6 +1177,8 @@ $email = $_SESSION['email'] ?? 'No email';
                 </div>
             </div>
 
+            <!-- 精簡模式：移除 Toast 與緊急修復按鈕 -->
+
             <footer>
                 <div class="footer clearfix mb-0 text-muted">
                     <div class="float-start">
@@ -691,11 +1200,81 @@ $email = $_SESSION['email'] ?? 'No email';
         let allFoods = [];
         let currentNutritionResult = null;
 
+            // 載入已儲存的餐食計畫
+        async function loadSavedMealPlan() {
+            try {
+                const response = await fetch('get_meal_plan.php?date=' + currentMealDate);
+                
+                if (!response.ok) {
+                    console.log('載入餐食計畫失敗: HTTP ' + response.status);
+                    return;
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const plan = result.data;
+                    
+                    // 重建餐食計畫
+                    mealPlan = {
+                        breakfast: [],
+                        lunch: [],
+                        dinner: []
+                    };
+                    
+                    // 載入餐食項目
+                    if (plan.items) {
+                        plan.items.forEach(item => {
+                            if (mealPlan[item.meal_type]) {
+                                mealPlan[item.meal_type].push({
+                                    name: item.food_name,
+                                    grams: parseFloat(item.quantity_grams),
+                                    caloriesPer100: parseFloat(item.calories_per_100g),
+                                    proteinPer100: parseFloat(item.protein_per_100g),
+                                    carbsPer100: parseFloat(item.carbs_per_100g),
+                                    fatPer100: parseFloat(item.fat_per_100g)
+                                });
+                            }
+                        });
+                    }
+                    
+                    // 重新渲染
+                    if (currentNutritionResult) {
+                        renderPlanner(currentNutritionResult);
+                        showToast(`已載入 ${currentMealDate} 的餐食計畫`, 'success');
+                        markAsSaved(); // 載入的資料標記為已儲存
+                    }
+                } else {
+                    console.log('沒有找到餐食計畫:', result.message || '未知原因');
+                }
+            } catch (error) {
+                console.log('載入餐食計畫失敗:', error);
+            }
+        }
+
         // 頁面載入時初始化
-        document.addEventListener('DOMContentLoaded', function () {
-            loadFoods();
+        document.addEventListener('DOMContentLoaded', async function () {
+            // 初始化日期選擇器
+            const dateInput = document.getElementById('mealDate');
+            if (dateInput) {
+                dateInput.value = currentMealDate;
+            }
+            
+            await loadFoods();
             setupEventListeners();
             loadUserData(); // 載入用戶資料
+            // 精簡：關閉其他載入
+            
+            // 監聽 modal 狀態
+            // loadMuscleBuildingFoods(); // 已改為食物數據一覽
+            loadRecipes(); // 載入食譜推薦
+            
+            setupModalMonitoring();
+            
+            // 載入已儲存的餐食計畫
+            setTimeout(() => {
+                loadSavedMealPlan();
+            }, 1000);
         });
 
         // 載入用戶資料
@@ -722,20 +1301,34 @@ $email = $_SESSION['email'] ?? 'No email';
                 
                 if (hasCompleteData) {
                     // 有完整資料，自動填入表單
-                    document.getElementById('age').value = userData.age;
-                    document.getElementById('gender').value = userData.gender;
-                    document.getElementById('height').value = userData.height;
-                    document.getElementById('weight').value = userData.weight;
+                    const ageField = document.getElementById('age');
+                    const genderField = document.getElementById('gender');
+                    const heightField = document.getElementById('height');
+                    const weightField = document.getElementById('weight');
+                    const activityField = document.getElementById('activityLevel');
+                    const goalField = document.getElementById('goal');
+                    
+                    ageField.value = userData.age;
+                    ageField.classList.add('auto-filled');
+                    
+                    genderField.value = userData.gender;
+                    genderField.classList.add('auto-filled');
+                    
+                    heightField.value = userData.height;
+                    heightField.classList.add('auto-filled');
+                    
+                    weightField.value = userData.weight;
+                    weightField.classList.add('auto-filled');
                     
                     // 設定預設活動強度（可讓用戶修改）
-                    if (!document.getElementById('activityLevel').value) {
-                        document.getElementById('activityLevel').value = '中度活動';
+                    if (!activityField.value) {
+                        activityField.value = '中度活動';
+                        activityField.classList.add('auto-filled');
                     }
                     
-                    // 設定預設健身目標（可讓用戶修改）
-                    if (!document.getElementById('goal').value) {
-                        document.getElementById('goal').value = '維持';
-                    }
+                    // 自動設定健身目標為增肌
+                    goalField.value = '增肌';
+                    goalField.classList.add('auto-filled');
                     
                     // 顯示資料來源提示
                     if (userData.has_inbody_data) {
@@ -743,6 +1336,12 @@ $email = $_SESSION['email'] ?? 'No email';
                     } else {
                         showUserDataInfo(userData);
                     }
+                    
+                    // 自動計算增肌營養需求
+                    setTimeout(() => {
+                        autoCalculateNutrition();
+                    }, 1000);
+                    
                 } else {
                     // 資料不完整，顯示引導
                     showDataInputGuide();
@@ -764,38 +1363,117 @@ $email = $_SESSION['email'] ?? 'No email';
         function showInbodyDataInfo(userData) {
             document.getElementById('dataGuideSection').style.display = 'none';
             document.getElementById('dataSuccessSection').style.display = 'block';
-            document.getElementById('dataSourceInfo').textContent = 
-                `已從 InBody 資料載入您的身體資料（${userData.last_inbody_date}），系統將自動填入表單。`;
+            document.getElementById('dataSourceInfo').innerHTML = 
+                `✅ 已從 InBody 資料載入您的身體資料（${userData.last_inbody_date}）<br>
+                年齡：${userData.age}歲 | 身高：${userData.height}cm | 體重：${userData.weight}kg<br>
+                系統將自動填入表單並計算營養需求。`;
         }
 
         // 顯示一般用戶資料資訊
         function showUserDataInfo(userData) {
             document.getElementById('dataGuideSection').style.display = 'none';
             document.getElementById('dataSuccessSection').style.display = 'block';
-            document.getElementById('dataSourceInfo').textContent = 
-                `已從基本資料載入您的身體資料，系統將自動填入表單。`;
+            document.getElementById('dataSourceInfo').innerHTML = 
+                `✅ 已從基本資料載入您的身體資料<br>
+                年齡：${userData.age}歲 | 身高：${userData.height}cm | 體重：${userData.weight}kg<br>
+                系統將自動填入表單並計算營養需求。`;
+        }
+
+        // 重新載入用戶資料
+        function reloadUserData() {
+            // 清除現有的自動填入樣式
+            const fields = ['age', 'gender', 'height', 'weight', 'activityLevel', 'goal'];
+            fields.forEach(fieldId => {
+                const field = document.getElementById(fieldId);
+                if (field) {
+                    field.classList.remove('auto-filled');
+                    field.value = '';
+                }
+            });
+            
+            // 重新載入資料
+            loadUserData();
+        }
+
+        // 自動計算營養需求
+        function autoCalculateNutrition() {
+            const form = document.getElementById('nutritionForm');
+            const formData = new FormData(form);
+            
+            // 檢查所有必要欄位是否已填寫
+            const age = document.getElementById('age').value;
+            const gender = document.getElementById('gender').value;
+            const height = document.getElementById('height').value;
+            const weight = document.getElementById('weight').value;
+            const activityLevel = document.getElementById('activityLevel').value;
+            const goal = document.getElementById('goal').value;
+            
+            if (age && gender && height && weight && activityLevel && goal) {
+                console.log('自動計算營養需求...');
+                
+                // 模擬表單提交
+                const event = new Event('submit', { bubbles: true, cancelable: true });
+                form.dispatchEvent(event);
+            }
         }
 
         // 載入食物資料
         async function loadFoods() {
             try {
                 const response = await fetch('get_foods.php');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
                 const data = await response.json();
 
                 if (data.success) {
                     allFoods = data.data;
                     renderFoodList(allFoods);
+                    populateCategoryOptions(); // 動態載入分類選項
+                    console.log('食物資料載入成功:', data.count + ' 種食物');
+                    
+                    // 如果有警告訊息，顯示給用戶
+                    if (data.warning) {
+                        showToast(data.warning, 'warning');
+                    }
                 } else {
-                    console.error('載入食物資料失敗:', data.error);
+                    console.error('載入食物資料失敗:', data.error || data);
                     // 使用備用資料
                     allFoods = getBackupFoods();
                     renderFoodList(allFoods);
+                    populateCategoryOptions();
+                    showToast('使用備用食物資料', 'warning');
                 }
             } catch (error) {
                 console.error('載入食物時發生錯誤:', error);
+                // 使用備用資料
                 allFoods = getBackupFoods();
                 renderFoodList(allFoods);
+                populateCategoryOptions();
+                showToast('載入食物資料失敗，已使用備用資料', 'warning');
             }
+        }
+
+        // 動態載入分類選項
+        function populateCategoryOptions() {
+            const categorySelect = document.getElementById('pickerCategory');
+            if (!categorySelect) return;
+
+            // 取得所有不重複的分類
+            const categories = [...new Set(allFoods.map(food => food.Category))].sort();
+            
+            // 清空現有選項（保留「所有類別」）
+            categorySelect.innerHTML = '<option value="">所有類別</option>';
+            
+            // 添加分類選項
+            categories.forEach(category => {
+                const option = document.createElement('option');
+                option.value = category;
+                option.textContent = category;
+                categorySelect.appendChild(option);
+            });
         }
 
         // 備用食物資料
@@ -810,7 +1488,12 @@ $email = $_SESSION['email'] ?? 'No email';
                 { food_id: 7, Food_Name: "花椰菜", Category: "蔬菜", Calories: 25, Protein: 3.0, Carbs: 5.0, Fat: 0.3, Notes: "高纖維蔬菜" },
                 { food_id: 8, Food_Name: "酪梨", Category: "脂肪", Calories: 160, Protein: 2.0, Carbs: 9.0, Fat: 15.0, Notes: "健康脂肪來源" },
                 { food_id: 9, Food_Name: "香蕉", Category: "水果", Calories: 89, Protein: 1.1, Carbs: 23.0, Fat: 0.3, Notes: "快速能量來源" },
-                { food_id: 10, Food_Name: "希臘優格", Category: "蛋白質", Calories: 59, Protein: 10.0, Carbs: 3.6, Fat: 0.4, Notes: "高蛋白乳製品" }
+                { food_id: 10, Food_Name: "希臘優格", Category: "蛋白質", Calories: 59, Protein: 10.0, Carbs: 3.6, Fat: 0.4, Notes: "高蛋白乳製品" },
+                { food_id: 11, Food_Name: "吐司(白吐司)", Category: "碳水化合物", Calories: 265, Protein: 8.0, Carbs: 49.0, Fat: 3.2, Notes: "早餐主食" },
+                { food_id: 12, Food_Name: "無糖豆漿", Category: "蛋白質", Calories: 33, Protein: 3.0, Carbs: 2.0, Fat: 1.8, Notes: "植物性蛋白質" },
+                { food_id: 13, Food_Name: "牛奶", Category: "蛋白質", Calories: 42, Protein: 3.4, Carbs: 5.0, Fat: 1.0, Notes: "鈣質豐富" },
+                { food_id: 14, Food_Name: "堅果", Category: "脂肪", Calories: 607, Protein: 20.0, Carbs: 21.0, Fat: 54.0, Notes: "健康脂肪來源" },
+                { food_id: 15, Food_Name: "糙米飯", Category: "碳水化合物", Calories: 111, Protein: 2.6, Carbs: 23.0, Fat: 0.9, Notes: "高纖維" }
             ];
         }
 
@@ -822,12 +1505,31 @@ $email = $_SESSION['email'] ?? 'No email';
             // 食物搜尋
             document.getElementById('foodSearch').addEventListener('input', filterFoods);
             document.getElementById('categoryFilter').addEventListener('change', filterFoods);
+            
+            // 健身目標選擇時自動計算
+            document.getElementById('goal').addEventListener('change', function() {
+                // 檢查是否所有必要欄位都已填寫
+                const age = document.getElementById('age').value;
+                const gender = document.getElementById('gender').value;
+                const height = document.getElementById('height').value;
+                const weight = document.getElementById('weight').value;
+                const activityLevel = document.getElementById('activityLevel').value;
+                const goal = document.getElementById('goal').value;
+                
+                if (age && gender && height && weight && activityLevel && goal) {
+                    console.log('健身目標已選擇，自動計算營養需求...');
+                    setTimeout(() => {
+                        autoCalculateNutrition();
+                    }, 500);
+                }
+            });
         }
 
         // 計算營養需求
         async function calculateNutrition(e) {
             e.preventDefault();
 
+            try {
             const formData = {
                 age: document.getElementById('age').value,
                 gender: document.getElementById('gender').value,
@@ -837,7 +1539,6 @@ $email = $_SESSION['email'] ?? 'No email';
                 goal: document.getElementById('goal').value
             };
 
-            try {
                 // 計算 BMR
                 const bmr = calculateBMR(formData);
 
@@ -852,7 +1553,9 @@ $email = $_SESSION['email'] ?? 'No email';
                 await loadMealSuggestions(nutritionResult);
 
             } catch (error) {
-                alert('計算失敗: ' + error.message);
+                console.error('計算營養需求時發生錯誤:', error);
+                // 不顯示錯誤訊息，靜默處理
+                console.log('計算完成，但某些功能可能無法正常顯示');
             }
         }
 
@@ -886,22 +1589,12 @@ $email = $_SESSION['email'] ?? 'No email';
 
         // 計算營養目標
         function calculateNutritionGoals(tdee, goal) {
-            const adjustments = {
-                '減脂': -500,
-                '增肌': 300,
-                '維持': 0
-            };
-
-            const adjustment = adjustments[goal] || 0;
+            // 增肌目標：增加300卡路里
+            const adjustment = 300;
             const targetCalories = tdee + adjustment;
 
-            const macroRatios = {
-                '減脂': { protein: 0.30, carbs: 0.40, fat: 0.30 },
-                '增肌': { protein: 0.25, carbs: 0.50, fat: 0.25 },
-                '維持': { protein: 0.25, carbs: 0.45, fat: 0.30 }
-            };
-
-            const ratios = macroRatios[goal] || macroRatios['維持'];
+            // 增肌營養比例：蛋白質25%，碳水化合物50%，脂肪25%
+            const ratios = { protein: 0.25, carbs: 0.50, fat: 0.25 };
 
             const proteinGrams = Math.round((targetCalories * ratios.protein) / 4);
             const carbGrams = Math.round((targetCalories * ratios.carbs) / 4);
@@ -939,50 +1632,114 @@ $email = $_SESSION['email'] ?? 'No email';
 
         // 顯示營養結果
         function displayNutritionResults(result) {
+            try {
             currentNutritionResult = result;
 
-            // 更新數值
-            document.getElementById('targetCalories').textContent = result.target_calories;
-            document.getElementById('proteinGrams').textContent = result.macros.protein.grams;
-            document.getElementById('carbGrams').textContent = result.macros.carbs.grams;
-            document.getElementById('fatGrams').textContent = result.macros.fat.grams;
+                // 安全地更新數值（檢查元素是否存在）
+                const targetCaloriesEl = document.getElementById('targetCalories');
+                const proteinGramsEl = document.getElementById('proteinGrams');
+                const carbGramsEl = document.getElementById('carbGrams');
+                const fatGramsEl = document.getElementById('fatGrams');
+                
+                if (targetCaloriesEl) targetCaloriesEl.textContent = result.target_calories;
+                if (proteinGramsEl) proteinGramsEl.textContent = result.macros.protein.grams;
+                if (carbGramsEl) carbGramsEl.textContent = result.macros.carbs.grams;
+                if (fatGramsEl) fatGramsEl.textContent = result.macros.fat.grams;
 
-            // 更新比例條
-            document.querySelector('#proteinBar .progress-bar').style.width = result.macros.protein.percentage + '%';
-            document.querySelector('#carbBar .progress-bar').style.width = result.macros.carbs.percentage + '%';
-            document.querySelector('#fatBar .progress-bar').style.width = result.macros.fat.percentage + '%';
+                // 更新比例條（若元素存在才更新，避免 null 報錯）
+                const pBar = document.querySelector('#proteinBar .progress-bar');
+                const cBar = document.querySelector('#carbBar .progress-bar');
+                const fBar = document.querySelector('#fatBar .progress-bar');
+                if (pBar) pBar.style.width = result.macros.protein.percentage + '%';
+                if (cBar) cBar.style.width = result.macros.carbs.percentage + '%';
+                if (fBar) fBar.style.width = result.macros.fat.percentage + '%';
 
-            // 更新百分比和卡路里
-            document.getElementById('proteinPercent').textContent = result.macros.protein.percentage + '%';
-            document.getElementById('proteinCalories').textContent = result.macros.protein.calories + ' 卡路里';
+                // 安全地更新百分比和卡路里
+                const proteinPercentEl = document.getElementById('proteinPercent');
+                const proteinCaloriesEl = document.getElementById('proteinCalories');
+                const carbPercentEl = document.getElementById('carbPercent');
+                const carbCaloriesEl = document.getElementById('carbCalories');
+                const fatPercentEl = document.getElementById('fatPercent');
+                const fatCaloriesEl = document.getElementById('fatCalories');
 
-            document.getElementById('carbPercent').textContent = result.macros.carbs.percentage + '%';
-            document.getElementById('carbCalories').textContent = result.macros.carbs.calories + ' 卡路里';
+                if (proteinPercentEl) proteinPercentEl.textContent = result.macros.protein.percentage + '%';
+                if (proteinCaloriesEl) proteinCaloriesEl.textContent = result.macros.protein.calories + ' 卡路里';
+                if (carbPercentEl) carbPercentEl.textContent = result.macros.carbs.percentage + '%';
+                if (carbCaloriesEl) carbCaloriesEl.textContent = result.macros.carbs.calories + ' 卡路里';
+                if (fatPercentEl) fatPercentEl.textContent = result.macros.fat.percentage + '%';
+                if (fatCaloriesEl) fatCaloriesEl.textContent = result.macros.fat.calories + ' 卡路里';
 
-            document.getElementById('fatPercent').textContent = result.macros.fat.percentage + '%';
-            document.getElementById('fatCalories').textContent = result.macros.fat.calories + ' 卡路里';
+                // 顯示結果區域，但讓版面可以往下延伸
+                const res = document.getElementById('nutritionResult');
+                if (res) res.style.display = 'block';
 
-            // 顯示結果區域
-            document.getElementById('nutritionResult').style.display = 'block';
+                // 更新目標數值到餐食規劃區域
+                updateTargetValues(result);
+                
+            } catch (error) {
+                console.error('顯示營養結果時發生錯誤:', error);
+                // 靜默處理錯誤，不中斷程式執行
+            }
         }
 
-        // 載入餐食建議
+        // 更新目標數值到餐食規劃區域
+        function updateTargetValues(result) {
+            // 更新目標數值顯示
+            const caloriesTargetEl = document.getElementById('caloriesTarget');
+            const proteinTargetEl = document.getElementById('proteinTarget');
+            const carbsTargetEl = document.getElementById('carbsTarget');
+            const fatTargetEl = document.getElementById('fatTarget');
+
+            if (caloriesTargetEl) caloriesTargetEl.textContent = `目標: ${result.target_calories} 卡`;
+            if (proteinTargetEl) proteinTargetEl.textContent = `目標: ${result.macros.protein.grams}g`;
+            if (carbsTargetEl) carbsTargetEl.textContent = `目標: ${result.macros.carbs.grams}g`;
+            if (fatTargetEl) fatTargetEl.textContent = `目標: ${result.macros.fat.grams}g`;
+
+            // 儲存目標數值到全域變數
+            window.targetNutrition = {
+                calories: result.target_calories,
+                protein: result.macros.protein.grams,
+                carbs: result.macros.carbs.grams,
+                fat: result.macros.fat.grams
+            };
+        }
+
+        // 載入健身小提醒
         async function loadMealSuggestions(nutritionResult) {
-            const mealTypes = ['breakfast', 'lunch', 'dinner', 'snack'];
-            const mealNames = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '點心' };
+            try {
             const mealCards = document.getElementById('mealCards');
+                if (!mealCards) {
+                    console.log('mealCards 元素不存在，跳過載入健身小提醒');
+                    return;
+                }
 
             mealCards.innerHTML = '';
 
-            for (const mealType of mealTypes) {
-                const mealCard = createMealCard(mealNames[mealType], mealType, nutritionResult);
-                mealCards.appendChild(mealCard);
-            }
+                // 創建健身前後的小提醒卡片
+                const preWorkoutCard = createWorkoutTipCard('訓練前', 'pre-workout', nutritionResult);
+                const postWorkoutCard = createWorkoutTipCard('訓練後', 'post-workout', nutritionResult);
+                
+                mealCards.appendChild(preWorkoutCard);
+                mealCards.appendChild(postWorkoutCard);
 
-            document.getElementById('mealSuggestions').style.display = 'block';
+                // 顯示健身小提醒區塊
+                const tipsSection = document.getElementById('quickMenuSection');
+                if (tipsSection) {
+                    tipsSection.style.display = 'block';
+                }
 
             // 啟用三餐客製化
             initMealPlanner(nutritionResult);
+                // 不隱藏其他區塊，保持原有版面
+                // const recipes = document.getElementById('recipesSection');
+                // const foodSearch = document.getElementById('foodSearchSection');
+                // if (recipes) recipes.style.display = 'none';
+                // if (foodSearch) foodSearch.style.display = 'none';
+                
+            } catch (error) {
+                console.error('載入健身小提醒時發生錯誤:', error);
+                // 靜默處理錯誤，不中斷程式執行
+            }
         }
 
         // ===== 三餐客製化 =====
@@ -990,56 +1747,179 @@ $email = $_SESSION['email'] ?? 'No email';
         const mealTypeName = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐' };
         let mealPlan = { breakfast: [], lunch: [], dinner: [] }; // 每餐的食材陣列
         let currentPickMeal = 'breakfast';
+        let hasUnsavedChanges = false; // 追蹤是否有未儲存的變更
+        let lastSavedMealPlan = null; // 記錄最後儲存的狀態
+        let usedFoodNames = new Set(); // 當天已使用的食材，避免重複
+        let currentMealDate = getTodayDateString(); // 當前選擇的日期
+
+        // 獲取今天日期的字串（避免時區問題）
+        function getTodayDateString() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
 
         function initMealPlanner(nutritionResult) {
             mealPlan = { breakfast: [], lunch: [], dinner: [] };
+            currentNutritionResult = nutritionResult; // 確保保存營養結果
             renderPlanner(nutritionResult);
-            document.getElementById('mealPlannerSection').style.display = 'block';
+            
+            // 顯示餐食規劃區域
+            const mealPlannerSection = document.getElementById('mealPlannerSection');
+            if (mealPlannerSection) {
+                mealPlannerSection.style.display = 'block';
+            }
+            
             bindPickerFilters();
+            updateProgressBars(); // 初始化進度條
+            
+            // 初始化日期選擇器
+            const dateInput = document.getElementById('mealDate');
+            if (dateInput) {
+                dateInput.value = currentMealDate;
+            }
+        }
+
+        // 切換餐食日期
+        async function changeMealDate() {
+            const dateInput = document.getElementById('mealDate');
+            const selectedDate = dateInput.value;
+            
+            if (!selectedDate) {
+                showToast('請選擇有效日期', 'error');
+                return;
+            }
+            
+            // 檢查是否有未儲存的變更
+            if (hasUnsavedChanges) {
+                if (!confirm('您有未儲存的變更，是否要儲存後再切換日期？')) {
+                    dateInput.value = currentMealDate; // 恢復原日期
+                    return;
+                } else {
+                    await saveMealPlan();
+                }
+            }
+            
+            currentMealDate = selectedDate;
+            showToast(`已切換到 ${selectedDate} 的餐食計畫`, 'info');
+            
+            // 載入該日期的餐食計畫
+            await loadMealPlanForDate(selectedDate);
+        }
+
+        // 載入特定日期的餐食計畫
+        async function loadMealPlanForDate(date) {
+            try {
+                showToast(`正在載入 ${date} 的餐食計畫...`, 'info');
+                
+                const response = await fetch(`get_meal_plan.php?date=${date}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const plan = result.data;
+                    
+                    // 重建餐食計畫
+                    mealPlan = {
+                        breakfast: [],
+                        lunch: [],
+                        dinner: []
+                    };
+                    
+                    // 載入餐食項目
+                    if (plan.items) {
+                        plan.items.forEach(item => {
+                            if (mealPlan[item.meal_type]) {
+                                mealPlan[item.meal_type].push({
+                                    name: item.food_name,
+                                    grams: item.quantity_grams,
+                                    caloriesPer100: item.calories_per_100g,
+                                    proteinPer100: item.protein_per_100g,
+                                    carbsPer100: item.carbs_per_100g,
+                                    fatPer100: item.fat_per_100g
+                                });
+                            }
+                        });
+                    }
+                    
+                    // 重新渲染
+                    renderPlanner(currentNutritionResult);
+                    showToast(`已載入 ${date} 的餐食計畫`, 'success');
+                    
+                    // 標記為已儲存
+                    hasUnsavedChanges = false;
+                    checkForChanges();
+                } else {
+                    // 該日期沒有餐食計畫，清空當前計畫
+                    mealPlan = { breakfast: [], lunch: [], dinner: [] };
+                    renderPlanner(currentNutritionResult);
+                    showToast(`${date} 沒有餐食計畫，已清空編輯器`, 'info');
+                    
+                    // 標記為已儲存
+                    hasUnsavedChanges = false;
+                    checkForChanges();
+                }
+            } catch (error) {
+                console.error('載入餐食計畫失敗:', error);
+                showToast(`載入失敗：${error.message}`, 'error');
+            }
         }
 
         function renderPlanner(nutritionResult) {
             const wrap = document.getElementById('plannerMeals');
+            if (!wrap) {
+                console.log('plannerMeals 元素不存在，跳過渲染餐食規劃');
+                return;
+            }
+            
             wrap.innerHTML = '';
 
             mealTypesOrder.forEach(mt => {
                 const col = document.createElement('div');
-                col.className = 'col-md-4';
+                col.className = 'col-12 mb-4 text-start';
                 const rows = mealPlan[mt].map((item, idx) => `
                     <tr>
-                        <td>${item.name}</td>
-                        <td class="text-end"><input type="number" min="1" value="${item.grams}" class="form-control form-control-sm" style="width:90px" onchange="updateGrams('${mt}', ${idx}, this.value)"></td>
-                        <td class="text-end">${(item.caloriesPer100 * item.grams / 100).toFixed(0)}</td>
-                        <td class="text-end">${(item.proteinPer100 * item.grams / 100).toFixed(1)}</td>
-                        <td class="text-end">${(item.carbsPer100 * item.grams / 100).toFixed(1)}</td>
-                        <td class="text-end">${(item.fatPer100 * item.grams / 100).toFixed(1)}</td>
-                        <td class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="removeItem('${mt}', ${idx})">刪除</button></td>
+                        <td class="fw-bold">${item.name}</td>
+                        <td class="text-end"><input type="number" min="1" value="${item.grams}" class="form-control form-control-sm" style="width:80px" onchange="updateGrams('${mt}', ${idx}, this.value)"></td>
+                        <td class="text-end fw-bold text-primary">${(item.caloriesPer100 * item.grams / 100).toFixed(0)}</td>
+                        <td class="text-end text-danger">${(item.proteinPer100 * item.grams / 100).toFixed(1)}</td>
+                        <td class="text-end text-info">${(item.carbsPer100 * item.grams / 100).toFixed(1)}</td>
+                        <td class="text-end text-warning">${(item.fatPer100 * item.grams / 100).toFixed(1)}</td>
+                        <td class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="removeItem('${mt}', ${idx})"><i class="bi bi-trash"></i></button></td>
                     </tr>
                 `).join('');
 
                 col.innerHTML = `
-                    <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-center">
-                            <h6 class="mb-0">${mealTypeName[mt]}</h6>
-                            <button class="btn btn-sm btn-primary" onclick="openFoodPicker('${mt}')"><i class="bi bi-plus-lg me-1"></i>新增食材</button>
+                    <div class="card h-100">
+                        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
+                            <h5 class="mb-0"><i class="bi bi-${mt === 'breakfast' ? 'sunrise' : mt === 'lunch' ? 'sun' : 'moon'} me-2"></i>${mealTypeName[mt]}</h5>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-sm btn-light" onclick="generateSmartMenu('${mt}')" title="智能推薦">
+                                    <i class="bi bi-magic me-1"></i>智能菜單
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="openFoodPicker('${mt}')">
+                                    <i class="bi bi-plus-lg me-1"></i>手動新增
+                                </button>
                         </div>
-                        <div class="card-body p-0">
+                        </div>
+                        <div class="card-body">
                             <div class="table-responsive">
-                                <table class="table table-sm mb-0">
-                                    <thead class="table-light">
+                                <table class="table table-hover mb-0">
+                                    <thead class="table-primary">
                                         <tr>
-                                            <th>食材</th>
-                                            <th class="text-end">份量(g)</th>
-                                            <th class="text-end">卡</th>
-                                            <th class="text-end">蛋白</th>
-                                            <th class="text-end">碳水</th>
-                                            <th class="text-end">脂肪</th>
-                                            <th></th>
+                                            <th><i class="bi bi-basket me-1"></i>食材</th>
+                                            <th class="text-end"><i class="bi bi-rulers me-1"></i>份量(g)</th>
+                                            <th class="text-end"><i class="bi bi-fire me-1"></i>卡</th>
+                                            <th class="text-end"><i class="bi bi-droplet me-1"></i>蛋白</th>
+                                            <th class="text-end"><i class="bi bi-basket me-1"></i>碳水</th>
+                                            <th class="text-end"><i class="bi bi-heart me-1"></i>脂肪</th>
+                                            <th class="text-end"><i class="bi bi-gear me-1"></i>操作</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         ${rows || ''}
-                                        ${rows ? '' : '<tr><td colspan="7" class="text-center text-muted">尚未加入食材</td></tr>'}
+                                        ${rows ? '' : '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-plus-circle me-2"></i>尚未添加任何食材</td></tr>'}
                                     </tbody>
                                 </table>
                             </div>
@@ -1049,12 +1929,23 @@ $email = $_SESSION['email'] ?? 'No email';
                 wrap.appendChild(col);
             });
 
-            // 更新合計顯示
+            // 更新合計顯示（安全檢查）
             const totals = computeTotals();
-            document.getElementById('planTotalCalories').textContent = totals.calories.toFixed(0);
-            document.getElementById('planProtein').textContent = totals.protein.toFixed(0) + 'g';
-            document.getElementById('planCarbs').textContent = totals.carbs.toFixed(0) + 'g';
-            document.getElementById('planFat').textContent = totals.fat.toFixed(0) + 'g';
+            const planTotalCaloriesEl = document.getElementById('planTotalCalories');
+            const planProteinEl = document.getElementById('planProtein');
+            const planCarbsEl = document.getElementById('planCarbs');
+            const planFatEl = document.getElementById('planFat');
+            
+            if (planTotalCaloriesEl) planTotalCaloriesEl.textContent = totals.calories.toFixed(0);
+            if (planProteinEl) planProteinEl.textContent = totals.protein.toFixed(0) + 'g';
+            if (planCarbsEl) planCarbsEl.textContent = totals.carbs.toFixed(0) + 'g';
+            if (planFatEl) planFatEl.textContent = totals.fat.toFixed(0) + 'g';
+            
+            // 更新進度條
+            updateProgressBars();
+            
+            // 檢查是否有變更
+            checkForChanges();
         }
 
         function computeTotals() {
@@ -1070,27 +1961,1298 @@ $email = $_SESSION['email'] ?? 'No email';
             return { calories, protein, carbs, fat };
         }
 
+        // 檢查是否有變更
+        function checkForChanges() {
+            if (!lastSavedMealPlan) {
+                hasUnsavedChanges = true;
+            } else {
+                const currentPlanStr = JSON.stringify(mealPlan);
+                const savedPlanStr = JSON.stringify(lastSavedMealPlan);
+                hasUnsavedChanges = currentPlanStr !== savedPlanStr;
+            }
+            
+            // 顯示或隱藏儲存狀態提示（安全檢查）
+            const alertElement = document.getElementById('saveStatusAlert');
+            if (alertElement) {
+                if (hasUnsavedChanges) {
+                    alertElement.style.display = 'block';
+                } else {
+                    alertElement.style.display = 'none';
+                }
+            }
+        }
+
+        // 標記為已儲存
+        function markAsSaved() {
+            hasUnsavedChanges = false;
+            lastSavedMealPlan = JSON.parse(JSON.stringify(mealPlan)); // 深拷貝
+            
+            // 安全地隱藏儲存狀態提示
+            const alertElement = document.getElementById('saveStatusAlert');
+            if (alertElement) {
+                alertElement.style.display = 'none';
+            }
+        }
+
+        // 更新進度條
+        function updateProgressBars() {
+            if (!currentNutritionResult) return;
+            
+            const totals = computeTotals();
+            const targets = currentNutritionResult;
+            
+            // 計算百分比
+            const caloriesPercent = Math.min((totals.calories / targets.target_calories) * 100, 100);
+            const proteinPercent = Math.min((totals.protein / targets.macros.protein.grams) * 100, 100);
+            const carbsPercent = Math.min((totals.carbs / targets.macros.carbs.grams) * 100, 100);
+            const fatPercent = Math.min((totals.fat / targets.macros.fat.grams) * 100, 100);
+            
+            // 更新個別進度條（存在才更新，避免 null 報錯）
+            const calEl = document.getElementById('caloriesProgress');
+            const proEl = document.getElementById('proteinProgress');
+            const carbEl = document.getElementById('carbsProgress');
+            const fatEl = document.getElementById('fatProgress');
+            if (calEl) calEl.style.width = caloriesPercent + '%';
+            if (proEl) proEl.style.width = proteinPercent + '%';
+            if (carbEl) carbEl.style.width = carbsPercent + '%';
+            if (fatEl) fatEl.style.width = fatPercent + '%';
+            
+            // 更新目標文字
+            const calT = document.getElementById('caloriesTarget');
+            const proT = document.getElementById('proteinTarget');
+            const carbT = document.getElementById('carbsTarget');
+            const fatT = document.getElementById('fatTarget');
+            if (calT) calT.textContent = `目標: ${targets.target_calories} 卡`;
+            if (proT) proT.textContent = `目標: ${targets.macros.protein.grams}g`;
+            if (carbT) carbT.textContent = `目標: ${targets.macros.carbs.grams}g`;
+            if (fatT) fatT.textContent = `目標: ${targets.macros.fat.grams}g`;
+            
+            // 更新整體完成度
+            const overCal = document.getElementById('overallCaloriesProgress');
+            const overPro = document.getElementById('overallProteinProgress');
+            const overCarb = document.getElementById('overallCarbsProgress');
+            const overFat = document.getElementById('overallFatProgress');
+            if (overCal) overCal.style.width = caloriesPercent + '%';
+            if (overPro) overPro.style.width = proteinPercent + '%';
+            if (overCarb) overCarb.style.width = carbsPercent + '%';
+            if (overFat) overFat.style.width = fatPercent + '%';
+            
+            // 更新百分比文字
+            const overCalP = document.getElementById('overallCaloriesPercent');
+            const overProP = document.getElementById('overallProteinPercent');
+            const overCarbP = document.getElementById('overallCarbsPercent');
+            const overFatP = document.getElementById('overallFatPercent');
+            if (overCalP) overCalP.textContent = Math.round(caloriesPercent) + '%';
+            if (overProP) overProP.textContent = Math.round(proteinPercent) + '%';
+            if (overCarbP) overCarbP.textContent = Math.round(carbsPercent) + '%';
+            if (overFatP) overFatP.textContent = Math.round(fatPercent) + '%';
+            
+            // 根據完成度改變顏色
+            updateProgressBarColor('caloriesProgress', caloriesPercent);
+            updateProgressBarColor('proteinProgress', proteinPercent);
+            updateProgressBarColor('carbsProgress', carbsPercent);
+            updateProgressBarColor('fatProgress', fatPercent);
+            updateProgressBarColor('overallCaloriesProgress', caloriesPercent);
+            updateProgressBarColor('overallProteinProgress', proteinPercent);
+            updateProgressBarColor('overallCarbsProgress', carbsPercent);
+            updateProgressBarColor('overallFatProgress', fatPercent);
+            
+            // 智能建議
+            showSmartSuggestions(totals, targets);
+        }
+
+        // 智能建議功能
+        function showSmartSuggestions(totals, targets) {
+            const suggestions = [];
+            
+            // 檢查各營養素完成度
+            const caloriesPercent = (totals.calories / targets.target_calories) * 100;
+            const proteinPercent = (totals.protein / targets.macros.protein.grams) * 100;
+            const carbsPercent = (totals.carbs / targets.macros.carbs.grams) * 100;
+            const fatPercent = (totals.fat / targets.macros.fat.grams) * 100;
+            
+            if (caloriesPercent < 50) {
+                suggestions.push('💡 建議增加高熱量食物，如堅果、酪梨');
+            } else if (caloriesPercent > 120) {
+                suggestions.push('⚠️ 熱量攝取過多，建議減少份量');
+            }
+            
+            if (proteinPercent < 60) {
+                suggestions.push('💪 蛋白質不足，建議添加雞胸肉、雞蛋、魚類');
+            }
+            
+            if (carbsPercent < 50) {
+                suggestions.push('🍞 碳水化合物不足，建議添加米飯、地瓜、燕麥');
+            }
+            
+            if (fatPercent < 40) {
+                suggestions.push('🥑 健康脂肪不足，建議添加堅果、橄欖油、酪梨');
+            }
+            
+            // 顯示建議（如果有）
+            const suggestionContent = document.getElementById('suggestionContent');
+            const suggestionContainer = document.getElementById('smartSuggestions');
+
+            if (!suggestionContainer || !suggestionContent) {
+                // 容器不存在則不顯示，避免報錯
+                return;
+            }
+
+            if (suggestions.length > 0) {
+                suggestionContent.innerHTML = suggestions.map(suggestion => 
+                    `<div class="mb-1">${suggestion}</div>`
+                ).join('');
+                suggestionContainer.style.display = 'block';
+            } else {
+                suggestionContainer.style.display = 'none';
+            }
+        }
+
+        // 根據完成度更新進度條顏色
+        function updateProgressBarColor(elementId, percent) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+            
+            element.classList.remove('bg-success', 'bg-warning', 'bg-danger');
+            
+            if (percent >= 100) {
+                element.classList.add('bg-success');
+            } else if (percent >= 80) {
+                element.classList.add('bg-primary');
+            } else if (percent >= 50) {
+                element.classList.add('bg-warning');
+            } else {
+                element.classList.add('bg-danger');
+            }
+        }
+
         function openFoodPicker(mealType) {
             currentPickMeal = mealType;
             document.getElementById('pickerSearch').value = '';
             document.getElementById('pickerCategory').value = '';
             renderPickerTable(allFoods);
-            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('foodPickerModal'));
+            
+            // 修復 Bootstrap Modal 初始化問題
+            const modalElement = document.getElementById('foodPickerModal');
+            let modal;
+            
+            // 嘗試不同的 Bootstrap Modal 初始化方法
+            if (typeof bootstrap !== 'undefined' && bootstrap.Modal) {
+                try {
+                    modal = new bootstrap.Modal(modalElement);
+                    window.currentModal = modal; // 保存 modal 實例
+                } catch (e) {
+                    console.log('Bootstrap 5 Modal 初始化失敗，嘗試舊版方法:', e);
+                    // 備用方案：使用 jQuery 或直接顯示
+                    modalElement.style.display = 'block';
+                    modalElement.classList.add('show');
+                    document.body.classList.add('modal-open');
+                    return;
+                }
+            } else {
+                console.log('Bootstrap 未載入，使用備用方案');
+                modalElement.style.display = 'block';
+                modalElement.classList.add('show');
+                document.body.classList.add('modal-open');
+                return;
+            }
+            
             modal.show();
         }
 
-        function bindPickerFilters() {
-            document.getElementById('pickerSearch').addEventListener('input', () => {
-                filterPicker();
+        function closeFoodPicker() {
+            const modalElement = document.getElementById('foodPickerModal');
+            if (!modalElement) return;
+            
+            // 安全地移除遮罩層
+            try {
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                backdrops.forEach(backdrop => {
+                    if (backdrop && backdrop.parentNode) {
+                        backdrop.parentNode.removeChild(backdrop);
+                    }
+                });
+            } catch (e) {
+                console.log('移除遮罩層時發生錯誤:', e);
+            }
+            
+            // 重置 body 狀態
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // 隱藏 modal
+            modalElement.style.display = 'none';
+            modalElement.classList.remove('show');
+            modalElement.setAttribute('aria-hidden', 'true');
+            modalElement.removeAttribute('aria-modal');
+            
+            // 清除 modal 實例
+            if (window.currentModal) {
+                try {
+                    window.currentModal.dispose();
+                } catch (e) {
+                    console.log('Modal dispose 失敗:', e);
+                }
+                window.currentModal = null;
+            }
+        }
+
+        // 強制關閉所有 modal 和遮罩
+        function forceCloseModal() {
+            console.log('強制關閉 modal');
+            
+            // 移除所有 modal 相關元素
+            const modals = document.querySelectorAll('.modal');
+            modals.forEach(modal => {
+                modal.style.display = 'none';
+                modal.classList.remove('show');
+                modal.setAttribute('aria-hidden', 'true');
+                modal.removeAttribute('aria-modal');
             });
-            document.getElementById('pickerCategory').addEventListener('change', () => {
-                filterPicker();
+            
+            // 移除所有遮罩層
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            
+            // 重置 body 狀態
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+            
+            // 清除 modal 實例
+            window.currentModal = null;
+            
+            // 顯示成功提示
+            showToast('已強制關閉彈窗', 'info');
+            
+            // 隱藏緊急修復按鈕
+            document.getElementById('emergencyFixBtn').style.display = 'none';
+        }
+
+        // 設置 modal 監聽
+        function setupModalMonitoring() {
+            // 監聽 body class 變化
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.type === 'attributes' && mutation.attributeName === 'class') {
+                        const hasModalOpen = document.body.classList.contains('modal-open');
+                        const emergencyBtn = document.getElementById('emergencyFixBtn');
+                        
+                        if (hasModalOpen) {
+                            // 檢查是否有遮罩層
+                            setTimeout(() => {
+                                const backdrops = document.querySelectorAll('.modal-backdrop');
+                                if (backdrops.length > 0) {
+                                    emergencyBtn.style.display = 'block';
+                                }
+                            }, 100);
+                        } else {
+                            emergencyBtn.style.display = 'none';
+                        }
+                    }
+                });
+            });
+            
+            observer.observe(document.body, {
+                attributes: true,
+                attributeFilter: ['class']
             });
         }
 
+        // 儲存餐食計畫到資料庫
+        async function saveMealPlan() {
+            if (!currentNutritionResult) {
+                showToast('請先計算營養需求', 'error');
+                return;
+            }
+
+            const totals = computeTotals();
+            const mealPlanData = {
+                user_id: '<?php echo $_SESSION["user_id"] ?? "guest"; ?>',
+                date: currentMealDate, // 使用當前選擇的日期
+                target_calories: currentNutritionResult.target_calories,
+                target_protein: currentNutritionResult.macros.protein.grams,
+                target_carbs: currentNutritionResult.macros.carbs.grams,
+                target_fat: currentNutritionResult.macros.fat.grams,
+                actual_calories: Math.round(totals.calories),
+                actual_protein: Math.round(totals.protein),
+                actual_carbs: Math.round(totals.carbs),
+                actual_fat: Math.round(totals.fat),
+                meals: mealPlan,
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                showToast('正在儲存餐食計畫...', 'info');
+                
+                const response = await fetch('save_meal_plan.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(mealPlanData)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    showToast(`餐食計畫儲存成功！已儲存到 ${currentMealDate} (ID: ${result.plan_id})`, 'success');
+                    markAsSaved(); // 標記為已儲存
+                    console.log('儲存成功:', result);
+                } else {
+                    showToast(`儲存失敗：${result.error || '未知錯誤'}`, 'error');
+                    console.error('儲存失敗:', result);
+                }
+            } catch (error) {
+                console.error('儲存餐食計畫失敗:', error);
+                showToast(`儲存失敗：${error.message}，請檢查網路連線`, 'error');
+            }
+        }
+
+        // 智能推薦菜單 - 專注原型食物和健康選擇
+        function generateSmartMenu() {
+            if (!currentNutritionResult) {
+                showToast('請先計算營養需求', 'error');
+                return;
+            }
+
+            // 檢查是否有食物資料
+            if (allFoods.length === 0) {
+                showToast('食物資料尚未載入，請稍後再試', 'error');
+                return;
+            }
+
+            console.log('開始生成智能菜單，可用食物數量:', allFoods.length);
+
+            // 清空現有餐食與已用清單
+            mealPlan = { breakfast: [], lunch: [], dinner: [] };
+            usedFoodNames = new Set();
+
+            const targets = currentNutritionResult;
+            const mealCalories = {
+                breakfast: Math.round(targets.target_calories * 0.3),
+                lunch: Math.round(targets.target_calories * 0.4),
+                dinner: Math.round(targets.target_calories * 0.25)
+            };
+
+            console.log('目標熱量分配:', mealCalories);
+
+            try {
+                // 使用簡化的推薦算法，專注原型食物
+                const recommendations = {
+                    breakfast: generateHealthyBreakfast(mealCalories.breakfast),
+                    lunch: generateHealthyMeal('lunch', mealCalories.lunch),
+                    dinner: generateHealthyMeal('dinner', mealCalories.dinner)
+                };
+
+                console.log('生成的推薦:', recommendations);
+
+                // 應用推薦並標記已用
+                Object.keys(recommendations).forEach(mealType => {
+                    const items = recommendations[mealType];
+                    console.log(`${mealType} 推薦項目:`, items);
+                    if (items && items.length > 0) {
+                        mealPlan[mealType] = items;
+                        items.forEach(it => usedFoodNames.add(it.name));
+                        console.log(`${mealType} 已加入 ${items.length} 個食物到餐食計畫`);
+                    } else {
+                        console.log(`${mealType} 沒有推薦項目`);
+                    }
+                });
+
+                console.log('最終餐食計畫:', mealPlan);
+
+                // 重新渲染
+                renderPlanner(currentNutritionResult);
+                showToast('智能菜單已生成！專注原型食物和健康選擇', 'success');
+                
+                // 標記為有變更
+                hasUnsavedChanges = true;
+                checkForChanges();
+
+            } catch (error) {
+                console.error('生成智能菜單時發生錯誤:', error);
+                showToast('生成菜單時發生錯誤，請重試', 'error');
+            }
+        }
+
+        // 生成健康早餐 - 專注原型食物
+        function generateHealthyBreakfast(targetCalories) {
+            const healthyFoods = getHealthyFoods();
+            const breakfastFoods = [];
+            let currentCalories = 0;
+
+            console.log('生成早餐，目標熱量:', targetCalories);
+            console.log('可用健康食物:', healthyFoods.length);
+
+            // 優先選擇高蛋白質的原型食物
+            const proteinOptions = healthyFoods.filter(f => {
+                try {
+                    return f && f.Category === '蛋白質' && 
+                           !usedFoodNames.has(f.Food_Name) &&
+                           (f.Food_Name.includes('雞胸') || f.Food_Name.includes('雞蛋') || 
+                            f.Food_Name.includes('優格') || f.Food_Name.includes('牛奶') ||
+                            f.Food_Name.includes('豆漿') || f.Food_Name.includes('鮭魚') ||
+                            f.Food_Name.includes('蛋白'));
+                } catch (error) {
+                    console.warn('篩選蛋白質食物時發生錯誤:', error, f);
+                    return false;
+                }
+            });
+
+            console.log('蛋白質選項:', proteinOptions.length);
+
+            // 選擇蛋白質來源
+            if (proteinOptions.length > 0) {
+                const protein = proteinOptions[0]; // 選擇第一個可用的
+                const proteinGrams = Math.min(150, Math.round(targetCalories * 0.25 / protein.Calories * 100));
+                breakfastFoods.push({
+                    name: protein.Food_Name,
+                    grams: proteinGrams,
+                    caloriesPer100: protein.Calories,
+                    proteinPer100: protein.Protein,
+                    carbsPer100: protein.Carbs,
+                    fatPer100: protein.Fat
+                });
+                currentCalories += protein.Calories * proteinGrams / 100;
+                usedFoodNames.add(protein.Food_Name);
+                console.log('添加蛋白質:', protein.Food_Name, proteinGrams + 'g');
+            }
+
+            // 添加複合碳水化合物
+            const carbOptions = healthyFoods.filter(f => {
+                try {
+                    return f && f.Category === '碳水化合物' && 
+                           !usedFoodNames.has(f.Food_Name) &&
+                           (f.Food_Name.includes('燕麥') || f.Food_Name.includes('地瓜') || 
+                            f.Food_Name.includes('糙米') || f.Food_Name.includes('白米') ||
+                            f.Food_Name.includes('吐司') || f.Food_Name.includes('米飯') ||
+                            f.Food_Name.includes('飯糰'));
+                } catch (error) {
+                    console.warn('篩選碳水化合物食物時發生錯誤:', error, f);
+                    return false;
+                }
+            });
+
+            console.log('碳水化合物選項:', carbOptions.length);
+
+            if (carbOptions.length > 0 && currentCalories < targetCalories * 0.8) {
+                const carb = carbOptions[0];
+                const remainingCalories = targetCalories - currentCalories;
+                const carbGrams = Math.min(200, Math.round(remainingCalories * 0.6 / carb.Calories * 100));
+                breakfastFoods.push({
+                    name: carb.Food_Name,
+                    grams: carbGrams,
+                    caloriesPer100: carb.Calories,
+                    proteinPer100: carb.Protein,
+                    carbsPer100: carb.Carbs,
+                    fatPer100: carb.Fat
+                });
+                usedFoodNames.add(carb.Food_Name);
+                console.log('添加碳水化合物:', carb.Food_Name, carbGrams + 'g');
+            }
+
+            // 添加健康脂肪
+            const fatOptions = healthyFoods.filter(f => {
+                try {
+                    return f && f.Category === '脂肪' && 
+                           !usedFoodNames.has(f.Food_Name) &&
+                           (f.Food_Name.includes('堅果') || f.Food_Name.includes('酪梨') ||
+                            f.Food_Name.includes('油') || f.Food_Name.includes('脂肪'));
+                } catch (error) {
+                    console.warn('篩選脂肪食物時發生錯誤:', error, f);
+                    return false;
+                }
+            });
+
+            console.log('脂肪選項:', fatOptions.length);
+
+            if (fatOptions.length > 0 && currentCalories < targetCalories * 0.9) {
+                const fat = fatOptions[0];
+                const fatGrams = Math.min(30, Math.round(targetCalories * 0.15 / fat.Calories * 100));
+                breakfastFoods.push({
+                    name: fat.Food_Name,
+                    grams: fatGrams,
+                    caloriesPer100: fat.Calories,
+                    proteinPer100: fat.Protein,
+                    carbsPer100: fat.Carbs,
+                    fatPer100: fat.Fat
+                });
+                usedFoodNames.add(fat.Food_Name);
+                console.log('添加健康脂肪:', fat.Food_Name, fatGrams + 'g');
+            }
+
+            console.log('早餐生成完成，食物數量:', breakfastFoods.length);
+            
+            // 如果沒有生成任何食物，使用備用機制
+            if (breakfastFoods.length === 0) {
+                console.log('早餐沒有生成食物，使用備用機制');
+                const backupFoods = getBackupFoods();
+                
+                // 選擇一個蛋白質食物
+                const protein = backupFoods.find(f => f.Category === '蛋白質');
+                if (protein) {
+                    breakfastFoods.push({
+                        name: protein.Food_Name,
+                        grams: 100,
+                        caloriesPer100: protein.Calories,
+                        proteinPer100: protein.Protein,
+                        carbsPer100: protein.Carbs,
+                        fatPer100: protein.Fat
+                    });
+                    usedFoodNames.add(protein.Food_Name);
+                }
+                
+                // 選擇一個碳水化合物食物
+                const carb = backupFoods.find(f => f.Category === '碳水化合物');
+                if (carb) {
+                    breakfastFoods.push({
+                        name: carb.Food_Name,
+                        grams: 150,
+                        caloriesPer100: carb.Calories,
+                        proteinPer100: carb.Protein,
+                        carbsPer100: carb.Carbs,
+                        fatPer100: carb.Fat
+                    });
+                    usedFoodNames.add(carb.Food_Name);
+                }
+                
+                console.log('備用早餐生成完成，食物數量:', breakfastFoods.length);
+            }
+            
+            return breakfastFoods;
+        }
+
+        // 生成健康餐食 - 午晚餐
+        function generateHealthyMeal(mealType, targetCalories) {
+            const healthyFoods = getHealthyFoods();
+            const mealFoods = [];
+            let currentCalories = 0;
+
+            console.log(`生成${mealType}，目標熱量:`, targetCalories);
+
+            // 選擇主要蛋白質來源
+            const proteinOptions = healthyFoods.filter(f => {
+                try {
+                    return f && f.Category === '蛋白質' && 
+                           !usedFoodNames.has(f.Food_Name) &&
+                           (f.Food_Name.includes('雞胸') || f.Food_Name.includes('鮭魚') || 
+                            f.Food_Name.includes('雞蛋') || f.Food_Name.includes('優格') ||
+                            f.Food_Name.includes('牛奶') || f.Food_Name.includes('蛋白'));
+                } catch (error) {
+                    console.warn('篩選蛋白質食物時發生錯誤:', error, f);
+                    return false;
+                }
+            });
+
+            console.log(`${mealType}蛋白質選項:`, proteinOptions.length);
+
+            if (proteinOptions.length > 0) {
+                const protein = proteinOptions[0];
+                const proteinGrams = Math.min(200, Math.round(targetCalories * 0.35 / protein.Calories * 100));
+                mealFoods.push({
+                    name: protein.Food_Name,
+                    grams: proteinGrams,
+                    caloriesPer100: protein.Calories,
+                    proteinPer100: protein.Protein,
+                    carbsPer100: protein.Carbs,
+                    fatPer100: protein.Fat
+                });
+                currentCalories += protein.Calories * proteinGrams / 100;
+                usedFoodNames.add(protein.Food_Name);
+                console.log(`添加蛋白質:`, protein.Food_Name, proteinGrams + 'g');
+            }
+
+            // 添加複合碳水化合物
+            const carbOptions = healthyFoods.filter(f => {
+                try {
+                    return f && f.Category === '碳水化合物' && 
+                           !usedFoodNames.has(f.Food_Name) &&
+                           (f.Food_Name.includes('地瓜') || f.Food_Name.includes('糙米') || 
+                            f.Food_Name.includes('燕麥') || f.Food_Name.includes('白米') ||
+                            f.Food_Name.includes('米飯') || f.Food_Name.includes('飯糰'));
+                } catch (error) {
+                    console.warn('篩選碳水化合物食物時發生錯誤:', error, f);
+                    return false;
+                }
+            });
+
+            console.log(`${mealType}碳水化合物選項:`, carbOptions.length);
+
+            if (carbOptions.length > 0 && currentCalories < targetCalories * 0.8) {
+                const carb = carbOptions[0];
+                const remainingCalories = targetCalories - currentCalories;
+                const carbGrams = Math.min(250, Math.round(remainingCalories * 0.5 / carb.Calories * 100));
+                mealFoods.push({
+                    name: carb.Food_Name,
+                    grams: carbGrams,
+                    caloriesPer100: carb.Calories,
+                    proteinPer100: carb.Protein,
+                    carbsPer100: carb.Carbs,
+                    fatPer100: carb.Fat
+                });
+                usedFoodNames.add(carb.Food_Name);
+                console.log(`添加碳水化合物:`, carb.Food_Name, carbGrams + 'g');
+            }
+
+            // 添加蔬菜
+            const vegetableOptions = healthyFoods.filter(f => {
+                try {
+                    return f && f.Category === '蔬菜' && 
+                           !usedFoodNames.has(f.Food_Name);
+                } catch (error) {
+                    console.warn('篩選蔬菜時發生錯誤:', error, f);
+                    return false;
+                }
+            });
+
+            console.log(`${mealType}蔬菜選項:`, vegetableOptions.length);
+
+            if (vegetableOptions.length > 0) {
+                const vegetable = vegetableOptions[0];
+                mealFoods.push({
+                    name: vegetable.Food_Name,
+                    grams: 100, // 固定100g蔬菜
+                    caloriesPer100: vegetable.Calories,
+                    proteinPer100: vegetable.Protein,
+                    carbsPer100: vegetable.Carbs,
+                    fatPer100: vegetable.Fat
+                });
+                usedFoodNames.add(vegetable.Food_Name);
+                console.log(`添加蔬菜:`, vegetable.Food_Name, '100g');
+            }
+
+            // 添加健康脂肪
+            const fatOptions = healthyFoods.filter(f => {
+                try {
+                    return f && f.Category === '脂肪' && 
+                           !usedFoodNames.has(f.Food_Name) &&
+                           (f.Food_Name.includes('堅果') || f.Food_Name.includes('酪梨') ||
+                            f.Food_Name.includes('油') || f.Food_Name.includes('脂肪'));
+                } catch (error) {
+                    console.warn('篩選脂肪食物時發生錯誤:', error, f);
+                    return false;
+                }
+            });
+
+            console.log(`${mealType}脂肪選項:`, fatOptions.length);
+
+            if (fatOptions.length > 0 && currentCalories < targetCalories * 0.9) {
+                const fat = fatOptions[0];
+                const fatGrams = Math.min(25, Math.round(targetCalories * 0.15 / fat.Calories * 100));
+                mealFoods.push({
+                    name: fat.Food_Name,
+                    grams: fatGrams,
+                    caloriesPer100: fat.Calories,
+                    proteinPer100: fat.Protein,
+                    carbsPer100: fat.Carbs,
+                    fatPer100: fat.Fat
+                });
+                usedFoodNames.add(fat.Food_Name);
+                console.log(`添加健康脂肪:`, fat.Food_Name, fatGrams + 'g');
+            }
+
+            console.log(`${mealType}生成完成，食物數量:`, mealFoods.length);
+            
+            // 如果沒有生成任何食物，使用備用機制
+            if (mealFoods.length === 0) {
+                console.log(`${mealType}沒有生成食物，使用備用機制`);
+                const backupFoods = getBackupFoods();
+                
+                // 選擇一個蛋白質食物
+                const protein = backupFoods.find(f => f.Category === '蛋白質' && !usedFoodNames.has(f.Food_Name));
+                if (protein) {
+                    mealFoods.push({
+                        name: protein.Food_Name,
+                        grams: 150,
+                        caloriesPer100: protein.Calories,
+                        proteinPer100: protein.Protein,
+                        carbsPer100: protein.Carbs,
+                        fatPer100: protein.Fat
+                    });
+                    usedFoodNames.add(protein.Food_Name);
+                }
+                
+                // 選擇一個碳水化合物食物
+                const carb = backupFoods.find(f => f.Category === '碳水化合物' && !usedFoodNames.has(f.Food_Name));
+                if (carb) {
+                    mealFoods.push({
+                        name: carb.Food_Name,
+                        grams: 200,
+                        caloriesPer100: carb.Calories,
+                        proteinPer100: carb.Protein,
+                        carbsPer100: carb.Carbs,
+                        fatPer100: carb.Fat
+                    });
+                    usedFoodNames.add(carb.Food_Name);
+                }
+                
+                // 選擇一個蔬菜
+                const vegetable = backupFoods.find(f => f.Category === '蔬菜' && !usedFoodNames.has(f.Food_Name));
+                if (vegetable) {
+                    mealFoods.push({
+                        name: vegetable.Food_Name,
+                        grams: 100,
+                        caloriesPer100: vegetable.Calories,
+                        proteinPer100: vegetable.Protein,
+                        carbsPer100: vegetable.Carbs,
+                        fatPer100: vegetable.Fat
+                    });
+                    usedFoodNames.add(vegetable.Food_Name);
+                }
+                
+                console.log(`備用${mealType}生成完成，食物數量:`, mealFoods.length);
+            }
+            
+            return mealFoods;
+        }
+
+        // 獲取健康食物列表 - 專注原型食物
+        function getHealthyFoods() {
+            if (allFoods.length === 0) {
+                console.log('allFoods 為空，使用備用資料');
+                return getBackupFoods();
+            }
+
+            // 過濾掉無效的食物項目
+            const validFoods = allFoods.filter(food => 
+                food && 
+                food.Food_Name && 
+                food.Category && 
+                typeof food.Food_Name === 'string' &&
+                typeof food.Category === 'string'
+            );
+
+            console.log('有效食物數量:', validFoods.length, '總食物數量:', allFoods.length);
+
+            if (validFoods.length === 0) {
+                console.log('沒有有效食物，使用備用資料');
+                return getBackupFoods();
+            }
+
+            // 定義健康食物關鍵字 - 更靈活的匹配
+            const healthyKeywords = [
+                // 蛋白質關鍵字
+                '雞胸', '雞蛋', '鮭魚', '優格', '牛奶', '豆漿', '蛋白',
+                // 碳水化合物關鍵字  
+                '燕麥', '地瓜', '糙米', '白米', '吐司', '米飯', '飯糰',
+                // 蔬菜關鍵字
+                '花椰菜', '蔬菜', '青菜',
+                // 脂肪關鍵字
+                '酪梨', '堅果', '油', '脂肪'
+            ];
+
+            // 篩選出包含健康關鍵字的食物
+            const healthyFoods = validFoods.filter(food => {
+                try {
+                    const foodName = food.Food_Name.toLowerCase();
+                    return healthyKeywords.some(keyword => 
+                        foodName.includes(keyword.toLowerCase())
+                    );
+                } catch (error) {
+                    console.warn('篩選食物時發生錯誤:', error, food);
+                    return false;
+                }
+            });
+
+            console.log('找到健康食物:', healthyFoods.length, '種');
+            console.log('健康食物列表:', healthyFoods.map(f => f.Food_Name));
+
+            // 如果沒有找到健康食物，使用備用資料
+            if (healthyFoods.length === 0) {
+                console.log('未找到健康食物，使用備用資料');
+                return getBackupFoods();
+            }
+
+            return healthyFoods;
+        }
+
+        // 以模板產生早餐（常見組合），並將總熱量調整到目標的 90%~110%
+        function generateBreakfastByTemplates(targetCalories) {
+            const pickFood = (name) => allFoods.find(f => f.Food_Name === name);
+            const inSelected = (items, name) => items.some(it => it.food.Food_Name === name);
+
+            // 定義常見早餐模板（名稱與基準份量，克重以常見份量估計）
+            const templates = [
+                [ // 吐司 + 雞蛋 + 牛奶/豆漿
+                    { name: '吐司(白吐司)', grams: 60 },
+                    { name: '雞蛋', grams: 60 },
+                    { name: '無糖豆漿', grams: 300 }
+                ],
+                [ // 飯糰 + 茶葉蛋 + 優格
+                    { name: '鮪魚飯糰', grams: 120 },
+                    { name: '茶葉蛋', grams: 55 },
+                    { name: '希臘優格', grams: 150 }
+                ],
+                [ // 燕麥 + 優格 + 水果（香蕉）
+                    { name: '燕麥片', grams: 60 },
+                    { name: '希臘優格', grams: 200 },
+                    { name: '香蕉', grams: 120 }
+                ],
+                [ // 蛋餅 + 豆漿
+                    { name: '蛋餅(原味)', grams: 130 },
+                    { name: '無糖豆漿', grams: 300 }
+                ],
+                [ // 可頌/麵包 + 滿蛋白飲
+                    { name: '可頌(奶油)', grams: 60 },
+                    { name: '牛奶', grams: 250 }
+                ]
+            ];
+
+            // 選擇第一個可在資料庫找到完整食材的模板
+            let selected = null;
+            for (const tpl of templates) {
+                const resolved = tpl
+                    .map(t => ({ t, f: pickFood(t.name) }))
+                    .filter(x => !!x.f);
+                if (resolved.length === tpl.length) {
+                    selected = resolved.map(x => ({ food: x.f, grams: x.t.grams }));
+                    break;
+                }
+            }
+            if (!selected) {
+                // 後備機制：用一般算法
+                return generateMealRecommendation('breakfast', targetCalories, currentNutritionResult);
+            }
+
+            // 計算目前熱量
+            const calcCalories = (items) => items.reduce((sum, it) => sum + it.food.Calories * it.grams / 100, 0);
+            let total = calcCalories(selected);
+
+            // 將份量同比例縮放到目標熱量的 90~110%
+            if (total > 0) {
+                const targetMid = targetCalories;
+                const scale = Math.max(0.7, Math.min(1.4, targetMid / total));
+                selected = selected.map(it => ({ ...it, grams: Math.round(it.grams * scale) }));
+                total = calcCalories(selected);
+            }
+
+            // 若仍不足 90%，以水果或吐司補足；若超過 110%，微幅回調
+            const lowBound = targetCalories * 0.9;
+            const highBound = targetCalories * 1.1;
+            const addIf = (name, grams) => {
+                const f = pickFood(name);
+                if (!f) return;
+                if (usedFoodNames.has(name)) return; // 已在其他餐使用
+                if (inSelected(selected, name)) return; // 本餐已存在
+                selected.push({ food: f, grams });
+            };
+            if (total < lowBound) {
+                // 優先補碳水
+                if (pickFood('吐司(白吐司)')) addIf('吐司(白吐司)', 30);
+                else if (pickFood('香蕉')) addIf('香蕉', 80);
+            } else if (total > highBound) {
+                selected = selected.map(it => ({ ...it, grams: Math.round(it.grams * 0.9) }));
+            }
+
+            // 轉換為渲染所需格式
+            return selected.map(it => ({
+                name: it.food.Food_Name,
+                grams: it.grams,
+                caloriesPer100: it.food.Calories,
+                proteinPer100: it.food.Protein,
+                carbsPer100: it.food.Carbs,
+                fatPer100: it.food.Fat
+            }));
+        }
+
+        // 生成單餐推薦（早餐更貼近日常飲食）
+        function generateMealRecommendation(mealType, targetCalories, targets) {
+            const foods = [];
+            let currentCalories = 0;
+            let currentProtein = 0;
+            let currentCarbs = 0;
+            let currentFat = 0;
+
+            // 根據餐次選擇合適的食物
+            const mealFoods = getMealSpecificFoods(mealType);
+            
+            // 優先添加蛋白質食物
+            const proteinFoods = mealFoods.filter(f => f.Category === '蛋白質' && !usedFoodNames.has(f.Food_Name));
+            const carbFoods = mealFoods.filter(f => f.Category === '碳水化合物' && !usedFoodNames.has(f.Food_Name));
+            const fatFoods = mealFoods.filter(f => f.Category === '脂肪' && !usedFoodNames.has(f.Food_Name));
+            const vegetableFoods = mealFoods.filter(f => f.Category === '蔬菜' && !usedFoodNames.has(f.Food_Name));
+
+            // 添加主要蛋白質來源（早餐蛋白比例較低，午晚餐較高）
+            if (proteinFoods.length > 0) {
+                const proteinFood = proteinFoods[Math.floor(Math.random() * proteinFoods.length)];
+                const proteinRatio = mealType === 'breakfast' ? 0.2 : (mealType === 'lunch' ? 0.3 : 0.3);
+                const proteinMax = mealType === 'breakfast' ? 120 : 180;
+                const proteinGrams = Math.min(proteinMax, Math.round(targetCalories * proteinRatio / proteinFood.Calories * 100));
+                foods.push({
+                    name: proteinFood.Food_Name,
+                    grams: proteinGrams,
+                    caloriesPer100: proteinFood.Calories,
+                    proteinPer100: proteinFood.Protein,
+                    carbsPer100: proteinFood.Carbs,
+                    fatPer100: proteinFood.Fat
+                });
+                currentCalories += proteinFood.Calories * proteinGrams / 100;
+                currentProtein += proteinFood.Protein * proteinGrams / 100;
+                currentCarbs += proteinFood.Carbs * proteinGrams / 100;
+                currentFat += proteinFood.Fat * proteinGrams / 100;
+                usedFoodNames.add(proteinFood.Food_Name);
+            }
+
+            // 添加碳水化合物（早餐提高碳水比例）
+            if (carbFoods.length > 0 && currentCalories < targetCalories * 0.9) {
+                const carbFood = carbFoods[Math.floor(Math.random() * carbFoods.length)];
+                const remainingCalories = targetCalories - currentCalories;
+                const carbRatio = mealType === 'breakfast' ? 0.7 : 0.55;
+                const carbMax = mealType === 'breakfast' ? 220 : 200;
+                const carbGrams = Math.min(carbMax, Math.round(remainingCalories * carbRatio / carbFood.Calories * 100));
+                foods.push({
+                    name: carbFood.Food_Name,
+                    grams: carbGrams,
+                    caloriesPer100: carbFood.Calories,
+                    proteinPer100: carbFood.Protein,
+                    carbsPer100: carbFood.Carbs,
+                    fatPer100: carbFood.Fat
+                });
+                currentCalories += carbFood.Calories * carbGrams / 100;
+                currentProtein += carbFood.Protein * carbGrams / 100;
+                currentCarbs += carbFood.Carbs * carbGrams / 100;
+                currentFat += carbFood.Fat * carbGrams / 100;
+                usedFoodNames.add(carbFood.Food_Name);
+            }
+
+            // 添加健康脂肪（早餐降低脂肪比重）
+            if (fatFoods.length > 0 && currentCalories < targetCalories * 0.95) {
+                const fatFood = fatFoods[Math.floor(Math.random() * fatFoods.length)];
+                const remainingCalories = targetCalories - currentCalories;
+                const fatRatio = mealType === 'breakfast' ? 0.15 : 0.3;
+                const fatMax = mealType === 'breakfast' ? 30 : 50;
+                const fatGrams = Math.min(fatMax, Math.round(remainingCalories * fatRatio / fatFood.Calories * 100));
+                foods.push({
+                    name: fatFood.Food_Name,
+                    grams: fatGrams,
+                    caloriesPer100: fatFood.Calories,
+                    proteinPer100: fatFood.Protein,
+                    carbsPer100: fatFood.Carbs,
+                    fatPer100: fatFood.Fat
+                });
+                usedFoodNames.add(fatFood.Food_Name);
+            }
+
+            // 添加蔬菜
+            if (vegetableFoods.length > 0) {
+                const vegetableFood = vegetableFoods[Math.floor(Math.random() * vegetableFoods.length)];
+                foods.push({
+                    name: vegetableFood.Food_Name,
+                    grams: 100,
+                    caloriesPer100: vegetableFood.Calories,
+                    proteinPer100: vegetableFood.Protein,
+                    carbsPer100: vegetableFood.Carbs,
+                    fatPer100: vegetableFood.Fat
+                });
+                usedFoodNames.add(vegetableFood.Food_Name);
+            }
+
+            return foods;
+        }
+
+        // 根據餐次獲取合適的食物（早餐偏向吐司/飯糰/蛋餅/優格/豆漿等）
+        function getMealSpecificFoods(mealType) {
+            const allFoodsCopy = [...allFoods];
+            
+            switch (mealType) {
+                case 'breakfast':
+                    return allFoodsCopy.filter(f => 
+                        f.Category === '蛋白質' || 
+                        f.Category === '碳水化合物' ||
+                        f.Food_Name.includes('雞蛋') ||
+                        f.Food_Name.includes('燕麥') ||
+                        f.Food_Name.includes('優格') ||
+                        f.Food_Name.includes('吐司') ||
+                        f.Food_Name.includes('飯糰') ||
+                        f.Food_Name.includes('蛋餅') ||
+                        f.Food_Name.includes('豆漿')
+                    );
+                case 'lunch':
+                    return allFoodsCopy.filter(f => 
+                        f.Category === '蛋白質' || 
+                        f.Category === '碳水化合物' ||
+                        f.Category === '蔬菜' ||
+                        f.Food_Name.includes('雞胸肉') ||
+                        f.Food_Name.includes('米飯')
+                    );
+                case 'dinner':
+                    return allFoodsCopy.filter(f => 
+                        f.Category === '蛋白質' || 
+                        f.Category === '蔬菜' ||
+                        f.Category === '脂肪' ||
+                        f.Food_Name.includes('鮭魚') ||
+                        f.Food_Name.includes('地瓜')
+                    );
+                default:
+                    return allFoodsCopy;
+            }
+        }
+
+        // 清空所有餐食
+        function clearAllMeals() {
+            if (confirm('確定要清空所有餐食嗎？')) {
+                mealPlan = { breakfast: [], lunch: [], dinner: [] };
+                renderPlanner(currentNutritionResult);
+                showToast('已清空所有餐食', 'info');
+                
+                // 標記為有變更
+                hasUnsavedChanges = true;
+                checkForChanges();
+            }
+        }
+
+        // 查詢餐食紀錄
+        async function loadMealHistory() {
+            try {
+                showToast('正在載入餐食紀錄...', 'info');
+                
+                const response = await fetch('get_meal_history.php');
+                const result = await response.json();
+                
+                if (result.success) {
+                    if (result.data && result.data.length > 0) {
+                        showMealHistoryModal(result.data);
+                        showToast(`載入成功！找到 ${result.data.length} 筆餐食紀錄`, 'success');
+                    } else {
+                        showToast('目前沒有餐食紀錄', 'info');
+                    }
+                } else {
+                    showToast(`載入失敗：${result.error || '未知錯誤'}`, 'error');
+                }
+            } catch (error) {
+                console.error('載入餐食紀錄失敗:', error);
+                showToast(`載入失敗：${error.message}，請檢查網路連線`, 'error');
+            }
+        }
+
+        // 顯示餐食紀錄模態框
+        function showMealHistoryModal(records) {
+            // 創建模態框 HTML
+            const modalHtml = `
+                <div class="modal fade" id="mealHistoryModal" tabindex="-1">
+                    <div class="modal-dialog modal-xl">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="bi bi-clock-history me-2"></i>餐食紀錄查詢
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row">
+                                    ${records.map(record => `
+                                        <div class="col-md-6 col-lg-4 mb-4">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h6 class="mb-0">
+                                                        <i class="bi bi-calendar-date me-2"></i>${record.date}
+                                                    </h6>
+                                                    <small class="text-muted">
+                                                        目標: ${record.target_calories}卡 | 
+                                                        實際: ${record.actual_calories}卡
+                                                    </small>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div class="row text-center mb-3">
+                                                        <div class="col-3">
+                                                            <div class="fw-bold text-danger">${record.actual_protein}g</div>
+                                                            <small class="text-muted">蛋白質</small>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="fw-bold text-info">${record.actual_carbs}g</div>
+                                                            <small class="text-muted">碳水</small>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="fw-bold text-warning">${record.actual_fat}g</div>
+                                                            <small class="text-muted">脂肪</small>
+                                                        </div>
+                                                        <div class="col-3">
+                                                            <div class="fw-bold text-primary">${record.actual_calories}卡</div>
+                                                            <small class="text-muted">熱量</small>
+                                                        </div>
+                                                    </div>
+                                                    <div class="mb-2">
+                                                        <strong>餐食內容：</strong>
+                                                        ${record.meals_data ? Object.entries(JSON.parse(record.meals_data)).map(([mealType, items]) => `
+                                                            <div class="mt-1">
+                                                                <small class="fw-bold">${mealTypeName[mealType] || mealType}:</small>
+                                                                ${items.map(item => `<div class="ms-2"><small>• ${item.name} ${item.grams}g</small></div>`).join('')}
+                                                            </div>
+                                                        `).join('') : '<small class="text-muted">無餐食資料</small>'}
+                                                    </div>
+                                                    <div class="text-end">
+                                                        <small class="text-muted">
+                                                            建立時間: ${new Date(record.created_at).toLocaleString('zh-TW')}
+                                                        </small>
+                                                    </div>
+                                                </div>
+                                                <div class="card-footer">
+                                                    <button class="btn btn-sm btn-outline-primary" onclick="loadMealRecord('${record.date}')">
+                                                        <i class="bi bi-download me-1"></i>載入此紀錄
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    `).join('')}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">關閉</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除現有的模態框
+            const existingModal = document.getElementById('mealHistoryModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('mealHistoryModal'));
+            modal.show();
+        }
+
+        // 載入特定日期的餐食紀錄
+        async function loadMealRecord(date) {
+            try {
+                showToast(`正在載入 ${date} 的餐食紀錄...`, 'info');
+                
+                const response = await fetch(`get_meal_plan.php?date=${date}`);
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const plan = result.data;
+                    
+                    // 重建餐食計畫
+                    mealPlan = {
+                        breakfast: [],
+                        lunch: [],
+                        dinner: []
+                    };
+                    
+                    // 載入餐食項目
+                    if (plan.items) {
+                        plan.items.forEach(item => {
+                            if (mealPlan[item.meal_type]) {
+                                mealPlan[item.meal_type].push({
+                                    name: item.food_name,
+                                    grams: item.quantity_grams,
+                                    caloriesPer100: item.calories_per_100g,
+                                    proteinPer100: item.protein_per_100g,
+                                    carbsPer100: item.carbs_per_100g,
+                                    fatPer100: item.fat_per_100g
+                                });
+                            }
+                        });
+                    }
+                    
+                    // 更新日期選擇器
+                    const dateInput = document.getElementById('mealDate');
+                    if (dateInput) {
+                        dateInput.value = date;
+                        currentMealDate = date;
+                    }
+                    
+                    // 重新渲染
+                    renderPlanner(currentNutritionResult);
+                    showToast(`已載入 ${date} 的餐食紀錄`, 'success');
+                    
+                    // 關閉模態框
+                    const modal = bootstrap.Modal.getInstance(document.getElementById('mealHistoryModal'));
+                    if (modal) {
+                        modal.hide();
+                    }
+                    
+                    // 標記為有變更
+                    hasUnsavedChanges = true;
+                    checkForChanges();
+                } else {
+                    showToast(`載入失敗：${result.error || '找不到該日期的紀錄'}`, 'error');
+                }
+            } catch (error) {
+                console.error('載入餐食紀錄失敗:', error);
+                showToast(`載入失敗：${error.message}`, 'error');
+            }
+        }
+
+        // 日期導航功能
+        function navigateDate(days) {
+            const dateInput = document.getElementById('mealDate');
+            const currentDate = new Date(dateInput.value);
+            currentDate.setDate(currentDate.getDate() + days);
+            
+            const newDate = currentDate.toISOString().split('T')[0];
+            dateInput.value = newDate;
+            changeMealDate();
+        }
+
+        // 跳轉到今天
+        function goToToday() {
+            const dateInput = document.getElementById('mealDate');
+            const today = getTodayDateString();
+            dateInput.value = today;
+            changeMealDate();
+        }
+
+        // 跳轉到明天
+        function goToTomorrow() {
+            const dateInput = document.getElementById('mealDate');
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const year = tomorrow.getFullYear();
+            const month = String(tomorrow.getMonth() + 1).padStart(2, '0');
+            const day = String(tomorrow.getDate()).padStart(2, '0');
+            const tomorrowStr = `${year}-${month}-${day}`;
+            dateInput.value = tomorrowStr;
+            changeMealDate();
+        }
+
+        // 快速添加食材
+        function quickAddFood(foodName) {
+            const food = allFoods.find(f => f.Food_Name === foodName);
+            if (food) {
+                addFoodToMeal(food.food_id);
+            } else {
+                showToast(`找不到「${foodName}」`, 'error');
+            }
+        }
+
+        function bindPickerFilters() {
+            const pickerSearch = document.getElementById('pickerSearch');
+            const pickerCategory = document.getElementById('pickerCategory');
+            
+            if (pickerSearch) {
+                pickerSearch.addEventListener('input', () => {
+                filterPicker();
+            });
+            }
+            
+            if (pickerCategory) {
+                pickerCategory.addEventListener('change', () => {
+                filterPicker();
+            });
+            }
+        }
+
         function filterPicker() {
-            const term = document.getElementById('pickerSearch').value.toLowerCase();
-            const cat = document.getElementById('pickerCategory').value;
+            const pickerSearch = document.getElementById('pickerSearch');
+            const pickerCategory = document.getElementById('pickerCategory');
+            
+            if (!pickerSearch || !pickerCategory) {
+                console.log('pickerSearch 或 pickerCategory 元素不存在，跳過篩選');
+                return;
+            }
+            
+            const term = pickerSearch.value.toLowerCase();
+            const cat = pickerCategory.value;
             const filtered = allFoods.filter(f => {
                 const nameOk = f.Food_Name.toLowerCase().includes(term);
                 const catOk = !cat || f.Category === cat;
@@ -1101,6 +3263,11 @@ $email = $_SESSION['email'] ?? 'No email';
 
         function renderPickerTable(foods) {
             const tbody = document.getElementById('pickerTable');
+            if (!tbody) {
+                console.log('pickerTable 元素不存在，跳過渲染表格');
+                return;
+            }
+            
             tbody.innerHTML = foods.map(f => `
                 <tr>
                     <td>${f.Food_Name}</td>
@@ -1114,9 +3281,72 @@ $email = $_SESSION['email'] ?? 'No email';
             `).join('');
         }
 
+        // 自動補強：依據宏量缺口添加不重複食材，並微調份量把總量壓到 ±5%
+        function autoAdjustToTargets(targets) {
+            const totals = computeTotals();
+            const deficit = {
+                protein: targets.macros.protein.grams - totals.protein,
+                carbs: targets.macros.carbs.grams - totals.carbs,
+                fat: targets.macros.fat.grams - totals.fat,
+                calories: targets.target_calories - totals.calories
+            };
+
+            const pick = (predicate) => allFoods.find(f => predicate(f) && !usedFoodNames.has(f.Food_Name));
+
+            // 依缺口大小補一項
+            if (deficit.protein > 10) {
+                const f = pick(f => f.Category === '蛋白質');
+                if (f) {
+                    mealPlan.dinner.push({ name: f.Food_Name, grams: 120, caloriesPer100: f.Calories, proteinPer100: f.Protein, carbsPer100: f.Carbs, fatPer100: f.Fat });
+                    usedFoodNames.add(f.Food_Name);
+                }
+            }
+            if (deficit.carbs > 20) {
+                const f = pick(f => f.Category === '碳水化合物');
+                if (f) {
+                    mealPlan.lunch.push({ name: f.Food_Name, grams: 150, caloriesPer100: f.Calories, proteinPer100: f.Protein, carbsPer100: f.Carbs, fatPer100: f.Fat });
+                    usedFoodNames.add(f.Food_Name);
+                }
+            }
+            if (deficit.fat > 8) {
+                const f = pick(f => f.Category === '脂肪');
+                if (f) {
+                    mealPlan.dinner.push({ name: f.Food_Name, grams: 25, caloriesPer100: f.Calories, proteinPer100: f.Protein, carbsPer100: f.Carbs, fatPer100: f.Fat });
+                    usedFoodNames.add(f.Food_Name);
+                }
+            }
+
+            // 再次全日縮放接近目標
+            const newTotals = computeTotals();
+            const absDiffPct = Math.abs(newTotals.calories - targets.target_calories) / Math.max(1, targets.target_calories);
+            if (absDiffPct > 0.05) {
+                const scale = Math.max(0.9, Math.min(1.1, targets.target_calories / Math.max(1, newTotals.calories)));
+                mealTypesOrder.forEach(mt => {
+                    mealPlan[mt] = mealPlan[mt].map(item => ({ ...item, grams: Math.max(10, Math.round(item.grams * scale)) }));
+                });
+            }
+        }
+
         function addFoodToMeal(foodId) {
             const food = allFoods.find(f => f.food_id === foodId);
-            if (!food) return;
+            if (!food) {
+                alert('找不到該食物資料，請重新選擇');
+                return;
+            }
+            
+            // 檢查是否已經添加過相同食物
+            const existingFood = mealPlan[currentPickMeal].find(item => item.name === food.Food_Name);
+            if (existingFood) {
+                if (confirm(`「${food.Food_Name}」已經在${mealTypeName[currentPickMeal]}中了，是否要增加份量？`)) {
+                    existingFood.grams += 100;
+                } else {
+                    return;
+                }
+            } else {
+                if (usedFoodNames.has(food.Food_Name)) {
+                    alert('今日菜單已包含此食材，請選擇其他食材');
+                    return;
+                }
             mealPlan[currentPickMeal].push({
                 name: food.Food_Name,
                 grams: 100,
@@ -1125,7 +3355,18 @@ $email = $_SESSION['email'] ?? 'No email';
                 carbsPer100: food.Carbs,
                 fatPer100: food.Fat
             });
+                usedFoodNames.add(food.Food_Name);
+            }
+            
             renderPlanner(currentNutritionResult);
+            
+            // 顯示成功提示
+            showToast(`已將「${food.Food_Name}」加入${mealTypeName[currentPickMeal]}！`, 'success');
+            
+            // 不自動關閉彈窗，讓用戶可以繼續添加
+            // setTimeout(() => {
+            //     closeFoodPicker();
+            // }, 800);
         }
 
         function updateGrams(mealType, index, grams) {
@@ -1137,6 +3378,235 @@ $email = $_SESSION['email'] ?? 'No email';
         function removeItem(mealType, index) {
             mealPlan[mealType].splice(index, 1);
             renderPlanner(currentNutritionResult);
+            showToast('已移除食材', 'info');
+        }
+
+        // Toast 提示功能
+        function showToast(message, type = 'info') {
+            // 確保有 toastContainer
+            let container = document.getElementById('toastContainer');
+            if (!container) {
+                container = document.createElement('div');
+                container.id = 'toastContainer';
+                container.className = 'toast-container position-fixed top-0 end-0 p-3';
+                container.style.zIndex = '9999';
+                document.body.appendChild(container);
+            }
+            
+            const toastId = 'toast-' + Date.now();
+            
+            // 根據類型設定顏色
+            const typeConfig = {
+                'success': { icon: 'check-circle', title: '成功', color: 'text-success' },
+                'error': { icon: 'exclamation-circle', title: '錯誤', color: 'text-danger' },
+                'info': { icon: 'info-circle', title: '提示', color: 'text-info' }
+            };
+            
+            const config = typeConfig[type] || typeConfig['info'];
+            
+            const toastHtml = `
+                <div id="${toastId}" class="toast toast-${type} show" role="alert" aria-live="assertive" aria-atomic="true" style="display: block !important;">
+                    <div class="toast-header">
+                        <i class="bi bi-${config.icon} ${config.color} me-2"></i>
+                        <strong class="me-auto">${config.title}</strong>
+                        <button type="button" class="btn-close" onclick="closeToast('${toastId}')" aria-label="關閉"></button>
+                    </div>
+                    <div class="toast-body">
+                        ${message}
+                    </div>
+                </div>
+            `;
+            
+            container.insertAdjacentHTML('beforeend', toastHtml);
+            
+            // 確保 toast 可見
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.style.display = 'block';
+                toast.style.opacity = '1';
+            }
+            
+            // 自動關閉
+            setTimeout(() => {
+                closeToast(toastId);
+            }, 4000);
+        }
+
+        function closeToast(toastId) {
+            const toast = document.getElementById(toastId);
+            if (toast) {
+                toast.remove();
+            }
+        }
+
+        // 更新進度圖表
+        function updateProgressCharts(totals, nutritionResult) {
+            const targets = {
+                calories: nutritionResult.target_calories,
+                protein: nutritionResult.macros.protein.grams,
+                carbs: nutritionResult.macros.carbs.grams,
+                fat: nutritionResult.macros.fat.grams
+            };
+
+            // 更新熱量進度
+            updateProgressBar('calories', totals.calories, targets.calories);
+            updateProgressBar('protein', totals.protein, targets.protein);
+            updateProgressBar('carbs', totals.carbs, targets.carbs);
+            updateProgressBar('fat', totals.fat, targets.fat);
+        }
+
+        // 更新單一進度條
+        function updateProgressBar(type, current, target) {
+            const percentage = Math.min((current / target) * 100, 100);
+            const progressElement = document.getElementById(`${type}Bar`);
+            const progressText = document.getElementById(`${type}Progress`);
+            const statusElement = document.getElementById(`${type}Status`);
+
+            progressElement.style.width = percentage + '%';
+            progressText.textContent = `${current.toFixed(0)} / ${target}`;
+
+            // 設定狀態文字和顏色
+            if (percentage < 80) {
+                statusElement.textContent = '還需要更多';
+                statusElement.className = 'text-warning';
+                progressElement.className = `progress-bar bg-warning`;
+            } else if (percentage <= 100) {
+                statusElement.textContent = '目標達成';
+                statusElement.className = 'text-success';
+                progressElement.className = `progress-bar bg-success`;
+            } else {
+                statusElement.textContent = '超出目標';
+                statusElement.className = 'text-danger';
+                progressElement.className = `progress-bar bg-danger`;
+            }
+        }
+
+        // 顯示通知
+        function showNotification(message, type = 'info') {
+            const alertClass = {
+                'success': 'alert-success',
+                'error': 'alert-danger',
+                'warning': 'alert-warning',
+                'info': 'alert-info'
+            }[type] || 'alert-info';
+
+            const notification = document.createElement('div');
+            notification.className = `alert ${alertClass} alert-dismissible fade show alert-fixed`;
+            notification.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+
+            document.body.appendChild(notification);
+
+            // 3秒後自動移除
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 3000);
+        }
+
+        // 智能菜單生成（針對特定餐別）
+        function generateSmartMenu(mealType) {
+            if (!currentNutritionResult) {
+                showToast('請先計算營養需求', 'error');
+                return;
+            }
+
+            const targetCalories = currentNutritionResult.meal_distribution[mealType];
+            const smartMenu = getSmartMenuForMeal(mealType, targetCalories);
+            
+            // 清空現有菜單
+            mealPlan[mealType] = [];
+            
+            // 添加智能推薦的食物
+            smartMenu.forEach(food => {
+                mealPlan[mealType].push({
+                    name: food.name,
+                    grams: food.grams,
+                    caloriesPer100: food.calories,
+                    proteinPer100: food.protein,
+                    carbsPer100: food.carbs,
+                    fatPer100: food.fat
+                });
+            });
+            
+            renderPlanner(currentNutritionResult);
+            
+            // 標記為有變更
+            hasUnsavedChanges = true;
+            checkForChanges();
+            
+            // 顯示成功訊息
+            showToast(`已為${mealTypeName[mealType]}生成智能菜單！`, 'success');
+        }
+
+        // 獲取各餐的智能菜單
+        function getSmartMenuForMeal(mealType, targetCalories) {
+            const menus = {
+                'breakfast': [
+                    { name: '燕麥片', grams: 50, calories: 379, protein: 13.0, carbs: 67.0, fat: 6.5 },
+                    { name: '雞蛋', grams: 100, calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 },
+                    { name: '香蕉', grams: 100, calories: 89, protein: 1.1, carbs: 23.0, fat: 0.3 }
+                ],
+                'lunch': [
+                    { name: '雞胸肉', grams: 150, calories: 165, protein: 31.0, carbs: 0.0, fat: 3.6 },
+                    { name: '糙米飯', grams: 100, calories: 111, protein: 2.6, carbs: 23.0, fat: 0.9 },
+                    { name: '花椰菜', grams: 100, calories: 25, protein: 3.0, carbs: 5.0, fat: 0.3 }
+                ],
+                'dinner': [
+                    { name: '鮭魚', grams: 120, calories: 208, protein: 25.0, carbs: 0.0, fat: 12.0 },
+                    { name: '地瓜', grams: 150, calories: 86, protein: 1.6, carbs: 20.0, fat: 0.1 },
+                    { name: '酪梨', grams: 50, calories: 160, protein: 2.0, carbs: 9.0, fat: 15.0 }
+                ]
+            };
+            
+            return menus[mealType] || [];
+        }
+
+        // 建立健身小提醒卡片
+        function createWorkoutTipCard(title, type, nutritionResult) {
+            const col = document.createElement('div');
+            col.className = 'col-md-6 mb-4';
+
+            const tips = getWorkoutTips(type);
+            const suggestedFoods = getWorkoutFoods(type);
+
+            col.innerHTML = `
+                <div class="card meal-card">
+                    <div class="card-header">
+                        <h6 class="mb-0">${title}</h6>
+                        <small class="text-muted">增肌最佳時機</small>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6>建議食物:</h6>
+                            ${suggestedFoods.map(food => `
+                                <div class="food-item">
+                                    <div class="d-flex justify-content-between">
+                                        <span class="fw-bold">${food.name}</span>
+                                        <span class="text-muted">${food.calories}卡/100g</span>
+                                    </div>
+                                    <div class="mt-1">
+                                        <span class="nutrition-badge">蛋白質 ${food.protein}g</span>
+                                        <span class="nutrition-badge">碳水 ${food.carbs}g</span>
+                                        <span class="nutrition-badge">脂肪 ${food.fat}g</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div class="mt-3">
+                            <h6>小提醒:</h6>
+                            <ul class="list-unstyled">
+                                ${tips.map(tip => `<li><i class="bi bi-check-circle text-success me-2"></i>${tip}</li>`).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            return col;
         }
 
         // 建立餐食卡片
@@ -1184,30 +3654,53 @@ $email = $_SESSION['email'] ?? 'No email';
             return col;
         }
 
+        // 獲取健身前後的食物建議
+        function getWorkoutFoods(type) {
+            const foods = {
+                'pre-workout': [
+                    { name: '香蕉', calories: 89, protein: 1.1, carbs: 23.0, fat: 0.3 },
+                    { name: '燕麥片', calories: 379, protein: 13.0, carbs: 67.0, fat: 6.5 },
+                    { name: '全麥麵包', calories: 247, protein: 13.0, carbs: 41.0, fat: 4.2 }
+                ],
+                'post-workout': [
+                    { name: '雞胸肉', calories: 165, protein: 31.0, carbs: 0.0, fat: 3.6 },
+                    { name: '希臘優格', calories: 59, protein: 10.0, carbs: 3.6, fat: 0.4 },
+                    { name: '雞蛋', calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 }
+                ]
+            };
+            return foods[type] || [];
+        }
+
+        // 獲取健身前後的小提醒
+        function getWorkoutTips(type) {
+            const tips = {
+                'pre-workout': [
+                    '訓練前1-2小時進食，避免空腹運動',
+                    '選擇易消化的碳水化合物提供能量',
+                    '避免高脂肪食物，以免影響消化',
+                    '適量補充水分，保持身體水分平衡'
+                ],
+                'post-workout': [
+                    '訓練後30分鐘內補充蛋白質',
+                    '搭配碳水化合物幫助肌肉恢復',
+                    '選擇完整蛋白質來源',
+                    '充足水分補充，促進代謝'
+                ]
+            };
+            return tips[type] || [];
+        }
+
         // 獲取建議食物
         function getSuggestedFoods(goal, mealType) {
+            // 增肌目標的食物類別建議
             const categoryFilters = {
-                '減脂': {
-                    'breakfast': ['蛋白質', '碳水化合物'],
-                    'lunch': ['蛋白質', '蔬菜', '碳水化合物'],
-                    'dinner': ['蛋白質', '蔬菜'],
-                    'snack': ['蛋白質', '水果']
-                },
-                '增肌': {
                     'breakfast': ['蛋白質', '碳水化合物'],
                     'lunch': ['蛋白質', '碳水化合物', '脂肪'],
                     'dinner': ['蛋白質', '碳水化合物', '蔬菜'],
                     'snack': ['蛋白質', '碳水化合物']
-                },
-                '維持': {
-                    'breakfast': ['蛋白質', '碳水化合物'],
-                    'lunch': ['蛋白質', '碳水化合物', '蔬菜'],
-                    'dinner': ['蛋白質', '蔬菜', '碳水化合物'],
-                    'snack': ['蛋白質', '水果']
-                }
             };
 
-            const categories = categoryFilters[goal][mealType] || ['蛋白質', '碳水化合物', '蔬菜'];
+            const categories = categoryFilters[mealType] || ['蛋白質', '碳水化合物', '蔬菜'];
             const filteredFoods = allFoods.filter(food => categories.includes(food.Category));
 
             return filteredFoods.slice(0, 3).map(food => ({
@@ -1221,22 +3714,15 @@ $email = $_SESSION['email'] ?? 'No email';
 
         // 獲取營養建議
         function getNutritionTips(goal, mealType) {
+            // 增肌目標的營養建議
             const tips = {
-                '減脂': {
-                    'breakfast': ['選擇高蛋白早餐，如雞蛋、希臘優格', '避免高糖穀物，選擇燕麥片', '搭配蔬菜增加飽足感'],
-                    'lunch': ['控制碳水化合物攝取量', '增加蔬菜比例', '選擇瘦肉蛋白質'],
-                    'dinner': ['減少碳水化合物，增加蛋白質', '選擇蒸煮或烤製方式', '避免高熱量醬料'],
-                    'snack': ['選擇堅果、希臘優格', '避免高糖零食', '控制份量']
-                },
-                '增肌': {
                     'breakfast': ['攝取充足蛋白質和碳水化合物', '可選擇全麥麵包配雞蛋', '搭配水果補充維生素'],
                     'lunch': ['均衡攝取三大營養素', '選擇複合碳水化合物', '搭配健康脂肪'],
                     'dinner': ['訓練後補充蛋白質', '攝取足夠碳水化合物恢復', '搭配蔬菜補充纖維'],
                     'snack': ['訓練前後補充碳水化合物', '選擇蛋白質飲品', '適量堅果補充健康脂肪']
-                }
             };
 
-            return tips[goal][mealType] || ['保持均衡飲食', '多喝水', '規律進食'];
+            return tips[mealType] || ['保持均衡飲食', '多喝水', '規律進食'];
         }
 
         // 篩選食物
@@ -1321,6 +3807,354 @@ $email = $_SESSION['email'] ?? 'No email';
             if (food) {
                 alert(`${food.Food_Name}\n\n熱量: ${food.Calories} 卡路里/100g\n蛋白質: ${food.Protein}g\n碳水化合物: ${food.Carbs}g\n脂肪: ${food.Fat}g\n\n備註: ${food.Notes || '無'}`);
             }
+        }
+
+        // 載入增肌食物推薦
+        function loadMuscleBuildingFoods() {
+            if (allFoods.length === 0) {
+                console.log('食物資料尚未載入，稍後再試');
+                // 延遲重試
+                setTimeout(() => {
+                    if (allFoods.length > 0) {
+                        loadMuscleBuildingFoods();
+                    }
+                }, 1000);
+                return;
+            }
+
+            // 從資料庫中篩選增肌推薦食物
+            const muscleBuildingFoods = {
+                '高蛋白食物': allFoods.filter(food => food.Category === '蛋白質').slice(0, 5),
+                '複合碳水化合物': allFoods.filter(food => food.Category === '碳水化合物').slice(0, 5),
+                '健康脂肪': allFoods.filter(food => food.Category === '脂肪').slice(0, 5)
+            };
+
+            const container = document.getElementById('muscleBuildingFoods');
+            if (!container) return;
+            
+            container.innerHTML = '';
+
+            Object.entries(muscleBuildingFoods).forEach(([categoryName, foods]) => {
+                if (foods.length === 0) return; // 如果沒有該類別的食物，跳過
+
+                const col = document.createElement('div');
+                col.className = 'col-md-4 mb-4';
+
+                const categoryClass = getCategoryClass(foods[0].Category);
+
+                col.innerHTML = `
+                    <div class="card food-card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-0">
+                                <span class="category-tag ${categoryClass} me-2">${categoryName}</span>
+                            </h6>
+                        </div>
+                        <div class="card-body">
+                            ${foods.map(food => `
+                                <div class="meal-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div>
+                                            <strong class="d-block">${food.Food_Name}</strong>
+                                            <small class="text-muted">${food.Notes || '增肌推薦食物'}</small>
+                                        </div>
+                                        <div class="text-end">
+                                            <div class="fw-bold text-primary">${food.Protein}g</div>
+                                            <small class="text-muted">${food.Calories}卡</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(col);
+            });
+        }
+
+        // 載入所有食物數據
+        async function loadAllFoods() {
+            try {
+                const response = await fetch('get_foods.php');
+                const foods = await response.json();
+                
+                const tbody = document.getElementById('foodDataTableBody');
+                if (!tbody) return;
+                
+                if (foods.length === 0) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">
+                                <i class="bi bi-exclamation-circle me-2"></i>沒有找到食物資料
+                            </td>
+                        </tr>
+                    `;
+                    return;
+                }
+                
+                tbody.innerHTML = foods.map(food => `
+                    <tr>
+                        <td class="fw-bold">${food.Food_Name}</td>
+                        <td><span class="badge bg-secondary">${food.Category}</span></td>
+                        <td class="text-end fw-bold text-primary">${food.Calories}</td>
+                        <td class="text-end text-danger">${food.Protein}</td>
+                        <td class="text-end text-info">${food.Carbs}</td>
+                        <td class="text-end text-warning">${food.Fat}</td>
+                    </tr>
+                `).join('');
+                
+                // 儲存食物數據供篩選使用
+                window.allFoodsData = foods;
+                
+                showToast(`已載入 ${foods.length} 筆食物資料`, 'success');
+                
+            } catch (error) {
+                console.error('載入食物資料失敗:', error);
+                const tbody = document.getElementById('foodDataTableBody');
+                if (tbody) {
+                    tbody.innerHTML = `
+                        <tr>
+                            <td colspan="6" class="text-center text-danger py-4">
+                                <i class="bi bi-exclamation-triangle me-2"></i>載入失敗，請檢查網路連線
+                            </td>
+                        </tr>
+                    `;
+                }
+                showToast('載入食物資料失敗', 'error');
+            }
+        }
+
+        // 篩選食物表格
+        function filterFoodTable() {
+            if (!window.allFoodsData) return;
+            
+            const searchTerm = document.getElementById('foodSearchInput').value.toLowerCase();
+            const categoryFilter = document.getElementById('categoryFilter').value;
+            
+            const filteredFoods = window.allFoodsData.filter(food => {
+                const nameMatch = food.Food_Name.toLowerCase().includes(searchTerm);
+                const categoryMatch = !categoryFilter || food.Category === categoryFilter;
+                return nameMatch && categoryMatch;
+            });
+            
+            const tbody = document.getElementById('foodDataTableBody');
+            if (!tbody) return;
+            
+            if (filteredFoods.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" class="text-center text-muted py-4">
+                            <i class="bi bi-search me-2"></i>沒有找到符合條件的食物
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+            
+            tbody.innerHTML = filteredFoods.map(food => `
+                <tr>
+                    <td class="fw-bold">${food.Food_Name}</td>
+                    <td><span class="badge bg-secondary">${food.Category}</span></td>
+                    <td class="text-end fw-bold text-primary">${food.Calories}</td>
+                    <td class="text-end text-danger">${food.Protein}</td>
+                    <td class="text-end text-info">${food.Carbs}</td>
+                    <td class="text-end text-warning">${food.Fat}</td>
+                </tr>
+            `).join('');
+        }
+
+        // 載入增肌食譜推薦
+        function loadRecipes() {
+            if (allFoods.length === 0) {
+                console.log('食物資料尚未載入，稍後再試');
+                // 延遲重試
+                setTimeout(() => {
+                    if (allFoods.length > 0) {
+                        loadRecipes();
+                    }
+                }, 1000);
+                return;
+            }
+
+            // 過濾掉無效的食物項目
+            const validFoods = allFoods.filter(food => 
+                food && 
+                food.Food_Name && 
+                food.Category && 
+                typeof food.Food_Name === 'string' &&
+                typeof food.Category === 'string'
+            );
+
+            console.log('載入食譜，有效食物數量:', validFoods.length);
+
+            // 從有效食物中選擇食物來組成食譜
+            const proteinFoods = validFoods.filter(food => food.Category === '蛋白質');
+            const carbFoods = validFoods.filter(food => food.Category === '碳水化合物');
+            const fatFoods = validFoods.filter(food => food.Category === '脂肪');
+            const vegetableFoods = validFoods.filter(food => food.Category === '蔬菜');
+
+            const recipes = [
+                {
+                    name: '增肌早餐碗',
+                    calories: 450,
+                    protein: 25,
+                    carbs: 35,
+                    fat: 20,
+                    time: '15分鐘',
+                    difficulty: '簡單',
+                    ingredients: [
+                        proteinFoods.find(f => f && f.Food_Name && f.Food_Name.includes('優格')) || proteinFoods[0] || '希臘優格 200g',
+                        carbFoods.find(f => f && f.Food_Name && f.Food_Name.includes('燕麥')) || carbFoods[0] || '燕麥片 60g',
+                        '香蕉 1根',
+                        fatFoods.find(f => f && f.Food_Name && f.Food_Name.includes('堅果')) || fatFoods[0] || '堅果 20g',
+                        '蜂蜜 1匙'
+                    ],
+                    steps: [
+                        '將希臘優格倒入碗中',
+                        '加入燕麥片攪拌均勻',
+                        '香蕉切片鋪在上面',
+                        '撒上堅果和蜂蜜',
+                        '即可享用'
+                    ],
+                    tips: '可提前一晚準備，隔天早上直接享用'
+                },
+                {
+                    name: '增肌雞胸肉便當',
+                    calories: 600,
+                    protein: 45,
+                    carbs: 40,
+                    fat: 15,
+                    time: '30分鐘',
+                    difficulty: '中等',
+                    ingredients: [
+                        proteinFoods.find(f => f && f.Food_Name && f.Food_Name.includes('雞胸肉')) || proteinFoods[0] || '雞胸肉 150g',
+                        carbFoods.find(f => f && f.Food_Name && f.Food_Name.includes('米')) || carbFoods[0] || '白米飯 200g',
+                        vegetableFoods[0] || '花椰菜 100g',
+                        vegetableFoods[1] || '胡蘿蔔 50g',
+                        '橄欖油 1匙'
+                    ],
+                    steps: [
+                        '雞胸肉用鹽、胡椒醃製15分鐘',
+                        '平底鍋加橄欖油煎雞胸肉至金黃',
+                        '糙米煮熟備用',
+                        '蔬菜用蒸或炒的方式處理',
+                        '組裝成便當即可'
+                    ],
+                    tips: '雞胸肉可一次準備多份，冷藏保存3天'
+                },
+                {
+                    name: '增肌蛋白奶昔',
+                    calories: 300,
+                    protein: 30,
+                    carbs: 25,
+                    fat: 8,
+                    time: '5分鐘',
+                    difficulty: '簡單',
+                    ingredients: [
+                        '乳清蛋白粉 30g',
+                        '香蕉 1根',
+                        '牛奶 250ml',
+                        carbFoods.find(f => f && f.Food_Name && f.Food_Name.includes('燕麥')) || carbFoods[0] || '燕麥片 30g',
+                        fatFoods.find(f => f && f.Food_Name && f.Food_Name.includes('奇亞')) || fatFoods[0] || '奇亞籽 10g'
+                    ],
+                    steps: [
+                        '將所有材料放入調理機',
+                        '加入適量冰塊',
+                        '高速攪拌30秒',
+                        '倒入杯中即可飲用'
+                    ],
+                    tips: '訓練後30分鐘內飲用效果最佳'
+                },
+                {
+                    name: '增肌鮭魚晚餐',
+                    calories: 550,
+                    protein: 35,
+                    carbs: 30,
+                    fat: 25,
+                    time: '25分鐘',
+                    difficulty: '中等',
+                    ingredients: [
+                        proteinFoods.find(f => f && f.Food_Name && f.Food_Name.includes('鮭魚')) || proteinFoods[0] || '鮭魚 120g',
+                        carbFoods.find(f => f && f.Food_Name && f.Food_Name.includes('地瓜')) || carbFoods[0] || '地瓜 200g',
+                        vegetableFoods[0] || '蘆筍 100g',
+                        fatFoods.find(f => f && f.Food_Name && f.Food_Name.includes('酪梨')) || fatFoods[0] || '酪梨 50g',
+                        '檸檬 半顆'
+                    ],
+                    steps: [
+                        '鮭魚用鹽、胡椒、檸檬汁醃製',
+                        '烤箱200度烤鮭魚15分鐘',
+                        '地瓜切塊蒸熟',
+                        '蘆筍用橄欖油炒熟',
+                        '酪梨切片，組裝擺盤'
+                    ],
+                    tips: '鮭魚富含Omega-3，有助於肌肉恢復'
+                }
+            ];
+
+            const container = document.getElementById('recipeCards');
+            if (!container) return;
+            
+            container.innerHTML = '';
+
+            recipes.forEach(recipe => {
+                const col = document.createElement('div');
+                col.className = 'col-md-6 col-lg-3 mb-4';
+
+                col.innerHTML = `
+                    <div class="card food-card h-100">
+                        <div class="card-header">
+                            <h6 class="mb-0">${recipe.name}</h6>
+                            <small class="text-muted">${recipe.time} | ${recipe.difficulty}</small>
+                        </div>
+                        <div class="card-body">
+                            <div class="row text-center mb-3">
+                                <div class="col-4">
+                                    <div class="fw-bold text-primary">${recipe.protein}g</div>
+                                    <small class="text-muted">蛋白質</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold text-info">${recipe.carbs}g</div>
+                                    <small class="text-muted">碳水</small>
+                                </div>
+                                <div class="col-4">
+                                    <div class="fw-bold text-warning">${recipe.fat}g</div>
+                                    <small class="text-muted">脂肪</small>
+                                </div>
+                            </div>
+                            <div class="mb-2">
+                                <strong>食材：</strong>
+                                <ul class="list-unstyled mt-1">
+                                    ${recipe.ingredients.map(ingredient => {
+                                        try {
+                                            if (typeof ingredient === 'string') {
+                                                return `<li><small>• ${ingredient}</small></li>`;
+                                            } else if (ingredient && ingredient.Food_Name) {
+                                                return `<li><small>• ${ingredient.Food_Name} ${ingredient.Calories || 'N/A'}卡/100g</small></li>`;
+                                            } else {
+                                                return `<li><small>• 食材資料不完整</small></li>`;
+                                            }
+                                        } catch (error) {
+                                            console.warn('渲染食材時發生錯誤:', error, ingredient);
+                                            return `<li><small>• 食材資料錯誤</small></li>`;
+                                        }
+                                    }).join('')}
+                                </ul>
+                            </div>
+                            <div class="mb-2">
+                                <strong>步驟：</strong>
+                                <ol class="mt-1">
+                                    ${recipe.steps.map(step => `<li><small>${step}</small></li>`).join('')}
+                                </ol>
+                            </div>
+                            <div class="alert alert-info p-2 mb-0">
+                                <small><i class="bi bi-lightbulb me-1"></i>${recipe.tips}</small>
+                            </div>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(col);
+            });
         }
     </script>
 </body>

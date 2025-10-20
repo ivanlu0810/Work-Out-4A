@@ -12,6 +12,8 @@
     <link rel="stylesheet" href="assets/css/bootstrap.css">
     <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/app.css">
+    <!-- 日期選擇器：Air Datepicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.3/air-datepicker.css">
 
     <!-- 自訂樣式 -->
     <style>
@@ -68,6 +70,20 @@
             color: #fff !important;
         }
 
+        /* 讓編輯/刪除按鈕中的圖示與文字垂直置中 */
+        .btn-detail,
+        .btn-remove {
+            display: inline-flex;
+            align-items: center; /* 垂直置中 icon 與文字 */
+            justify-content: center;
+            gap: .35rem; /* icon 與文字距離 */
+            height: 36px; /* 固定高度避免不同行高造成視覺偏移 */
+            padding: 0 .75rem; /* 垂直居中 */
+            line-height: 1; /* 防止文字行高撐開 */
+        }
+        .btn-detail i,
+        .btn-remove i { display: inline-block; line-height: 1; }
+
         .btn-detail:hover,
         .btn-detail:active,
         .btn-detail:focus {
@@ -109,12 +125,34 @@
             border: none;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
             transition: transform 0.2s ease-in-out;
+            min-height: 80px; /* 進一步減少最小高度 */
         }
 
         .card.bg-primary:hover,
         .card.bg-success:hover,
         .card.bg-info:hover {
             transform: translateY(-2px);
+        }
+
+        /* 統計卡片內容調整 */
+        .card.bg-primary .card-body,
+        .card.bg-success .card-body,
+        .card.bg-info .card-body {
+            padding: 0.75rem 1rem; /* 進一步減少內邊距 */
+        }
+
+        .card.bg-primary h4,
+        .card.bg-success h4,
+        .card.bg-info h4 {
+            font-size: 1.6rem; /* 進一步減少數字大小 */
+            margin-bottom: 0.25rem; /* 進一步減少與文字的間距 */
+        }
+
+        .card.bg-primary p,
+        .card.bg-success p,
+        .card.bg-info p {
+            font-size: 0.85rem; /* 進一步減少文字大小 */
+            margin-bottom: 0; /* 移除底部邊距 */
         }
 
         /* 搜尋和控制面板樣式 */
@@ -206,7 +244,217 @@
             /* 文字顏色 */
             border: none !important;
             /* 移除邊框 */
+            display: flex;
+            align-items: center; /* 讓圖示與文字垂直置中 */
+            justify-content: center; /* 置中整段內容 */
+            gap: .5rem;
         }
+        .alert-morandi .bi { line-height: 1; display: inline-block; }
+
+        /* Air Datepicker 客製：選取日期顏色同「編輯」按鈕莫蘭迪藍灰 */
+        .air-datepicker-cell.-selected-,
+        .air-datepicker-cell.-selected-:hover {
+            background-color: #7f90a9 !important; /* 與 .btn-detail 一致 */
+            color: #fff !important;
+        }
+        /* 聚焦或游標移入時略為加深 */
+        .air-datepicker-cell.-focus- {
+            background-color: #67798f !important;
+            color: #fff !important;
+        }
+        /* 星期幾標題顏色改為黑色 */
+        .air-datepicker-body--day-name { color: #000 !important; }
+
+        /* 按鈕：讓 icon 與文字垂直置中對齊 */
+        .btn-align {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: .5rem;
+            line-height: 1; /* 避免不一致的行高 */
+            height: 42px; /* 與輸入框一致高度 */
+            padding: 0 14px; /* 垂直置中 */
+        }
+        .btn-align i { line-height: 1; display: inline-block; }
+
+        /* 篩選輸入框：統一高度 */
+        .filter-eq { height: 42px; }
+
+        /* 套用篩選按鈕：莫蘭迪藍灰，互動時加深，邊框一致 */
+        .btn-filter {
+            background-color: #9db3c6 !important; /* 基色 */
+            border-color: #9db3c6 !important;
+            color: #fff !important;
+        }
+        .btn-filter:hover,
+        .btn-filter:focus { background-color: #87a3bb !important; border-color: #87a3bb !important; color: #fff !important; }
+        .btn-filter:active { background-color: #6f8eab !important; border-color: #6f8eab !important; color: #fff !important; }
+        .btn-filter:disabled { opacity: .7; }
+
+        /* 重置按鈕：預設淺灰實心，不是空心；互動時微加深 */
+        .btn-reset {
+            background-color: #adb5bd !important; /* 灰色 */
+            border-color: #adb5bd !important;
+            color: #fff !important;
+        }
+        .btn-reset:hover,
+        .btn-reset:focus { background-color: #9aa3ab !important; border-color: #9aa3ab !important; color: #fff !important; }
+        .btn-reset:active { background-color: #868e96 !important; border-color: #868e96 !important; color: #fff !important; }
+
+        /* 統一提示框樣式 - 與 profile.html 一致 */
+        .custom-modal {
+            background-color: #ffffff !important;
+            border-radius: 8px !important;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15) !important;
+            border: none !important;
+        }
+
+        .custom-modal .modal-header {
+            background-color: transparent !important;
+            border-bottom: 1px solid #dee2e6 !important;
+            padding: 1rem 1.5rem !important;
+        }
+
+        .custom-modal .modal-title {
+            color: #2c3e50 !important;
+            font-weight: 600 !important;
+            font-size: 1.05rem !important;
+            margin: 0 !important;
+        }
+
+        .custom-modal .btn-close {
+            color: #6c757d !important;
+            opacity: 1 !important;
+            font-size: 18px !important;
+        }
+
+        .custom-modal .modal-body {
+            padding: 1.5rem !important;
+            color: #333333 !important;
+            font-size: 14px !important;
+        }
+
+        .custom-modal .modal-footer {
+            border-top: 1px solid #dee2e6 !important;
+            padding: 1rem 1.5rem !important;
+            justify-content: flex-end !important;
+        }
+
+        .custom-modal .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #ffffff !important;
+            border-radius: 4px !important;
+            padding: 0.5rem 1rem !important;
+            font-weight: 500 !important;
+        }
+
+        .custom-modal .btn-primary:hover {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+        }
+
+        .custom-modal .btn-secondary {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #ffffff !important;
+            border-radius: 4px !important;
+            padding: 0.5rem 1rem !important;
+            font-weight: 500 !important;
+        }
+
+        /* 提示框（customAlertModal）按鈕顏色與 profile.html 一致 */
+        #customAlertModal .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #ffffff !important;
+        }
+        #customAlertModal .btn-primary:hover,
+        #customAlertModal .btn-primary:focus {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+            color: #ffffff !important;
+        }
+
+        /* 確認對話框（confirmModal）按鈕顏色與 profile.html 一致 */
+        #confirmModal .btn-primary {
+            background-color: #5A628C !important;
+            border-color: #5A628C !important;
+            color: #ffffff !important;
+        }
+        #confirmModal .btn-primary:hover,
+        #confirmModal .btn-primary:focus {
+            background-color: #4e567d !important;
+            border-color: #4e567d !important;
+            color: #ffffff !important;
+        }
+        #confirmModal .btn-secondary {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #ffffff !important;
+        }
+
+        /* 分頁控制樣式 - 水平排列 */
+        .pagination-controls {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-top: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        #pagination-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .pagination-controls button {
+            padding: 0;
+            border: 1px solid #dee2e6;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 35px;
+            height: 35px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .pagination-controls button:hover:not(:disabled) {
+            background: #5A628C;
+            color: white;
+            border-color: #5A628C;
+        }
+
+        .pagination-controls button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .pagination-controls button.active {
+            background: #5A628C;
+            color: white;
+            border-color: #5A628C;
+        }
+
+        .pagination-info {
+            color: #6c757d;
+            font-size: 0.9rem;
+            margin-left: 15px;
+            white-space: nowrap;
+        }
+
+
     </style>
 </head>
 
@@ -301,6 +549,8 @@
                 </div>
             </div>
 
+            <!-- 篩選控制列（已移至統計卡片下方） -->
+
             <!-- 統計資訊 -->
             <div class="container">
                 <section class="section">
@@ -308,10 +558,45 @@
                 </section>
             </div>
 
+            <!-- 篩選控制列（移到這裡） -->
+            <div class="container">
+                <section class="section">
+                    <div class="card shadow-sm border-0 mb-3">
+                        <div class="card-body">
+                            <div class="row g-3 align-items-end">
+                                <div class="col-12 col-md-4">
+                                    <label for="filter_start" class="form-label">起始日期</label>
+                                    <input type="text" id="filter_start" class="form-control filter-eq" placeholder="年／月／日" />
+                                </div>
+                                <div class="col-12 col-md-4">
+                                    <label for="filter_end" class="form-label">結束日期</label>
+                                    <input type="text" id="filter_end" class="form-control filter-eq" placeholder="年／月／日" />
+                                </div>
+                                <div class="col-12 col-md-4 d-flex gap-2">
+                                    <button id="btn_apply_filter" class="btn btn-filter flex-fill btn-align">
+                                        <i class="bi bi-funnel"></i><span>套用篩選</span>
+                                    </button>
+                                    <button id="btn_reset_filter" class="btn btn-reset flex-fill btn-align">
+                                        <i class="bi bi-arrow-counterclockwise"></i><span>重置</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+
             <!-- 歷史記錄清單 -->
             <div class="container">
                 <section class="section">
                     <div id="history-list" class="row g-4"></div>
+                    
+                    <!-- 分頁控制 -->
+                    <div id="pagination-container" class="pagination-controls" style="display: none !important;">
+                        <div id="pagination-controls">
+                            <!-- 分頁按鈕將由 JavaScript 動態生成 -->
+                        </div>
+                    </div>
                 </section>
             </div>
 
@@ -329,6 +614,102 @@
     </div>
 
     <script>
+        // 自定義確認對話框函數
+        function showConfirmDialog(message, title = '確認') {
+            return new Promise((resolve) => {
+                const modalHtml = `
+                    <div class="modal fade" id="confirmModal" tabindex="-1" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">${title}</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <p>${message}</p>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" id="confirmCancel">取消</button>
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal" id="confirmOk">確定</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+                // 移除舊的模態框
+                const existingModal = document.getElementById('confirmModal');
+                if (existingModal) {
+                    existingModal.remove();
+                }
+                
+                // 添加新的模態框到 body
+                document.body.insertAdjacentHTML('beforeend', modalHtml);
+                
+                // 顯示模態框
+                const modal = new bootstrap.Modal(document.getElementById('confirmModal'));
+                modal.show();
+                
+                // 綁定按鈕事件
+                document.getElementById('confirmOk').addEventListener('click', () => {
+                    modal.hide();
+                    resolve(true);
+                });
+                
+                document.getElementById('confirmCancel').addEventListener('click', () => {
+                    modal.hide();
+                    resolve(false);
+                });
+                
+                // 模態框關閉後移除元素
+                document.getElementById('confirmModal').addEventListener('hidden.bs.modal', function() {
+                    this.remove();
+                    resolve(false);
+                });
+            });
+        }
+
+        // 自定義提示框函數 - 與 profile.html 完全一致
+        function showCustomAlert(message, title = '提示！') {
+            // 創建模態框 HTML（與 profile.html 的 successModal 結構一致）
+            const modalHtml = `
+                <div class="modal fade" id="customAlertModal" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">${title}</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <p>${message}</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">確定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // 移除舊的模態框
+            const existingModal = document.getElementById('customAlertModal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+            
+            // 添加新的模態框到 body
+            document.body.insertAdjacentHTML('beforeend', modalHtml);
+            
+            // 顯示模態框
+            const modal = new bootstrap.Modal(document.getElementById('customAlertModal'));
+            modal.show();
+            
+            // 模態框關閉後移除元素
+            document.getElementById('customAlertModal').addEventListener('hidden.bs.modal', function() {
+                this.remove();
+            });
+        }
+
         async function loadHistory() {
             try {
                 const response = await fetch("get_history.php", {
@@ -342,33 +723,29 @@
                 try {
                     result = JSON.parse(text);
                 } catch (e) {
-                    document.getElementById("history-list").innerHTML =
-                        `<div class="alert alert-danger" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            伺服器回傳的不是 JSON，請檢查 console log
-                        </div>`;
+                    // 與成功提示一致：改用模態框
+                    showCustomAlert('伺服器回傳的不是 JSON，請檢查 console log');
+                    document.getElementById("history-list").innerHTML = '';
                     return;
                 }
 
                 if (!result.success) {
-                    document.getElementById("history-list").innerHTML =
-                        `<div class="alert alert-danger" role="alert">
-                            <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                            ${result.error || '載入資料時發生錯誤'}
-                        </div>`;
+                    // 與成功提示一致：改用模態框
+                    showCustomAlert(`${result.error || '載入資料時發生錯誤'}`);
+                    document.getElementById("history-list").innerHTML = '';
                     return;
                 }
 
-                updateStats(result.stats, result.data);
-                renderData(result.data);
+                // 儲存原始資料於全域，供前端篩選使用
+                window.historyDataOriginal = Array.isArray(result.data) ? result.data : [];
+                // 初次渲染：依目前篩選條件（預設顯示全部）
+                applyDateFilter({ preferServerStats: result.stats });
 
             } catch (err) {
                 console.error("❌ 載入失敗:", err);
-                document.getElementById("history-list").innerHTML =
-                    `<div class="alert alert-danger" role="alert">
-                        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-                        載入紀錄時發生錯誤: ${err.message}
-                    </div>`;
+                // 與成功提示一致：改用模態框
+                showCustomAlert(`載入紀錄時發生錯誤: ${err.message}`);
+                document.getElementById("history-list").innerHTML = '';
             }
         }
 
@@ -444,12 +821,118 @@
         /** 安全取得 record_id（避免 undefined 時 substring 報錯） **/
         const getId = (r) => r?.record_id || r?.id || '';
 
+        // 全域變數：分頁相關
+        let currentPage = 1;
+        const recordsPerPage = 3;
+
+        // 分頁函數
+        function paginateData(data, page = 1) {
+            const startIndex = (page - 1) * recordsPerPage;
+            const endIndex = startIndex + recordsPerPage;
+            return data.slice(startIndex, endIndex);
+        }
+
+        // 渲染分頁控制 - 水平排列
+        function renderPagination(totalRecords, currentPageNum) {
+            const totalPages = Math.ceil(totalRecords / recordsPerPage);
+            const paginationContainer = document.getElementById("pagination-container");
+            const paginationControls = document.getElementById("pagination-controls");
+
+            if (totalPages <= 1) {
+                paginationContainer.style.display = "none";
+                return;
+            }
+
+            paginationContainer.style.display = "flex";
+            paginationControls.innerHTML = "";
+
+            // 上一頁按鈕
+            const prevButton = document.createElement("button");
+            prevButton.innerHTML = '<';
+            prevButton.disabled = currentPageNum === 1;
+            prevButton.onclick = () => goToPage(currentPageNum - 1);
+            paginationControls.appendChild(prevButton);
+
+            // 頁碼按鈕
+            const startPage = Math.max(1, currentPageNum - 2);
+            const endPage = Math.min(totalPages, currentPageNum + 2);
+
+            if (startPage > 1) {
+                const firstPageBtn = createPageButton(1);
+                paginationControls.appendChild(firstPageBtn);
+                if (startPage > 2) {
+                    const ellipsis = document.createElement("span");
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 5px';
+                    ellipsis.style.display = 'flex';
+                    ellipsis.style.alignItems = 'center';
+                    ellipsis.style.justifyContent = 'center';
+                    ellipsis.style.minWidth = '35px';
+                    ellipsis.style.height = '35px';
+                    paginationControls.appendChild(ellipsis);
+                }
+            }
+
+            for (let i = startPage; i <= endPage; i++) {
+                const pageBtn = createPageButton(i);
+                paginationControls.appendChild(pageBtn);
+            }
+
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) {
+                    const ellipsis = document.createElement("span");
+                    ellipsis.textContent = '...';
+                    ellipsis.style.padding = '0 5px';
+                    ellipsis.style.display = 'flex';
+                    ellipsis.style.alignItems = 'center';
+                    ellipsis.style.justifyContent = 'center';
+                    ellipsis.style.minWidth = '35px';
+                    ellipsis.style.height = '35px';
+                    paginationControls.appendChild(ellipsis);
+                }
+                const lastPageBtn = createPageButton(totalPages);
+                paginationControls.appendChild(lastPageBtn);
+            }
+
+            // 下一頁按鈕
+            const nextButton = document.createElement("button");
+            nextButton.innerHTML = '>';
+            nextButton.disabled = currentPageNum === totalPages;
+            nextButton.onclick = () => goToPage(currentPageNum + 1);
+            paginationControls.appendChild(nextButton);
+
+            // 頁碼資訊
+            const pageInfo = document.createElement("span");
+            pageInfo.className = "pagination-info";
+            pageInfo.textContent = `第 ${currentPageNum} 頁，共 ${totalPages} 頁 (共 ${totalRecords} 項)`;
+            paginationControls.appendChild(pageInfo);
+        }
+
+        // 建立頁碼按鈕 - 與 training.html 一致
+        function createPageButton(pageNumber) {
+            const button = document.createElement("button");
+            button.textContent = pageNumber;
+            button.className = currentPage === pageNumber ? 'active' : '';
+            button.onclick = () => goToPage(pageNumber);
+            return button;
+        }
+
+        // 跳轉到指定頁碼
+        function goToPage(pageNumber) {
+            const totalPages = Math.ceil((window.historyDataFiltered || []).length / recordsPerPage);
+            if (pageNumber < 1 || pageNumber > totalPages) return;
+
+            currentPage = pageNumber;
+            applyDateFilter({ onlyOnApply: false, resetPage: false });
+        }
+
         /* render 時：把顯示欄位改成同時支援 */
-        function renderData(data) {
+        function renderData(data, page = 1) {
             const container = document.getElementById("history-list");
             container.innerHTML = "";
 
             if (!Array.isArray(data) || data.length === 0) {
+                // 在日期篩選下方顯示提示，不使用彈出視窗
                 container.innerHTML = `
       <div class="col-12">
         <div class="alert alert-morandi text-center" role="alert">
@@ -457,10 +940,17 @@
           目前沒有歷史紀錄，請先新增健康數據
         </div>
       </div>`;
+                // 隱藏分頁控制
+                document.getElementById("pagination-container").style.display = "none";
                 return;
             }
 
-            data.forEach((record, index) => {
+            // 分頁處理
+            const paginatedData = paginateData(data, page);
+            renderPagination(data.length, page);
+
+            paginatedData.forEach((record, index) => {
+                const globalIndex = (page - 1) * recordsPerPage + index;
                 const recordId = getId(record);
                 const age = getField(record, 'age', 'age');
                 const h = getField(record, 'height_cm', 'height-cm');
@@ -477,7 +967,7 @@
       <div class="card shadow-lg border-0 rounded-4 h-100">
         <div class="card-header bg-gradient-primary text-white">
           <h5 class="card-title mb-1">
-            📅 ${record.Date || ''} <small class="opacity-75">#${index + 1}</small>
+            📅 ${record.Date || ''} <small class="opacity-75">#${globalIndex + 1}</small>
           </h5>
         </div>
         <div class="card-body">
@@ -553,10 +1043,15 @@
 
         /* 刪除：改用 x-www-form-urlencoded（PHP 可直接 $_POST['record_id']） */
         async function deleteRecord(recordId) {
-            if (!recordId) return alert('缺少 record_id，無法刪除');
-            if (!confirm('刪除此筆紀錄將無法復原，確定要刪除嗎？')) return;
+            if (!recordId) return showCustomAlert('缺少 record_id，無法刪除', '提示！');
+            
+            // 使用自定義確認對話框
+            const confirmed = await showConfirmDialog('刪除此筆紀錄將無法復原，確定要刪除嗎？', '提示！');
+            if (!confirmed) return;
 
             try {
+                const btns = document.querySelectorAll('.btn-remove');
+                btns.forEach(b=>b.disabled=true);
                 const res = await fetch('delete_record.php', {
                     method: 'POST',
                     credentials: 'include',
@@ -567,13 +1062,17 @@
                 let result;
                 try { result = JSON.parse(text); } catch { throw new Error('後端未回傳 JSON：' + text); }
                 if (result.success) {
+                    showCustomAlert('刪除成功');
                     await loadHistory();
                 } else {
-                    alert('刪除失敗：' + (result.error || '未知錯誤'));
+                    showCustomAlert('刪除失敗：' + (result.error || '未知錯誤'), '提示！');
                 }
             } catch (err) {
                 console.error(err);
-                alert('刪除發生錯誤：' + err.message);
+                showCustomAlert('刪除發生錯誤：' + err.message, '提示！');
+            } finally {
+                const btns = document.querySelectorAll('.btn-remove');
+                btns.forEach(b=>b.disabled=false);
             }
         }
 
@@ -581,7 +1080,66 @@
         // 只保留數字/小數點/負號；移除逗號與單位
         function toNumberString(v) {
             if (v === null || v === undefined) return '';
+            // 確保返回的是可編輯的字串
             return String(v).replace(/,/g, '').replace(/[^\d.-]/g, '');
+        }
+
+        // 將各種日期格式安全轉為 YYYY-MM-DD 字串（若無法解析則回傳空字串）
+        function toDateOnlyString(input) {
+            if (!input) return '';
+            const s = String(input).replace(/\//g, '-');
+            // 若已是 YYYY-MM-DD 開頭，先取前 10 碼
+            const first10 = s.slice(0, 10);
+            // 嘗試用 Date 解析
+            const d = new Date(first10);
+            if (isNaN(d.getTime())) {
+                // 再嘗試完整字串
+                const d2 = new Date(s);
+                if (isNaN(d2.getTime())) return '';
+                const yyyy = d2.getFullYear();
+                const mm = String(d2.getMonth() + 1).padStart(2, '0');
+                const dd = String(d2.getDate()).padStart(2, '0');
+                return `${yyyy}-${mm}-${dd}`;
+            }
+            const yyyy = d.getFullYear();
+            const mm = String(d.getMonth() + 1).padStart(2, '0');
+            const dd = String(d.getDate()).padStart(2, '0');
+            return `${yyyy}-${mm}-${dd}`;
+        }
+
+        // 日期篩選主函式
+        function applyDateFilter(options = {}) {
+            const startEl = document.getElementById('filter_start');
+            const endEl = document.getElementById('filter_end');
+            const start = startEl?.value || '';
+            const end = endEl?.value || '';
+
+            const src = Array.isArray(window.historyDataOriginal) ? window.historyDataOriginal : [];
+
+            // 僅在指定（onlyOnApply）且兩者皆有值時才過濾
+            let filtered = src;
+            const shouldFilter = options.onlyOnApply ? (start && end) : (start || end);
+            if (shouldFilter) {
+                filtered = src.filter(r => {
+                    const dStr = toDateOnlyString(r?.Date);
+                    if (!dStr) return false;
+                    if (start && dStr < start) return false;
+                    if (end && dStr > end) return false;
+                    return true;
+                });
+            }
+
+            // 重置到第一頁（當篩選條件改變時）
+            if (options.resetPage !== false) {
+                currentPage = 1;
+            }
+
+            // 優先用目前篩選後的資料更新統計與列表
+            updateStats(options.preferServerStats, filtered);
+            renderData(filtered, currentPage);
+
+            // 暫存目前的過濾結果
+            window.historyDataFiltered = filtered;
         }
 
         // 全域變數：Bootstrap modal instance
@@ -589,18 +1147,54 @@
 
         function openEditModal(record) {
             if (typeof record === 'string') { try { record = JSON.parse(record); } catch (e) { } }
+            
+            // 清除所有輸入欄位的值
             document.getElementById('edit_record_id').value = record.record_id || record.id || '';
             document.getElementById('edit_Date').value = record.Date ? String(record.Date).split(' ')[0].replace(/\//g, '-') : '';
 
-            const get = (u, h) => toNumberString(getField(record, u, h));
-            document.getElementById('edit_age').value = get('age', 'age');
-            document.getElementById('edit_height_cm').value = get('height_cm', 'height-cm');
-            document.getElementById('edit_weight_kg').value = get('weight_kg', 'weight-kg');
-            document.getElementById('edit_skeletal_muscle').value = get('skeletal_muscle', 'skeletal_muscle');
-            document.getElementById('edit_body_fat').value = get('body_fat', 'body_fat');
-            document.getElementById('edit_fat_percentage').value = get('fat_percentage', 'fat_percentage');
-            document.getElementById('edit_basal_metabolism').value = get('basal_metabolism', 'basal_metabolism');
-            document.getElementById('edit_bmi').value = get('bmi', 'bmi');
+            // 安全地設定數值欄位
+            const setValue = (id, value) => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.value = value || '';
+                    element.disabled = false; // 確保欄位未被禁用
+                    element.readOnly = false; // 確保欄位可讀寫
+                    console.log(`設定 ${id}: ${value}, disabled: ${element.disabled}, readOnly: ${element.readOnly}`);
+                } else {
+                    console.error(`找不到元素: ${id}`);
+                }
+            };
+
+            setValue('edit_age', record.age || '');
+            setValue('edit_height_cm', record['height-cm'] || record.height_cm || '');
+            setValue('edit_weight_kg', record['weight-kg'] || record.weight_kg || '');
+            setValue('edit_skeletal_muscle', record.skeletal_muscle || '');
+            setValue('edit_body_fat', record.body_fat || '');
+            setValue('edit_fat_percentage', record.fat_percentage || '');
+            setValue('edit_basal_metabolism', record.basal_metabolism || '');
+            setValue('edit_bmi', record.bmi || '');
+
+            // 動態綁定：身高/體重變更自動計算 BMI
+            const heightEl = document.getElementById('edit_height_cm');
+            const weightEl = document.getElementById('edit_weight_kg');
+            const bmiEl = document.getElementById('edit_bmi');
+            
+            const recomputeBMI = () => {
+                const h = parseFloat(heightEl.value);
+                const w = parseFloat(weightEl.value);
+                if (Number.isFinite(h) && h > 0 && Number.isFinite(w)) {
+                    const m = h / 100;
+                    bmiEl.value = (w / (m * m)).toFixed(2);
+                }
+            };
+            
+            // 移除舊的事件監聽器，避免重複綁定
+            heightEl.removeEventListener('input', recomputeBMI);
+            weightEl.removeEventListener('input', recomputeBMI);
+            
+            // 重新綁定事件
+            heightEl.addEventListener('input', recomputeBMI);
+            weightEl.addEventListener('input', recomputeBMI);
 
             const el = document.getElementById('editRecordModal');
             if (!window.editModalInstance) window.editModalInstance = new bootstrap.Modal(el, { keyboard: true });
@@ -610,7 +1204,7 @@
     <!-- Edit Record Modal -->
     <div class="modal fade" id="editRecordModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-lg modal-dialog-centered">
-            <div class="modal-content">
+            <div class="modal-content custom-modal">
                 <div class="modal-header">
                     <h5 class="modal-title">編輯健康紀錄</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
@@ -667,11 +1261,40 @@
     </div>
     <!-- 若專案沒有打包 bootstrap.bundle，先用 CDN -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.3/air-datepicker.js"></script>
     <script>
         // 先把「儲存」的處理邏輯抽成函式
         async function handleSaveEdit() {
             const id = document.getElementById('edit_record_id').value;
             const date = document.getElementById('edit_Date').value;
+
+            // 檢查必填欄位是否為空值
+            const requiredFields = [
+                { id: 'edit_Date', name: '日期' },
+                { id: 'edit_age', name: '年齡' },
+                { id: 'edit_height_cm', name: '身高' },
+                { id: 'edit_weight_kg', name: '體重' },
+                { id: 'edit_skeletal_muscle', name: '骨骼肌' },
+                { id: 'edit_body_fat', name: '體脂重' },
+                { id: 'edit_fat_percentage', name: '體脂率' },
+                { id: 'edit_basal_metabolism', name: '基礎代謝' },
+                { id: 'edit_bmi', name: 'BMI' }
+            ];
+
+            // 檢查每個必填欄位
+            for (const field of requiredFields) {
+                const element = document.getElementById(field.id);
+                const value = element ? element.value.trim() : '';
+                if (!value) {
+                    return showCustomAlert(`${field.name}不能是空值`, '提示！');
+                }
+            }
+
+            // 數值驗證
+            const height = parseFloat(document.getElementById('edit_height_cm').value);
+            const weight = parseFloat(document.getElementById('edit_weight_kg').value);
+            if (!Number.isFinite(height) || height <= 0) return showCustomAlert('請填入有效身高', '提示！');
+            if (!Number.isFinite(weight) || weight <= 0) return showCustomAlert('請填入有效體重', '提示！');
 
             const underScorePayload = {
                 record_id: id,
@@ -685,13 +1308,10 @@
                 basal_metabolism: document.getElementById('edit_basal_metabolism').value,
                 bmi: document.getElementById('edit_bmi').value
             };
-            // 放在 handleSaveEdit() 裡 ↓↓↓
             const aliasPayload = {
-                id: underScorePayload.record_id, // 後端若收 id 也能過
-                date: underScorePayload.Date     // 後端若收小寫 date 也能過
+                id: underScorePayload.record_id,
+                date: underScorePayload.Date
             };
-
-            // 若你暫時讓後端同時支援底線/連字號，這裡也可同送；不需要就拿掉 hyphenPayload
             const hyphenPayload = {
                 'height-cm': underScorePayload.height_cm,
                 'weight-kg': underScorePayload.weight_kg
@@ -703,7 +1323,10 @@
                 ...hyphenPayload
             });
 
+            const saveBtn = document.getElementById('saveEditBtn');
             try {
+                saveBtn.disabled = true;
+                saveBtn.innerText = '儲存中...';
                 const res = await fetch('update_record.php', {
                     method: 'POST',
                     credentials: 'include',
@@ -715,14 +1338,18 @@
                 try { result = JSON.parse(text); } catch { throw new Error('後端未回傳 JSON：' + text); }
 
                 if (result.success) {
+                    showCustomAlert('更新成功');
                     window.editModalInstance?.hide();
                     await loadHistory();
                 } else {
-                    alert('更新失敗：' + (result.error || '未知錯誤'));
+                    showCustomAlert('更新失敗：' + (result.error || '未知錯誤'), '提示！');
                 }
             } catch (err) {
                 console.error(err);
-                alert('更新發生錯誤：' + err.message);
+                showCustomAlert('更新發生錯誤：' + err.message, '提示！');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.innerText = '儲存變更';
             }
         }
 
@@ -736,6 +1363,68 @@
             if (saveBtn && !saveBtn.dataset.bound) {
                 saveBtn.dataset.bound = '1';
                 saveBtn.addEventListener('click', handleSaveEdit);
+            }
+
+            // 綁定日期篩選與重置
+            const applyBtn = document.getElementById('btn_apply_filter');
+            const resetBtn = document.getElementById('btn_reset_filter');
+            const startEl = document.getElementById('filter_start');
+            const endEl = document.getElementById('filter_end');
+            if (applyBtn && !applyBtn.dataset.bound) {
+                applyBtn.dataset.bound = '1';
+                applyBtn.addEventListener('click', () => {
+                    const start = document.getElementById('filter_start')?.value || '';
+                    const end = document.getElementById('filter_end')?.value || '';
+                    if (!start || !end) {
+                        showCustomAlert('請先選擇「起始日期」與「結束日期」，再套用篩選', '提示！');
+                        return;
+                    }
+                    applyDateFilter({ onlyOnApply: true, resetPage: true });
+                });
+            }
+            if (resetBtn && !resetBtn.dataset.bound) {
+                resetBtn.dataset.bound = '1';
+                resetBtn.addEventListener('click', () => {
+                    if (startEl) startEl.value = '';
+                    if (endEl) endEl.value = '';
+                    applyDateFilter({ onlyOnApply: true, resetPage: true });
+                });
+            }
+            // 取消改變日期即時套用：需按下「套用篩選」才會生效
+
+            // 初始化 Air Datepicker（繁體中文、yyyy-MM-dd）
+            try {
+                const zhTW = {
+                    days: ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'],
+                    daysShort: ['日','一','二','三','四','五','六'],
+                    daysMin: ['日','一','二','三','四','五','六'],
+                    months: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+                    monthsShort: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+                    today: '今天',
+                    clear: '清除',
+                    dateFormat: 'yyyy-MM-dd',
+                    firstDay: 0
+                };
+                // 起始日曆
+                if (startEl && !startEl.dataset.dpInit) {
+                    startEl.dataset.dpInit = '1';
+                    new AirDatepicker(startEl, {
+                        locale: zhTW,
+                        dateFormat: 'yyyy-MM-dd',
+                        autoClose: true
+                    });
+                }
+                // 結束日曆
+                if (endEl && !endEl.dataset.dpInit) {
+                    endEl.dataset.dpInit = '1';
+                    new AirDatepicker(endEl, {
+                        locale: zhTW,
+                        dateFormat: 'yyyy-MM-dd',
+                        autoClose: true
+                    });
+                }
+            } catch (e) {
+                console.warn('日期選擇器初始化失敗：', e);
             }
         });
     </script>

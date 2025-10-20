@@ -134,3 +134,41 @@
   background-color: #f1f1f1;
   text-align: left;
 }
+
+/* === 打字中微動畫（三個點） === */
+.message.typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #f1f1f1;
+}
+
+.typing-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  line-height: 1;
+}
+
+.typing-indicator .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #9aa8b8; /* 莫蘭迪灰藍調和你的配色 */
+  animation: typingBounce 1s infinite ease-in-out;
+}
+
+.typing-indicator .dot:nth-child(1) { animation-delay: 0s; }
+.typing-indicator .dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-indicator .dot:nth-child(3) { animation-delay: 0.3s; }
+
+@keyframes typingBounce {
+  0%, 80%, 100% { transform: translateY(0); opacity: 0.6; }
+  40% { transform: translateY(-3px); opacity: 1; }
+}
+
+/* 打字機效果中的訊息樣式（先以等寬字順暢顯示，完成後再轉 Markdown） */
+.message.bot.typing-target {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+  white-space: pre-wrap;
+}
