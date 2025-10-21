@@ -182,37 +182,130 @@ function pickDiverseExercises(array $rows, int $eachCount, int $seed): array {
 }
 
 /** === 器材：別名、顯示名、解析、關鍵字 Map（「獨立功能」使用） === */
+/** 1) 別名（使用者說法 → equipment_key） */
 function getEquipmentAliases(): array {
     return [
-        'smith_machine' => ['史密斯','smith','史密斯機','史密斯槓'],
-        'leg_press'     => ['腿推','腿推機','leg press'],
-        'cable_machine' => ['cable','拉繩','滑輪','繩索','交叉拉繩'],
+        // 既有 11 種
+        'smith_machine' => ['史密斯','史密斯機','smith','史密斯槓'],
+        'leg_press'     => ['腿推','腿推機','leg press','推腿'],
+        'cable_machine' => ['雙滑輪','DAP','功能訓練機','拉繩機','拉繩','交叉拉繩','cable','cable machine','dual adjustable pulley'],
         'dumbbell'      => ['啞鈴','dumbbell','db'],
         'barbell'       => ['槓鈴','barbell','bb'],
         'leg_extension' => ['腿屈伸','leg extension'],
         'leg_curl'      => ['腿後彎','腿彎舉','leg curl'],
-        'lat_pulldown'  => ['下拉','滑輪下拉','lat pulldown','pulldown'],
-        'seated_row'    => ['划船','坐姿划船機','seated row','row'],
-        'hip_thrust'    => ['臀推','臀橋','hip thrust'],
-        'calf_raise'    => ['提踵','calf raise'],
+        'lat_pulldown'  => ['滑輪下拉','高位下拉','背闊下拉','lat pulldown','pulldown','下拉'],
+        'seated_row'    => ['坐姿划船','坐姿划船機','seated row','划船(重量訓練)','划船機(重訓)'],
+        'hip_thrust'    => ['臀推','臀橋','hip thrust','臀推凳'],
+        'calf_raise'    => ['提踵','站姿提踵','calf raise'],
+
+        // 擴充器材（依你資料表）
+        'ez_bar'                        => ['EZ 曲桿','EZ bar','曲桿','彎舉桿'],
+        'triceps_extension_machine'     => ['三頭伸展','三頭伸展機','下壓機','pressdown','繩索下壓'],
+        'biceps_curl_machine'           => ['二頭彎舉機','二頭彎舉','biceps curl machine'],
+        'lateral_raise_machine'         => ['側平舉機','側平舉','lateral raise machine'],
+        'power_rack'                    => ['動力架','深蹲架','power rack','squat rack'],
+        'adjustable_bench'              => ['可調椅','調整椅','上斜椅','訓練椅','adjustable bench'],
+        'hack_squat_machine'            => ['哈克深蹲機','哈克深蹲','hack squat'],
+        'seated_leg_curl_machine'       => ['坐姿腿後彎','腿後彎(坐姿)','seated leg curl'],
+        'kettlebell'                    => ['壺鈴','kettlebell'],
+        'rear_delt_fly_machine'         => ['後三角飛鳥機','反向飛鳥機','rear delt fly','reverse fly'],
+        'standing_calf_raise_machine'   => ['站姿提踵機','站姿提踵','standing calf raise'],
+        'shoulder_press_machine'        => ['肩推機','肩部推舉機','shoulder press machine'],
+        'back_extension_machine'        => ['背伸展機','back extension machine','背部伸展機'],
+        'chest_press_machine'           => ['胸推機','胸部推舉機','chest press machine'],
+        'ab_crunch_machine'             => ['腹肌機','腹肌捲腹機','ab crunch machine'],
+        'glute_kickback_machine'        => ['臀後踢機','glute kickback machine','後踢'],
+        'pec_deck'                      => ['蝴蝶機','夾胸','pec deck'],
+        'rotary_torso_machine'          => ['軀幹旋轉機','旋轉機','rotary torso'],
+        'assisted_dip_pullup'           => ['輔助引體','輔助單槓','輔助雙槓','assist pull-up','assisted dip','graviton'],
+        'dual_adjustable_pulley'        => ['雙滑輪','功能訓練機','DAP','dual adjustable pulley','拉繩機','拉繩','cable'],
+        'hip_adductor_machine'          => ['髖內收機','內收機','adductor'],
+        'hip_abductor_machine'          => ['髖外展機','外展機','abductor'],
     ];
 }
+
+/** 2) 顯示名稱（前端友善顯示） */
 function equipmentDisplayName(string $key): string {
     $map = [
-        'smith_machine' => '史密斯機',
-        'leg_press'     => '腿推機',
-        'cable_machine' => 'Cable 拉繩機',
-        'dumbbell'      => '啞鈴',
-        'barbell'       => '槓鈴',
-        'leg_extension' => '腿屈伸機',
-        'leg_curl'      => '腿後彎機',
-        'lat_pulldown'  => '滑輪下拉',
-        'seated_row'    => '坐姿划船機',
-        'hip_thrust'    => '臀推凳/裝置',
-        'calf_raise'    => '提踵機/站姿提踵',
+        'smith_machine'                 => '史密斯機',
+        'leg_press'                     => '腿推機',
+        'cable_machine'                 => '雙滑輪功能訓練機（DAP）／拉繩機',
+        'dumbbell'                      => '啞鈴（器材）',
+        'barbell'                       => '槓鈴（器材）',
+        'leg_extension'                 => '腿屈伸機',
+        'leg_curl'                      => '腿後彎機（腿彎舉）',
+        'lat_pulldown'                  => '滑輪下拉（高位下拉）',
+        'seated_row'                    => '坐姿划船機',
+        'hip_thrust'                    => '臀推凳／裝置',
+        'calf_raise'                    => '站姿提踵（通用）',
+
+        'ez_bar'                        => 'EZ 曲桿（器材）',
+        'triceps_extension_machine'     => '三頭伸展機',
+        'biceps_curl_machine'           => '二頭彎舉機',
+        'lateral_raise_machine'         => '側平舉機',
+        'power_rack'                    => '動力架 / 深蹲架',
+        'adjustable_bench'              => '可調式訓練椅',
+        'hack_squat_machine'            => '哈克深蹲機',
+        'seated_leg_curl_machine'       => '坐姿腿後彎機',
+        'kettlebell'                    => '壺鈴（器材）',
+        'rear_delt_fly_machine'         => '後三角飛鳥機',
+        'standing_calf_raise_machine'   => '站姿提踵機',
+        'shoulder_press_machine'        => '肩推機',
+        'back_extension_machine'        => '背伸展機',
+        'chest_press_machine'           => '胸推機（水平）',
+        'ab_crunch_machine'             => '腹肌捲腹機（腹肌機）',
+        'glute_kickback_machine'        => '臀後踢機',
+        'pec_deck'                      => '蝴蝶機（夾胸）',
+        'rotary_torso_machine'          => '軀幹旋轉機',
+        'assisted_dip_pullup'           => '輔助引體／雙槓撐機',
+        'dual_adjustable_pulley'        => '雙滑輪功能訓練機（DAP）',
+        'hip_adductor_machine'          => '髖內收機',
+        'hip_abductor_machine'          => '髖外展機',
     ];
     return $map[$key] ?? $key;
 }
+
+/** 3) 代表動作關鍵字（拿來查 exercises.name LIKE） */
+function equipmentKeywordMap(): array {
+    return [
+        'smith_machine'                 => ['史密斯','smith'],
+        'leg_press'                     => ['腿推','leg press','推腿'],
+        'cable_machine'                 => ['cable','拉繩','繩索','滑輪','交叉拉繩'],
+        'dumbbell'                      => ['啞鈴','dumbbell','db'],
+        'barbell'                       => ['槓鈴','barbell','bb'],
+        'leg_extension'                 => ['腿屈伸','leg extension'],
+        'leg_curl'                      => ['腿後彎','腿彎舉','leg curl'],
+        'lat_pulldown'                  => ['下拉','lat pulldown','pulldown','高位下拉','滑輪下拉'],
+        'seated_row'                    => ['划船','row','seated row','坐姿划船'],
+        'hip_thrust'                    => ['臀推','hip thrust','臀推凳'],
+        'calf_raise'                    => ['提踵','calf raise','站姿提踵'],
+
+        'ez_bar'                        => ['EZ','曲桿','彎舉桿'],
+        'triceps_extension_machine'     => ['三頭','三頭伸展','pressdown','下壓','繩索下壓'],
+        'biceps_curl_machine'           => ['二頭','彎舉機','biceps curl'],
+        'lateral_raise_machine'         => ['側平舉','lateral raise'],
+        'power_rack'                    => ['深蹲','臥推','肩推','硬舉'],
+        'adjustable_bench'              => ['上斜','下斜','啞鈴推舉','胸推','肩推'],
+        'hack_squat_machine'            => ['哈克深蹲','hack squat'],
+        'seated_leg_curl_machine'       => ['坐姿腿後彎','seated leg curl'],
+        'kettlebell'                    => ['壺鈴擺盪','壺鈴划船','壺鈴深蹲','kettlebell swing'],
+        'rear_delt_fly_machine'         => ['反向飛鳥','rear delt','reverse fly'],
+        'standing_calf_raise_machine'   => ['站姿提踵','standing calf raise'],
+        'shoulder_press_machine'        => ['肩推','shoulder press'],
+        'back_extension_machine'        => ['背伸展','back extension'],
+        'chest_press_machine'           => ['胸推','chest press'],
+        'ab_crunch_machine'             => ['腹肌捲腹','ab crunch'],
+        'glute_kickback_machine'        => ['臀後踢','glute kickback'],
+        'pec_deck'                      => ['夾胸','飛鳥','pec deck'],
+        'rotary_torso_machine'          => ['軀幹旋轉','旋轉','rotary torso'],
+        'assisted_dip_pullup'           => ['輔助引體','引體向上','雙槓撐','dip','pull-up'],
+        'dual_adjustable_pulley'        => ['cable','拉繩','繩索','滑輪','交叉拉繩','DAP'],
+        'hip_adductor_machine'          => ['髖內收','adductor'],
+        'hip_abductor_machine'          => ['髖外展','abductor'],
+    ];
+}
+
+/** 從使用者文字中偵測器材 key（別名 -> key） */
 function normalizeEquipmentKeysFromText(string $text): array {
     $aliases = getEquipmentAliases();
     $t = function_exists('mb_strtolower') ? mb_strtolower($text, 'UTF-8') : strtolower($text);
@@ -225,6 +318,8 @@ function normalizeEquipmentKeysFromText(string $text): array {
     }
     return array_values(array_unique($found));
 }
+
+/** 從分類結果提取器材 key（保留相容） */
 function normalizeEquipmentKeysFromClassified($raw): array {
     if (!$raw) return [];
     $aliases = getEquipmentAliases();
@@ -242,22 +337,8 @@ function normalizeEquipmentKeysFromClassified($raw): array {
     }
     return array_values(array_unique($res));
 }
-/** 程式內關聯：器材 → 動作關鍵字（查 exercises.name LIKE） */
-function equipmentKeywordMap(): array {
-    return [
-        'smith_machine' => ['史密斯','smith'],
-        'leg_press'     => ['腿推','leg press'],
-        'cable_machine' => ['cable','拉繩','繩索','滑輪','交叉拉繩'],
-        'dumbbell'      => ['啞鈴','dumbbell','db'],
-        'barbell'       => ['槓鈴','barbell','bb'],
-        'leg_extension' => ['腿屈伸','leg extension'],
-        'leg_curl'      => ['腿後彎','腿彎舉','leg curl'],
-        'lat_pulldown'  => ['下拉','lat pulldown','pulldown'],
-        'seated_row'    => ['划船','row','seated row'],
-        'hip_thrust'    => ['臀推','hip thrust'],
-        'calf_raise'    => ['提踵','calf raise'],
-    ];
-}
+
+/** 共用：把多個關鍵字組成 name LIKE 子句 */
 function buildNameLikeSql(array $keywords, string $col = 'name'): array {
     $likes = []; $params = [];
     foreach ($keywords as $kw) {
@@ -267,6 +348,15 @@ function buildNameLikeSql(array $keywords, string $col = 'name'): array {
         $params[] = "%{$kw}%";
     }
     return [ $likes ? '(' . implode(' OR ', $likes) . ')' : '1=0', $params ];
+}
+
+/** ✅ 保險：偵測「看起來像單一動作詢問」 */
+function looksLikeSingleExerciseQuery(string $text): bool {
+    $t = function_exists('mb_strtolower') ? mb_strtolower($text, 'UTF-8') : strtolower($text);
+    $moves = '(臥推|胸推|肩推|深蹲|硬舉|划船|下拉|飛鳥|側平舉|前平舉|反向飛鳥|弓步|弓箭步|腿推|腿屈伸|腿後彎|提踵|捲腹|仰臥起坐|臀推|夾胸|引體向上|雙槓撐|背伸展|press|row|squat|deadlift|lunge|pulldown|fly|raise|extension|curl|dip|crunch|hip thrust|bench press)';
+    $prefix = '(槓鈴|啞鈴|史密斯|壺鈴|滑輪|拉繩|繩索|蝴蝶機|哈克|坐姿|站姿|上斜|下斜|barbell|dumbbell|smith|kettlebell|cable|pec deck)';
+    $isShort = (mb_strlen($text, 'UTF-8') <= 12);
+    return $isShort && (preg_match("/$moves/u", $t) === 1 || preg_match("/$prefix.*$moves/u", $t) === 1);
 }
 
 // 5️⃣ 撈歷史紀錄
@@ -306,7 +396,7 @@ $messages = [
     ]
 ];
 
-// 8️⃣ 第一次 API call → 判斷意圖與目標肌群 / 器材（器材為獨立路徑）
+// 8️⃣ 第一次 API call → 判斷意圖與目標肌群 / 器材（器材為獨立路徑）——更新規則（單一動作名→exercise_qa）
 $classificationPrompt = [
     [
         "role" => "system",
@@ -317,11 +407,11 @@ $classificationPrompt = [
   \"target_muscle\": \"胸部|肩部|背部|腿部|手臂|核心|null|多個以|分隔\",
   \"equipment\": \"若有器材則以|分隔（可用：smith_machine|leg_press|cable_machine|dumbbell|barbell|leg_extension|leg_curl|lat_pulldown|seated_row|hip_thrust|calf_raise），否則 null\"
 }
-規則：
+判斷規則：
 - 純寒暄/閒聊/一般問答 → intent=chat
-- 要求課表、安排訓練 → intent=plan（target_muscle 如可辨識）
-- 詢問某部位/動作作法 → intent=exercise_qa
-- 詢問器材使用方式/調整/安全 → intent=equipment_qa
+- 要『安排課表/今天練什麼/幫我排訓練』→ intent=plan
+- 只提『單一動作名稱』（有無「怎麼做」皆算）→ intent=exercise_qa（例：啞鈴胸推、槓鈴臥推、側平舉、深蹲）
+- 問『器材如何使用/調整/安全』或只說器材名稱並詢問用法 → intent=equipment_qa
 - 無法判斷 → intent=other"
     ],
     [ "role" => "user", "content" => $userMessage ]
@@ -357,13 +447,18 @@ $equipmentKeys = array_values(array_unique(array_merge(
     normalizeEquipmentKeysFromText($userMessage) // 後備解析
 )));
 
+// 👉 若看起來像單一動作詢問但被判成 plan，強制轉為 exercise_qa
+if ($intent === 'plan' && looksLikeSingleExerciseQuery($userMessage)) {
+    $intent = 'exercise_qa';
+}
+
 // === 回傳欄位初始值（維持你的命名與型別） ===
 $exerciseText     = "";   // plan/exercise_qa 候選清單 或 器材代表動作段落
 $ssql             = "";   // plan/exercise_qa 的 SQL（debug）
 $equipmentStmt    = "";   // equipment_qa 的 FAQ 查詢 SQL（debug）
 $exampleStmtList  = [];   // equipment_qa 的代表動作查詢 SQL（debug）
 
-// 9️⃣（獨立功能）equipment_qa：器材用法卡 + 代表動作（不影響部位訓練）
+// 9️⃣（獨立功能）equipment_qa：器材用法說明 + 代表動作（不影響部位訓練）
 if ($intent === "equipment_qa") {
     if (!empty($equipmentKeys)) {
         // 讀取 FAQ
@@ -378,7 +473,7 @@ if ($intent === "equipment_qa") {
         if ($faqs) {
             foreach ($faqs as $faq) {
                 $dn = $faq['display_name'] ?? equipmentDisplayName($faq['equipment_key']);
-                $equipmentText .= "你問到「{$dn}」怎麼做，以下是重點：\n";
+                $equipmentText .= "你問到「{$dn}」怎麼用，以下是重點：\n";
                 if (!empty($faq['primary_muscles'])) $equipmentText .= "🧰 用途與主訓肌群：{$faq['primary_muscles']}\n";
                 if (!empty($faq['setup_steps']))     $equipmentText .= "🔧 基本調整：{$faq['setup_steps']}\n";
                 if (!empty($faq['form_cues']))       $equipmentText .= "🏁 起始姿勢：{$faq['form_cues']}\n";
@@ -406,7 +501,7 @@ if ($intent === "equipment_qa") {
                             return $ka <=> $kb;
                         });
                         $pick = array_slice($rows, 0, min(3, count($rows)));
-                        $exerciseText .= "── 「{$dn}」代表動作（擇" . count($pick) . "）：\n";
+                        $exerciseText .= "── 「{$dn}」可搭配的代表動作（擇" . count($pick) . "）：\n";
                         foreach ($pick as $erow) {
                             $exerciseText .= "- {$erow['name']}（{$erow['target_muscle']}）\n";
                             $exerciseText .= "  組數：{$erow['hypertrophy_sets_min']}–{$erow['hypertrophy_sets_max']}，次數：{$erow['hypertrophy_reps_min']}–{$erow['hypertrophy_reps_max']}\n";
@@ -424,10 +519,10 @@ if ($intent === "equipment_qa") {
                 $equipmentText .= "\n";
             }
         } else {
-            $equipmentText = "⚠️ 資料庫目前沒有對應的器材說明，想問的是哪一種器材呢？（例：史密斯、腿推機、拉繩機、啞鈴、槓鈴…）";
+            $equipmentText = "⚠️ 資料庫目前沒有對應的器材說明，想問的是哪一種器材呢？（例：史密斯、腿推機、雙滑輪（DAP）／拉繩機、啞鈴、槓鈴…）";
         }
     } else {
-        $equipmentText = "想了解哪種器材的使用方法呢？可以告訴我器材名稱，例如：史密斯、腿推機、Cable 拉繩、啞鈴、槓鈴…";
+        $equipmentText = "想了解哪種器材的使用方法呢？可以告訴我器材名稱，例如：史密斯、腿推機、雙滑輪（DAP）／拉繩機、啞鈴、槓鈴…";
     }
 
     // === 組合「獨立」的器材提示給模型（不帶 InBody、不帶部位候選） ===
@@ -459,7 +554,7 @@ if ($intent === "equipment_qa") {
     curl_close($ch);
 
     $decoded = json_decode($response ?? "{}", true);
-    $aiReply = $decoded["choices"][0]["message"]["content"] ?? "這是器材使用解答模式。如果能告訴我器材名稱（例：史密斯、腿推機、Cable 拉繩），我可以提供更精準的用法與安全重點。";
+    $aiReply = $decoded["choices"][0]["message"]["content"] ?? "這是器材使用解答模式。如果能告訴我器材名稱（例：史密斯、腿推機、雙滑輪（DAP）／拉繩機），我可以提供更精準的用法與安全重點。";
 
     // 儲存與回傳（維持你的回傳欄位）
     saveMessage($pdo, $userId, "assistant", $aiReply);
@@ -479,11 +574,91 @@ if ($intent === "equipment_qa") {
     exit;
 }
 
-// 🔟（原功能）plan / exercise_qa：查 exercises（與器材路徑完全分開）
-$exerciseText = "";
-$ssql = ""; // 保證存在
+// 🔟（新增）exercise_qa：優先以「名稱關鍵字」直查單動作教學素材（不塞排課規則）
+if ($intent === "exercise_qa") {
+    // 從使用者訊息抓中英關鍵字
+    preg_match_all('/[A-Za-z]+|[\x{4e00}-\x{9fff}]+/u', $userMessage, $m);
+    $tokens = array_slice(array_unique($m[0] ?? []), 0, 5);
+    $tokens = array_values(array_filter($tokens, fn($x)=>mb_strlen($x,'UTF-8')>0));
 
-if (in_array($intent, ["plan", "exercise_qa"], true) && !empty($targetMuscles)) {
+    if (!empty($tokens)) {
+        list($likeClause, $likeParams) = buildNameLikeSql($tokens, 'name');
+        $sql    = "SELECT * FROM exercises WHERE {$likeClause} AND user_level = ?";
+        $params = array_merge($likeParams, ["新手"]);
+        $stmt   = $pdo->prepare($sql); $stmt->execute($params);
+        $rows   = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+        $ssql   = preg_replace("/\s+/", " ", $sql) . ' ｜參數：[' . implode(', ', $params) . ']';
+
+        if ($rows) {
+            $seed = crc32(date('Y-m-d') . '|' . $userId);
+            usort($rows, function($a,$b)use($seed){
+                $ka=crc32(($a['name']??'').'|'.$seed)%100000;
+                $kb=crc32(($b['name']??'').'|'.$seed)%100000;
+                return $ka<=>$kb;
+            });
+            $pick = array_slice($rows, 0, min(2, count($rows)));
+
+            $exerciseText = "資料庫命中的相關動作：\n";
+            foreach ($pick as $erow) {
+                $exerciseText .= "- {$erow['name']}（{$erow['target_muscle']}）\n";
+                $exerciseText .= "  組數：{$erow['hypertrophy_sets_min']}–{$erow['hypertrophy_sets_max']}；次數：{$erow['hypertrophy_reps_min']}–{$erow['hypertrophy_reps_max']}\n";
+                if (!empty($erow['instruction_short'])) $exerciseText .= "  動作重點：{$erow['instruction_short']}\n";
+                if (!empty($erow['instruction_cues']))   $exerciseText .= "  提示：{$erow['instruction_cues']}\n";
+                if (!empty($erow['notes']))              $exerciseText .= "  備註：{$erow['notes']}\n";
+                $exerciseText .= "\n";
+            }
+        } else {
+            // 名稱沒命中且有目標肌群時，做輕量補強（抓 2–3 筆即可）
+            if (!empty($targetMuscles)) {
+                $map = [
+                    '胸部' => ['上胸', '中胸', '下胸'],
+                    '肩部' => ['肩膀前束', '肩膀中束', '肩膀後束', '肩膀'],
+                    '背部' => ['上背', '中背', '下背'],
+                    '腿部' => ['股四頭肌', '股二頭肌', '小腿', '臀肌', '臀中束', '臀前束', '臀後束'],
+                    '手臂' => ['二頭肌', '三頭肌', '前臂'],
+                    '核心' => ['上腹', '下腹', '側腹', '核心'],
+                ];
+                $labels = [];
+                foreach ($targetMuscles as $big) {
+                    if (isset($map[$big]) && !empty($map[$big])) $labels = array_merge($labels, $map[$big]);
+                    else $labels[] = $big;
+                }
+                $labels = array_values(array_unique(array_filter($labels)));
+                if (!empty($labels)) {
+                    $placeholders = implode(',', array_fill(0, count($labels), '?'));
+                    $sql = "SELECT * FROM exercises WHERE target_muscle IN ($placeholders) AND user_level = ?";
+                    $params = array_merge($labels, ["新手"]);
+                    $stmt = $pdo->prepare($sql); $stmt->execute($params);
+                    $ssql = preg_replace("/\s+/", " ", $sql) . ' ｜參數：[' . implode(', ', $params) . ']';
+                    $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+                    if ($rows) {
+                        $seed = crc32(date('Y-m-d') . '|' . $userId);
+                        usort($rows, function($a,$b)use($seed){
+                            $ka=crc32(($a['name']??'').'|'.$seed)%100000;
+                            $kb=crc32(($b['name']??'').'|'.$seed)%100000;
+                            return $ka<=>$kb;
+                        });
+                        $pick = array_slice($rows, 0, min(3, count($rows)));
+                        $exerciseText = "相關動作（依資料庫，供參考）：\n";
+                        foreach ($pick as $erow) {
+                            $exerciseText .= "- {$erow['name']}（{$erow['target_muscle']}）\n";
+                            $exerciseText .= "  組數：{$erow['hypertrophy_sets_min']}–{$erow['hypertrophy_sets_max']}；次數：{$erow['hypertrophy_reps_min']}–{$erow['hypertrophy_reps_max']}\n";
+                            if (!empty($erow['instruction_short'])) $exerciseText .= "  動作重點：{$erow['instruction_short']}\n";
+                            if (!empty($erow['instruction_cues']))   $exerciseText .= "  提示：{$erow['instruction_cues']}\n";
+                            if (!empty($erow['notes']))              $exerciseText .= "  備註：{$erow['notes']}\n";
+                            $exerciseText .= "\n";
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+// 🔟（原功能）plan：查 exercises（含分桶＋多樣化；僅 plan 才執行）
+if ($intent === "plan" && !empty($targetMuscles)) {
     $map = [
         '胸部' => ['上胸', '中胸', '下胸'],
         '肩部' => ['肩膀前束', '肩膀中束', '肩膀後束', '肩膀'],
@@ -580,15 +755,28 @@ if (in_array($intent, ["plan", "exercise_qa"], true) && !empty($targetMuscles)) 
 
 // 🔟 組合送給 AI 的 user message（各意圖獨立）
 $userPrompt = "意圖(intent): {$intent}\n";
-if ($isFirstChat && in_array($intent, ["plan","exercise_qa"], true)) {
+
+// 只有 plan 才帶 inBody
+if ($isFirstChat && $intent === "plan") {
     $userPrompt .= "以下是使用者的最新健康數據：\n" . $userDataText . "\n\n";
 }
-if (in_array($intent, ["plan","exercise_qa"], true) && isset($GLOBALS['_selectionGuide'])) {
+
+// 只有 plan 才加『排課規則』與『候選清單』
+if ($intent === "plan" && isset($GLOBALS['_selectionGuide'])) {
     $userPrompt .= $GLOBALS['_selectionGuide'] . "\n\n";
 }
-if ($exerciseText && in_array($intent, ["plan","exercise_qa"], true)) {
+if ($intent === "plan" && $exerciseText) {
     $userPrompt .= $exerciseText . "\n\n";
 }
+
+// exercise_qa：明確要求「單動作教學卡」，不排課表
+if ($intent === "exercise_qa") {
+    $userPrompt .= "請針對【單一動作】做教學說明（用途/調整/起始/動作/錯誤/安全），不要排整份課表。\n";
+    if ($exerciseText) {
+        $userPrompt .= "以下為資料庫查到的該動作相關資訊（如有）：\n" . $exerciseText . "\n\n";
+    }
+}
+
 $userPrompt .= "使用者的問題：" . $userMessage;
 
 // 加入歷史紀錄
