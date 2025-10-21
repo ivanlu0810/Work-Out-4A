@@ -16,7 +16,7 @@ $email = $_SESSION['email'] ?? 'No email';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>健習生｜飲食指南 </title>
+    <title>健習生｜飲食指南</title>
     <link rel="icon" href="images/fitness.png" type="image/png">
 
     <!-- 字體 & Bootstrap -->
@@ -428,14 +428,9 @@ $email = $_SESSION['email'] ?? 'No email';
             /* 40px */
         }
 
-        /* ✅ footer 與上方保持適當間距 - 增加間距 */
+        /* footer 與上方保持 60px 間距 */
         footer {
-            margin-top: 50px;
-            margin-bottom: 30px;
-        }
-
-        .footer {
-            padding: 1rem 2rem;
+            margin-top: 60px;
         }
     </style>
 </head>
@@ -514,7 +509,7 @@ $email = $_SESSION['email'] ?? 'No email';
                 <div class="page-title">
                     <div class="row">
                         <div class="col-12 col-md-6 order-md-1 order-last">
-                            <h3 class="mb-4-3 me-3">增肌飲食指南💪</h3>
+                            <h3 class="mb-4-3 me-3">飲食指南🍴</h3>
                             <p class="text-muted mt-2 mb-4" style="font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">專為增肌設計的營養計算，科學制定個人化飲食計畫，讓肌肉增長更有效率。</p>
                         </div>
                         <div class="col-12 col-md-6 order-md-2 order-first">
@@ -1098,6 +1093,9 @@ $email = $_SESSION['email'] ?? 'No email';
                                                 </div>
                                             </div>
                                         </div>
+                                    </div>
+                                </div>
+                            </div>
 
                             <!-- 智能建議（動態顯示） -->
                             <div class="row mb-4">
@@ -1111,14 +1109,11 @@ $email = $_SESSION['email'] ?? 'No email';
                                     </div>
                                 </div>
                             </div>
-                                    </div>
-                                </div>
-                            </div>
 
+                            <!-- 各餐區塊 -->
                             <div class="row mt-4" id="plannerMeals">
-                                    <div class="col-12">
-                                <!-- 各餐區塊渲染 -->
-                                    </div>
+                                <div class="col-12">
+                                    <!-- 各餐區塊渲染 -->
                                 </div>
                             </div>
                         </div>
