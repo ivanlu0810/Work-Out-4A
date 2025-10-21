@@ -1003,7 +1003,34 @@
             border-color: #B8A8C8 !important;
         }
 
-        /* 最終強制覆蓋 - 使用 !important 的最高優先級 */
+        /* 下拉選單樣式調整 */
+        select:focus,
+        select:active {
+            border-color: #8B9DC3 !important;
+            box-shadow: 0 0 0 0.2rem rgba(139, 157, 195, 0.25) !important;
+        }
+        
+        select option:hover,
+        select option:focus,
+        select option:active {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+        }
+        
+        select option:checked {
+            background-color: #f8f9fa !important;
+            color: #6c757d !important;
+        }
+        .apexcharts-bar-series .apexcharts-bar-area {
+            transition: transform 0.3s ease, box-shadow 0.3s ease !important;
+        }
+        
+        .apexcharts-bar-series .apexcharts-bar-area:hover {
+            transform: translateY(-5px) !important;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+            filter: none !important;
+            opacity: 1 !important;
+        }
         button[onclick*="toggleExerciseCompletion"] {
             background-color: #B8A8C8 !important;
             background: #B8A8C8 !important;
@@ -1014,6 +1041,128 @@
         button[onclick*="toggleExerciseCompletion"]:focus {
             background-color: #A090B0 !important;
             background: #A090B0 !important;
+        }
+
+        /* 統計切換器樣式 - 莫蘭迪色系 */
+        .btn-group .btn-check:checked + .btn {
+            background-color: #8B9DC3 !important;
+            color: white !important;
+            border: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        .btn-group .btn-check:not(:checked) + .btn {
+            background-color: white !important;
+            color: #6c757d !important;
+            border: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* 強制移除所有按鈕邊框但保持適當間距 */
+        .btn-group .btn {
+            border: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            margin: 0 !important;
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+            padding-top: 8px !important;
+            padding-bottom: 8px !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* 移除所有可能的邊框變體 */
+        .btn-group .btn:not(:first-child) {
+            border-left: none !important;
+            margin-left: 0 !important;
+        }
+        
+        .btn-group .btn:not(:last-child) {
+            border-right: none !important;
+            margin-right: 0 !important;
+        }
+        
+        /* 移除 Bootstrap 預設的邊框樣式 */
+        .btn-group .btn.btn-outline-secondary {
+            border: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+        }
+        
+        /* 確保第一個和最後一個按鈕有圓角 */
+        .btn-group .btn:first-child {
+            border-top-left-radius: 20px !important;
+            border-bottom-left-radius: 20px !important;
+            border-left: none !important;
+        }
+        
+        .btn-group .btn:last-child {
+            border-top-right-radius: 20px !important;
+            border-bottom-right-radius: 20px !important;
+            border-right: none !important;
+        }
+        
+        /* 移除 btn-group 本身的邊框 */
+        .btn-group {
+            border: none !important;
+        }
+        
+        /* 確保沒有陰影或輪廓 */
+        .btn-group .btn:focus,
+        .btn-group .btn:active,
+        .btn-group .btn:hover {
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        /* 最高優先級 - 強制移除所有邊框但保持間距 */
+        div.btn-group label.btn.btn-outline-secondary {
+            border: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            margin: 0 !important;
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+            padding-top: 8px !important;
+            padding-bottom: 8px !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+        
+        /* 針對特定 ID 的按鈕 */
+        label[for="weekMode"],
+        label[for="monthMode"], 
+        label[for="yearMode"] {
+            border: none !important;
+            border-left: none !important;
+            border-right: none !important;
+            border-top: none !important;
+            border-bottom: none !important;
+            margin: 0 !important;
+            padding-left: 12px !important;
+            padding-right: 12px !important;
+            padding-top: 8px !important;
+            padding-bottom: 8px !important;
+            outline: none !important;
+            box-shadow: none !important;
         }
 
         /* 訓練動作按鈕樣式 - 與 history.html 一致 */
@@ -1529,10 +1678,13 @@
             transition: all 0.3s ease;
             text-align: center;
             margin-bottom: 1rem;
+            /* 一開始就顯示陰影 */
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
+        /* 移除懸浮效果，保持陰影 */
         .stats-card:hover {
-            transform: translateY(-2px);
+            transform: none;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
@@ -2284,7 +2436,10 @@
                 <section class="section">
                     <div class="card">
                         <div class="card-header">
-                            <h4><i class="bi bi-grid-3x3-gap me-2"></i>訓練分化模板</h4>
+                            <div>
+                                <h4><i class="bi bi-grid-3x3-gap me-2"></i>訓練分化模板</h4>
+                                <p class="text-muted mb-0">選擇適合的訓練模板快速建立週計畫</p>
+                            </div>
                         </div>
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3"
@@ -2368,14 +2523,14 @@
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <h4 class="mb-1"><i class="bi bi-graph-up me-2"></i>訓練完成度統計</h4>
-                                <p class="text-muted mb-0 small">查看您的訓練進度和完成情況</p>
+                                <p class="text-muted mb-0">查看您的訓練進度和完成情況</p>
                             </div>
                             <div class="col-md-6">
                                 <div class="d-flex justify-content-end align-items-center">
                                     <!-- 統計模式分段控制器 -->
                                     <div class="btn-group" role="group" aria-label="統計模式選擇" style="border-radius: 20px; overflow: hidden; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                                         <input type="radio" class="btn-check" name="statsMode" id="weekMode" value="week" autocomplete="off" checked onclick="changeStatsMode('week')">
-                                        <label class="btn btn-outline-secondary rounded-0 px-3 py-2" for="weekMode" style="border: none; background: #007bff; color: white; font-weight: 500;">
+                                        <label class="btn btn-outline-secondary rounded-0 px-3 py-2" for="weekMode" style="border: none; background: #8B9DC3; color: white; font-weight: 500;">
                                             週統計
                                         </label>
 
@@ -2411,7 +2566,7 @@
                                                 <div class="row g-3">
                                                     <div class="col-md-3">
                                                         <div class="form-floating">
-                                                            <select class="form-select border-0 bg-light" id="week-year-select" onchange="updateCompletionStats()">
+                                                            <select class="form-select border-0 bg-light" id="week-year-select">
                                                                 <!-- 動態生成年份選項 -->
                                                             </select>
                                                             <label for="week-year-select" class="text-muted">年份</label>
@@ -2419,7 +2574,8 @@
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-floating">
-                                                            <select class="form-select border-0 bg-light" id="week-month-select" onchange="initializeWeekSelector(); updateCompletionStats()">
+                                                            <select class="form-select border-0 bg-light" id="week-month-select" onchange="initializeWeekSelector()">
+                                                                <option value="" disabled selected>請選擇月份</option>
                                                                 <option value="1">1月</option>
                                                                 <option value="2">2月</option>
                                                                 <option value="3">3月</option>
@@ -2438,7 +2594,7 @@
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="form-floating">
-                                                            <select class="form-select border-0 bg-light" id="week-week-select" onchange="updateCompletionStats()">
+                                                            <select class="form-select border-0 bg-light" id="week-week-select">
                                                                 <!-- 動態生成週數選項 -->
                                                             </select>
                                                             <label for="week-week-select" class="text-muted">週數</label>
@@ -2461,9 +2617,9 @@
                                         <div id="weekCompletionChart"></div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="d-flex flex-column h-100">
+                                        <div class="d-flex flex-column h-100 justify-content-center">
                                             <div class="stats-card p-3 rounded-3" style="background: #F8F9FA; color: #495057; border: 1px solid #E9ECEF;">
-                                                <div class="d-flex align-items-center mb-3">
+                                                <div class="d-flex align-items-center mb-3 justify-content-center">
                                                     <i class="bi bi-graph-up-arrow me-2 fs-5" style="color: #6C757D;"></i>
                                                     <h6 class="mb-0 fw-semibold" style="color: #495057;">週統計概覽</h6>
                                                 </div>
@@ -2484,24 +2640,6 @@
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="small" style="color: #6C757D; font-size: 0.75rem;">完成率</span>
                                                             <span class="fw-semibold" id="completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">連續訓練</span>
-                                                            <span class="fw-semibold" id="consecutive-days" style="color: #495057; font-size: 0.875rem;">0天</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">平均時長</span>
-                                                            <span class="fw-semibold" id="avg-duration" style="color: #495057; font-size: 0.875rem;">0分鐘</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="stat-card rounded-2 p-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">本週目標</span>
-                                                            <span class="fw-semibold" id="weekly-goal" style="color: #495057; font-size: 0.875rem;">7天</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2526,7 +2664,7 @@
                                                 <div class="row g-3">
                                                     <div class="col-md-4">
                                                         <div class="form-floating">
-                                                            <select class="form-select border-0 bg-light" id="month-year-select" onchange="updateCompletionStats()">
+                                                            <select class="form-select border-0 bg-light" id="month-year-select">
                                                                 <!-- 動態生成年份選項 -->
                                                             </select>
                                                             <label for="month-year-select" class="text-muted">年份</label>
@@ -2534,7 +2672,8 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="form-floating">
-                                                            <select class="form-select border-0 bg-light" id="month-month-select" onchange="updateCompletionStats()">
+                                                            <select class="form-select border-0 bg-light" id="month-month-select">
+                                                                <option value="" disabled selected>請選擇月份</option>
                                                                 <option value="1">1月</option>
                                                                 <option value="2">2月</option>
                                                                 <option value="3">3月</option>
@@ -2568,9 +2707,9 @@
                                         <div id="monthCompletionChart"></div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="d-flex flex-column h-100">
+                                        <div class="d-flex flex-column h-100 justify-content-center">
                                             <div class="stats-card p-3 rounded-3" style="background: #F8F9FA; color: #495057; border: 1px solid #E9ECEF;">
-                                                <div class="d-flex align-items-center mb-3">
+                                                <div class="d-flex align-items-center mb-3 justify-content-center">
                                                     <i class="bi bi-graph-up-arrow me-2 fs-5" style="color: #6C757D;"></i>
                                                     <h6 class="mb-0 fw-semibold" style="color: #495057;">月統計概覽</h6>
                                                 </div>
@@ -2591,24 +2730,6 @@
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="small" style="color: #6C757D; font-size: 0.75rem;">完成率</span>
                                                             <span class="fw-semibold" id="completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">連續訓練</span>
-                                                            <span class="fw-semibold" id="consecutive-days" style="color: #495057; font-size: 0.875rem;">0天</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">平均時長</span>
-                                                            <span class="fw-semibold" id="avg-duration" style="color: #495057; font-size: 0.875rem;">0分鐘</span>
-                                                        </div>
-                                                    </div>
-                                                    <div class="stat-card rounded-2 p-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <span class="small" style="color: #6C757D; font-size: 0.75rem;">本週目標</span>
-                                                            <span class="fw-semibold" id="weekly-goal" style="color: #495057; font-size: 0.875rem;">7天</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -2633,7 +2754,7 @@
                                                 <div class="row g-3">
                                                     <div class="col-md-6">
                                                         <div class="form-floating">
-                                                            <select class="form-select border-0 bg-light" id="year-year-select" onchange="updateCompletionStats()">
+                                                            <select class="form-select border-0 bg-light" id="year-year-select">
                                                                 <!-- 動態生成年份選項 -->
                                                             </select>
                                                             <label for="year-year-select" class="text-muted">年份</label>
@@ -2656,9 +2777,9 @@
                                         <div id="yearCompletionChart"></div>
                                     </div>
                                     <div class="col-md-4">
-                                        <div class="d-flex flex-column h-100">
+                                        <div class="d-flex flex-column h-100 justify-content-center">
                                             <div class="stats-card p-3 rounded-3" style="background: #F8F9FA; color: #495057; border: 1px solid #E9ECEF;">
-                                                <div class="d-flex align-items-center mb-3">
+                                                <div class="d-flex align-items-center mb-3 justify-content-center">
                                                     <i class="bi bi-graph-up-arrow me-2 fs-5" style="color: #6C757D;"></i>
                                                     <h6 class="mb-0 fw-semibold" style="color: #495057;">年統計概覽</h6>
                                                 </div>
@@ -2675,7 +2796,7 @@
                                                             <span class="fw-semibold" id="year-completed-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
-                                                    <div class="stat-card rounded-2 p-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
+                                                    <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="small" style="color: #6C757D; font-size: 0.75rem;">完成率</span>
                                                             <span class="fw-semibold" id="year-completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
@@ -2906,18 +3027,59 @@
                     height: 300,
                     toolbar: {
                         show: false
+                    },
+                    animations: {
+                        enabled: false
                     }
                 },
-                colors: ['#8B9DC3'], // 莫蘭迪灰藍色
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded'
+                        columnWidth: '60%',
+                        borderRadius: 4,
+                        colors: {
+                            ranges: [{
+                                from: 0,
+                                to: 25,
+                                color: '#ead0d0' // 溫暖的米棕色
+                            }, {
+                                from: 25,
+                                to: 50,
+                                color: '#ead0d0' // 溫暖的米棕色
+                            }, {
+                                from: 50,
+                                to: 75,
+                                color: '#ead0d0' // 溫暖的米棕色
+                            }, {
+                                from: 75,
+                                to: 100,
+                                color: '#c7cbd2' // 淺灰藍色（週統計專用）
+                            }]
+                        },
+                        states: {
+                            hover: {
+                                filter: {
+                                    type: 'none'
+                                }
+                            },
+                            active: {
+                                filter: {
+                                    type: 'none'
+                                }
+                            }
+                        }
                     }
                 },
                 dataLabels: {
-                    enabled: false
+                    enabled: true,
+                    formatter: function(val) {
+                        return val + '%';
+                    },
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        colors: ['#fff']
+                    }
                 },
                 stroke: {
                     show: true,
@@ -2934,14 +3096,14 @@
                 },
                 yaxis: {
                     title: {
-                        text: '完成狀態'
+                        text: '完成百分比'
                     },
                     min: 0,
-                    max: 1,
-                    tickAmount: 1,
+                    max: 100,
+                    tickAmount: 5,
                     labels: {
                         formatter: function(val) {
-                            return val === 1 ? '已完成' : val === 0 ? '未完成' : '';
+                            return val + '%';
                         }
                     }
                 },
@@ -2949,18 +3111,19 @@
                     opacity: 1
                 },
                 tooltip: {
+                    enabled: true,
                     y: {
                         formatter: function(val) {
-                            return val === 1 ? '已完成' : '未完成';
+                            return val + '% 完成';
                         }
                     }
                 },
                 grid: {
-                    borderColor: '#E8D5C4' // 莫蘭迪淺灰棕色
-                }
+                    show: false
+                },
             };
 
-            // 月統計圖表選項
+                // 月統計圖表選項
             const monthOptions = {
                 series: [{
                     name: '完成度',
@@ -2971,18 +3134,47 @@
                     height: 300,
                     toolbar: {
                         show: false
+                    },
+                    animations: {
+                        enabled: false
                     }
                 },
-                colors: ['#A8B5A0'], // 莫蘭迪灰綠色
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded'
+                        columnWidth: '60%',
+                        borderRadius: 4,
+                        colors: {
+                            ranges: [{
+                                from: 0,
+                                to: 25,
+                                color: '#bfbfbf' // 淺灰色
+                            }, {
+                                from: 25,
+                                to: 50,
+                                color: '#bfbfbf' // 淺灰色
+                            }, {
+                                from: 50,
+                                to: 75,
+                                color: '#bfbfbf' // 淺灰色
+                            }, {
+                                from: 75,
+                                to: 100,
+                                color: '#e0e5df' // 淺灰綠色（月統計專用）
+                            }]
+                        }
                     }
                 },
                 dataLabels: {
-                    enabled: false
+                    enabled: true,
+                    formatter: function(val) {
+                        return val + '%';
+                    },
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        colors: ['#fff']
+                    }
                 },
                 stroke: {
                     show: true,
@@ -2999,14 +3191,14 @@
                 },
                 yaxis: {
                     title: {
-                        text: '完成狀態'
+                        text: '完成百分比'
                     },
                     min: 0,
-                    max: 1,
-                    tickAmount: 1,
+                    max: 100,
+                    tickAmount: 5,
                     labels: {
                         formatter: function(val) {
-                            return val === 1 ? '已完成' : val === 0 ? '未完成' : '';
+                            return val + '%';
                         }
                     }
                 },
@@ -3014,15 +3206,16 @@
                     opacity: 1
                 },
                 tooltip: {
+                    enabled: true,
                     y: {
                         formatter: function(val) {
-                            return val === 1 ? '已完成' : '未完成';
+                            return val + '% 完成';
                         }
                     }
                 },
                 grid: {
-                    borderColor: '#E8D5C4' // 莫蘭迪淺灰棕色
-                }
+                    show: false
+                },
             };
 
             // 年統計圖表選項
@@ -3036,18 +3229,47 @@
                     height: 300,
                     toolbar: {
                         show: false
+                    },
+                    animations: {
+                        enabled: false
                     }
                 },
-                colors: ['#C4A484'], // 莫蘭迪灰棕色
                 plotOptions: {
                     bar: {
                         horizontal: false,
-                        columnWidth: '55%',
-                        endingShape: 'rounded'
+                        columnWidth: '60%',
+                        borderRadius: 4,
+                        colors: {
+                            ranges: [{
+                                from: 0,
+                                to: 25,
+                                color: '#f0ebe5' // 淺米色
+                            }, {
+                                from: 25,
+                                to: 50,
+                                color: '#f0ebe5' // 淺米色
+                            }, {
+                                from: 50,
+                                to: 75,
+                                color: '#f0ebe5' // 淺米色
+                            }, {
+                                from: 75,
+                                to: 100,
+                                color: '#cac3bb' // 深米色（年統計專用）
+                            }]
+                        }
                     }
                 },
                 dataLabels: {
-                    enabled: false
+                    enabled: true,
+                    formatter: function(val) {
+                        return val + '%';
+                    },
+                    style: {
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        colors: ['#fff']
+                    }
                 },
                 stroke: {
                     show: true,
@@ -3064,14 +3286,14 @@
                 },
                 yaxis: {
                     title: {
-                        text: '完成狀態'
+                        text: '完成百分比'
                     },
                     min: 0,
-                    max: 1,
-                    tickAmount: 1,
+                    max: 100,
+                    tickAmount: 5,
                     labels: {
                         formatter: function(val) {
-                            return val === 1 ? '已完成' : val === 0 ? '未完成' : '';
+                            return val + '%';
                         }
                     }
                 },
@@ -3079,15 +3301,16 @@
                     opacity: 1
                 },
                 tooltip: {
+                    enabled: true,
                     y: {
                         formatter: function(val) {
-                            return val === 1 ? '已完成' : '未完成';
+                            return val + '% 完成';
                         }
                     }
                 },
                 grid: {
-                    borderColor: '#E8D5C4' // 莫蘭迪淺灰棕色
-                }
+                    show: false
+                },
             };
 
             // 初始化三個圖表
@@ -3123,26 +3346,26 @@
                 initializeWeekSelector();
                 const weekLabel = document.querySelector('label[for="weekMode"]');
                 if (weekLabel) {
-                    weekLabel.style.background = '#007bff';
+                    weekLabel.style.background = '#8B9DC3';
                     weekLabel.style.color = 'white';
                 }
             } else if (mode === 'month') {
                 document.getElementById('month-tab').classList.add('show', 'active');
                 const monthLabel = document.querySelector('label[for="monthMode"]');
                 if (monthLabel) {
-                    monthLabel.style.background = '#007bff';
+                    monthLabel.style.background = '#8B9DC3';
                     monthLabel.style.color = 'white';
                 }
             } else if (mode === 'year') {
                 document.getElementById('year-tab').classList.add('show', 'active');
                 const yearLabel = document.querySelector('label[for="yearMode"]');
                 if (yearLabel) {
-                    yearLabel.style.background = '#007bff';
+                    yearLabel.style.background = '#8B9DC3';
                     yearLabel.style.color = 'white';
                 }
             }
             
-            updateCompletionStats();
+            // 移除自動更新統計，只在用戶點擊查詢統計按鈕時才更新
         }
 
         // 初始化統計選擇器
@@ -3175,15 +3398,21 @@
 
                 yearSelect.innerHTML = '';
                 
+                // 添加預設選項
+                const defaultOption = document.createElement('option');
+                defaultOption.value = '';
+                defaultOption.textContent = '請選擇年份';
+                defaultOption.disabled = true;
+                defaultOption.selected = true;
+                yearSelect.appendChild(defaultOption);
+                
                 // 生成過去5年到未來2年的選項
                 for (let year = currentYear - 5; year <= currentYear + 2; year++) {
                     const option = document.createElement('option');
                     option.value = year;
-                    option.textContent = year + '年  ';
+                    option.textContent = year + '年';
                     yearSelect.appendChild(option);
                 }
-                
-                yearSelect.value = currentYear;
             });
         }
 
@@ -3193,8 +3422,25 @@
             if (!weekSelect) return;
 
             weekSelect.innerHTML = '';
-            const year = parseInt(document.getElementById('week-year-select').value);
-            const month = parseInt(document.getElementById('week-month-select').value);
+            
+            // 添加預設選項
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = '請選擇週數';
+            defaultOption.disabled = true;
+            defaultOption.selected = true;
+            weekSelect.appendChild(defaultOption);
+            
+            const yearSelect = document.getElementById('week-year-select');
+            const monthSelect = document.getElementById('week-month-select');
+            
+            // 檢查是否有選中年份和月份
+            if (!yearSelect.value || !monthSelect.value) {
+                return;
+            }
+            
+            const year = parseInt(yearSelect.value);
+            const month = parseInt(monthSelect.value);
             
             // 計算該月的週數
             const weeksInMonth = getWeeksInMonth(year, month);
@@ -3217,29 +3463,14 @@
             return Math.ceil((lastWeekStart - firstWeekStart) / (7 * 24 * 60 * 60 * 1000)) + 1;
         }
 
-        // 設定當前期間
+        // 設定當前期間（移除自動設定，保持預設提示）
         function setCurrentPeriod() {
-            const today = new Date();
-            const yearSelectors = ['week-year-select', 'month-year-select', 'year-year-select'];
-            const monthSelectors = ['week-month-select', 'month-month-select'];
+            // 不再自動設定年份和月份，讓用戶手動選擇
+            // 只初始化週數選擇器（當年份和月份都選擇後才會顯示週數選項）
             const weekSelect = document.getElementById('week-week-select');
-            
-            // 設定所有年份選擇器
-            yearSelectors.forEach(selectorId => {
-                const yearSelect = document.getElementById(selectorId);
-                if (yearSelect) yearSelect.value = today.getFullYear();
-            });
-            
-            // 設定所有月份選擇器
-            monthSelectors.forEach(selectorId => {
-                const monthSelect = document.getElementById(selectorId);
-                if (monthSelect) monthSelect.value = today.getMonth() + 1;
-            });
-            
-            // 計算當前是該月的第幾週
             if (weekSelect) {
-                const currentWeek = getCurrentWeekInMonth(today);
-                weekSelect.value = currentWeek;
+                // 週數選擇器會在 initializeWeekSelector 中處理
+                initializeWeekSelector();
             }
         }
 
@@ -3280,7 +3511,7 @@
                 initializeWeekSelector(); // 重新初始化週數選項
             }
             
-            updateCompletionStats();
+            // 移除自動更新統計，只在用戶點擊查詢統計按鈕時才更新
         }
 
         // 更新完成度統計
@@ -3293,11 +3524,29 @@
                 year = parseInt(document.getElementById('week-year-select').value);
                 month = parseInt(document.getElementById('week-month-select').value);
                 week = parseInt(document.getElementById('week-week-select').value);
+                
+                // 檢查是否所有選項都已選擇
+                if (!year || !month || !week) {
+                    showErrorMessage('請選擇完整的年份、月份和週數');
+                    return;
+                }
             } else if (selectedMode === 'month') {
                 year = parseInt(document.getElementById('month-year-select').value);
                 month = parseInt(document.getElementById('month-month-select').value);
+                
+                // 檢查是否所有選項都已選擇
+                if (!year || !month) {
+                    showErrorMessage('請選擇完整的年份和月份');
+                    return;
+                }
             } else if (selectedMode === 'year') {
                 year = parseInt(document.getElementById('year-year-select').value);
+                
+                // 檢查是否所有選項都已選擇
+                if (!year) {
+                    showErrorMessage('請選擇年份');
+                    return;
+                }
             }
             
             console.log('更新統計:', { selectedMode, year, month, week });
@@ -3312,10 +3561,19 @@
                     data = await loadYearCompletionData(year);
                 }
                 
+                // 檢查是否有數據
+                const hasData = Object.values(data).some(value => value > 0);
+                if (!hasData) {
+                    showWarningMessage('所選期間沒有訓練數據');
+                    return;
+                }
+                
                 updateCompletionChartWithData(data, selectedMode);
                 updateStatsOverview(data, selectedMode);
+                showSuccessMessage('統計數據已更新');
             } catch (error) {
                 console.error('載入統計數據失敗:', error);
+                showErrorMessage('載入統計數據失敗，請重試');
             }
         }
 
@@ -3343,20 +3601,70 @@
             let completedDays = 0;
             
             if (timeUnit === 'week') {
-                // 週模式：只計算有訓練計畫的天數
+                // 週模式：計算該週的總天數和已完成天數
                 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                totalDays = days.filter(day => data[day] !== undefined && data[day] !== -1).length;
-                completedDays = Object.values(data).filter(val => val === 1).length;
+                const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+                
+                // 獲取當前選中的週
+                const year = parseInt(document.getElementById('week-year-select').value);
+                const month = parseInt(document.getElementById('week-month-select').value);
+                const week = parseInt(document.getElementById('week-week-select').value);
+                const weekStart = getWeekStartDate(year, month, week);
+                
+                for (let i = 0; i < 7; i++) {
+                    const date = new Date(weekStart);
+                    date.setDate(weekStart.getDate() + i);
+                    const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    
+                    const dayExercises = dailyTrainingData[dateKey] || [];
+                    if (dayExercises.length > 0) {
+                        totalDays += 1; // 計算有訓練計畫的天數
+                        const allCompleted = dayExercises.every(exercise => exercise.completed === true);
+                        if (allCompleted) completedDays += 1; // 計算已完成的天數
+                    }
+                }
             } else if (timeUnit === 'month') {
-                // 月模式：計算有訓練計畫的週數
-                const weeks = ['week1', 'week2', 'week3', 'week4'];
-                totalDays = weeks.filter(week => data[week] !== undefined).length;
-                completedDays = Object.values(data).filter(val => val > 0).length;
+                // 月模式：計算該月的總動作數和已完成動作數
+                const year = parseInt(document.getElementById('month-year-select').value);
+                const month = parseInt(document.getElementById('month-month-select').value);
+                const monthStart = new Date(year, month - 1, 1);
+                const monthEnd = new Date(year, month, 0);
+                const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+                
+                for (let dayOffset = 0; dayOffset < monthEnd.getDate(); dayOffset++) {
+                    const date = new Date(monthStart);
+                    date.setDate(monthStart.getDate() + dayOffset);
+                    const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                    
+                    const dayExercises = dailyTrainingData[dateKey] || [];
+                    if (dayExercises.length > 0) {
+                        totalDays += 1; // 計算有訓練計畫的天數
+                        const allCompleted = dayExercises.every(exercise => exercise.completed === true);
+                        if (allCompleted) completedDays += 1; // 計算已完成的天數
+                    }
+                }
             } else if (timeUnit === 'year') {
-                // 年模式：計算有訓練計畫的月數
-                const months = Object.keys(data).filter(key => key.startsWith('month_'));
-                totalDays = months.length;
-                completedDays = Object.values(data).filter(val => val > 0).length;
+                // 年模式：計算該年的總動作數和已完成動作數
+                const year = parseInt(document.getElementById('year-year-select').value);
+                const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
+                
+                for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
+                    const monthStart = new Date(year, monthIndex - 1, 1);
+                    const monthEnd = new Date(year, monthIndex, 0);
+                    
+                    for (let dayOffset = 0; dayOffset < monthEnd.getDate(); dayOffset++) {
+                        const date = new Date(monthStart);
+                        date.setDate(monthStart.getDate() + dayOffset);
+                        const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                        
+                        const dayExercises = dailyTrainingData[dateKey] || [];
+                        if (dayExercises.length > 0) {
+                            totalDays += 1; // 計算有訓練計畫的天數
+                            const allCompleted = dayExercises.every(exercise => exercise.completed === true);
+                            if (allCompleted) completedDays += 1; // 計算已完成的天數
+                        }
+                    }
+                }
             }
             
             const completionRate = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
@@ -3385,7 +3693,7 @@
                 const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
                 const completionData = {};
                 
-                // 計算該週每天的完成狀態
+                // 計算該週每天的完成動作數量
                 const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
                 
                 for (let i = 0; i < 7; i++) {
@@ -3395,9 +3703,10 @@
                     
                     const dayExercises = dailyTrainingData[dateKey] || [];
                     if (dayExercises.length > 0) {
-                        // 檢查是否所有動作都已完成
-                        const allCompleted = dayExercises.every(exercise => exercise.completed === true);
-                        completionData[days[i]] = allCompleted ? 1 : 0;
+                        // 計算該天的完成百分比
+                        const completedCount = dayExercises.filter(exercise => exercise.completed === true).length;
+                        const completionPercentage = Math.round((completedCount / dayExercises.length) * 100);
+                        completionData[days[i]] = completionPercentage;
                     } else {
                         // 沒有訓練計畫的天數不包含在統計中
                         completionData[days[i]] = -1; // 使用-1表示沒有訓練計畫
@@ -3422,7 +3731,7 @@
                 const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
                 const completionData = {};
                 
-                // 計算該月每週的完成狀態
+                // 計算該月每週的完成百分比
                 const weeks = ['week1', 'week2', 'week3', 'week4'];
                 
                 for (let weekIndex = 0; weekIndex < 4; weekIndex++) {
@@ -3431,10 +3740,10 @@
                     const weekEnd = new Date(weekStart);
                     weekEnd.setDate(weekStart.getDate() + 6);
                     
-                    let weekCompletedDays = 0;
-                    let weekTotalDays = 0;
+                    let weekTotalExercises = 0;
+                    let weekCompletedExercises = 0;
                     
-                    // 計算該週每天的完成狀態
+                    // 計算該週每天的完成百分比
                     for (let dayOffset = 0; dayOffset < 7; dayOffset++) {
                         const date = new Date(weekStart);
                         date.setDate(weekStart.getDate() + dayOffset);
@@ -3446,13 +3755,15 @@
                         const dayExercises = dailyTrainingData[dateKey] || [];
                         
                         if (dayExercises.length > 0) {
-                            weekTotalDays++;
-                            const allCompleted = dayExercises.every(exercise => exercise.completed === true);
-                            if (allCompleted) weekCompletedDays++;
+                            weekTotalExercises += dayExercises.length;
+                            const completedCount = dayExercises.filter(exercise => exercise.completed === true).length;
+                            weekCompletedExercises += completedCount;
                         }
                     }
                     
-                    completionData[weeks[weekIndex]] = weekTotalDays > 0 ? Math.round((weekCompletedDays / weekTotalDays) * 100) : 0;
+                    // 計算該週的完成百分比
+                    const weekCompletionPercentage = weekTotalExercises > 0 ? Math.round((weekCompletedExercises / weekTotalExercises) * 100) : 0;
+                    completionData[weeks[weekIndex]] = weekCompletionPercentage;
                 }
                 
                 console.log('月完成度數據:', completionData);
@@ -3470,15 +3781,15 @@
                 const dailyTrainingData = JSON.parse(localStorage.getItem('dailyTrainingData') || '{}');
                 const completionData = {};
                 
-                // 計算該年每月的完成狀態
+                // 計算該年每月的完成百分比
                 for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
                     const monthStart = new Date(year, monthIndex - 1, 1);
                     const monthEnd = new Date(year, monthIndex, 0);
                     
-                    let monthCompletedDays = 0;
-                    let monthTotalDays = 0;
+                    let monthTotalExercises = 0;
+                    let monthCompletedExercises = 0;
                     
-                    // 計算該月每天的完成狀態
+                    // 計算該月每天的完成百分比
                     for (let dayOffset = 0; dayOffset < monthEnd.getDate(); dayOffset++) {
                         const date = new Date(monthStart);
                         date.setDate(monthStart.getDate() + dayOffset);
@@ -3487,13 +3798,15 @@
                         const dayExercises = dailyTrainingData[dateKey] || [];
                         
                         if (dayExercises.length > 0) {
-                            monthTotalDays++;
-                            const allCompleted = dayExercises.every(exercise => exercise.completed === true);
-                            if (allCompleted) monthCompletedDays++;
+                            monthTotalExercises += dayExercises.length;
+                            const completedCount = dayExercises.filter(exercise => exercise.completed === true).length;
+                            monthCompletedExercises += completedCount;
                         }
                     }
                     
-                    completionData[`month_${monthIndex}`] = monthTotalDays > 0 ? Math.round((monthCompletedDays / monthTotalDays) * 100) : 0;
+                    // 計算該月的完成百分比
+                    const monthCompletionPercentage = monthTotalExercises > 0 ? Math.round((monthCompletedExercises / monthTotalExercises) * 100) : 0;
+                    completionData[`month_${monthIndex}`] = monthCompletionPercentage;
                 }
                 
                 console.log('年完成度數據:', completionData);
@@ -3516,12 +3829,10 @@
         // 載入指定日期範圍的完成度數據
         // 使用莫蘭迪色系的圖表更新函式
         function updateCompletionChartWithData(data, timeUnit) {
-            if (!completionChart) return;
-
             // 莫蘭迪色系
             const morandiColors = {
                 primary: '#8B9DC3',    // 灰藍色
-                secondary: '#A8B5A0',  // 灰綠色
+                secondary: '#dbd2c9',  // 灰綠色
                 accent: '#C4A484',     // 灰棕色
                 success: '#9CAF88',    // 灰綠色
                 warning: '#D4A574',    // 灰黃色
@@ -3533,17 +3844,17 @@
             let chartData, categories, colors;
 
             if (timeUnit === 'week') {
-                // 週模式：顯示7天的完成度
+                // 週模式：顯示7天的完成動作數量
                 categories = ['週一', '週二', '週三', '週四', '週五', '週六', '週日'];
                 chartData = categories.map((day, index) => {
                     const dayKey = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'][index];
                     const value = data[dayKey];
                     // -1表示沒有訓練計畫，不顯示在圖表中
-                    return value === -1 ? null : (value === 1 ? 1 : 0);
+                    return value === -1 ? null : value;
                 });
                 colors = [morandiColors.primary];
             } else if (timeUnit === 'month') {
-                // 月模式：顯示4週的完成度
+                // 月模式：顯示4週的完成動作數量
                 categories = ['第1週', '第2週', '第3週', '第4週'];
                 chartData = categories.map((week, index) => {
                     const weekKey = `week${index + 1}`;
@@ -3551,7 +3862,7 @@
                 });
                 colors = [morandiColors.secondary];
             } else if (timeUnit === 'year') {
-                // 年模式：顯示12個月的完成度
+                // 年模式：顯示12個月的完成動作數量
                 categories = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
                 chartData = categories.map((month, index) => {
                     return data[`month_${index + 1}`] || 0;
@@ -3561,17 +3872,28 @@
 
             console.log('圖表數據更新:', { timeUnit, chartData, categories });
 
-            // 更新圖表
-            completionChart.updateOptions({
-                xaxis: {
-                    categories: categories
-                },
-                colors: colors,
-                series: [{
-                    name: '完成度',
-                    data: chartData
-                }]
-            });
+            // 更新對應的圖表
+            let targetChart;
+            if (timeUnit === 'week') {
+                targetChart = weekCompletionChart;
+            } else if (timeUnit === 'month') {
+                targetChart = monthCompletionChart;
+            } else if (timeUnit === 'year') {
+                targetChart = yearCompletionChart;
+            }
+
+            if (targetChart) {
+                targetChart.updateOptions({
+                    xaxis: {
+                        categories: categories
+                    },
+                    colors: colors,
+                    series: [{
+                        name: '完成動作數量',
+                        data: chartData
+                    }]
+                });
+            }
         }
         // 獲取週鍵值
         function getWeekKey(date) {
@@ -5082,11 +5404,57 @@
             // 重新顯示訓練內容詳情
             showDayTrainingDetails(date, dayTrainingData);
             
-            // 更新進度統計
-            updateTrainingProgressStats();
+            console.log('=== toggleExerciseCompletion 結束 ===');
+        }
+
+        // 設定統計圖表為當前日期並更新
+        function updateStatsToCurrentDate(date) {
+            const year = date.getFullYear();
+            const month = date.getMonth() + 1;
             
-            // 更新統計圖表
-            updateCompletionStats();
+            // 計算該日期是第幾週
+            const weekNumber = getWeekNumberInMonth(date);
+            
+            // 設定所有統計選擇器為當前日期
+            const weekYearSelect = document.getElementById('week-year-select');
+            const weekMonthSelect = document.getElementById('week-month-select');
+            const weekWeekSelect = document.getElementById('week-week-select');
+            
+            const monthYearSelect = document.getElementById('month-year-select');
+            const monthMonthSelect = document.getElementById('month-month-select');
+            
+            const yearYearSelect = document.getElementById('year-year-select');
+            
+            if (weekYearSelect) weekYearSelect.value = year;
+            if (weekMonthSelect) weekMonthSelect.value = month;
+            if (weekWeekSelect) weekWeekSelect.value = weekNumber;
+            
+            if (monthYearSelect) monthYearSelect.value = year;
+            if (monthMonthSelect) monthMonthSelect.value = month;
+            
+            if (yearYearSelect) yearYearSelect.value = year;
+            
+            // 移除自動更新統計，只在用戶點擊查詢統計按鈕時才更新
+        }
+        
+        // 計算日期在該月是第幾週
+        function getWeekNumberInMonth(date) {
+            const firstDay = new Date(date.getFullYear(), date.getMonth(), 1);
+            const firstWeekStart = getWeekMonday(firstDay);
+            const weekStart = getWeekMonday(date);
+            const diffTime = weekStart - firstWeekStart;
+            const diffWeeks = Math.ceil(diffTime / (7 * 24 * 60 * 60 * 1000));
+            return Math.max(1, diffWeeks + 1);
+        }
+        
+        // 取得週一的日期
+        function getWeekMonday(date) {
+            const d = new Date(date);
+            const day = d.getDay();
+            const diffToMonday = (day === 0 ? -6 : 1 - day); // 週一起算
+            d.setDate(d.getDate() + diffToMonday);
+            d.setHours(0,0,0,0);
+            return d;
         }
 
         // 更新訓練進度統計
@@ -5183,12 +5551,7 @@
 
         // 更新週進度顯示
         function updateWeekProgressDisplay(progress) {
-            const completionRateEl = document.getElementById('completion-rate');
-            if (completionRateEl) {
-                completionRateEl.textContent = progress.percentage + '%';
-            }
-            
-            // 更新進度條
+            // 只更新進度條，不更新統計概覽中的完成率
             const progressBarEl = document.querySelector('.progress-bar');
             if (progressBarEl) {
                 progressBarEl.style.width = progress.percentage + '%';
@@ -6051,7 +6414,7 @@
         function showErrorMessage(message) {
             const errorDiv = document.createElement('div');
             errorDiv.innerHTML = `
-                <div class="alert alert-danger alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 10000;">
+                <div class="alert alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 10000; background-color: #ead0d0; border: none; color: #8b6b6b;">
                     ${message}
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
@@ -6065,7 +6428,25 @@
                 }
             }, 5000);
         }
-        // 載入動作資料（只使用資料庫中的動作）
+        
+        // 顯示警告訊息
+        function showWarningMessage(message) {
+            const warningDiv = document.createElement('div');
+            warningDiv.innerHTML = `
+                <div class="alert alert-dismissible fade show" role="alert" style="position: fixed; top: 20px; right: 20px; z-index: 10000; background-color: #ccd2cc; border: none; color: #6b6b6b;">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            document.body.appendChild(warningDiv);
+            
+            // 5秒後自動移除
+            setTimeout(() => {
+                if (warningDiv.parentNode) {
+                    warningDiv.remove();
+                }
+            }, 5000);
+        }
         async function loadExercises() {
             try {
                 console.log('開始載入動作資料...');
@@ -6360,6 +6741,7 @@
             // 顯示成功訊息
             const message = newStatus ? `${getDayName(day)}訓練已完成！` : `${getDayName(day)}訓練狀態已重置`;
             showSuccessMessage(message);
+            
             console.log('=== toggleDayCompletion 結束 ===');
         }
 
@@ -6687,16 +7069,6 @@
 
         // 供模板使用的基準日期（使用者在模態中選擇）；預設為今日
         let selectedTemplateBaseDate = null;
-
-        // 取得某日期所在週的週一
-        function getWeekMonday(baseDate) {
-            const d = new Date(baseDate);
-            const day = d.getDay(); // 0(日)~6(六)
-            const diffToMonday = (day === 0 ? -6 : 1 - day); // 週一起算
-            d.setDate(d.getDate() + diffToMonday);
-            d.setHours(0,0,0,0);
-            return d;
-        }
 
         // 將目前 weeklyPlan 同步寫入行事曆（localStorage）並刷新顯示
         // 若有傳入 baseDate，則以該日期所在週(週一起算)寫入行事曆
