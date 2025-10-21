@@ -172,3 +172,33 @@
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
   white-space: pre-wrap;
 }
+/* === 左下角把手：三條斜線視覺（與原生右下角風格一致） === */
+.chat-window .resizer.bl {
+  position: absolute;
+  left: 0;                /* 你原本就有 bottom:0；保留即可 */
+  bottom: 0;
+  width: 18px;
+  height: 18px;
+  cursor: sw-resize;
+  pointer-events: auto;
+  z-index: 1001;
+}
+
+/* 用一條橫線 + 兩個 box-shadow 疊出「三條」；再整組旋轉 45deg 成斜線 */
+.chat-window .resizer.bl::before {
+  content: "";
+  position: absolute;
+  left: 0px;              /* 微調整靠角落 */
+  bottom: 4px;
+  width: 8px;
+  height: 1px;            /* 線條粗細（可改 1~2px） */
+  background: rgba(0,0,0,.38);  /* 線條顏色（可依主題調深淺） */
+  box-shadow:
+    0 -4px 0 rgba(0,0,0,.38);   /* 兩條間距（-4px、-8px） */
+  transform: rotate(45deg);     /* 轉成與原生日誌一樣的斜率 */
+  transform-origin: left bottom;
+  pointer-events: none;         /* 不影響拖曳事件 */
+}
+
+/* 想更接近原生「細一點」：把高度改 1px、顏色調淡些即可 */
+/* .chat-window .resizer.bl::before { height:1px; background:rgba(0,0,0,.3); box-shadow:0 -3px 0 rgba(0,0,0,.3),0 -6px 0 rgba(0,0,0,.3);} */
