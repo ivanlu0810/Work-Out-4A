@@ -215,6 +215,100 @@ async function sendMessage() {
   }
 }
 
+// === 左下 + 右下 角落縮放（只改寬/高，不動定位；相容原本對齊邏輯） ===
+(function enableDualCornerResize() {
+  const chatWin = document.getElementById('chat-window');
+  if (!chatWin) return;
+
+  // 若之前有黑點版：清掉殘留與 inline 設定
+  chatWin.querySelectorAll('.resize-dot').forEach(n => n.remove());
+  if (chatWin.style.resize === 'none') chatWin.style.resize = ''; // 恢復原生右下把手（若本來有）
+
+  // 建立左下與（可選）右下把手（若已存在就略過）
+  let handleBL = chatWin.querySelector('.resizer.bl');
+  if (!handleBL) {
+    handleBL = document.createElement('div');
+    handleBL.className = 'resizer bl';
+    handleBL.setAttribute('aria-hidden', 'true');
+    chatWin.appendChild(handleBL);
+  }
+  let handleBR = chatWin.querySelector('.resizer.br');
+  if (!handleBR) {
+    handleBR = document.createElement('div');
+    handleBR.className = 'resizer br';
+    handleBR.setAttribute('aria-hidden', 'true');
+    chatWin.appendChild(handleBR);
+  }
+
+  // 讀取最小尺寸（若 CSS 未設，給預設）
+  const getMinWH = () => {
+    const s = getComputedStyle(chatWin);
+    const minW = parseInt(s.minWidth)  || 280;
+    const minH = parseInt(s.minHeight) || 300;
+    return { minW, minH };
+  };
+
+  let resizing = false;
+  let mode = null; // 'bl' | 'br'
+  let startX = 0, startY = 0, startW = 0, startH = 0;
+
+  const onStart = (e, m) => {
+    resizing = true;
+    mode = m;
+    startX = e.clientX;
+    startY = e.clientY;
+    startW = chatWin.offsetWidth;
+    startH = chatWin.offsetHeight;
+    document.body.style.userSelect = 'none';
+    if (e.target.setPointerCapture && e.pointerId != null) {
+      e.target.setPointerCapture(e.pointerId);
+    }
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const onMove = (e) => {
+    if (!resizing) return;
+    const dx = e.clientX - startX; // → 右正
+    const dy = e.clientY - startY; // → 下正
+    const { minW, minH } = getMinWH();
+
+    let newW = startW;
+    let newH = Math.max(minH, startH + dy);
+
+    if (mode === 'bl') {
+      // 左下：往左拖加寬、往右拖縮小
+      newW = Math.max(minW, startW - dx);
+    } else if (mode === 'br') {
+      // 右下：往右拖加寬、往左拖縮小
+      newW = Math.max(minW, startW + dx);
+    }
+
+    chatWin.style.width  = newW + 'px';
+    chatWin.style.height = newH + 'px';
+    // 不調整 left/right；若你原本有 ResizeObserver 負責對齊，會自動貼齊
+  };
+
+  const onEnd = (e) => {
+    if (!resizing) return;
+    resizing = false;
+    mode = null;
+    document.body.style.userSelect = '';
+    if (e.target.releasePointerCapture && e.pointerId != null) {
+      e.target.releasePointerCapture(e.pointerId);
+    }
+  };
+
+  // 使用 Pointer Events（同時支援滑鼠/觸控/手寫筆）
+  const bind = (el, m) => {
+    el.addEventListener('pointerdown', (e) => onStart(e, m));
+  };
+  bind(handleBL, 'bl');
+  bind(handleBR, 'br');
+
+  window.addEventListener('pointermove', onMove, { passive: false });
+  window.addEventListener('pointerup', onEnd);
+})();
 
 
 // --------- 發送事件 ----------
