@@ -446,8 +446,8 @@
         }
 
         .training-item.completed {
-            background: #d4edda !important;
-            border-color: #c3e6cb;
+            background: #f0eef2 !important; /* 淺紫灰色，與按鈕同色系 */
+            border-color: #e6e2ea;
             opacity: 0.8;
         }
 
@@ -923,6 +923,99 @@
             }
         }
 
+        /* 標記完成按鈕樣式 - 強制覆蓋所有可能的樣式 */
+        .btn-complete-exercise,
+        .btn.btn-sm.btn-complete-exercise,
+        .btn-complete-exercise.btn-success,
+        button.btn-complete-exercise,
+        button.btn.btn-sm.btn-complete-exercise {
+            background-color: #B8A8C8 !important; /* 莫蘭迪紫灰色 */
+            border: none !important;
+            color: #fff !important;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.35rem;
+            height: 36px;
+            padding: 0 0.75rem;
+            line-height: 1;
+        }
+
+        .btn-complete-exercise:hover,
+        .btn-complete-exercise:active,
+        .btn-complete-exercise:focus,
+        .btn.btn-sm.btn-complete-exercise:hover,
+        .btn.btn-sm.btn-complete-exercise:active,
+        .btn.btn-sm.btn-complete-exercise:focus,
+        .btn-complete-exercise.btn-success:hover,
+        .btn-complete-exercise.btn-success:active,
+        .btn-complete-exercise.btn-success:focus,
+        button.btn-complete-exercise:hover,
+        button.btn-complete-exercise:active,
+        button.btn-complete-exercise:focus {
+            background-color: #A090B0 !important; /* 深一點的紫灰色 */
+            color: #fff !important;
+            outline: none !important;
+            box-shadow: none !important;
+        }
+
+        .btn-complete-exercise i {
+            display: inline-block;
+            line-height: 1;
+            color: #fff !important; /* 確保圖示是白色 */
+        }
+
+        /* 確保完成狀態下的按鈕圖示也是白色 - 強制覆蓋 */
+        .training-item.completed .btn-complete-exercise i,
+        .training-item.completed .btn-complete-exercise,
+        .training-item.completed button.btn-complete-exercise,
+        .training-item.completed .btn.btn-sm.btn-complete-exercise {
+            color: #fff !important;
+            background-color: #B8A8C8 !important;
+        }
+
+        .training-item.completed .btn-complete-exercise:hover,
+        .training-item.completed .btn-complete-exercise:active,
+        .training-item.completed .btn-complete-exercise:focus,
+        .training-item.completed button.btn-complete-exercise:hover,
+        .training-item.completed button.btn-complete-exercise:active,
+        .training-item.completed button.btn-complete-exercise:focus {
+            background-color: #A090B0 !important;
+            color: #fff !important;
+        }
+
+        /* 絕對優先級 - 強制覆蓋所有綠色樣式 */
+        .btn-complete-exercise[style*="background"],
+        .btn-complete-exercise[style*="background-color"],
+        button.btn-complete-exercise[style*="background"],
+        button.btn-complete-exercise[style*="background-color"] {
+            background-color: #B8A8C8 !important;
+            background: #B8A8C8 !important;
+        }
+
+        /* 強制覆蓋 Bootstrap 的 btn-success 綠色 */
+        .btn-success.btn-complete-exercise,
+        .btn-success.btn-complete-exercise:hover,
+        .btn-success.btn-complete-exercise:active,
+        .btn-success.btn-complete-exercise:focus {
+            background-color: #B8A8C8 !important;
+            background: #B8A8C8 !important;
+            border-color: #B8A8C8 !important;
+        }
+
+        /* 最終強制覆蓋 - 使用 !important 的最高優先級 */
+        button[onclick*="toggleExerciseCompletion"] {
+            background-color: #B8A8C8 !important;
+            background: #B8A8C8 !important;
+        }
+
+        button[onclick*="toggleExerciseCompletion"]:hover,
+        button[onclick*="toggleExerciseCompletion"]:active,
+        button[onclick*="toggleExerciseCompletion"]:focus {
+            background-color: #A090B0 !important;
+            background: #A090B0 !important;
+        }
+
         /* 訓練動作按鈕樣式 - 與 history.html 一致 */
         .btn-edit-exercise {
             background-color: #7f90a9 !important;
@@ -1061,6 +1154,17 @@
             vertical-align: middle;
             position: relative;
             top: 1px;
+        }
+
+        /* 加入訓練行事曆按鈕的圖示與文字對齊 */
+        .btn-primary i.bi-plus-circle {
+            vertical-align: middle;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            margin-right: 8px;
+            position: relative;
+            top: 0px;
         }
 
         /* 週課表容器 */
@@ -2176,13 +2280,11 @@
                 </div>
             </div>
 
-            <!-- 訓練模板選擇區 -->
             <div class="container">
                 <section class="section">
                     <div class="card">
                         <div class="card-header">
                             <h4><i class="bi bi-grid-3x3-gap me-2"></i>訓練分化模板</h4>
-                            <p class="text-muted mb-0">選擇想要的訓練分化方式，並選擇訓練計畫生成方式</p>
                         </div>
                         <div class="card-body">
                             <div class="row row-cols-1 row-cols-sm-2 row-cols-xl-3 g-3"
@@ -3535,7 +3637,7 @@
                 difficulty: 'beginner',
                 icon: 'bi bi-person-check',
                 schedule: ['週一', '週三', '週五'],
-                exercisesPerDay: 8,
+                exercisesPerDay: 6,
                 totalDays: 3,
                 muscleGroups: ['胸', '背', '腿', '肩膀', '手臂', '腹部'],
                 exercises: {
@@ -3590,7 +3692,7 @@
                 difficulty: 'intermediate',
                 icon: 'bi bi-arrow-up-down',
                 schedule: ['週一', '週二', '週四', '週五'],
-                exercisesPerDay: 8,
+                exercisesPerDay: 6,
                 totalDays: 4,
                 muscleGroups: ['胸', '背', '肩膀', '手臂', '腿'],
                 exercises: {
@@ -3651,7 +3753,7 @@
                 difficulty: 'intermediate',
                 icon: 'bi bi-arrow-repeat',
                 schedule: ['週一', '週二', '週三', '週五', '週六', '週日'],
-                exercisesPerDay: 8,
+                exercisesPerDay: 6,
                 totalDays: 6,
                 muscleGroups: ['胸', '三頭', '背', '二頭', '肩膀', '腿'],
                 exercises: {
@@ -4188,16 +4290,19 @@
                 // 獲取該日期的訓練內容
                 const dayTrainingData = getDayTrainingData(dayDate);
                 if (dayTrainingData && dayTrainingData.length > 0) {
-                    // 顯示訓練動作數量
-                    const exerciseCount = dayTrainingData.length;
-                    trainingContent.innerHTML = `
-                        <div class="training-count">
-                            <i class="bi bi-dumbbell"></i>
-                            <span>${exerciseCount}個動作</span>
-                        </div>
-                    `;
-                    
-                    dayElement.classList.add('has-training');
+                    // 過濾掉休息日，只計算真正的訓練動作
+                    const actualExercises = dayTrainingData.filter(exercise => exercise.id !== 0);
+                    if (actualExercises.length > 0) {
+                        const exerciseCount = actualExercises.length;
+                        trainingContent.innerHTML = `
+                            <div class="training-count">
+                                <i class="bi bi-dumbbell"></i>
+                                <span>${exerciseCount}個動作</span>
+                            </div>
+                        `;
+                        
+                        dayElement.classList.add('has-training');
+                    }
                 }
                 // 移除自動標記為休息日的邏輯
                 
@@ -4522,8 +4627,8 @@
                                 <span class="muscle-group-badge">${exercise.muscleGroup}</span>
                             </div>
                             <div class="training-item-actions">
-                                <button class="btn btn-sm btn-complete-exercise ${exercise.completed ? 'btn-success' : 'btn-outline-success'}" onclick="toggleExerciseCompletion('${date.toISOString()}', ${index})">
-                                    <i class="bi bi-check-circle"></i> ${exercise.completed ? '已完成' : '標記完成'}
+                                <button class="btn btn-sm btn-complete-exercise" onclick="toggleExerciseCompletion('${date.toISOString()}', ${index})">
+                                    <i class="bi bi-check-circle"></i> ${exercise.completed ? '未完成' : '已完成'}
                                 </button>
                                 <button class="btn btn-sm btn-edit-exercise" onclick="editSingleExercise('${date.toISOString()}', ${index})">
                                     <i class="bi bi-pencil"></i> 編輯
@@ -5161,7 +5266,6 @@
                                             <div class="mb-3">
                                                 <select class="form-select" id="muscleGroupFilter" onchange="filterExercises()">
                                                     <option value="">選擇肌群...</option>
-                                                    <option value="休息">休息</option>
                                                     <option value="上胸">上胸</option>
                                                     <option value="中胸">中胸</option>
                                                     <option value="下胸">下胸</option>
@@ -6003,9 +6107,6 @@
         // 備用動作資料
         function getBackupExercises() {
             return [
-                // 休息選項
-                { id: 0, name: "休息", muscle_group: "休息", description: "今日無訓練，讓身體充分恢復", difficulty_level: "無", equipment_needed: "無" },
-
                 // 胸部動作 - 按上中下胸分類，適合新手和有基礎使用者
                 
                 // 上胸部動作
@@ -6314,14 +6415,12 @@
                 const exerciseDiv = document.createElement('div');
                 exerciseDiv.className = 'col-md-6 mb-3';
 
-                // 休息選項的特殊樣式
-                const isRest = exercise.id === 0;
-                const cardClass = isRest ? 'card exercise-card rest-card h-100' : 'card exercise-card h-100';
-                const buttonClass = 'btn btn-add-exercise w-100'; // ✅ 統一使用一樣的樣式
-                const buttonIcon = isRest ? 'bi bi-moon' : 'bi bi-plus-circle';
-                const buttonText = isRest ? '選擇休息日' : '選擇此動作';
-                const badgeClass = isRest ? 'badge bg-success' : 'badge bg-secondary';
-                const tagClass = isRest ? 'muscle-group-tag rest-tag' : 'muscle-group-tag';
+                const cardClass = 'card exercise-card h-100';
+                const buttonClass = 'btn btn-add-exercise w-100';
+                const buttonIcon = 'bi bi-plus-circle';
+                const buttonText = '選擇此動作';
+                const badgeClass = 'badge bg-secondary';
+                const tagClass = 'muscle-group-tag';
 
                 exerciseDiv.innerHTML = `
                     <div class="${cardClass}">
@@ -6347,14 +6446,6 @@
             document.getElementById('selectedDay').value = selectedDay;
             document.getElementById('exerciseName').value = exerciseName;
             document.getElementById('muscleGroup').value = muscleGroup;
-
-            // 休息：直接加入
-            if (exerciseId === 0) {
-                addExerciseToDay(exerciseId, exerciseName, muscleGroup, 0, 0, '休息日');
-                const exerciseModal = bootstrap.Modal.getInstance(document.getElementById('exerciseModal'));
-                if (exerciseModal) exerciseModal.hide();
-                return;
-            }
 
             // 直接加入（以資料庫增肌建議為準：顯示範圍，統計採下限）
             try {
@@ -6538,12 +6629,10 @@
             // 同步到資料庫
             try {
                 await syncToDatabase();
-                const message = exerciseId === 0 ? '休息日已加入課表並同步到資料庫！' : '動作已加入課表並同步到資料庫！';
-                showSuccessMessage(message);
+                showSuccessMessage('動作已加入課表並同步到資料庫！');
             } catch (error) {
                 console.error('同步到資料庫失敗:', error);
-                const message = exerciseId === 0 ? '休息日已加入課表，但同步到資料庫失敗' : '動作已加入課表，但同步到資料庫失敗';
-                showSuccessMessage(message, 'danger');
+                showSuccessMessage('動作已加入課表，但同步到資料庫失敗', 'danger');
             }
         }
 
@@ -6920,10 +7009,6 @@
           ${template.schedule.map(day => `<span class="schedule-day">${day}</span>`).join('')}
         </div>
         <div class="template-footer mt-auto">
-  <div class="template-stats">
-    <span>${template.exercisesPerDay}個動作/天</span>
-    <span>${template.totalDays}天/週</span>
-  </div>
   <div class="mt-2">
     <span class="template-difficulty ${difficultyClass}">${difficultyText}</span>
   </div>
@@ -8119,31 +8204,6 @@
             // 重置動作追蹤
             usedExercises.clear();
             
-            // 基於Level 1的改進版二分化訓練安排
-            const level1Recommendations = {
-                monday: [
-                    // 上半身訓練 (週一) - 8個動作
-                    { muscleGroup: '中胸', exerciseName: '胸推', sets: 3, reps: 12 },
-                    { muscleGroup: '上胸', exerciseName: '上胸推', sets: 3, reps: 12 },
-                    { muscleGroup: '上背', exerciseName: '背闊下拉', sets: 3, reps: 12 },
-                    { muscleGroup: '中背', exerciseGroup: '划船', sets: 3, reps: 12 },
-                    { muscleGroup: '肩膀前束', exerciseName: '啞鈴肩推', sets: 3, reps: 12 },
-                    { muscleGroup: '肩膀中束', exerciseName: '側平舉', sets: 3, reps: 12 },
-                    { muscleGroup: '二頭肌', exerciseName: '二頭彎舉', sets: 3, reps: 12 },
-                    { muscleGroup: '三頭肌', exerciseName: '三頭伸展', sets: 3, reps: 12 }
-                ],
-                friday: [
-                   // 下半身訓練 (週五) - 8個動作
-                    { muscleGroup: '股四頭肌', exerciseName: '深蹲', sets: 3, reps: 12 },
-                    { muscleGroup: '股二頭肌', exerciseName: '羅馬尼亞硬舉', sets: 3, reps: 12 },
-                    { muscleGroup: '股四頭肌', exerciseName: '腿推機', sets: 3, reps: 12 },
-                    { muscleGroup: '股二頭肌', exerciseName: '腿彎舉', sets: 3, reps: 12 },
-                    { muscleGroup: '臀肌', exerciseName: '羅馬尼亞硬舉', sets: 3, reps: 12 },
-                    { muscleGroup: '臀肌', exerciseName: '臀推', sets: 3, reps: 12 },
-                    { muscleGroup: '核心', exerciseName: '平板支撐', sets: 3, reps: 30 },
-                    { muscleGroup: '核心', exerciseName: '仰臥起坐', sets: 3, reps: 15 }
-                ]
-            };
             
             // 應用推薦到對應的日期
             Object.keys(level1Recommendations).forEach(day => {
