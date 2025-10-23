@@ -25,11 +25,18 @@ if (!$data) {
 }
 
 // 驗證必要字段
-$required_fields = ['age', 'height_cm', 'weight_kg'];
+$required_fields = ['age', 'height_cm', 'weight_kg', 'basal_metabolism'];
+$field_names = [
+    'age' => '年齡',
+    'height_cm' => '身高',
+    'weight_kg' => '體重',
+    'basal_metabolism' => '基礎代謝量'
+];
+
 foreach ($required_fields as $field) {
     if (!isset($data[$field]) || empty($data[$field])) {
         http_response_code(400);
-        echo json_encode(['error' => "缺少必要字段: $field"]);
+        echo json_encode(['error' => "請填寫必要欄位: " . $field_names[$field]]);
         exit;
     }
 }
@@ -93,7 +100,7 @@ try {
                 ':skeletal_muscle' => isset($data['skeletal_muscle']) && !empty($data['skeletal_muscle']) ? floatval($data['skeletal_muscle']) : null,
                 ':body_fat' => isset($data['body_fat']) && !empty($data['body_fat']) ? floatval($data['body_fat']) : null,
                 ':fat_percentage' => isset($data['fat_percentage']) && !empty($data['fat_percentage']) ? floatval($data['fat_percentage']) : null,
-                ':basal_metabolism' => isset($data['basal_metabolism']) && !empty($data['basal_metabolism']) ? floatval($data['basal_metabolism']) : null,
+                ':basal_metabolism' => floatval($data['basal_metabolism']),
                 ':bmi' => $bmi,
                 ':test_date' => $test_date
             ]);
