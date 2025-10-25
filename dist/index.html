@@ -793,7 +793,7 @@
                         </div>
                         <div class="row">
                             <div class="col-md-6 mb-3">
-                                <label for="bmi" class="form-label">BMI (可選)</label>
+                                <label for="bmi" class="form-label">BMI指數</label>
                                 <input type="number" class="form-control" id="bmi" name="bmi" step="0.1">
                             </div>
                         </div>
@@ -881,15 +881,8 @@
                     userAvatar.alt = '預設大頭貼';
                 }
 
-                // 載入並套用已儲存的健康目標（依使用者）
-                try {
-                    const stored = loadGoalsFromStorage();
-                    if (stored) {
-                        applyGoalsToUI(stored);
-                    }
-                } catch (e) {
-                    console.error('載入已儲存目標失敗:', e);
-                }
+                // 載入並套用已儲存的健康目標（從資料庫）
+                loadGoalsFromDatabase(data.userid);
             })
             .catch(error => {
                 console.error('Error loading user info:', error);
@@ -1507,8 +1500,9 @@
             document.getElementById('goal-fat-percentage-display').textContent = goalFatPercentage;
             document.getElementById('goal-muscle-display').textContent = goalMuscle;
 
-            // 儲存到 localStorage（依使用者）
-            saveGoalsToStorage({
+            // 儲存到資料庫
+            saveGoalsToDatabase({
+                user_id: getCurrentUserId(),
                 goal_weight: goalWeight,
                 goal_fat_percentage: goalFatPercentage,
                 goal_muscle: goalMuscle
@@ -1679,27 +1673,73 @@
             new bootstrap.Modal(document.getElementById('successModal')).show();
         }
 
-        // ========= 目標儲存/載入（依使用者） =========
+        // ========= 目標儲存/載入（資料庫版本） =========
         function getCurrentUserId() {
             const el = document.getElementById('user-id');
             const uid = el ? (el.textContent || '').trim() : '';
             return uid || 'guest';
         }
 
-        function saveGoalsToStorage(goals) {
-            try {
-                const key = 'healthGoals_' + getCurrentUserId();
-                localStorage.setItem(key, JSON.stringify(goals));
-            } catch (e) {
-                console.error('保存目標到 localStorage 失敗:', e);
+        // 從資料庫載入健康目標
+        function loadGoalsFromDatabase(userId) {
+            if (!userId || userId === 'guest') {
+                console.log('無效的使用者ID，跳過載入目標');
+                return;
             }
+
+            fetch(`get_goals_mysqli.php?user_id=${encodeURIComponent(userId)}`)
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('載入目標失敗');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    if (result.success && result.data) {
+                        applyGoalsToUI(result.data);
+                        console.log('從資料庫載入健康目標成功:', result.data);
+                    } else {
+                        console.log('尚未設定健康目標');
+                    }
+                })
+                .catch(error => {
+                    console.error('載入健康目標失敗:', error);
+                });
         }
 
-        function loadGoalsFromStorage() {
-            const key = 'healthGoals_' + getCurrentUserId();
-            const raw = localStorage.getItem(key);
-            if (!raw) return null;
-            try { return JSON.parse(raw); } catch { return null; }
+        // 儲存健康目標到資料庫
+        function saveGoalsToDatabase(goals) {
+            const userId = goals.user_id;
+            if (!userId || userId === 'guest') {
+                console.error('無效的使用者ID，無法儲存目標');
+                return;
+            }
+
+            fetch('save_goals_mysqli.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(goals)
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('儲存目標失敗');
+                }
+                return response.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    console.log('健康目標儲存成功:', result.message);
+                } else {
+                    console.error('儲存目標失敗:', result.error);
+                    showModal(result.error || '儲存目標時發生錯誤', '錯誤');
+                }
+            })
+            .catch(error => {
+                console.error('儲存健康目標失敗:', error);
+                showModal('網路錯誤，請稍後再試', '錯誤');
+            });
         }
 
         function applyGoalsToUI(goals) {
