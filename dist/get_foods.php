@@ -98,7 +98,7 @@ try {
             Notes
             FROM food 
             ORDER BY Category, Food_Name
-            LIMIT 100";
+            LIMIT 25";
     
     $result = $conn->query($sql);
     
