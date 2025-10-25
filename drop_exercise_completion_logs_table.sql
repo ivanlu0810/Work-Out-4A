@@ -3,3 +3,4 @@
 
 DROP TABLE IF EXISTS `exercise_completion_logs`;
 
+

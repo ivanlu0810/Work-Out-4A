@@ -45,3 +45,4 @@ ADD INDEX `idx_exercise_lookup` (`plan_id`, `user_id`, `week_number`, `day_of_we
 ALTER TABLE `training_plan_completion` 
 ADD UNIQUE KEY `uk_exercise_completion` (`plan_id`, `user_id`, `week_number`, `day_of_week`, `exercise_id`);
 
+

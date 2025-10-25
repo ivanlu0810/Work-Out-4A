@@ -413,10 +413,10 @@ try {
         $delete_completion_stmt->execute([$input['user_id'], $input['week_number']]);
         $deleted_completion_count = $delete_completion_stmt->rowCount();
         
-        // 2. 刪除該週的所有運動記錄
-        $delete_exercises_sql = "DELETE FROM training_plan_exercises WHERE user_id = ? AND week_number = ?";
+        // 2. 刪除該週的所有運動記錄（通過 plan_id）
+        $delete_exercises_sql = "DELETE FROM training_plan_exercises WHERE plan_id IN (" . implode(',', array_fill(0, count($plan_ids), '?')) . ")";
         $delete_exercises_stmt = $pdo->prepare($delete_exercises_sql);
-        $delete_exercises_stmt->execute([$input['user_id'], $input['week_number']]);
+        $delete_exercises_stmt->execute($plan_ids);
         $deleted_exercises_count = $delete_exercises_stmt->rowCount();
         
         // 3. 刪除該週的主計畫記錄

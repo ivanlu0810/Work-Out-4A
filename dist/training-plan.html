@@ -48,6 +48,7 @@
             padding: 0;
             margin-bottom: 0;
             box-shadow: none;
+            height: 100%; /* 讓容器佔滿可用空間 */
         }
 
         .calendar-header {
@@ -121,12 +122,12 @@
         }
 
         .calendar-grid {
-            margin-bottom: 1.5rem;
+            margin-bottom: 0; /* 移除底部邊距 */
         }
 
         .calendar-weekdays {
             display: grid;
-            grid-template-columns: repeat(7, 1fr) 96px; /* 7 天 + 1 週動作欄對齊 */
+            grid-template-columns: 50px repeat(7, 1fr) 96px; /* 週數 + 7 天 + 1 週動作欄對齊 */
             gap: 1px;
             margin-bottom: 1px;
         }
@@ -142,11 +143,25 @@
 
         .calendar-days {
             display: grid;
-            grid-template-columns: repeat(7, 1fr) 96px; /* 7 天 + 1 週動作欄 */
+            grid-template-columns: 50px repeat(7, 1fr) 96px; /* 週數 + 7 天 + 1 週動作欄 */
             gap: 1px;
-            background: #e9ecef;
+            background: transparent; /* 移除灰色背景 */
             border-radius: 8px;
-            overflow: hidden;
+            /* overflow: hidden; 暫時移除，看看是否影響顯示 */
+            grid-template-rows: repeat(5, auto); /* 明確設定為5行 */
+        }
+
+        /* 週數欄位 */
+        .calendar-week-number {
+            background: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-right: 1px solid #e9ecef;
+            padding: 0.5rem;
+            font-weight: 600;
+            color: #6c757d;
+            font-size: 0.8rem;
         }
 
         /* 每週動作欄位 */
@@ -270,17 +285,29 @@
             background: #ff9800;
         }
 
-        .calendar-legend {
-            display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
-            gap: 2rem;
-            flex-wrap: wrap;
-            margin-top: 1rem;
-            padding: 0.5rem 0;
-            min-height: 50px;
-            background-color: #f8f9fa;
-            border-top: 1px solid #dee2e6;
+        /* 完成/待完成按鈕樣式 */
+        .btn-complete-exercise {
+            background-color: #6f42c1 !important;
+            border-color: #6f42c1 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-complete-exercise:hover {
+            background-color: #5a32a3 !important;
+            border-color: #5a32a3 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-complete-exercise.btn-outline-secondary {
+            background-color: transparent !important;
+            border-color: #6c757d !important;
+            color: #6c757d !important;
+        }
+
+        .btn-complete-exercise.btn-outline-secondary:hover {
+            background-color: #6c757d !important;
+            border-color: #6c757d !important;
+            color: #ffffff !important;
         }
 
         .legend-item {
@@ -304,7 +331,7 @@
 
         /* 只有非訓練日的 hover 效果 */
         .calendar-day:not(.other-month):not(.training-day):not(.has-training):hover {
-            background: #dadce0 !important;
+            background: #dadce0 !important; /* 保持原本的灰色 hover 背景 */
             border: 2px solid #ffffff !important; /* 添加白色邊框分隔 */
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -319,7 +346,7 @@
         /* 訓練日的 hover 效果（保持原有樣式） */
         .calendar-day.training-day:hover,
         .calendar-day.has-training:hover {
-            background: #e8eaed !important; /* 保持訓練日背景 */
+            background: #dadce0 !important; /* 灰色 hover 背景 */
             transform: translateY(-1px);
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             cursor: pointer;
@@ -339,29 +366,852 @@
             text-align: center;
         }
 
-        .training-count {
-            display: block;
-            color: #333333;
+        /* 選項 1：簡潔的圓形徽章 */
+        .training-count.badge-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
             font-weight: 600;
-            font-size: 0.75rem;
-            background: #ffffff;
-            border-radius: 8px;
-            padding: 4px 8px;
-            margin: 0 auto;
-            border: 1px solid #f0f0f0;
-            width: fit-content;
-            min-width: 60px;
-            text-align: center;
-            line-height: 1.2;
+            font-size: 0.65rem;
+            background: #dc3545; /* 紅色徽章 */
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+            position: relative;
+            z-index: 2;
         }
 
-        .training-count i {
-            font-size: 0.7rem;
+        .training-count.badge-style i {
+            font-size: 0.6rem;
             margin-right: 2px;
         }
 
+        /* 選項 2：簡約的數字標籤 */
+        .training-count.number-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #333333;
+            font-weight: 700;
+            font-size: 0.7rem;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #007bff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+        }
+
+        .training-count.number-style i {
+            font-size: 0.6rem;
+            margin-right: 3px;
+            color: #007bff;
+        }
+
+        .training-count.number-style span {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #333333;
+        }
+
+        /* 選項 3：漸層膠囊 */
+        .training-count.pill-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            border-radius: 20px;
+            padding: 4px 12px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(40, 167, 69, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .training-count.pill-style i {
+            font-size: 0.6rem;
+            margin-right: 3px;
+        }
+
+        .training-count.pill-style span {
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* 選項 4：簡潔的線條標籤 */
+        .training-count.line-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #007bff;
+            font-weight: 600;
+            font-size: 0.7rem;
+            background: transparent;
+            border-radius: 4px;
+            padding: 2px 6px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #007bff;
+            position: relative;
+            z-index: 2;
+        }
+
+        .training-count.line-style i {
+            font-size: 0.6rem;
+            margin-right: 3px;
+            color: #007bff;
+        }
+
+        /* 選項 5：浮動氣球標籤 */
+        .training-count.float-balloon-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #007bff;
+            border-radius: 20px;
+            padding: 8px 14px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: float-balloon 3s ease-in-out infinite;
+        }
+
+        .training-count.float-balloon-style::before {
+            content: '';
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 6px solid transparent;
+            border-right: 6px solid transparent;
+            border-top: 8px solid #007bff;
+        }
+
+        .training-count.float-balloon-style::after {
+            content: '';
+            position: absolute;
+            bottom: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 8px;
+            background: #007bff;
+            border-radius: 1px;
+        }
+
+        @keyframes float-balloon {
+            0%, 100% { 
+                transform: translateY(0px) rotate(-1deg);
+            }
+            50% { 
+                transform: translateY(-8px) rotate(1deg);
+            }
+        }
+
+        /* 選項 6：懸浮卡片標籤 */
+        .training-count.float-card-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #333333;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #ffffff;
+            border-radius: 12px;
+            padding: 8px 12px;
+            margin: 4px auto 0 auto;
+            border: 1px solid #e9ecef;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            position: relative;
+            z-index: 2;
+            animation: float-card 2.5s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+
+        .training-count.float-card-style::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(45deg, #007bff, #28a745, #ffc107, #dc3545);
+            border-radius: 14px;
+            z-index: -1;
+            opacity: 0.3;
+        }
+
+        @keyframes float-card {
+            0%, 100% { 
+                transform: translateY(0px) rotateX(0deg);
+                box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+            }
+            50% { 
+                transform: translateY(-6px) rotateX(5deg);
+                box-shadow: 0 12px 35px rgba(0, 0, 0, 0.25);
+            }
+        }
+
+        /* 選項 7：彈跳標籤 */
+        .training-count.bounce-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #28a745;
+            border-radius: 15px;
+            padding: 6px 12px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: bounce-label 2s ease-in-out infinite;
+        }
+
+        @keyframes bounce-label {
+            0%, 100% { 
+                transform: translateY(0px) scale(1);
+            }
+            25% { 
+                transform: translateY(-4px) scale(1.05);
+            }
+            50% { 
+                transform: translateY(-8px) scale(1.1);
+            }
+            75% { 
+                transform: translateY(-4px) scale(1.05);
+            }
+        }
+
+        /* 選項 8：波浪浮動標籤 */
+        .training-count.wave-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #6f42c1;
+            border-radius: 20px;
+            padding: 8px 14px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: wave-float 3s ease-in-out infinite;
+        }
+
+        @keyframes wave-float {
+            0%, 100% { 
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% { 
+                transform: translateY(-6px) rotate(1deg);
+            }
+            50% { 
+                transform: translateY(-3px) rotate(0deg);
+            }
+            75% { 
+                transform: translateY(-8px) rotate(-1deg);
+            }
+        }
+
+        /* 選項 9：3D 浮動標籤 */
+        .training-count.floating-3d-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+            border-radius: 12px;
+            padding: 8px 14px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 
+                0 8px 25px rgba(255, 107, 107, 0.3),
+                0 0 0 1px rgba(255, 255, 255, 0.1);
+            position: relative;
+            z-index: 2;
+            animation: floating-3d 2.8s ease-in-out infinite;
+            transform-style: preserve-3d;
+        }
+
+        .training-count.floating-3d-style::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.2), transparent);
+            border-radius: 10px;
+            z-index: -1;
+        }
+
+        @keyframes floating-3d {
+            0%, 100% { 
+                transform: translateY(0px) rotateX(0deg) rotateY(0deg);
+                box-shadow: 
+                    0 8px 25px rgba(255, 107, 107, 0.3),
+                    0 0 0 1px rgba(255, 255, 255, 0.1);
+            }
+            33% { 
+                transform: translateY(-8px) rotateX(5deg) rotateY(2deg);
+                box-shadow: 
+                    0 12px 35px rgba(255, 107, 107, 0.4),
+                    0 0 0 1px rgba(255, 255, 255, 0.2);
+            }
+            66% { 
+                transform: translateY(-4px) rotateX(-3deg) rotateY(-1deg);
+                box-shadow: 
+                    0 10px 30px rgba(255, 107, 107, 0.35),
+                    0 0 0 1px rgba(255, 255, 255, 0.15);
+            }
+        }
+
+        /* 選項 10：脈衝效果標籤 */
+        .training-count.pulse-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #28a745;
+            border-radius: 20px;
+            padding: 8px 14px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: pulse-effect 2s ease-in-out infinite;
+        }
+
+        .training-count.pulse-style::before {
+            content: '';
+            position: absolute;
+            top: -4px;
+            left: -4px;
+            right: -4px;
+            bottom: -4px;
+            background: rgba(40, 167, 69, 0.3);
+            border-radius: 24px;
+            z-index: -1;
+            animation: pulse-ring 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse-effect {
+            0%, 100% { 
+                transform: scale(1);
+                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            }
+            50% { 
+                transform: scale(1.05);
+                box-shadow: 0 6px 20px rgba(40, 167, 69, 0.5);
+            }
+        }
+
+        @keyframes pulse-ring {
+            0% { 
+                transform: scale(1);
+                opacity: 1;
+            }
+            100% { 
+                transform: scale(1.4);
+                opacity: 0;
+            }
+        }
+
+        /* 選項 11：打字機效果標籤 */
+        .training-count.typewriter-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #6f42c1;
+            border-radius: 8px;
+            padding: 8px 14px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(111, 66, 193, 0.3);
+            position: relative;
+            z-index: 2;
+            overflow: hidden;
+        }
+
+        .training-count.typewriter-style::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: typewriter-sweep 3s ease-in-out infinite;
+        }
+
+        @keyframes typewriter-sweep {
+            0% { left: -100%; }
+            50% { left: 100%; }
+            100% { left: 100%; }
+        }
+
+        /* 選項 12：發光效果標籤 */
+        .training-count.glow-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #dc3545;
+            border-radius: 15px;
+            padding: 8px 14px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 
+                0 4px 12px rgba(220, 53, 69, 0.3),
+                0 0 20px rgba(220, 53, 69, 0.5);
+            position: relative;
+            z-index: 2;
+            animation: glow-effect 2.5s ease-in-out infinite;
+        }
+
+        @keyframes glow-effect {
+            0%, 100% { 
+                box-shadow: 
+                    0 4px 12px rgba(220, 53, 69, 0.3),
+                    0 0 20px rgba(220, 53, 69, 0.5);
+            }
+            50% { 
+                box-shadow: 
+                    0 6px 20px rgba(220, 53, 69, 0.5),
+                    0 0 30px rgba(220, 53, 69, 0.8);
+            }
+        }
+
+        /* 選項 13：旋轉出現標籤 */
+        .training-count.spin-appear-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #ffc107;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            margin: 4px auto 0 auto;
+            border: 3px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(255, 193, 7, 0.3);
+            position: relative;
+            z-index: 2;
+            animation: spin-appear 3s ease-in-out infinite;
+        }
+
+        @keyframes spin-appear {
+            0% { 
+                transform: rotate(0deg) scale(0.8);
+                opacity: 0.7;
+            }
+            50% { 
+                transform: rotate(180deg) scale(1.1);
+                opacity: 1;
+            }
+            100% { 
+                transform: rotate(360deg) scale(0.8);
+                opacity: 0.7;
+            }
+        }
+
+        /* 選項 14：波浪文字效果標籤 */
+        .training-count.wave-text-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: linear-gradient(45deg, #17a2b8, #138496);
+            border-radius: 20px;
+            padding: 8px 14px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(23, 162, 184, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .training-count.wave-text-style span {
+            animation: wave-text 2s ease-in-out infinite;
+        }
+
+        @keyframes wave-text {
+            0%, 100% { 
+                transform: translateY(0px);
+            }
+            25% { 
+                transform: translateY(-2px);
+            }
+            50% { 
+                transform: translateY(0px);
+            }
+            75% { 
+                transform: translateY(2px);
+            }
+        }
+
+        /* 選項 6：進度條樣式 */
+        .training-count.progress-style {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333333;
+            font-weight: 600;
+            font-size: 0.6rem;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 4px 8px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #007bff;
+            box-shadow: 0 3px 8px rgba(0, 123, 255, 0.2);
+            position: relative;
+            z-index: 2;
+            min-width: 50px;
+        }
+
+        .training-count.progress-style .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: #e9ecef;
+            border-radius: 2px;
+            overflow: hidden;
+            margin-bottom: 2px;
+        }
+
+        .training-count.progress-style .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 2px;
+            transition: width 0.3s ease;
+        }
+
+        .training-count.progress-style i {
+            font-size: 0.7rem;
+            margin-right: 3px;
+            color: #007bff;
+        }
+
+        .training-count.progress-style span {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #333333;
+        }
+
+        /* 選項 7：分層顯示 */
+        .training-count.layered-style {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.6rem;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            border-radius: 8px;
+            padding: 6px 10px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+            position: relative;
+            z-index: 2;
+        }
+
+        .training-count.layered-style::before {
+            content: '';
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            right: 2px;
+            bottom: 2px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 6px;
+            z-index: -1;
+        }
+
+        .training-count.layered-style .icon-layer {
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+        }
+
+        .training-count.layered-style .text-layer {
+            font-size: 0.6rem;
+            font-weight: 700;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        /* 選項 8：卡片樣式 */
+        .training-count.card-style {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #333333;
+            font-weight: 600;
+            font-size: 0.6rem;
+            background: #ffffff;
+            border-radius: 8px;
+            padding: 8px 6px;
+            margin: 4px auto 0 auto;
+            border: 1px solid #dee2e6;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            position: relative;
+            z-index: 2;
+            min-width: 45px;
+        }
+
+        .training-count.card-style::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, #007bff, #28a745);
+            border-radius: 8px 8px 0 0;
+        }
+
+        .training-count.card-style i {
+            font-size: 0.8rem;
+            margin-bottom: 2px;
+            color: #007bff;
+        }
+
+        .training-count.card-style span {
+            font-size: 0.6rem;
+            font-weight: 600;
+            color: #333333;
+        }
+
+        /* 選項 9：徽章樣式 */
+        .training-count.badge-simple-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 700;
+            font-size: 0.7rem;
+            background: #dc3545;
+            border-radius: 12px;
+            padding: 4px 8px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 2px 6px rgba(220, 53, 69, 0.3);
+            position: relative;
+            z-index: 2;
+            min-width: 30px;
+            height: 24px;
+        }
+
+        .training-count.badge-simple-style i {
+            font-size: 0.6rem;
+            margin-right: 3px;
+            color: #ffffff;
+        }
+
+        .training-count.badge-simple-style span {
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: #ffffff;
+        }
+
+        /* 選項 6：六角形標籤 */
+        .training-count.hexagon-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #28a745;
+            width: 60px;
+            height: 30px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3);
+            position: relative;
+            z-index: 2;
+            clip-path: polygon(25% 0%, 75% 0%, 100% 50%, 75% 100%, 25% 100%, 0% 50%);
+        }
+
+        .training-count.hexagon-style i {
+            font-size: 0.7rem;
+            margin-right: 4px;
+            color: #ffffff;
+        }
+
+        .training-count.hexagon-style span {
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* 選項 7：鑽石標籤 */
+        .training-count.diamond-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #6f42c1;
+            width: 50px;
+            height: 50px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(111, 66, 193, 0.3);
+            position: relative;
+            z-index: 2;
+            transform: rotate(45deg);
+        }
+
+        .training-count.diamond-style i,
+        .training-count.diamond-style span {
+            transform: rotate(-45deg);
+        }
+
+        .training-count.diamond-style i {
+            font-size: 0.7rem;
+            margin-right: 4px;
+            color: #ffffff;
+        }
+
+        .training-count.diamond-style span {
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* 選項 8：標籤紙樣式 */
+        .training-count.tag-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #ffffff;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #dc3545;
+            border-radius: 4px 12px 12px 4px;
+            padding: 6px 12px 6px 8px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(220, 53, 69, 0.3);
+            position: relative;
+            z-index: 2;
+        }
+
+        .training-count.tag-style::before {
+            content: '';
+            position: absolute;
+            left: -2px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 6px solid transparent;
+            border-bottom: 6px solid transparent;
+            border-right: 6px solid #dc3545;
+        }
+
+        .training-count.tag-style i {
+            font-size: 0.7rem;
+            margin-right: 4px;
+            color: #ffffff;
+        }
+
+        .training-count.tag-style span {
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        /* 選項 9：膠帶標籤 */
+        .training-count.tape-style {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: #333333;
+            font-weight: 600;
+            font-size: 0.65rem;
+            background: #ffc107;
+            border-radius: 2px;
+            padding: 8px 12px;
+            margin: 4px auto 0 auto;
+            border: 2px solid #ffffff;
+            box-shadow: 0 3px 8px rgba(255, 193, 7, 0.3);
+            position: relative;
+            z-index: 2;
+            transform: rotate(-2deg);
+        }
+
+        .training-count.tape-style::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            height: 4px;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 2px,
+                rgba(0,0,0,0.1) 2px,
+                rgba(0,0,0,0.1) 4px
+            );
+            border-radius: 2px 2px 0 0;
+        }
+
+        .training-count.tape-style i {
+            font-size: 0.7rem;
+            margin-right: 4px;
+            color: #333333;
+        }
+
+        .training-count.tape-style span {
+            font-size: 0.65rem;
+            font-weight: 600;
+        }
+
+        .training-count i {
+            font-size: 0.8rem;
+            margin-right: 4px;
+            color: #ffffff;
+        }
+
         .training-count span {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
+            font-weight: 700;
         }
 
         .exercise-name {
@@ -403,12 +1253,12 @@
         }
 
         .calendar-day.has-training {
-            background: #e8eaed; /* 恢復滿格背景 */
+            background: #dadce0; /* 灰色背景 */
             border: 2px solid #ffffff; /* 白色邊框分隔 */
         }
 
         .calendar-day.has-training.today {
-            background: #e8eaed; /* 恢復滿格背景 */
+            background: #dadce0; /* 保持灰色背景，與其他訓練日一致 */
             border: 2px solid #ffffff; /* 白色邊框分隔 */
         }
 
@@ -537,14 +1387,16 @@
         @media (max-width: 1200px) {
             .calendar-weekdays,
             .calendar-days {
-                grid-template-columns: repeat(7, 1fr) 35px;
+                grid-template-columns: 40px repeat(7, 1fr) 35px;
+                grid-template-rows: repeat(5, auto);
             }
         }
 
         @media (max-width: 992px) {
             .calendar-weekdays,
             .calendar-days {
-                grid-template-columns: repeat(7, 1fr) 30px;
+                grid-template-columns: 35px repeat(7, 1fr) 30px;
+                grid-template-rows: repeat(5, auto);
             }
             
             .calendar-day {
@@ -557,9 +1409,9 @@
             }
             
             .training-count {
-                font-size: 0.6rem;
-                padding: 1px 3px;
-                min-width: 30px;
+                font-size: 0.55rem;
+                padding: 3px 6px;
+                min-width: 50px;
             }
             
             .exercise-name {
@@ -575,7 +1427,8 @@
         @media (max-width: 768px) {
             .calendar-weekdays,
             .calendar-days {
-                grid-template-columns: repeat(7, 1fr) 50px;
+                grid-template-columns: 30px repeat(7, 1fr) 50px;
+                grid-template-rows: repeat(5, auto);
             }
             
             .calendar-day {
@@ -646,7 +1499,8 @@
         @media (max-width: 576px) {
             .calendar-weekdays,
             .calendar-days {
-                grid-template-columns: repeat(7, 1fr) 35px;
+                grid-template-columns: 25px repeat(7, 1fr) 35px;
+                grid-template-rows: repeat(5, auto);
             }
             
             .calendar-day {
@@ -2441,11 +3295,6 @@
                                     <h4><i class="bi bi-grid-3x3-gap me-2"></i>訓練分化模板</h4>
                                     <p class="text-muted mb-0">選擇適合的訓練模板快速建立週計畫</p>
                                 </div>
-                                <div>
-                                    <button class="btn btn-primary rounded-pill px-3 py-2" onclick="manualSyncToDatabase()">
-                                        <i class="bi bi-cloud-upload me-2"></i>同步到資料庫
-                                    </button>
-                                </div>
                             </div>
                         </div>
                         <div class="card-body">
@@ -2472,11 +3321,11 @@
                                     <!-- 月份導航 -->
                                     <div class="d-flex align-items-center">
                                         <button class="btn btn-outline-secondary btn-sm rounded-pill px-1 py-0" onclick="previousMonth()" style="min-width: 28px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-chevron-left" style="font-size: 0.8rem;"></i>
+                                            <i class="bi bi-chevron-left" style="font-size: 0.8rem; line-height: 1; vertical-align: middle; display: flex; align-items: center; justify-content: center;"></i>
                                         </button>
                                         <span class="mx-2 fw-semibold" id="calendar-month-year" style="font-size: 0.9rem;">2024年1月</span>
                                         <button class="btn btn-outline-secondary btn-sm rounded-pill px-1 py-0" onclick="nextMonth()" style="min-width: 28px; width: 28px; height: 28px; display: flex; align-items: center; justify-content: center;">
-                                            <i class="bi bi-chevron-right" style="font-size: 0.8rem;"></i>
+                                            <i class="bi bi-chevron-right" style="font-size: 0.8rem; line-height: 1; vertical-align: middle; display: flex; align-items: center; justify-content: center;"></i>
                                         </button>
                                     </div>
                                     
@@ -2492,6 +3341,7 @@
                         
                         <div class="calendar-grid">
                             <div class="calendar-weekdays">
+                                <div class="weekday">週</div>
                                 <div class="weekday">週一</div>
                                 <div class="weekday">週二</div>
                                 <div class="weekday">週三</div>
@@ -2852,12 +3702,7 @@
                             <label class="form-label">目標肌群</label>
                             <select class="form-select" id="muscleGroupFilter">
                                 <option value="">全部</option>
-                                <option value="胸">胸</option>
-                                <option value="背">背</option>
-                                <option value="腿">腿</option>
-                                <option value="手臂">手臂</option>
-                                <option value="腹部">腹部</option>
-                                <option value="肩膀">肩膀</option>
+                                <!-- 肌群選項將由 JavaScript 動態載入 -->
                             </select>
                         </div>
                     </div>
@@ -4655,17 +5500,7 @@
             console.log('本地數據已清空');
         }
 
-        // 手動同步到資料庫（供用戶點擊按鈕使用）
-        async function manualSyncToDatabase() {
-            try {
-                showSuccessMessage('正在同步到資料庫...', 'info');
-                await syncToDatabase();
-                showSuccessMessage('已成功同步到資料庫！');
-            } catch (error) {
-                console.error('同步失敗:', error);
-                showSuccessMessage('同步到資料庫失敗: ' + error.message, 'danger');
-            }
-        }
+        // 手動同步到資料庫函數已移除，現在使用自動同步
 
         // 同步到資料庫（使用 completion-api，會自動覆蓋同週並刪除舊明細）
         async function syncToDatabase() {
@@ -4755,15 +5590,86 @@
             }
         }
 
+        // 載入肌群選項
+        async function loadMuscleGroupOptions() {
+            try {
+                const response = await fetch('get_exercises.php');
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // 從動作資料中提取所有不重複的肌群
+                    const databaseMuscleGroups = [...new Set(result.data.map(exercise => exercise.muscle_group))];
+                    
+                    // 添加訓練模板中使用的細緻肌群分類
+                    const templateMuscleGroups = [
+                        '上胸', '中胸', '下胸', '胸',
+                        '上背', '中背', '下背', '背',
+                        '股四頭肌', '股二頭肌', '臀肌', '小腿', '腿',
+                        '三頭肌', '二頭肌', '手臂',
+                        '肩膀前束', '肩膀中束', '肩膀後束', '肩膀',
+                        '上腹', '下腹', '核心', '腹部'
+                    ];
+                    
+                    // 合併並去重
+                    const allMuscleGroups = [...new Set([...databaseMuscleGroups, ...templateMuscleGroups])];
+                    
+                    // 更新肌群下拉選單
+                    const muscleGroupSelect = document.getElementById('muscleGroupFilter');
+                    if (muscleGroupSelect) {
+                        // 清空現有選項（保留"全部"選項）
+                        muscleGroupSelect.innerHTML = '<option value="">全部</option>';
+                        
+                        // 按類別分組並排序
+                        const sortedMuscleGroups = allMuscleGroups.sort((a, b) => {
+                            // 定義排序順序
+                            const order = ['胸', '上胸', '中胸', '下胸', '背', '上背', '中背', '下背', '腿', '股四頭肌', '股二頭肌', '臀肌', '小腿', '手臂', '三頭肌', '二頭肌', '肩膀', '肩膀前束', '肩膀中束', '肩膀後束', '腹部', '上腹', '下腹', '核心'];
+                            const aIndex = order.indexOf(a);
+                            const bIndex = order.indexOf(b);
+                            return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex);
+                        });
+                        
+                        // 添加肌群選項
+                        sortedMuscleGroups.forEach(muscleGroup => {
+                            if (muscleGroup && muscleGroup !== '休息') {
+                                const option = document.createElement('option');
+                                option.value = muscleGroup;
+                                option.textContent = muscleGroup;
+                                muscleGroupSelect.appendChild(option);
+                            }
+                        });
+                    }
+                    
+                    console.log('已載入肌群選項:', allMuscleGroups);
+                }
+            } catch (error) {
+                console.error('載入肌群選項失敗:', error);
+            }
+        }
+
+        // 切換動作數量標籤樣式
+        function setTrainingCountStyle(style) {
+            trainingCountStyle = style;
+            console.log('動作數量標籤樣式已切換為:', style);
+            // 重新渲染行事曆以應用新樣式
+            renderCalendar();
+        }
+
         // 行事曆相關變數
         let currentCalendarDate = new Date();
         let calendarTrainingData = {};
+        
+        // 動作數量標籤樣式設定
+        let trainingCountStyle = 'default'; // 可選: 'default', 'badge-style', 'number-style', 'pill-style', 'line-style', 'heart-style', 'rainbow-style', 'star-style', 'cloud-style', 'fire-style', 'speech-style', 'hexagon-style', 'diamond-style', 'tag-style', 'tape-style', 'icon-style', 'progress-style', 'layered-style', 'card-style', 'badge-simple-style', 'pulse-style', 'typewriter-style', 'glow-style', 'spin-appear-style', 'wave-text-style'
 
         // 行事曆功能
         function renderCalendar() {
+            console.log('=== renderCalendar 開始 ===');
             const calendarDays = document.getElementById('calendar-days');
             const monthYear = document.getElementById('calendar-month-year');
-            if (!calendarDays || !monthYear) return;
+            if (!calendarDays || !monthYear) {
+                console.error('找不到行事曆元素');
+                return;
+            }
 
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
@@ -4771,7 +5677,7 @@
             // 更新月份年份顯示
             monthYear.textContent = `${year}年${month + 1}月`;
 
-            // 以 6 週 * 7 天 的方式產生方格，並在每週尾端加 1 欄動作
+            // 以 5 週 * 7 天 的方式產生方格，並在每週尾端加 1 欄動作
             const firstOfMonth = new Date(year, month, 1);
             const gridStart = new Date(firstOfMonth);
             // 調整為週一開始：如果第一天是週日(0)，則往前推6天到週一；否則推到該週的週一
@@ -4779,11 +5685,22 @@
             const daysToMonday = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
             gridStart.setDate(firstOfMonth.getDate() + daysToMonday);
 
+            console.log('清空行事曆內容');
             calendarDays.innerHTML = '';
 
-            for (let week = 0; week < 6; week++) {
+            console.log('開始渲染 5 週');
+            for (let week = 0; week < 5; week++) {
                 const weekStart = new Date(gridStart);
                 weekStart.setDate(gridStart.getDate() + week * 7);
+
+                // 計算週數（相對於該月第一週）
+                const weekNumber = week + 1;
+                
+                // 週數欄位
+                const weekNumberEl = document.createElement('div');
+                weekNumberEl.className = 'calendar-week-number';
+                weekNumberEl.textContent = weekNumber;
+                calendarDays.appendChild(weekNumberEl);
 
                 // 週一到週日的順序：直接按順序排列
                 for (let dayIndex = 0; dayIndex < 7; dayIndex++) {
@@ -4797,7 +5714,12 @@
                 // 週尾動作欄
                 const actionEl = createWeekActionCell(weekStart, month);
                 calendarDays.appendChild(actionEl);
+                
+                console.log(`第 ${week + 1} 週渲染完成`);
             }
+            
+            console.log('行事曆渲染完成，總共添加了', calendarDays.children.length, '個元素');
+            console.log('=== renderCalendar 結束 ===');
         }
 
         function createCalendarDayByDate(dayDate, isOtherMonth) {
@@ -4814,9 +5736,10 @@
                 dayElement.classList.add('today');
             }
             
-            // 檢查是否為訓練日
+            // 檢查是否為訓練日（只有真正有訓練動作的日期才標記為訓練日）
             const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
-            if (calendarTrainingData[dateKey]) {
+            const dayTrainingData = getDayTrainingData(dayDate);
+            if (dayTrainingData && dayTrainingData.length > 0) {
                 dayElement.classList.add('training-day');
             }
             
@@ -4831,30 +5754,43 @@
                 const trainingContent = document.createElement('div');
                 trainingContent.className = 'calendar-training-content';
                 
-                // 獲取該日期的訓練內容
-                const dayTrainingData = getDayTrainingData(dayDate);
+                // 使用之前獲取的 dayTrainingData
                 if (dayTrainingData && dayTrainingData.length > 0) {
                     // 過濾掉休息日，只計算真正的訓練動作
                     const actualExercises = dayTrainingData.filter(exercise => exercise.id !== 0);
                     if (actualExercises.length > 0) {
                         const exerciseCount = actualExercises.length;
                         trainingContent.innerHTML = `
-                            <div class="training-count">
+                            <div class="training-count ${trainingCountStyle}">
+                                ${trainingCountStyle === 'progress-style' ? `
+                                    <div class="progress-bar">
+                                        <div class="progress-fill" style="width: ${Math.min(exerciseCount * 20, 100)}%"></div>
+                                    </div>
                                 <i class="bi bi-dumbbell"></i>
                                 <span>${exerciseCount}個動作</span>
+                                ` : trainingCountStyle === 'layered-style' ? `
+                                    <div class="icon-layer">
+                                        <i class="bi bi-dumbbell"></i>
+                                    </div>
+                                    <div class="text-layer">
+                                        <span>${exerciseCount}個動作</span>
+                                    </div>
+                                ` : `
+                                    <i class="bi bi-dumbbell"></i>
+                                    <span>${exerciseCount}個動作</span>
+                                `}
                             </div>
                         `;
                         
                         dayElement.classList.add('has-training');
                     }
                 }
-                // 移除自動標記為休息日的邏輯
                 
                 dayElement.appendChild(trainingContent);
             }
             
-            // 添加指示器
-            if (calendarTrainingData[dateKey]) {
+            // 添加指示器（只有真正有訓練動作的日期才顯示小黑點）
+            if (dayTrainingData && dayTrainingData.length > 0) {
                 const indicator = document.createElement('div');
                 indicator.className = 'calendar-day-indicator training';
                 dayElement.appendChild(indicator);
@@ -4863,7 +5799,6 @@
             
             // 為可點擊的日期添加提示文字
             if (!isOtherMonth) {
-                const dayTrainingData = getDayTrainingData(dayDate);
                 if (dayTrainingData && dayTrainingData.length > 0) {
                     dayElement.title = '點擊選擇操作：查看或新增訓練動作';
                 } else {
@@ -4944,7 +5879,7 @@
 
         // 顯示與單筆刪除一致樣式的確認彈窗
         function showWeekDeleteConfirm(label, weekStartIso) {
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
 
             const html = `
                 <div class="modal fade" id="confirmWeekDeleteModal" tabindex="-1" aria-labelledby="confirmWeekDeleteLabel" aria-hidden="true">
@@ -4972,7 +5907,7 @@
             modal.show();
 
             document.getElementById('confirmWeekDeleteModal').addEventListener('hidden.bs.modal', function() {
-                clearAllModalBackdrops();
+                // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                 try {
                     if (this && document.body.contains(this)) {
                         this.remove();
@@ -4984,26 +5919,51 @@
         }
 
         // 真的執行刪除週（供確認彈窗呼叫）
-        function confirmDeleteWeekFromCalendar(weekStartIso) {
-            const weekStart = new Date(weekStartIso);
-
-            for (let i = 0; i < 7; i++) {
-                const d = new Date(weekStart);
-                d.setDate(weekStart.getDate() + i);
-                const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                if (calendarTrainingData[key]) delete calendarTrainingData[key];
-            }
-
-            // 直接更新行事曆數據
-            updateCalendarTrainingData();
-
+        async function confirmDeleteWeekFromCalendar(weekStartIso) {
             const modal = bootstrap.Modal.getInstance(document.getElementById('confirmWeekDeleteModal'));
             if (modal) modal.hide();
-            setTimeout(() => {
-                clearAllModalBackdrops();
-                updateCalendarTrainingData();
-                showSuccessMessage('已刪除該週的行事曆訓練動作');
-            }, 50);
+            
+            try {
+                const weekStart = new Date(weekStartIso);
+                
+                // 先刪除資料庫中的該週資料
+                console.log('正在刪除資料庫中的週資料:', weekStartIso);
+                
+                const response = await fetch('../exercise-completion-api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'delete_week',
+                        week_start: weekStartIso
+                    })
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('資料庫刪除成功');
+                    
+                    // 刪除該週的所有日期資料（記憶體）
+                    for (let i = 0; i < 7; i++) {
+                        const d = new Date(weekStart);
+                        d.setDate(weekStart.getDate() + i);
+                        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                        delete calendarTrainingData[key];
+                    }
+                    
+                    // 重新渲染行事曆
+                    renderCalendar();
+                    
+                    showSuccessMessage('已成功刪除該週的訓練動作（包含資料庫資料）');
+                } else {
+                    throw new Error(result.message || '刪除資料庫資料失敗');
+                }
+            } catch (error) {
+                console.error('刪除週資料失敗:', error);
+                showSuccessMessage('刪除失敗：' + error.message, 'danger');
+            }
         }
 
         function previousMonth() {
@@ -5154,6 +6114,10 @@
 
         // 顯示某一天的詳細訓練內容
         function showDayTrainingDetails(date, trainingData) {
+            console.log('=== showDayTrainingDetails 開始 ===');
+            console.log('date:', date);
+            console.log('trainingData:', trainingData);
+            
             const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
             const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
             const dayName = dayNames[date.getDay()];
@@ -5185,8 +6149,9 @@
                                 <span class="muscle-group-badge">${exercise.muscleGroup}</span>
                             </div>
                             <div class="training-item-actions">
-                                <button class="btn btn-sm btn-complete-exercise" onclick="toggleExerciseCompletion('${date.toISOString()}', ${index})">
-                                    <i class="bi bi-check-circle"></i> ${exercise.completed ? '已完成' : '未完成'}
+                                <button class="btn btn-sm btn-complete-exercise ${exercise.completed ? '' : 'btn-outline-secondary'}" onclick="toggleExerciseCompletion('${date.toISOString()}', ${index})">
+                                    <i class="bi ${exercise.completed ? 'bi-check-circle-fill' : 'bi-circle'}"></i> 
+                                    ${exercise.completed ? '已完成' : '待完成'}
                                 </button>
                                 <button class="btn btn-sm btn-edit-exercise" onclick="editSingleExercise('${date.toISOString()}', ${index})">
                                     <i class="bi bi-pencil"></i> 編輯
@@ -5231,7 +6196,7 @@
             `;
             
             // 清除所有現有的backdrop
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
             
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('trainingDetailsModal');
@@ -5243,18 +6208,37 @@
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             
             // 顯示模態框
-            modalManager.showModal('trainingDetailsModal', {
+            console.log('準備顯示模態框...');
+            const modal = new bootstrap.Modal(document.getElementById('trainingDetailsModal'), {
                 backdrop: true,
                 keyboard: true,
                 focus: true
             });
+            console.log('模態框實例創建完成:', modal);
+            
+            // 確保 backdrop 存在
+            setTimeout(() => {
+                modal.show();
+                console.log('模態框顯示命令已執行');
+                
+                // 檢查並確保 backdrop 存在
+                setTimeout(() => {
+                    const backdrops = document.querySelectorAll('.modal-backdrop');
+                    if (backdrops.length === 0) {
+                        console.log('沒有 backdrop，手動創建...');
+                        const backdrop = document.createElement('div');
+                        backdrop.className = 'modal-backdrop fade show';
+                        document.body.appendChild(backdrop);
+                    }
+                }, 100);
+            }, 50);
             
             // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('trainingDetailsModal').addEventListener('hidden.bs.modal', function () {
                 try {
                     // 延遲清除，讓 Bootstrap 先完成清理
                     setTimeout(() => {
-                        clearAllModalBackdrops();
+                        // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                         // 安全地移除DOM元素
                         if (this && this.parentNode && document.body.contains(this)) {
                             try {
@@ -5334,7 +6318,7 @@
             `;
             
             // 清除所有現有的backdrop
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
             
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('calendarDayModal');
@@ -5354,7 +6338,7 @@
                 try {
                     // 延遲清除，讓 Bootstrap 先完成清理
                     setTimeout(() => {
-                        clearAllModalBackdrops();
+                        // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                         // 安全地移除DOM元素
                         if (this && this.parentNode && document.body.contains(this)) {
                             try {
@@ -5372,8 +6356,14 @@
 
         // 查看某一天的訓練內容
         function viewDayTraining(dateString) {
+            console.log('=== viewDayTraining 開始 ===');
+            console.log('dateString:', dateString);
+            
             const date = new Date(dateString);
             const dayTrainingData = getDayTrainingData(date);
+            
+            console.log('date:', date);
+            console.log('dayTrainingData:', dayTrainingData);
             
             // 安全地關閉選擇菜單
             try {
@@ -5446,9 +6436,9 @@
             
             // 安全地顯示模態框
             showModal(elementId, options = {}) {
-                // 先清理所有現有狀態
+                // 先清理所有現有狀態，但保留 backdrop
                 this.disposeAllModals();
-                clearAllModalBackdrops();
+                // 移除這行：clearAllModalBackdrops();
                 
                 const modal = this.getOrCreateModal(elementId, options);
                 if (modal) {
@@ -5458,7 +6448,7 @@
                         console.error(`顯示模態框失敗: ${elementId}`, error);
                         // 如果顯示失敗，再次清理
                         this.disposeAllModals();
-                        clearAllModalBackdrops();
+                        // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                     }
                 }
             },
@@ -5565,78 +6555,101 @@
             }
         });
 
+        // 全域監聽所有模態框的關閉事件
+        document.addEventListener('hidden.bs.modal', function(event) {
+            console.log('模態框關閉事件觸發:', event.target.id);
+            // 延遲清理，確保 Bootstrap 完成清理
+            setTimeout(() => {
+                // 檢查是否還有其他模態框正在顯示
+                const visibleModals = document.querySelectorAll('.modal.show');
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                
+                console.log('可見模態框數量:', visibleModals.length);
+                console.log('backdrop 數量:', backdrops.length);
+                
+                // 如果有多個 backdrop，清理多餘的
+                if (backdrops.length > 1) {
+                    console.log('發現多餘的 backdrop，正在清理...');
+                    // 只保留最後一個 backdrop
+                    for (let i = 0; i < backdrops.length - 1; i++) {
+                        if (backdrops[i].parentNode) {
+                            backdrops[i].parentNode.removeChild(backdrops[i]);
+                        }
+                    }
+                }
+                
+                // 如果沒有可見模態框但有 backdrop，清理所有
+                if (visibleModals.length === 0 && backdrops.length > 0) {
+                    console.log('沒有可見模態框，清理所有 backdrop...');
+                    clearAllModalBackdrops();
+                }
+            }, 100);
+        });
+
         // 清除所有模態框backdrop的函數
         function clearAllModalBackdrops() {
             try {
-                // 先清理所有模態框實例
-                if (typeof modalManager !== 'undefined') {
-                    modalManager.disposeAllModals();
-                }
-                
-                // 安全地移除所有模態框相關的 DOM 元素
-                const modals = document.querySelectorAll('.modal');
-                modals.forEach(modal => {
-                    try {
-                        if (modal && modal.classList) {
-                            if (modal.classList.contains('show')) {
-                                modal.classList.remove('show');
-                            }
-                            modal.style.display = 'none';
-                            modal.setAttribute('aria-hidden', 'true');
-                            modal.removeAttribute('aria-modal');
-                        }
-                    } catch (e) {
-                        console.warn('清理模態框元素失敗:', e);
-                    }
-                });
-                
-                // 等待 Bootstrap 完成清理
-                setTimeout(() => {
-                    // 安全地移除所有 backdrop
+                // 移除所有 modal-backdrop 元素
                     const backdrops = document.querySelectorAll('.modal-backdrop');
                     backdrops.forEach(backdrop => {
-                        try {
-                            if (backdrop && backdrop.parentNode && document.body.contains(backdrop)) {
+                    if (backdrop.parentNode) {
                                 backdrop.parentNode.removeChild(backdrop);
-                            }
-                        } catch (e) {
-                            console.warn('移除 backdrop 失敗:', e);
                         }
                     });
                     
-                    // 清除 body 的 modal 相關樣式
+                // 移除 modal-open 類別
                     document.body.classList.remove('modal-open');
                     document.body.style.overflow = '';
                     document.body.style.paddingRight = '';
                     
-                    // 確保沒有殘留的 modal 相關類別
-                    const remainingModals = document.querySelectorAll('.modal');
-                    remainingModals.forEach(modal => {
-                        try {
-                            if (modal && modal.classList && modal.classList.contains('show')) {
-                                modal.classList.remove('show');
-                            }
-                        } catch (e) {
-                            console.warn('清理殘留模態框失敗:', e);
-                        }
-                    });
-                    
-                    // 強制移除任何殘留的 backdrop
-                    const remainingBackdrops = document.querySelectorAll('.modal-backdrop');
-                    remainingBackdrops.forEach(backdrop => {
-                        try {
-                            if (backdrop && backdrop.remove) {
-                                backdrop.remove();
-                            }
-                        } catch (e) {
-                            console.warn('強制移除 backdrop 失敗:', e);
-                        }
-                    });
-                }, 50);
+                // 清理模態框實例
+                if (typeof modalManager !== 'undefined') {
+                    modalManager.disposeAllModals();
+                }
+                
+                console.log('已清理所有 modal backdrop');
             } catch (error) {
-                console.error('清除模態框backdrop失敗:', error);
+                console.error('清理模態框實例失敗:', error);
             }
         }
+        
+        // 手動清理 backdrop 的函數（供調試使用）
+        function manualClearBackdrop() {
+            console.log('手動清理 backdrop...');
+            clearAllModalBackdrops();
+        }
+        
+        // 清理多餘 backdrop 的函數（智能版本）
+        function cleanupExtraBackdrops() {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            const visibleModals = document.querySelectorAll('.modal.show');
+            
+            console.log('當前 backdrop 數量:', backdrops.length);
+            console.log('可見模態框數量:', visibleModals.length);
+            
+            // 只有在有多個 backdrop 且沒有可見模態框時才清理
+            if (backdrops.length > 1 && visibleModals.length === 0) {
+                console.log('清理多餘的 backdrop...');
+                // 只保留最後一個 backdrop
+                for (let i = 0; i < backdrops.length - 1; i++) {
+                    if (backdrops[i].parentNode) {
+                        backdrops[i].parentNode.removeChild(backdrops[i]);
+                    }
+                }
+            } else if (backdrops.length > 0 && visibleModals.length === 0) {
+                console.log('沒有可見模態框但有 backdrop，清理所有...');
+                // 清理所有 backdrop
+                backdrops.forEach(backdrop => {
+                    if (backdrop.parentNode) {
+                        backdrop.parentNode.removeChild(backdrop);
+                    }
+                });
+            }
+        }
+        
+        // 在控制台提供清理函數
+        window.clearBackdrop = manualClearBackdrop;
+        window.cleanupBackdrops = cleanupExtraBackdrops;
 
         // 編輯單個訓練動作
         function editSingleExercise(dateString, exerciseIndex) {
@@ -5689,7 +6702,7 @@
             `;
             
             // 清除所有現有的backdrop
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
             
             // 移除現有的模態框
             const existingModal = document.getElementById('editExerciseModal');
@@ -5706,8 +6719,6 @@
             
             // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('editExerciseModal').addEventListener('hidden.bs.modal', function () {
-                // 清除backdrop
-                clearAllModalBackdrops();
                 // 安全地移除DOM元素
                 try {
                     if (this && document.body.contains(this)) {
@@ -5716,19 +6727,23 @@
                 } catch (error) {
                     console.warn('移除 editExerciseModal 時發生錯誤:', error);
                 }
-                // 重新顯示訓練內容詳情（確保有正確的backdrop）
+                
+                // 等待模態框完全關閉後再重新顯示訓練內容詳情
                 setTimeout(() => {
+                    // 清理多餘的 backdrop
+                    cleanupExtraBackdrops();
+                    
                     const date = new Date(dateString);
                     const dayTrainingData = getDayTrainingData(date);
                     if (dayTrainingData && dayTrainingData.length > 0) {
                         showDayTrainingDetails(date, dayTrainingData);
                     }
-                }, 100);
+                }, 300); // 增加延遲時間
             });
         }
 
         // 儲存編輯後的訓練動作
-        function saveEditedExercise(dateString, exerciseIndex) {
+        async function saveEditedExercise(dateString, exerciseIndex) {
             const date = new Date(dateString);
             const dayTrainingData = getDayTrainingData(date);
             
@@ -5753,22 +6768,23 @@
             // 更新行事曆
             updateCalendarTrainingData();
             
-            // 顯示成功訊息
-            showSuccessMessage('訓練動作已更新');
+            // 同步到資料庫
+            try {
+                await syncCalendarExerciseToDatabase(date, dayTrainingData[exerciseIndex]);
+                showSuccessMessage('訓練動作已更新並同步到資料庫！');
+            } catch (error) {
+                console.error('同步到資料庫失敗:', error);
+                showSuccessMessage('訓練動作已更新，但同步到資料庫失敗', 'warning');
+            }
             
             // 關閉模態框
             const modal = bootstrap.Modal.getInstance(document.getElementById('editExerciseModal'));
             if (modal) {
                 modal.hide();
-                // 確保backdrop被清除
-                setTimeout(() => {
-                    clearAllModalBackdrops();
-                    // 重新顯示訓練內容詳情
-                    showDayTrainingDetails(date, dayTrainingData);
-                }, 150);
+                // 不需要在這裡重新顯示，因為 editSingleExercise 的 hidden.bs.modal 事件會處理
             } else {
-                // 如果沒有找到模態框實例，直接清除並重新顯示
-                clearAllModalBackdrops();
+                // 如果沒有找到模態框實例，直接重新顯示
+                cleanupExtraBackdrops();
                 showDayTrainingDetails(date, dayTrainingData);
             }
         }
@@ -5810,8 +6826,6 @@
             
              // 模態框關閉時移除DOM元素和清除backdrop
              document.getElementById('confirmRemoveModal').addEventListener('hidden.bs.modal', function () {
-                 // 清除backdrop
-                 clearAllModalBackdrops();
                  // 安全地移除DOM元素
                  try {
                      if (this && document.body.contains(this)) {
@@ -5820,19 +6834,23 @@
                  } catch (error) {
                      console.warn('移除 confirmRemoveModal 時發生錯誤:', error);
                  }
-                 // 重新顯示訓練內容詳情（確保有正確的backdrop）
+                 
+                 // 等待模態框完全關閉後再重新顯示訓練內容詳情
                  setTimeout(() => {
+                     // 清理多餘的 backdrop
+                     cleanupExtraBackdrops();
+                     
                      const date = new Date(dateString);
                      const dayTrainingData = getDayTrainingData(date);
                      if (dayTrainingData && dayTrainingData.length > 0) {
                          showDayTrainingDetails(date, dayTrainingData);
                      }
-                 }, 100);
+                 }, 300); // 增加延遲時間
              });
         }
 
          // 確認移除訓練動作
-         function confirmRemoveExercise(dateString, exerciseIndex) {
+         async function confirmRemoveExercise(dateString, exerciseIndex) {
              const date = new Date(dateString);
              const dayTrainingData = getDayTrainingData(date);
              
@@ -5847,14 +6865,14 @@
              // 儲存到localStorage
              saveDailyTrainingData(date, dayTrainingData);
              
-            // 關閉確認模態框並清除backdrop
+            // 關閉確認模態框並重新顯示
             const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmRemoveModal'));
             if (confirmModal) {
                 confirmModal.hide();
-                // 確保backdrop被清除
+                
+                // 等待模態框關閉後重新顯示
                 setTimeout(() => {
-                    clearAllModalBackdrops();
-                    // 重新顯示訓練內容詳情
+                    cleanupExtraBackdrops();
                     if (dayTrainingData.length > 0) {
                         showDayTrainingDetails(date, dayTrainingData);
                     } else {
@@ -5862,16 +6880,12 @@
                         const detailsModal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
                         if (detailsModal) {
                             detailsModal.hide();
-                            // 確保backdrop被清除
-                            setTimeout(() => {
-                                clearAllModalBackdrops();
-                            }, 100);
                         }
                     }
-                }, 150);
+                }, 300);
             } else {
-                // 如果沒有找到模態框實例，直接清除並重新顯示
-                clearAllModalBackdrops();
+                // 如果沒有找到模態框實例，直接重新顯示
+                cleanupExtraBackdrops();
                 if (dayTrainingData.length > 0) {
                     showDayTrainingDetails(date, dayTrainingData);
                 } else {
@@ -5879,9 +6893,6 @@
                     const detailsModal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
                     if (detailsModal) {
                         detailsModal.hide();
-                        setTimeout(() => {
-                            clearAllModalBackdrops();
-                        }, 100);
                     }
                 }
             }
@@ -5889,8 +6900,14 @@
              // 更新行事曆
              updateCalendarTrainingData();
              
-             // 顯示成功訊息
-             showSuccessMessage('訓練動作已移除');
+             // 同步到資料庫
+             try {
+                 await syncCalendarExerciseToDatabase(date, null); // 傳入 null 表示移除動作
+                 showSuccessMessage('訓練動作已移除並同步到資料庫！');
+             } catch (error) {
+                 console.error('同步到資料庫失敗:', error);
+                 showSuccessMessage('訓練動作已移除，但同步到資料庫失敗', 'warning');
+             }
          }
 
         // 切換訓練動作完成狀態（個別動作完成）
@@ -5910,13 +6927,17 @@
                 return;
             }
             
+            // 保存要更新的動作資訊（用於後續識別）
+            const targetExercise = dayTrainingData[exerciseIndex];
+            console.log('目標動作:', targetExercise);
+            
             // 確保 completed 屬性存在
-            if (typeof dayTrainingData[exerciseIndex].completed === 'undefined') {
-                dayTrainingData[exerciseIndex].completed = false;
+            if (typeof targetExercise.completed === 'undefined') {
+                targetExercise.completed = false;
             }
             
             // 切換完成狀態
-            dayTrainingData[exerciseIndex].completed = !dayTrainingData[exerciseIndex].completed;
+            targetExercise.completed = !targetExercise.completed;
             
             // 儲存到記憶體
             saveDailyTrainingData(date, dayTrainingData);
@@ -5926,28 +6947,78 @@
             
             // 同步到資料庫（個別動作完成狀態）
             try {
-                await syncExerciseCompletionToDatabase(date, dayTrainingData[exerciseIndex]);
+                await syncCalendarExerciseToDatabase(date, targetExercise);
+                
+                // 顯示成功訊息
+                const status = targetExercise.completed ? '已完成' : '未完成';
+                showSuccessMessage(`動作狀態已更新為${status}並同步到資料庫！`);
+                
+                // 簡單的模態框更新：直接更新按鈕狀態
+                updateModalButtonState(date, exerciseIndex, targetExercise.completed);
+                
             } catch (error) {
                 console.error('同步到資料庫失敗:', error);
                 showSuccessMessage('動作狀態已更新，但同步到資料庫失敗', 'warning');
             }
             
-            // 顯示成功訊息
-            const status = dayTrainingData[exerciseIndex].completed ? '已完成' : '未完成';
-            showSuccessMessage(`訓練動作已標記為${status}`);
-            
-            // 更新當前模態框的內容（如果正在顯示）
-            updateCurrentModalContent(date, dayTrainingData);
-            
             console.log('=== toggleExerciseCompletion 結束 ===');
+        }
+
+        // 簡單更新模態框按鈕狀態
+        function updateModalButtonState(date, exerciseIndex, completed) {
+            try {
+                const trainingModal = document.getElementById('trainingDetailsModal');
+                if (!trainingModal || !trainingModal.classList.contains('show')) {
+                    return; // 模態框沒有顯示，不需要更新
+                }
+                
+                // 找到對應的按鈕
+                const buttons = trainingModal.querySelectorAll('.btn-complete-exercise');
+                const targetButton = buttons[exerciseIndex];
+                
+                if (targetButton) {
+                    // 更新按鈕文字和圖標
+                    const icon = targetButton.querySelector('i');
+                    const text = targetButton.querySelector('span') || targetButton.childNodes[targetButton.childNodes.length - 1];
+                    
+                    if (completed) {
+                        icon.className = 'bi bi-check-circle-fill';
+                        text.textContent = '已完成';
+                        targetButton.classList.remove('btn-outline-secondary');
+                    } else {
+                        icon.className = 'bi bi-circle';
+                        text.textContent = '待完成';
+                        targetButton.classList.add('btn-outline-secondary');
+                    }
+                    
+                    console.log('按鈕狀態已更新:', completed ? '已完成' : '待完成');
+                }
+            } catch (error) {
+                console.error('更新按鈕狀態失敗:', error);
+            }
         }
 
         // 更新當前模態框的內容（如果正在顯示）
         function updateCurrentModalContent(date, dayTrainingData) {
             try {
+                console.log('=== updateCurrentModalContent 開始 ===');
+                console.log('date:', date);
+                console.log('dayTrainingData:', dayTrainingData);
+                console.log('dayTrainingData 長度:', dayTrainingData?.length);
+                
                 // 檢查是否有正在顯示的訓練詳情模態框
                 const trainingModal = document.getElementById('trainingDetailsModal');
-                if (trainingModal && trainingModal.classList.contains('show')) {
+                const modalInstance = bootstrap.Modal.getInstance(trainingModal);
+                
+                console.log('trainingModal:', trainingModal);
+                console.log('modalInstance:', modalInstance);
+                console.log('modal.classList.contains("show"):', trainingModal?.classList.contains('show'));
+                console.log('modalInstance._isShown:', modalInstance?._isShown);
+                
+                // 檢查模態框是否真的在顯示（更嚴格的檢查）
+                if (trainingModal && 
+                    (trainingModal.classList.contains('show') || 
+                     (modalInstance && modalInstance._isShown))) {
                     // 更新模態框內容
                     const dateStr = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
                     const dayNames = ['週日', '週一', '週二', '週三', '週四', '週五', '週六'];
@@ -5962,49 +7033,70 @@
                             <div class="training-list">
                     `;
                     
-                    dayTrainingData.forEach((exercise, index) => {
-                        const statusClass = exercise.completed ? 'btn-success' : 'btn-outline-secondary';
-                        const statusText = exercise.completed ? '已完成' : '未完成';
-                        const statusIcon = exercise.completed ? 'bi-check-circle-fill' : 'bi-circle';
-                        
+                    // 檢查是否有有效的訓練資料
+                    if (!dayTrainingData || dayTrainingData.length === 0) {
                         content += `
-                            <div class="training-item d-flex align-items-center justify-content-between mb-3 p-3 border rounded">
-                                <div class="d-flex align-items-center">
-                                    <span class="badge bg-primary me-3">${index + 1}</span>
-                                    <div>
-                                        <h6 class="mb-1">${exercise.name}</h6>
-                                        <div class="d-flex align-items-center gap-3">
-                                            <span class="badge bg-light text-dark">${exercise.muscleGroup}</span>
-                                            <small class="text-muted"># ${exercise.sets} 組</small>
-                                            <small class="text-muted">${exercise.reps} 次</small>
-                                            ${exercise.weight ? `<small class="text-muted">${exercise.weight}kg</small>` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="d-flex gap-2">
-                                    <button class="btn ${statusClass} btn-sm" onclick="toggleExerciseCompletion('${date.toISOString()}', ${index})">
-                                        <i class="bi ${statusIcon} me-1"></i>${statusText}
-                                    </button>
-                                    <button class="btn btn-outline-primary btn-sm" onclick="editSingleExercise('${date.toISOString()}', ${index})">
-                                        <i class="bi bi-pencil me-1"></i>編輯
-                                    </button>
-                                    <button class="btn btn-outline-danger btn-sm" onclick="confirmRemoveSingleExercise('${date.toISOString()}', ${index})">
-                                        <i class="bi bi-trash me-1"></i>移除
-                                    </button>
-                                </div>
+                            <div class="text-center text-muted py-4">
+                                <i class="bi bi-calendar-x fs-1"></i>
+                                <p class="mt-2">當天沒有安排訓練動作</p>
                             </div>
                         `;
-                    });
+                    } else {
+                        dayTrainingData.forEach((exercise, index) => {
+                            // 檢查動作資料是否完整
+                            if (!exercise || !exercise.name) {
+                                console.warn(`跳過無效的動作資料:`, exercise);
+                                return;
+                            }
+                            
+                            content += `
+                                <div class="training-item ${exercise.completed ? 'completed' : ''}">
+                                    <div class="training-item-header">
+                                        <div class="training-item-left">
+                                            <span class="training-number">${index + 1}</span>
+                                            <span class="training-name">${exercise.name}</span>
+                                            <span class="muscle-group-badge">${exercise.muscleGroup || '未分類'}</span>
+                                        </div>
+                                        <div class="training-item-actions">
+                                            <button class="btn btn-sm btn-complete-exercise ${exercise.completed ? '' : 'btn-outline-secondary'}" onclick="toggleExerciseCompletion('${date.toISOString()}', ${index})">
+                                                <i class="bi ${exercise.completed ? 'bi-check-circle-fill' : 'bi-circle'}"></i> 
+                                                ${exercise.completed ? '已完成' : '待完成'}
+                                            </button>
+                                            <button class="btn btn-sm btn-edit-exercise" onclick="editSingleExercise('${date.toISOString()}', ${index})">
+                                                <i class="bi bi-pencil"></i> 編輯
+                                            </button>
+                                            <button class="btn btn-sm btn-remove-exercise" onclick="confirmRemoveSingleExercise('${date.toISOString()}', ${index})">
+                                                <i class="bi bi-trash"></i> 移除
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="training-item-details">
+                                        <span class="detail-item"># ${exercise.sets || 0} 組</span>
+                                        <span class="detail-item">${exercise.reps || 0} 次</span>
+                                        ${exercise.weight ? `<span class="detail-item">${exercise.weight}kg</span>` : ''}
+                                    </div>
+                                </div>
+                            `;
+                        });
+                    }
                     
                     content += `
                             </div>
                         </div>
                     `;
                     
-                    // 更新模態框內容
+                    // 平滑更新模態框內容
                     const modalBody = trainingModal.querySelector('.modal-body');
                     if (modalBody) {
-                        modalBody.innerHTML = content;
+                        // 添加淡出效果
+                        modalBody.style.opacity = '0.7';
+                        modalBody.style.transition = 'opacity 0.2s ease';
+                        
+                        setTimeout(() => {
+                            modalBody.innerHTML = content;
+                            // 恢復透明度
+                            modalBody.style.opacity = '1';
+                        }, 100);
                     }
                 }
             } catch (error) {
@@ -6713,7 +7805,7 @@
             `;
             
             // 清除所有現有的backdrop
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
             
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('dateExerciseModal');
@@ -6731,7 +7823,11 @@
             }, 100);
             
             // 顯示模態框
-            const modal = new bootstrap.Modal(document.getElementById('dateExerciseModal'));
+            const modal = new bootstrap.Modal(document.getElementById('dateExerciseModal'), {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
             modal.show();
             
             // 模態框顯示後再次嘗試載入動作列表
@@ -6744,8 +7840,7 @@
             
             // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('dateExerciseModal').addEventListener('hidden.bs.modal', function () {
-                // 清除backdrop
-                clearAllModalBackdrops();
+                // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                 // 安全地移除DOM元素
                 try {
                     if (this && document.body.contains(this)) {
@@ -6885,8 +7980,114 @@
             });
             event.target.closest('.list-group-item').classList.add('active');
         }
+        
+        // 載入行事曆資料（不重新渲染）
+        async function loadCalendarDataWithoutRendering() {
+            try {
+                console.log('開始載入行事曆資料（不重新渲染）...');
+                const response = await fetch('../exercise-completion-api.php?action=get_calendar_data');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // 更新 calendarTrainingData
+                    calendarTrainingData = result.data;
+                    console.log('行事曆資料載入成功（不重新渲染）:', Object.keys(calendarTrainingData));
+                    return true;
+                } else {
+                    console.warn('載入行事曆資料失敗:', result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('載入行事曆資料時發生錯誤:', error);
+                return false;
+            }
+        }
+        
+        // 載入行事曆資料
+        async function loadCalendarData() {
+            try {
+                console.log('開始載入行事曆資料...');
+                const response = await fetch('../exercise-completion-api.php?action=get_calendar_data');
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    // 更新 calendarTrainingData
+                    calendarTrainingData = result.data;
+                    console.log('行事曆資料載入成功:', Object.keys(calendarTrainingData));
+                    
+                    // 重新渲染行事曆
+                    renderCalendar();
+                    
+                    return true;
+                } else {
+                    console.warn('載入行事曆資料失敗:', result.error);
+                    return false;
+                }
+            } catch (error) {
+                console.error('載入行事曆資料時發生錯誤:', error);
+                return false;
+            }
+        }
+
+        // 同步行事曆動作到資料庫
+        async function syncCalendarExerciseToDatabase(date, exercise) {
+            try {
+                const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
+                const dayTrainingData = calendarTrainingData[dateKey] || [];
+                
+                // 構建要同步的資料
+                const syncData = {
+                    date: dateKey,
+                    exercises: dayTrainingData.filter(ex => ex.id !== 0) // 排除休息日
+                };
+                
+                console.log('同步行事曆動作到資料庫:', syncData);
+                console.log('exercises 陣列內容:', syncData.exercises);
+                console.log('exercises 陣列長度:', syncData.exercises.length);
+                
+                const response = await fetch('../exercise-completion-api.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'sync_calendar_exercise',
+                        data: syncData
+                    })
+                });
+                
+                console.log('API 回應狀態:', response.status);
+                console.log('API 回應 headers:', response.headers);
+                
+                const responseText = await response.text();
+                console.log('API 回應內容:', responseText);
+                
+                const result = JSON.parse(responseText);
+                
+                if (result.success) {
+                    console.log('行事曆動作同步成功');
+                    return result;
+                } else {
+                    throw new Error(result.message || '同步失敗');
+                }
+            } catch (error) {
+                console.error('同步行事曆動作到資料庫失敗:', error);
+                throw error;
+            }
+        }
+        
         // 為特定日期新增訓練動作
-        function addExerciseToSpecificDate(dateString) {
+        async function addExerciseToSpecificDate(dateString) {
             const targetDate = new Date(dateString);
             const exerciseId = document.getElementById('dateSelectedExerciseId').value;
             const exerciseName = document.getElementById('dateSelectedExerciseName').value;
@@ -6931,20 +8132,45 @@
             // 更新行事曆顯示
             updateCalendarTrainingData();
             
-            // 顯示成功訊息
-            showSuccessMessage(`已為 ${targetDate.getMonth() + 1}月${targetDate.getDate()}日 新增 ${exerciseName}`);
+            // 同步到資料庫
+            try {
+                await syncCalendarExerciseToDatabase(targetDate, exercise);
+                showSuccessMessage(`已為 ${targetDate.getMonth() + 1}月${targetDate.getDate()}日 新增 ${exerciseName} 並同步到資料庫！`);
+            } catch (error) {
+                console.error('同步到資料庫失敗:', error);
+                showSuccessMessage(`已為 ${targetDate.getMonth() + 1}月${targetDate.getDate()}日 新增 ${exerciseName}，但同步到資料庫失敗`, 'warning');
+            }
         }
 
         // 為某一天新增更多訓練動作
         function addMoreTraining(dateString) {
+            console.log('=== addMoreTraining 開始 ===');
+            console.log('dateString:', dateString);
+            
             const date = new Date(dateString);
             
-            // 關閉選擇菜單
+            // 安全地關閉選擇菜單，但不清理 backdrop
+            try {
             const modal = bootstrap.Modal.getInstance(document.getElementById('calendarDayModal'));
-            if (modal) modal.hide();
-            
-            // 直接為該日期新增更多訓練動作
+                if (modal) {
+                    console.log('關閉 calendarDayModal...');
+                    modal.hide();
+                    
+                    // 等待模態框關閉後再打開新的模態框
+                    setTimeout(() => {
+                        console.log('準備打開新增動作模態框...');
+                        openExerciseModalForDate(date);
+                    }, 200);
+                } else {
+                    // 如果沒有找到模態框實例，直接打開新的模態框
+                    console.log('沒有找到 calendarDayModal 實例，直接打開新增動作模態框...');
             openExerciseModalForDate(date);
+                }
+            } catch (error) {
+                console.error('關閉模態框時發生錯誤:', error);
+                // 即使出錯也要打開新的模態框
+                openExerciseModalForDate(date);
+            }
         }
 
         // 顯示沒有訓練內容的提示
@@ -6984,7 +8210,7 @@
             `;
             
             // 清除所有現有的backdrop
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
             
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('noTrainingModal');
@@ -7001,8 +8227,7 @@
             
             // 模態框關閉時移除DOM元素和清除backdrop
             document.getElementById('noTrainingModal').addEventListener('hidden.bs.modal', function () {
-                // 清除backdrop
-                clearAllModalBackdrops();
+                // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                 // 安全地移除DOM元素
                 try {
                     if (this && document.body.contains(this)) {
@@ -7048,6 +8273,12 @@
             try {
                 // 先載入動作資料
                 await loadExercises();
+                
+                // 載入行事曆資料
+                await loadCalendarData();
+                
+                // 載入肌群選項
+                await loadMuscleGroupOptions();
                 
                 // 載入當前週次的計畫
                 await loadPlan();
@@ -8056,7 +9287,7 @@
            draggable="true"
            ondragstart="dragStart(event, '${template.id}')"
            ondragend="dragEnd(event)"
-           onclick="applyTemplate('${template.id}')">
+           onclick="console.log('按鈕被點擊:', '${template.id}'); applyTemplate('${template.id}')">
         <div class="template-icon">
           <i class="${safeIcon}"></i>
         </div>
@@ -8119,11 +9350,26 @@
 
         // 應用整個模板
         function applyTemplate(templateId) {
-            const template = trainingTemplates.find(t => t.id === templateId);
-            if (template) {
-                // 顯示選項對話框
-                showTemplateOptions(template);
+            console.log('=== applyTemplate 開始 ===');
+            console.log('templateId:', templateId);
+            
+            try {
+                const template = trainingTemplates.find(t => t.id === templateId);
+                console.log('找到的模板:', template);
+                
+                if (template) {
+                    // 顯示選項對話框
+                    showTemplateOptions(template);
+                } else {
+                    console.error('找不到模板:', templateId);
+                    alert('找不到指定的訓練模板');
+                }
+            } catch (error) {
+                console.error('applyTemplate 錯誤:', error);
+                alert('應用模板時發生錯誤');
             }
+            
+            console.log('=== applyTemplate 結束 ===');
         }
 
         // 顯示模板選項對話框
@@ -8184,7 +9430,7 @@
             `;
 
             // 清除所有現有的backdrop
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
             
             // 移除現有的模態視窗（如果存在）
             const existingModal = document.getElementById('templateOptionsModal');
@@ -8197,6 +9443,13 @@
 
             // 顯示模態視窗
             const modal = new bootstrap.Modal(document.getElementById('templateOptionsModal'));
+            
+            // 添加關閉事件處理器
+            document.getElementById('templateOptionsModal').addEventListener('hidden.bs.modal', function() {
+                // 清理模態框元素
+                this.remove();
+            });
+            
             modal.show();
 
         }
@@ -8255,7 +9508,7 @@
             modalManager.showModal('confirmTemplateModal');
 
             document.getElementById('confirmTemplateModal').addEventListener('hidden.bs.modal', function() {
-                clearAllModalBackdrops();
+                // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                 try {
                     if (this && document.body.contains(this)) {
                         this.remove();
@@ -8274,7 +9527,7 @@
                 modalManager.hideModal('confirmTemplateModal');
                 
                 setTimeout(() => {
-                    clearAllModalBackdrops();
+                    // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                     if (templateId === 'fullbody' && mode === 'recommended') {
                         // 全身訓練推薦模式使用固定的專業菜單
                         applyFixedFullbodyRecommendations();
@@ -9584,7 +10837,7 @@
 
         // 顯示週計畫刪除選擇模態框
         function showWeekDeleteModal() {
-            clearAllModalBackdrops();
+            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
             
             const modalHtml = `
                 <div class="modal fade" id="weekDeleteModal" tabindex="-1" aria-labelledby="weekDeleteModalLabel" aria-hidden="true">
@@ -9620,7 +10873,7 @@
             
             // 清理模態框
             document.getElementById('weekDeleteModal').addEventListener('hidden.bs.modal', function() {
-                clearAllModalBackdrops();
+                // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
                 try {
                     if (this && document.body.contains(this)) {
                         this.remove();
@@ -10001,5 +11254,6 @@
 
 </body>
 
+</html>
 </html>
 </html>
