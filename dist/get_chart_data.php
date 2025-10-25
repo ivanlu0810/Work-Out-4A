@@ -32,7 +32,7 @@ try {
     // 調試信息：記錄時間範圍參數
     error_log("Date range parameters - start_date: " . ($start_date ?? 'null') . ", end_date: " . ($end_date ?? 'null'));
     
-    // 構建 SQL 查詢
+    // 構建 SQL 查詢 - 基本健康數據
     $sql = "SELECT 
                 Date,
                 `weight-kg`,
@@ -64,6 +64,35 @@ try {
     $stmt->execute($params);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
+    // 查詢部位數據
+    $bodyPartSql = "SELECT 
+                        measurement_date,
+                        chest_muscle_index,
+                        arm_muscle_index,
+                        leg_muscle_index,
+                        core_muscle_index,
+                        chest_fat_index,
+                        arm_fat_index,
+                        leg_fat_index,
+                        core_fat_index
+                    FROM body_part_data 
+                    WHERE user_id = :user_id";
+    
+    $bodyPartParams = [':user_id' => $user_id];
+    
+    // 如果有時間範圍，添加時間條件
+    if ($start_date && $end_date) {
+        $bodyPartSql .= " AND measurement_date >= :start_date AND measurement_date <= :end_date";
+        $bodyPartParams[':start_date'] = $start_date;
+        $bodyPartParams[':end_date'] = $end_date;
+    }
+    
+    $bodyPartSql .= " ORDER BY measurement_date ASC";
+    
+    $bodyPartStmt = $pdo->prepare($bodyPartSql);
+    $bodyPartStmt->execute($bodyPartParams);
+    $bodyPartRecords = $bodyPartStmt->fetchAll(PDO::FETCH_ASSOC);
+    
     // 調試信息：記錄查詢到的數據數量和日期範圍
     error_log("Chart data query result: " . count($records) . " records for user_id: " . $user_id);
     if (count($records) > 0) {
@@ -82,6 +111,15 @@ try {
         'fat_percentage' => [],
         'basal_metabolism' => [],
         'bmi' => [],
+        // 部位數據
+        'chest_muscle_index' => [],
+        'arm_muscle_index' => [],
+        'leg_muscle_index' => [],
+        'core_muscle_index' => [],
+        'chest_fat_index' => [],
+        'arm_fat_index' => [],
+        'leg_fat_index' => [],
+        'core_fat_index' => [],
         'total_records' => count($records), // 添加總記錄數
         'date_filter_applied' => ($start_date && $end_date), // 標記是否應用了日期篩選
         'filter_start_date' => $start_date, // 記錄篩選的開始日期
@@ -97,6 +135,18 @@ try {
         $chartData['fat_percentage'][] = $record['fat_percentage'] ? floatval($record['fat_percentage']) : null;
         $chartData['basal_metabolism'][] = $record['basal_metabolism'] ? floatval($record['basal_metabolism']) : null;
         $chartData['bmi'][] = $record['bmi'] ? floatval($record['bmi']) : null;
+    }
+    
+    // 處理部位數據
+    foreach ($bodyPartRecords as $record) {
+        $chartData['chest_muscle_index'][] = $record['chest_muscle_index'] ? floatval($record['chest_muscle_index']) : null;
+        $chartData['arm_muscle_index'][] = $record['arm_muscle_index'] ? floatval($record['arm_muscle_index']) : null;
+        $chartData['leg_muscle_index'][] = $record['leg_muscle_index'] ? floatval($record['leg_muscle_index']) : null;
+        $chartData['core_muscle_index'][] = $record['core_muscle_index'] ? floatval($record['core_muscle_index']) : null;
+        $chartData['chest_fat_index'][] = $record['chest_fat_index'] ? floatval($record['chest_fat_index']) : null;
+        $chartData['arm_fat_index'][] = $record['arm_fat_index'] ? floatval($record['arm_fat_index']) : null;
+        $chartData['leg_fat_index'][] = $record['leg_fat_index'] ? floatval($record['leg_fat_index']) : null;
+        $chartData['core_fat_index'][] = $record['core_fat_index'] ? floatval($record['core_fat_index']) : null;
     }
     
     // 調試信息：記錄處理後的數據

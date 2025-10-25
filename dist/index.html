@@ -242,14 +242,184 @@
         #weight-chart,
         #body-composition-chart,
         #fat-percentage-chart,
-        #bmi-chart {
+        #bmi-chart,
+        #muscle-index-chart,
+        #fat-index-chart {
             min-height: 390px;
+        }
+
+        /* 圖表分頁樣式 */
+        .chart-page {
+            transition: opacity 0.3s ease-in-out;
+            min-height: auto;
+        }
+
+        .chart-page.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 優化圖表分頁佈局，避免空白區域 */
+        .chart-page .row {
+            min-height: auto;
+        }
+
+        .chart-page .card {
+            margin-bottom: 0;
+        }
+
+        .chart-page .row.g-3 {
+            margin-bottom: 0;
+        }
+
+        .chart-page .card-body {
+            padding: 1rem;
+        }
+
+        /* 確保圖表區域高度合適 */
+        #chart-page-1,
+        #chart-page-2,
+        #chart-page-3 {
+            min-height: 400px;
+            max-height: 800px;
+        }
+
+        .pagination .page-link {
+            color: #6c757d;
+            border: 1px solid #dee2e6;
+            padding: 0.5rem 1rem;
+            margin: 0 0.25rem;
+            border-radius: 0.375rem;
+            transition: all 0.3s ease;
+        }
+
+        .pagination .page-link:hover {
+            color: #9db3c6;
+            background-color: #f8f9fa;
+            border-color: #9db3c6;
+        }
+
+        .pagination .page-item.active .page-link {
+            background-color: #9db3c6;
+            border-color: #9db3c6;
+            color: white;
+        }
+
+        .pagination .page-item.active .page-link:hover {
+            background-color: #87a3bb;
+            border-color: #87a3bb;
+            color: white;
+        }
+
+        /* 右側卡片分頁樣式 */
+        .right-cards-container {
+            position: relative;
+        }
+
+        .right-card-page {
+            transition: opacity 0.3s ease-in-out;
+        }
+
+        .right-card-page.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        /* 右側卡片分頁指示器樣式 */
+        .right-cards-container .pagination {
+            margin-bottom: 1rem;
+        }
+
+        .right-cards-container .pagination .page-link {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
         }
 
         /* 讓空圖時的提示字不要太醒目但仍可見 */
         .apexcharts-annotation-text {
             opacity: .7;
             letter-spacing: .5px;
+        }
+
+        /* 頁面指示器樣式 */
+        .page-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 16px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .page-indicator.active {
+            background-color: #5A628C;
+            color: white;
+        }
+
+        .page-indicator:not(.active) {
+            background-color: #f8f9fa;
+            color: #6c757d;
+        }
+
+        .page-number {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .page-indicator.active .page-number {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .page-indicator:not(.active) .page-number {
+            background-color: #e9ecef;
+        }
+
+        .page-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .page-separator {
+            width: 40px;
+            height: 2px;
+            background-color: #e9ecef;
+            margin: 0 8px;
+            position: relative;
+            top: -12px;
+        }
+
+        .page-separator::after {
+            content: '';
+            position: absolute;
+            top: -3px;
+            right: -3px;
+            width: 8px;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 50%;
+        }
+
+        /* 強制設定下一頁按鈕顏色 - 與history.html套用篩選按鈕一致 */
+        #nextPageBtn {
+            background-color: #9db3c6 !important;
+            border-color: #9db3c6 !important;
+            color: white !important;
+        }
+
+        #nextPageBtn:hover,
+        #nextPageBtn:focus,
+        #nextPageBtn:active {
+            background-color: #87a3bb !important;
+            border-color: #87a3bb !important;
+            color: white !important;
         }
     </style>
 </head>
@@ -533,46 +703,103 @@
                         </div>
 
                         <div class="row mt-0">
-                            <div class="col-12 col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card text-center">體重變化趨勢</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="weight-chart"></div>
+                            <!-- 圖表分頁容器 -->
+                            <div class="col-12">
+                                <!-- 分頁指示器 -->
+                                <div class="d-flex justify-content-center mb-4">
+                                    <nav aria-label="圖表分頁">
+                                        <ul class="pagination pagination-sm">
+                                            <li class="page-item active" id="chart-page-1-indicator">
+                                                <a class="page-link" href="#" onclick="showChartPage(1)">基本數據</a>
+                                            </li>
+                                            <li class="page-item" id="chart-page-2-indicator">
+                                                <a class="page-link" href="#" onclick="showChartPage(2)">身體組成</a>
+                                            </li>
+                                            <li class="page-item" id="chart-page-3-indicator">
+                                                <a class="page-link" href="#" onclick="showChartPage(3)">部位數據</a>
+                                            </li>
+                                        </ul>
+                                    </nav>
+                                </div>
+
+                                <!-- 第一頁：基本數據圖表 -->
+                                <div class="chart-page" id="chart-page-1">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h4 class="card text-center">體重變化趨勢</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="weight-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h4 class="card text-center">BMI數值變化趨勢</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="bmi-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="col-12 col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card text-center">身體組成變化</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="body-composition-chart"></div>
+                                <!-- 第二頁：身體組成圖表 -->
+                                <div class="chart-page" id="chart-page-2" style="display: none;">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h4 class="card text-center">身體組成變化</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="body-composition-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h4 class="card text-center">體脂率變化趨勢</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="fat-percentage-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="col-12 col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card text-center">體脂率變化趨勢</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="fat-percentage-chart"></div>
-                                    </div>
-                                </div>
-                            </div>
+                                <!-- 第三頁：部位數據圖表 -->
+                                <div class="chart-page" id="chart-page-3" style="display: none;">
+                                    <div class="row g-3">
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h4 class="card text-center">部位肌肉指數變化</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="muscle-index-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
 
-                            <div class="col-12 col-lg-6">
-                                <div class="card">
-                                    <div class="card-header">
-                                        <h4 class="card text-center">BMI數值變化趨勢</h4>
-                                    </div>
-                                    <div class="card-body">
-                                        <div id="bmi-chart"></div>
+                                        <div class="col-12 col-lg-6">
+                                            <div class="card h-100">
+                                                <div class="card-header">
+                                                    <h4 class="card text-center">部位脂肪指數變化</h4>
+                                                </div>
+                                                <div class="card-body">
+                                                    <div id="fat-index-chart"></div>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -658,22 +885,47 @@
                                 </div>
                             </div>
                         </div>
-                        <div class="card text-center equal-h mt-3">
-                            <div class="card-header">
-                                <h4 class="fw-bold">目標達成率</h4>
+                        
+                        <!-- 右側卡片分頁容器 -->
+                        <div class="right-cards-container mt-3">
+                            <!-- 分頁指示器 -->
+                            <div class="d-flex justify-content-center mb-3">
+                                <nav aria-label="右側卡片分頁">
+                                    <ul class="pagination pagination-sm">
+                                        <li class="page-item active" id="right-card-page-1-indicator">
+                                            <a class="page-link" href="#" onclick="showRightCardPage(1)">目標達成</a>
+                                        </li>
+                                        <li class="page-item" id="right-card-page-2-indicator">
+                                            <a class="page-link" href="#" onclick="showRightCardPage(2)">身體組成</a>
+                                        </li>
+                                    </ul>
+                                </nav>
                             </div>
-                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                                <div id="goal-progress-chart"
-                                    style="width: 100%; aspect-ratio: 1/1; max-height: 200px;"></div>
-                                <p class="mt-3 text-muted">離目標只差一點，加油！</p>
+
+                            <!-- 第一頁：目標達成率 -->
+                            <div class="right-card-page" id="right-card-page-1">
+                                <div class="card equal-h">
+                                    <div class="card-header">
+                                        <h4 class="fw-bold">目標達成率</h4>
+                                    </div>
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                        <div id="goal-progress-chart-page1"
+                                            style="width: 100%; aspect-ratio: 1/1; max-height: 200px;"></div>
+                                        <p class="mt-3 text-muted">離目標只差一點，加油！</p>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="card equal-h mt-3">
-                            <div class="card-header">
-                                <h4 class="text-center">身體組成比例</h4>
-                            </div>
-                            <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                                <div id="body-composition-pie-chart"></div>
+
+                            <!-- 第二頁：身體組成比例 -->
+                            <div class="right-card-page" id="right-card-page-2" style="display: none;">
+                                <div class="card equal-h">
+                                    <div class="card-header">
+                                        <h4 class="text-center">身體組成比例</h4>
+                                    </div>
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                        <div id="body-composition-pie-chart-page2"></div>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -744,64 +996,143 @@
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
+                    <!-- 頁面指示器 -->
+                    <div class="d-flex justify-content-center mb-4">
+                        <div class="d-flex align-items-center">
+                            <div class="page-indicator active" data-page="1">
+                                <span class="page-number">1</span>
+                                <span class="page-label">基本數據</span>
+                            </div>
+                            <div class="page-separator"></div>
+                            <div class="page-indicator" data-page="2">
+                                <span class="page-number">2</span>
+                                <span class="page-label">部位數據</span>
+                            </div>
+                        </div>
+                    </div>
+
                     <form id="healthDataForm">
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="test_date" class="form-label">測量日期</label>
-                                <input type="date" class="form-control" id="test_date" name="test_date">
+                        <!-- 第一頁：基本數據 -->
+                        <div class="page-content" id="page-1">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="test_date" class="form-label">測量日期</label>
+                                    <input type="date" class="form-control" id="test_date" name="test_date">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="age" class="form-label">年齡 *</label>
+                                    <input type="number" class="form-control" id="age" name="age" min="1" max="120"
+                                        required>
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="age" class="form-label">年齡 *</label>
-                                <input type="number" class="form-control" id="age" name="age" min="1" max="120"
-                                    required>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="height_cm" class="form-label">身高 (cm) *</label>
+                                    <input type="number" class="form-control" id="height_cm" name="height_cm" step="0.1"
+                                        min="50" max="250" required>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="weight_kg" class="form-label">體重 (kg) *</label>
+                                    <input type="number" class="form-control" id="weight_kg" name="weight_kg" step="0.1"
+                                        min="20" max="300" required>
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="skeletal_muscle" class="form-label">骨骼肌重 (kg)</label>
+                                    <input type="number" class="form-control" id="skeletal_muscle" name="skeletal_muscle"
+                                        step="0.1">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="body_fat" class="form-label">體脂肪重 (kg)</label>
+                                    <input type="number" class="form-control" id="body_fat" name="body_fat" step="0.1">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="fat_percentage" class="form-label">體脂率 (%)</label>
+                                    <input type="number" class="form-control" id="fat_percentage" name="fat_percentage"
+                                        step="0.1">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="basal_metabolism" class="form-label">基礎代謝量 (kcal)</label>
+                                    <input type="number" class="form-control" id="basal_metabolism" name="basal_metabolism"
+                                        step="0.1">
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="bmi" class="form-label">BMI(系統計算)</label>
+                                    <input type="number" class="form-control" id="bmi" name="bmi" step="0.1">
+                                </div>
                             </div>
                         </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="height_cm" class="form-label">身高 (cm) *</label>
-                                <input type="number" class="form-control" id="height_cm" name="height_cm" step="0.1"
-                                    min="50" max="250" required>
+
+                        <!-- 第二頁：部位數據 -->
+                        <div class="page-content" id="page-2" style="display: none;">
+                            <h6 class="mb-3 text-muted">部位肌肉指數</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="chest_muscle_index" class="form-label">胸部肌肉指數</label>
+                                    <input type="number" class="form-control" id="chest_muscle_index" name="chest_muscle_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="arm_muscle_index" class="form-label">手臂肌肉指數</label>
+                                    <input type="number" class="form-control" id="arm_muscle_index" name="arm_muscle_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="weight_kg" class="form-label">體重 (kg) *</label>
-                                <input type="number" class="form-control" id="weight_kg" name="weight_kg" step="0.1"
-                                    min="20" max="300" required>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="leg_muscle_index" class="form-label">腿部肌肉指數</label>
+                                    <input type="number" class="form-control" id="leg_muscle_index" name="leg_muscle_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="core_muscle_index" class="form-label">核心肌肉指數</label>
+                                    <input type="number" class="form-control" id="core_muscle_index" name="core_muscle_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
                             </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="skeletal_muscle" class="form-label">骨骼肌重 (kg)</label>
-                                <input type="number" class="form-control" id="skeletal_muscle" name="skeletal_muscle"
-                                    step="0.1">
+
+                            <hr class="my-4">
+
+                            <h6 class="mb-3 text-muted">部位脂肪指數</h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="chest_fat_index" class="form-label">胸部脂肪指數</label>
+                                    <input type="number" class="form-control" id="chest_fat_index" name="chest_fat_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="arm_fat_index" class="form-label">手臂脂肪指數</label>
+                                    <input type="number" class="form-control" id="arm_fat_index" name="arm_fat_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
                             </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="body_fat" class="form-label">體脂肪重 (kg)</label>
-                                <input type="number" class="form-control" id="body_fat" name="body_fat" step="0.1">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="fat_percentage" class="form-label">體脂率 (%)</label>
-                                <input type="number" class="form-control" id="fat_percentage" name="fat_percentage"
-                                    step="0.1">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label for="basal_metabolism" class="form-label">基礎代謝量 (kcal)</label>
-                                <input type="number" class="form-control" id="basal_metabolism" name="basal_metabolism"
-                                    step="0.1">
-                            </div>
-                        </div>
-                        <div class="row">
-                            <div class="col-md-6 mb-3">
-                                <label for="bmi" class="form-label">BMI指數</label>
-                                <input type="number" class="form-control" id="bmi" name="bmi" step="0.1">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="leg_fat_index" class="form-label">腿部脂肪指數</label>
+                                    <input type="number" class="form-control" id="leg_fat_index" name="leg_fat_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="core_fat_index" class="form-label">核心脂肪指數</label>
+                                    <input type="number" class="form-control" id="core_fat_index" name="core_fat_index"
+                                        step="0.1" min="0" max="100">
+                                </div>
                             </div>
                         </div>
                     </form>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
-                    <button type="button" class="btn btn-primary" id="saveDataBtn">保存數據</button>
+                <div class="modal-footer" id="modalFooter">
+                    <button type="button" class="btn btn-primary" id="prevPageBtn" style="display: none; background-color: #9db3c6 !important; border-color: #9db3c6 !important; color: white !important;">上一頁</button>
+                    <div class="d-flex gap-2" id="rightButtonsGroup">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                        <button type="button" class="btn btn-primary" id="nextPageBtn" style="background-color: #9db3c6 !important; border-color: #9db3c6 !important; color: white !important;">下一頁</button>
+                        <button type="button" class="btn btn-primary" id="saveDataBtn" style="display: none;">保存數據</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -947,7 +1278,16 @@
                         skeletal_muscle: Array.isArray(data.skeletal_muscle) ? data.skeletal_muscle : [],
                         body_fat: Array.isArray(data.body_fat) ? data.body_fat : [],
                         fat_percentage: Array.isArray(data.fat_percentage) ? data.fat_percentage : [],
-                        bmi: Array.isArray(data.bmi) ? data.bmi : []
+                        bmi: Array.isArray(data.bmi) ? data.bmi : [],
+                        // 部位數據
+                        chest_muscle_index: Array.isArray(data.chest_muscle_index) ? data.chest_muscle_index : [],
+                        arm_muscle_index: Array.isArray(data.arm_muscle_index) ? data.arm_muscle_index : [],
+                        leg_muscle_index: Array.isArray(data.leg_muscle_index) ? data.leg_muscle_index : [],
+                        core_muscle_index: Array.isArray(data.core_muscle_index) ? data.core_muscle_index : [],
+                        chest_fat_index: Array.isArray(data.chest_fat_index) ? data.chest_fat_index : [],
+                        arm_fat_index: Array.isArray(data.arm_fat_index) ? data.arm_fat_index : [],
+                        leg_fat_index: Array.isArray(data.leg_fat_index) ? data.leg_fat_index : [],
+                        core_fat_index: Array.isArray(data.core_fat_index) ? data.core_fat_index : []
                     };
 
                     // 不再用 length 判斷；直接交給各圖表函式自行決定要畫折線還是顯示占位
@@ -955,6 +1295,8 @@
                     createBodyCompositionChart(safe);
                     createFatPercentageChart(safe);
                     createBMIChart(safe);
+                    createMuscleIndexChart(safe);
+                    createFatIndexChart(safe);
                 })
                 .catch(error => {
                     console.error('Error loading chart data:', error);
@@ -963,6 +1305,8 @@
                     showPlaceholder("#body-composition-chart", 390);
                     showPlaceholder("#fat-percentage-chart", 390);
                     showPlaceholder("#bmi-chart", 390);
+                    showPlaceholder("#muscle-index-chart", 390);
+                    showPlaceholder("#fat-index-chart", 390);
                 });
         }
 
@@ -1233,6 +1577,206 @@
             }
         }
 
+        // ============ 5) 部位肌肉指數變化趨勢 ============
+        function createMuscleIndexChart(data) {
+            const el = document.querySelector("#muscle-index-chart");
+            if (!el) {
+                console.error('找不到 #muscle-index-chart 元素');
+                return;
+            }
+            el.innerHTML = '';
+
+            const colorY = '#2c3e50';
+            const chestData = data.chest_muscle_index ? data.chest_muscle_index.filter(v => v !== null) : [];
+            const armData = data.arm_muscle_index ? data.arm_muscle_index.filter(v => v !== null) : [];
+            const legData = data.leg_muscle_index ? data.leg_muscle_index.filter(v => v !== null) : [];
+            const coreData = data.core_muscle_index ? data.core_muscle_index.filter(v => v !== null) : [];
+
+            if (chestData.length === 0 && armData.length === 0 && legData.length === 0 && coreData.length === 0) {
+                renderEmptyApexLine("#muscle-index-chart", {
+                    title: '肌肉指數', yMin: 0, yMax: 100,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
+
+            const series = [];
+            if (chestData.length > 0) series.push({ name: '胸部肌肉指數', data: chestData });
+            if (armData.length > 0) series.push({ name: '手臂肌肉指數', data: armData });
+            if (legData.length > 0) series.push({ name: '腿部肌肉指數', data: legData });
+            if (coreData.length > 0) series.push({ name: '核心肌肉指數', data: coreData });
+
+            const dates = data.dates || [];
+
+            const options = {
+                series: series,
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                colors: ['#8B9DC3', '#A8C8EC', '#C4D4F0', '#E0E8F4'],
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: {
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
+                },
+                yaxis: {
+                    min: 0, max: 100,
+                    title: { text: '肌肉指數', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
+            };
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('部位肌肉指數變化圖表渲染成功');
+            } catch (error) {
+                console.error('部位肌肉指數變化圖表渲染失敗:', error);
+                showPlaceholder("#muscle-index-chart", 390);
+            }
+        }
+
+        // ============ 6) 部位脂肪指數變化趨勢 ============
+        function createFatIndexChart(data) {
+            const el = document.querySelector("#fat-index-chart");
+            if (!el) {
+                console.error('找不到 #fat-index-chart 元素');
+                return;
+            }
+            el.innerHTML = '';
+
+            const colorY = '#2c3e50';
+            const chestData = data.chest_fat_index ? data.chest_fat_index.filter(v => v !== null) : [];
+            const armData = data.arm_fat_index ? data.arm_fat_index.filter(v => v !== null) : [];
+            const legData = data.leg_fat_index ? data.leg_fat_index.filter(v => v !== null) : [];
+            const coreData = data.core_fat_index ? data.core_fat_index.filter(v => v !== null) : [];
+
+            if (chestData.length === 0 && armData.length === 0 && legData.length === 0 && coreData.length === 0) {
+                renderEmptyApexLine("#fat-index-chart", {
+                    title: '脂肪指數', yMin: 0, yMax: 100,
+                    xStart: document.getElementById('start-date').value || null,
+                    xEnd: document.getElementById('end-date').value || null,
+                    color: colorY
+                });
+                return;
+            }
+
+            const series = [];
+            if (chestData.length > 0) series.push({ name: '胸部脂肪指數', data: chestData });
+            if (armData.length > 0) series.push({ name: '手臂脂肪指數', data: armData });
+            if (legData.length > 0) series.push({ name: '腿部脂肪指數', data: legData });
+            if (coreData.length > 0) series.push({ name: '核心脂肪指數', data: coreData });
+
+            const dates = data.dates || [];
+
+            const options = {
+                series: series,
+                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                colors: ['#D4A5A5', '#E8C5C5', '#F2D5D5', '#FCE5E5'],
+                dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
+                stroke: { curve: 'smooth', width: 3 },
+                xaxis: {
+                    categories: dates, tickAmount: 5,
+                    labels: { rotate: 0, formatter: v => new Date(v).toLocaleDateString('zh-TW', { month: 'short', day: 'numeric' }) }
+                },
+                yaxis: {
+                    min: 0, max: 100,
+                    title: { text: '脂肪指數', style: { color: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } },
+                    labels: { style: { colors: colorY, fontWeight: 'normal', fontFamily: 'Nunito, sans-serif' } }
+                },
+                tooltip: { x: { format: 'dd/MM/yyyy' } }
+            };
+            
+            try {
+                new ApexCharts(el, options).render();
+                console.log('部位脂肪指數變化圖表渲染成功');
+            } catch (error) {
+                console.error('部位脂肪指數變化圖表渲染失敗:', error);
+                showPlaceholder("#fat-index-chart", 390);
+            }
+        }
+
+        // ============ 圖表分頁功能 ============
+        let currentChartPage = 1;
+        const totalChartPages = 3;
+
+        function showChartPage(pageNumber) {
+            // 隱藏所有圖表頁面
+            for (let i = 1; i <= totalChartPages; i++) {
+                const page = document.getElementById(`chart-page-${i}`);
+                const indicator = document.getElementById(`chart-page-${i}-indicator`);
+                
+                if (page) {
+                    page.style.display = 'none';
+                }
+                if (indicator) {
+                    indicator.classList.remove('active');
+                }
+            }
+
+            // 顯示選中的頁面
+            const targetPage = document.getElementById(`chart-page-${pageNumber}`);
+            const targetIndicator = document.getElementById(`chart-page-${pageNumber}-indicator`);
+            
+            if (targetPage) {
+                targetPage.style.display = 'block';
+            }
+            if (targetIndicator) {
+                targetIndicator.classList.add('active');
+            }
+
+            currentChartPage = pageNumber;
+            console.log(`切換到圖表第 ${pageNumber} 頁`);
+        }
+
+        // 初始化圖表分頁功能
+        function initializeChartPagination() {
+            // 確保第一頁是顯示的
+            showChartPage(1);
+            console.log('圖表分頁功能初始化完成');
+        }
+
+        // ============ 右側卡片分頁功能 ============
+        let currentRightCardPage = 1;
+        const totalRightCardPages = 2;
+
+        function showRightCardPage(pageNumber) {
+            // 隱藏所有右側卡片頁面
+            for (let i = 1; i <= totalRightCardPages; i++) {
+                const page = document.getElementById(`right-card-page-${i}`);
+                const indicator = document.getElementById(`right-card-page-${i}-indicator`);
+                
+                if (page) {
+                    page.style.display = 'none';
+                }
+                if (indicator) {
+                    indicator.classList.remove('active');
+                }
+            }
+
+            // 顯示選中的頁面
+            const targetPage = document.getElementById(`right-card-page-${pageNumber}`);
+            const targetIndicator = document.getElementById(`right-card-page-${pageNumber}-indicator`);
+            
+            if (targetPage) {
+                targetPage.style.display = 'block';
+            }
+            if (targetIndicator) {
+                targetIndicator.classList.add('active');
+            }
+
+            currentRightCardPage = pageNumber;
+            console.log(`切換到右側卡片第 ${pageNumber} 頁`);
+        }
+
+        // 初始化右側卡片分頁功能
+        function initializeRightCardPagination() {
+            // 確保第一頁是顯示的
+            showRightCardPage(1);
+            console.log('右側卡片分頁功能初始化完成');
+        }
+
         // 初始化時間範圍選擇器
         function initializeDateRange() {
             // 不設置預設值，讓用戶自己選擇
@@ -1280,6 +1824,15 @@
 
         // 載入圖表數據
         loadChartData();
+        
+        // 初始化圖表分頁功能
+        initializeChartPagination();
+        
+        // 初始化右側卡片分頁功能
+        initializeRightCardPagination();
+        
+        // 初始化右側卡片圖表
+        initializeRightCardCharts();
         // 目標達成率圓環圖 - 動態計算
         function createGoalProgressChart() {
             var chartDom = document.querySelector("#goal-progress-chart");
@@ -1417,6 +1970,214 @@
         // 創建目標達成率圖表並保存更新函數
         window.goalProgressChart = createGoalProgressChart();
 
+        // 創建分頁版本的目標達成率圖表
+        function createGoalProgressChartForPage(containerId) {
+            var chartDom = document.querySelector(containerId);
+            if (!chartDom) {
+                console.error('找不到容器:', containerId);
+                return;
+            }
+            var myChart = echarts.init(chartDom);
+
+            // 計算目標達成率
+            function calculateGoalProgress() {
+                const currentWeight = parseFloat(document.getElementById('current-weight').textContent) || 0;
+                const currentFatPercentage = parseFloat(document.getElementById('current-fat-percentage').textContent) || 0;
+                const currentMuscle = parseFloat(document.getElementById('current-muscle').textContent) || 0;
+
+                const gwText = document.getElementById('goal-weight-display').textContent.trim();
+                const gfText = document.getElementById('goal-fat-percentage-display').textContent.trim();
+                const gmText = document.getElementById('goal-muscle-display').textContent.trim();
+
+                const goalWeight = gwText ? parseFloat(gwText) : 0;
+                const goalFatPercentage = gfText ? parseFloat(gfText) : 0;
+                const goalMuscle = gmText ? parseFloat(gmText) : 0;
+
+                // 計算各項指標的達成率 (0-100%)
+                let weightProgress = 0;
+                let fatProgress = 0;
+                let muscleProgress = 0;
+
+                // 體重達成率：基於目前體重與目標體重的差距計算
+                if (currentWeight > 0 && goalWeight > 0) {
+                    if (currentWeight > goalWeight) {
+                        // 減重情況：目前體重 > 目標體重
+                        const startWeight = goalWeight * 1.2;
+                        const totalToLose = startWeight - goalWeight;
+                        const alreadyLost = startWeight - currentWeight;
+                        weightProgress = Math.min(100, Math.max(0, (alreadyLost / totalToLose) * 100));
+                    } else if (currentWeight <= goalWeight) {
+                        weightProgress = 100;
+                    }
+                }
+
+                // 體脂率達成率：基於目前體脂率與目標體脂率的差距計算
+                if (currentFatPercentage > 0 && goalFatPercentage > 0) {
+                    if (currentFatPercentage > goalFatPercentage) {
+                        const startFatPercentage = goalFatPercentage * 1.5;
+                        const totalToReduce = startFatPercentage - goalFatPercentage;
+                        const alreadyReduced = startFatPercentage - currentFatPercentage;
+                        fatProgress = Math.min(100, Math.max(0, (alreadyReduced / totalToReduce) * 100));
+                    } else if (currentFatPercentage <= goalFatPercentage) {
+                        fatProgress = 100;
+                    }
+                }
+
+                // 肌肉量達成率：基於目前肌肉量與目標肌肉量的差距計算
+                if (currentMuscle > 0 && goalMuscle > 0) {
+                    if (currentMuscle < goalMuscle) {
+                        const startMuscle = goalMuscle * 0.8;
+                        const totalToGain = goalMuscle - startMuscle;
+                        const alreadyGained = currentMuscle - startMuscle;
+                        muscleProgress = Math.min(100, Math.max(0, (alreadyGained / totalToGain) * 100));
+                    } else if (currentMuscle >= goalMuscle) {
+                        muscleProgress = 100;
+                    }
+                }
+
+                // 計算綜合達成率 (加權平均)
+                const overallProgress = Math.round((weightProgress * 0.4 + fatProgress * 0.3 + muscleProgress * 0.3));
+                return Math.min(100, Math.max(0, overallProgress));
+            }
+
+            // 更新圖表
+            function updateGoalProgressChart(progress) {
+                const progressDecimal = progress / 100;
+
+                var option = {
+                    series: [{
+                        type: 'liquidFill',
+                        data: [progressDecimal],
+                        radius: '65%',
+                        center: ['50%', '50%'],
+                        outline: {
+                            show: true,
+                            borderDistance: 3,
+                            itemStyle: {
+                                borderWidth: 2,
+                                borderColor: '#6b7b8c'
+                            }
+                        },
+                        backgroundStyle: { color: '#f5f7fa' },
+                        label: {
+                            normal: {
+                                formatter: progress + '%',
+                                fontSize: 20,
+                                color: '#34495e',
+                                fontWeight: 'bold'
+                            }
+                        },
+                        color: [{
+                            type: 'linear',
+                            x: 0, y: 0, x2: 0, y2: 1,
+                            colorStops: [
+                                { offset: 0, color: '#9c99a2' },
+                                { offset: 1, color: '#cddce6' }
+                            ]
+                        }]
+                    }]
+                };
+
+                myChart.setOption(option);
+            }
+
+            // 初始計算並更新圖表
+            const initialProgress = calculateGoalProgress();
+            updateGoalProgressChart(initialProgress);
+
+            // 讓圖表跟隨視窗大小縮放
+            window.addEventListener("resize", function () {
+                myChart.resize();
+            });
+
+            return {
+                update: function () {
+                    const progress = calculateGoalProgress();
+                    updateGoalProgressChart(progress);
+                }
+            };
+        }
+
+        // 創建分頁版本的身體組成比例圓餅圖
+        function createBodyCompositionPieChartForPage(containerId) {
+            const chartContainer = document.querySelector(containerId);
+            if (!chartContainer) {
+                console.error('找不到容器:', containerId);
+                return;
+            }
+            chartContainer.innerHTML = '';
+
+            fetch('get_health_stats.php')
+                .then(response => response.json())
+                .then(data => {
+                    const latestSkeletal = parseFloat(data.latest_skeletal_muscle) || 0;
+                    const latestBodyFat = parseFloat(data.latest_body_fat) || 0;
+                    const latestWeight = parseFloat(data.latest_weight) || 0;
+                    const other = latestWeight - latestSkeletal - latestBodyFat;
+
+                    const chart = echarts.init(chartContainer);
+                    const option = {
+                        tooltip: {
+                            trigger: 'item',
+                            formatter: '{a} <br/>{b}: {c} kg ({d}%)'
+                        },
+                        legend: {
+                            orient: 'horizontal',
+                            bottom: '5%',
+                            data: ['骨骼肌', '體脂肪', '其他']
+                        },
+                        series: [{
+                            name: '身體組成',
+                            type: 'pie',
+                            radius: ['40%', '70%'],
+                            center: ['50%', '45%'],
+                            avoidLabelOverlap: false,
+                            label: {
+                                show: false,
+                                position: 'center'
+                            },
+                            emphasis: {
+                                label: {
+                                    show: true,
+                                    fontSize: '20',
+                                    fontWeight: 'bold'
+                                }
+                            },
+                            labelLine: {
+                                show: false
+                            },
+                            data: [
+                                { value: latestSkeletal, name: '骨骼肌', itemStyle: { color: '#8B9DC3' } },
+                                { value: latestBodyFat, name: '體脂肪', itemStyle: { color: '#D4A5A5' } },
+                                { value: other, name: '其他', itemStyle: { color: '#E8C5C5' } }
+                            ]
+                        }]
+                    };
+
+                    chart.setOption(option);
+
+                    // 讓圖表跟隨視窗大小縮放
+                    window.addEventListener("resize", function () {
+                        chart.resize();
+                    });
+                })
+                .catch(error => {
+                    console.error('載入健康統計數據失敗:', error);
+                    chartContainer.innerHTML = '<p class="text-muted text-center">載入數據失敗</p>';
+                });
+        }
+
+        // 初始化右側卡片圖表
+        function initializeRightCardCharts() {
+            // 創建目標達成率圖表
+            createGoalProgressChartForPage('#goal-progress-chart-page1');
+            
+            // 創建身體組成比例圖表
+            createBodyCompositionPieChartForPage('#body-composition-pie-chart-page2');
+            
+            console.log('右側卡片圖表初始化完成');
+        }
+
         // 創建身體組成比例圓餅圖
         function createBodyCompositionPieChart() {
             // 清除舊的圖表
@@ -1489,6 +2250,13 @@
         // 載入身體組成比例圖表
         createBodyCompositionPieChart();
 
+        // 當新增數據彈出視窗打開時，不做任何操作，保持用戶數據
+        document.getElementById('addDataModal').addEventListener('show.bs.modal', function () {
+            console.log('彈出視窗打開 - 當前頁面:', currentPage);
+            console.log('彈出視窗打開 - 表單數據:', new FormData(document.getElementById('healthDataForm')));
+            // 不做任何操作，保持用戶數據
+        });
+
         // 設定目標功能
         document.getElementById('saveGoalBtn').addEventListener('click', function () {
             const goalWeight = document.getElementById('goal_weight').value;
@@ -1521,6 +2289,120 @@
             // 顯示成功提示
             showModal('目標設定成功！', '提示！');
         });
+
+        // 多頁面表單管理
+        let currentPage = 1;
+        const totalPages = 2;
+
+        // 頁面切換功能
+        function showPage(pageNumber) {
+            console.log('切換到頁面:', pageNumber, '從頁面:', currentPage);
+            
+            // 隱藏所有彈出視窗內的頁面（避免影響主畫面）
+            document.querySelectorAll('#addDataModal .page-content').forEach(page => {
+                page.style.display = 'none';
+            });
+            
+            // 顯示指定頁面
+            document.getElementById(`page-${pageNumber}`).style.display = 'block';
+            
+            // 更新頁面指示器
+            document.querySelectorAll('.page-indicator').forEach(indicator => {
+                indicator.classList.remove('active');
+            });
+            document.querySelector(`[data-page="${pageNumber}"]`).classList.add('active');
+            
+            // 更新按鈕顯示和布局
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+            const saveBtn = document.getElementById('saveDataBtn');
+            const modalFooter = document.getElementById('modalFooter');
+            
+            if (pageNumber === 1) {
+                // 第一頁：按鈕回到右下角
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'inline-block';
+                saveBtn.style.display = 'none';
+                modalFooter.className = 'modal-footer';
+            } else if (pageNumber === totalPages) {
+                // 第二頁：上一頁在左下角，其他在右下角
+                prevBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'none';
+                saveBtn.style.display = 'inline-block';
+                modalFooter.className = 'modal-footer d-flex justify-content-between';
+            }
+            
+            currentPage = pageNumber;
+            console.log('頁面切換完成，當前頁面:', currentPage);
+        }
+
+        // 下一頁按鈕事件
+        document.getElementById('nextPageBtn').addEventListener('click', function () {
+            if (validateCurrentPage()) {
+                showPage(currentPage + 1);
+            }
+        });
+
+        // 上一頁按鈕事件
+        document.getElementById('prevPageBtn').addEventListener('click', function () {
+            showPage(currentPage - 1);
+        });
+
+        // 頁面指示器點擊事件
+        document.querySelectorAll('.page-indicator').forEach(indicator => {
+            indicator.addEventListener('click', function () {
+                const targetPage = parseInt(this.getAttribute('data-page'));
+                if (targetPage < currentPage || validateCurrentPage()) {
+                    showPage(targetPage);
+                }
+            });
+        });
+
+        // 驗證當前頁面
+        function validateCurrentPage() {
+            if (currentPage === 1) {
+                // 驗證第一頁的必填欄位
+                const requiredFields = ['age', 'height_cm', 'weight_kg'];
+                for (let field of requiredFields) {
+                    const input = document.getElementById(field);
+                    if (!input.value.trim()) {
+                        showModal(`請填寫${input.previousElementSibling.textContent}`, '提示！');
+                        input.focus();
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+
+        // 重置表單到第一頁
+        function resetModalToFirstPage() {
+            showPage(1);
+            // 只重置第一頁的基本數據欄位
+            const firstPageFields = ['test_date', 'age', 'height_cm', 'weight_kg', 'skeletal_muscle', 'body_fat', 'fat_percentage', 'basal_metabolism', 'bmi'];
+            firstPageFields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.value = '';
+                }
+            });
+            
+            // 重置第二頁的部位數據欄位
+            const secondPageFields = ['chest_muscle_index', 'arm_muscle_index', 'leg_muscle_index', 'core_muscle_index', 'chest_fat_index', 'arm_fat_index', 'leg_fat_index', 'core_fat_index'];
+            secondPageFields.forEach(fieldId => {
+                const element = document.getElementById(fieldId);
+                if (element) {
+                    element.value = '';
+                }
+            });
+            
+            // 重新設置今天的日期為默認值
+            const today = new Date();
+            const year = today.getFullYear();
+            const month = String(today.getMonth() + 1).padStart(2, '0');
+            const day = String(today.getDate()).padStart(2, '0');
+            document.getElementById('test_date').value = `${year}-${month}-${day}`;
+        }
 
         // 保存數據按鈕點擊事件
         document.getElementById('saveDataBtn').addEventListener('click', function () {
@@ -1562,14 +2444,8 @@
                         const addDataModal = bootstrap.Modal.getInstance(document.getElementById('addDataModal'));
                         addDataModal.hide();
 
-                        // 重置表單
-                        form.reset();
-                        // 重新設置今天的日期為默認值
-                        const today = new Date();
-                        const year = today.getFullYear();
-                        const month = String(today.getMonth() + 1).padStart(2, '0');
-                        const day = String(today.getDate()).padStart(2, '0');
-                        document.getElementById('test_date').value = `${year}-${month}-${day}`;
+                        // 重置表單到第一頁（保存成功後才清空）
+                        resetModalToFirstPage();
 
                         // 重新載入統計數據
                         fetch('get_health_stats.php')

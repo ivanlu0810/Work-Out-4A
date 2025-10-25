@@ -106,7 +106,73 @@ try {
             ]);
     
     if ($result) {
-        echo json_encode(['success' => true, 'message' => '健康數據已保存！']);
+        // 基本健康數據保存成功，現在處理部位數據
+        $bodyPartDataSaved = true;
+        
+        // 檢查是否有部位數據需要保存
+        $hasBodyPartData = false;
+        $bodyPartFields = [
+            'chest_muscle_index', 'arm_muscle_index', 'leg_muscle_index', 'core_muscle_index',
+            'chest_fat_index', 'arm_fat_index', 'leg_fat_index', 'core_fat_index'
+        ];
+        
+        foreach ($bodyPartFields as $field) {
+            if (isset($data[$field]) && !empty($data[$field])) {
+                $hasBodyPartData = true;
+                break;
+            }
+        }
+        
+        // 如果有部位數據，保存到body_part_data表
+        if ($hasBodyPartData) {
+            try {
+                $bodyPartSql = "INSERT INTO body_part_data (
+                    user_id, record_id, measurement_date,
+                    chest_muscle_index, arm_muscle_index, leg_muscle_index, core_muscle_index,
+                    chest_fat_index, arm_fat_index, leg_fat_index, core_fat_index
+                ) VALUES (
+                    :user_id, :record_id, :measurement_date,
+                    :chest_muscle_index, :arm_muscle_index, :leg_muscle_index, :core_muscle_index,
+                    :chest_fat_index, :arm_fat_index, :leg_fat_index, :core_fat_index
+                )";
+                
+                $bodyPartStmt = $pdo->prepare($bodyPartSql);
+                
+                $bodyPartResult = $bodyPartStmt->execute([
+                    ':user_id' => $_SESSION['user_id'] ?? 1,
+                    ':record_id' => $record_id,
+                    ':measurement_date' => $test_date,
+                    ':chest_muscle_index' => isset($data['chest_muscle_index']) && !empty($data['chest_muscle_index']) ? floatval($data['chest_muscle_index']) : null,
+                    ':arm_muscle_index' => isset($data['arm_muscle_index']) && !empty($data['arm_muscle_index']) ? floatval($data['arm_muscle_index']) : null,
+                    ':leg_muscle_index' => isset($data['leg_muscle_index']) && !empty($data['leg_muscle_index']) ? floatval($data['leg_muscle_index']) : null,
+                    ':core_muscle_index' => isset($data['core_muscle_index']) && !empty($data['core_muscle_index']) ? floatval($data['core_muscle_index']) : null,
+                    ':chest_fat_index' => isset($data['chest_fat_index']) && !empty($data['chest_fat_index']) ? floatval($data['chest_fat_index']) : null,
+                    ':arm_fat_index' => isset($data['arm_fat_index']) && !empty($data['arm_fat_index']) ? floatval($data['arm_fat_index']) : null,
+                    ':leg_fat_index' => isset($data['leg_fat_index']) && !empty($data['leg_fat_index']) ? floatval($data['leg_fat_index']) : null,
+                    ':core_fat_index' => isset($data['core_fat_index']) && !empty($data['core_fat_index']) ? floatval($data['core_fat_index']) : null
+                ]);
+                
+                if (!$bodyPartResult) {
+                    $bodyPartDataSaved = false;
+                }
+                
+            } catch (PDOException $e) {
+                $bodyPartDataSaved = false;
+                error_log("部位數據保存失敗: " . $e->getMessage());
+            }
+        }
+        
+        // 根據保存結果返回響應
+        if ($bodyPartDataSaved) {
+            $message = '健康數據已保存！';
+            if ($hasBodyPartData) {
+                $message .= ' 部位數據也已保存。';
+            }
+            echo json_encode(['success' => true, 'message' => $message]);
+        } else {
+            echo json_encode(['success' => true, 'message' => '基本健康數據已保存，但部位數據保存失敗。']);
+        }
+        
     } else {
         http_response_code(500);
         echo json_encode(['error' => '數據保存失敗']);
