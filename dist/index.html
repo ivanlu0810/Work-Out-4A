@@ -271,7 +271,7 @@
         #bmi-chart,
         #muscle-index-chart,
         #fat-index-chart {
-            min-height: 390px;
+            min-height: 550px;
         }
 
         /* 圖表分頁樣式 */
@@ -311,8 +311,9 @@
         }
 
         .pagination .page-link {
-            color: #6c757d;
-            border: 1px solid #dee2e6;
+            color: #6b6b6b;
+            background-color: #d9d6d6;
+            border: none;
             padding: 0.5rem 1rem;
             margin: 0 0.25rem;
             border-radius: 0.375rem;
@@ -320,21 +321,19 @@
         }
 
         .pagination .page-link:hover {
-            color: #9db3c6;
-            background-color: #f8f9fa;
-            border-color: #9db3c6;
+            color: #4a4a4a;
+            background-color: #c9c6c6;
         }
 
         .pagination .page-item.active .page-link {
-            background-color: #9db3c6;
-            border-color: #9db3c6;
-            color: white;
+            background-color: #d9d6d6;
+            color: #3a3a3a;
+            font-weight: 600;
         }
 
         .pagination .page-item.active .page-link:hover {
-            background-color: #87a3bb;
-            border-color: #87a3bb;
-            color: white;
+            background-color: #c9c6c6;
+            color: #3a3a3a;
         }
 
         /* 右側卡片分頁樣式 */
@@ -747,8 +746,8 @@
                                 </div>
 
                                 <!-- 第一頁：基本數據圖表 -->
-                                <div class="chart-page" id="chart-page-1">
-                                    <div class="row g-3">
+                                <div class="chart-page" id="chart-page-1" style="flex: 1; min-height: 400px;">
+                                    <div class="row g-3 h-100">
                                         <div class="col-12 col-lg-6">
                                             <div class="card h-100">
                                                 <div class="card-header">
@@ -774,8 +773,8 @@
                                 </div>
 
                                 <!-- 第二頁：身體組成圖表 -->
-                                <div class="chart-page" id="chart-page-2" style="display: none;">
-                                    <div class="row g-3">
+                                <div class="chart-page" id="chart-page-2" style="display: none; flex: 1; min-height: 400px;">
+                                    <div class="row g-3 h-100">
                                         <div class="col-12 col-lg-6">
                                             <div class="card h-100">
                                                 <div class="card-header">
@@ -801,8 +800,8 @@
                                 </div>
 
                                 <!-- 第三頁：部位數據圖表 -->
-                                <div class="chart-page" id="chart-page-3" style="display: none;">
-                                    <div class="row g-3">
+                                <div class="chart-page" id="chart-page-3" style="display: none; flex: 1; min-height: 400px;">
+                                    <div class="row g-3 h-100">
                                         <div class="col-12 col-lg-6">
                                             <div class="card h-100">
                                                 <div class="card-header">
@@ -930,9 +929,9 @@
                             <div class="right-card-page" id="right-card-page-1">
                                 <div class="card equal-h">
                                     <div class="card-header">
-                                        <h4 class="fw-bold">目標達成率</h4>
+                                        <h4 class="fw-bold text-center">目標達成率</h4>
                                     </div>
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
+                                    <div class="card-body d-flex flex-column justify-content-center align-items-center" style="min-height: 320px;">
                                         <div id="goal-progress-chart-page1"
                                             style="width: 100%; aspect-ratio: 1/1; max-height: 200px;"></div>
                                         <p class="mt-3 text-muted">離目標只差一點，加油！</p>
@@ -946,9 +945,9 @@
                                     <div class="card-header">
                                         <h4 class="text-center">身體組成比例</h4>
                                     </div>
-                                    <div class="card-body d-flex flex-column justify-content-center align-items-center">
-                                        <div id="body-composition-pie-chart-page2"></div>
-                                    </div>
+                                <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 320px;">
+                                    <div id="body-composition-pie-chart-page2" style="width: 100%; height: 100%;"></div>
+                                </div>
                                 </div>
                             </div>
                         </div>
@@ -1325,12 +1324,12 @@
                 .catch(error => {
                     console.error('Error loading chart data:', error);
                     // 後端掛掉或網路錯誤時，也顯示占位，避免整塊塌陷
-                    showPlaceholder("#weight-chart", 390);
-                    showPlaceholder("#body-composition-chart", 390);
-                    showPlaceholder("#fat-percentage-chart", 390);
-                    showPlaceholder("#bmi-chart", 390);
-                    showPlaceholder("#muscle-index-chart", 390);
-                    showPlaceholder("#fat-index-chart", 390);
+                    showPlaceholder("#weight-chart", 400);
+                    showPlaceholder("#body-composition-chart", 400);
+                    showPlaceholder("#fat-percentage-chart", 400);
+                    showPlaceholder("#bmi-chart", 400);
+                    showPlaceholder("#muscle-index-chart", 400);
+                    showPlaceholder("#fat-index-chart", 400);
                 });
         }
 
@@ -1364,7 +1363,7 @@
 
             const options = {
                 series: [{ name: '', data: new Array(xCategories.length).fill(null) }],
-                chart: { type: 'line', height: 390, toolbar: { show: false }, animations: { enabled: false } },
+                chart: { type: 'line', height: 550, toolbar: { show: false }, animations: { enabled: false } },
                 stroke: { curve: 'smooth', width: 3 },
                 grid: { strokeDashArray: 3 },
                 xaxis: {
@@ -1426,7 +1425,7 @@
 
             const options = {
                 series: [{ name: '體重 (kg)', data: seriesData }],
-                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                chart: { type: 'line', height: 550, toolbar: { show: false } },
                 colors: ['#AB8B8B'],
                 dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
                 stroke: { curve: 'smooth', width: 3 },
@@ -1446,7 +1445,7 @@
                 console.log('體重變化趨勢圖表渲染成功');
             } catch (error) {
                 console.error('體重變化趨勢圖表渲染失敗:', error);
-                showPlaceholder("#weight-chart", 390);
+                showPlaceholder("#weight-chart", 400);
             }
         }
 
@@ -1479,7 +1478,7 @@
                     { name: '骨骼肌重 (kg)', data: skeletal },
                     { name: '體脂肪重 (kg)', data: fat }
                 ],
-                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                chart: { type: 'line', height: 550, toolbar: { show: false } },
                 colors: ['#99898C', '#60575A'],
                 dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
                 stroke: { curve: 'smooth', width: 3 },
@@ -1528,7 +1527,7 @@
 
             const options = {
                 series: [{ name: '體脂率 (%)', data: seriesData }],
-                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                chart: { type: 'line', height: 550, toolbar: { show: false } },
                 colors: ['#745E60'],
                 dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
                 stroke: { curve: 'smooth', width: 3 },
@@ -1577,7 +1576,7 @@
 
             const options = {
                 series: [{ name: 'BMI', data: seriesData }],
-                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                chart: { type: 'line', height: 550, toolbar: { show: false } },
                 colors: ['#9C7178'],
                 dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
                 stroke: { curve: 'smooth', width: 3 },
@@ -1597,7 +1596,7 @@
                 console.log('BMI變化趨勢圖表渲染成功');
             } catch (error) {
                 console.error('BMI變化趨勢圖表渲染失敗:', error);
-                showPlaceholder("#bmi-chart", 390);
+                showPlaceholder("#bmi-chart", 400);
             }
         }
 
@@ -1636,7 +1635,7 @@
 
             const options = {
                 series: series,
-                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                chart: { type: 'line', height: 550, toolbar: { show: false } },
                 colors: ['#8B9DC3', '#A8C8EC', '#C4D4F0', '#E0E8F4'],
                 dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
                 stroke: { curve: 'smooth', width: 3 },
@@ -1696,7 +1695,7 @@
 
             const options = {
                 series: series,
-                chart: { type: 'line', height: 390, toolbar: { show: false } },
+                chart: { type: 'line', height: 550, toolbar: { show: false } },
                 colors: ['#D4A5A5', '#E8C5C5', '#F2D5D5', '#FCE5E5'],
                 dataLabels: { enabled: true, formatter: v => v.toFixed(1) },
                 stroke: { curve: 'smooth', width: 3 },
@@ -1859,7 +1858,16 @@
         initializeRightCardCharts();
         // 目標達成率圓環圖 - 動態計算
         function createGoalProgressChart() {
-            var chartDom = document.querySelector("#goal-progress-chart");
+            var chartDom = document.querySelector("#goal-progress-chart-page1");
+            if (!chartDom) {
+                console.error('找不到 #goal-progress-chart-page1 元素，跳過初始化');
+                return {
+                    update: function() {
+                        console.log('圖表未初始化，跳過更新');
+                    }
+                };
+            }
+            
             var myChart = echarts.init(chartDom);
 
             // 計算目標達成率
@@ -1876,6 +1884,14 @@
                 const goalFatPercentage = gfText ? parseFloat(gfText) : 0;
                 const goalMuscle = gmText ? parseFloat(gmText) : 0;
 
+                // 調試信息
+                console.log('目標達成率計算調試:');
+                console.log('目前體重:', currentWeight);
+                console.log('目前體脂率:', currentFatPercentage);
+                console.log('目前肌肉量:', currentMuscle);
+                console.log('目標體重:', goalWeight);
+                console.log('目標體脂率:', goalFatPercentage);
+                console.log('目標肌肉量:', goalMuscle);
 
                 // 計算各項指標的達成率 (0-100%)
                 let weightProgress = 0;
@@ -1927,8 +1943,36 @@
                     }
                 }
 
+                // 如果沒有設定任何目標，返回 0
+                if (goalWeight === 0 && goalFatPercentage === 0 && goalMuscle === 0) {
+                    console.log('沒有設定任何目標，達成率為 0%');
+                    return 0;
+                }
+
                 // 計算綜合達成率 (加權平均)
-                const overallProgress = Math.round((weightProgress * 0.4 + fatProgress * 0.3 + muscleProgress * 0.3));
+                let totalWeight = 0;
+                let weightedSum = 0;
+
+                if (goalWeight > 0) {
+                    weightedSum += weightProgress * 0.4;
+                    totalWeight += 0.4;
+                }
+                if (goalFatPercentage > 0) {
+                    weightedSum += fatProgress * 0.3;
+                    totalWeight += 0.3;
+                }
+                if (goalMuscle > 0) {
+                    weightedSum += muscleProgress * 0.3;
+                    totalWeight += 0.3;
+                }
+
+                const overallProgress = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
+
+                console.log('各項達成率:');
+                console.log('體重達成率:', weightProgress + '%');
+                console.log('體脂率達成率:', fatProgress + '%');
+                console.log('肌肉量達成率:', muscleProgress + '%');
+                console.log('綜合達成率:', overallProgress + '%');
 
                 return Math.min(100, Math.max(0, overallProgress));
             }
@@ -1991,16 +2035,26 @@
                 }
             };
         }
-        // 創建目標達成率圖表並保存更新函數
-        window.goalProgressChart = createGoalProgressChart();
+        
+        // 延遲初始化目標達成率圖表，確保 DOM 完全載入
+        setTimeout(() => {
+            console.log('開始初始化目標達成率圖表...');
+            window.goalProgressChart = createGoalProgressChart();
+            console.log('目標達成率圖表初始化完成');
+        }, 500);
 
         // 創建分頁版本的目標達成率圖表
         function createGoalProgressChartForPage(containerId) {
             var chartDom = document.querySelector(containerId);
             if (!chartDom) {
                 console.error('找不到容器:', containerId);
-                return;
+                return {
+                    update: function() {
+                        console.log('分頁圖表未初始化，跳過更新');
+                    }
+                };
             }
+            
             var myChart = echarts.init(chartDom);
 
             // 計算目標達成率
@@ -2059,8 +2113,30 @@
                     }
                 }
 
+                // 如果沒有設定任何目標，返回 0
+                if (goalWeight === 0 && goalFatPercentage === 0 && goalMuscle === 0) {
+                    console.log('分頁版本：沒有設定任何目標，達成率為 0%');
+                    return 0;
+                }
+
                 // 計算綜合達成率 (加權平均)
-                const overallProgress = Math.round((weightProgress * 0.4 + fatProgress * 0.3 + muscleProgress * 0.3));
+                let totalWeight = 0;
+                let weightedSum = 0;
+
+                if (goalWeight > 0) {
+                    weightedSum += weightProgress * 0.4;
+                    totalWeight += 0.4;
+                }
+                if (goalFatPercentage > 0) {
+                    weightedSum += fatProgress * 0.3;
+                    totalWeight += 0.3;
+                }
+                if (goalMuscle > 0) {
+                    weightedSum += muscleProgress * 0.3;
+                    totalWeight += 0.3;
+                }
+
+                const overallProgress = totalWeight > 0 ? Math.round(weightedSum / totalWeight) : 0;
                 return Math.min(100, Math.max(0, overallProgress));
             }
 
@@ -2130,55 +2206,98 @@
                 return;
             }
             chartContainer.innerHTML = '';
+            console.log('開始創建身體組成比例圖表:', containerId);
 
             fetch('get_health_stats.php')
-                .then(response => response.json())
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('HTTP ' + response.status);
+                    }
+                    return response.json();
+                })
                 .then(data => {
+                    console.log('獲取到健康統計數據:', data);
                     const latestSkeletal = parseFloat(data.latest_skeletal_muscle) || 0;
                     const latestBodyFat = parseFloat(data.latest_body_fat) || 0;
                     const latestWeight = parseFloat(data.latest_weight) || 0;
                     const other = latestWeight - latestSkeletal - latestBodyFat;
 
+                    console.log('身體組成數據:', {latestSkeletal, latestBodyFat, latestWeight, other});
+
                     const chart = echarts.init(chartContainer);
-                    const option = {
-                        tooltip: {
-                            trigger: 'item',
-                            formatter: '{a} <br/>{b}: {c} kg ({d}%)'
-                        },
-                        legend: {
-                            orient: 'horizontal',
-                            bottom: '5%',
-                            data: ['骨骼肌', '體脂肪', '其他']
-                        },
-                        series: [{
-                            name: '身體組成',
-                            type: 'pie',
-                            radius: ['40%', '70%'],
-                            center: ['50%', '45%'],
-                            avoidLabelOverlap: false,
-                            label: {
-                                show: false,
-                                position: 'center'
-                            },
-                            emphasis: {
-                                label: {
-                                    show: true,
-                                    fontSize: '20',
-                                    fontWeight: 'bold'
-                                }
-                            },
-                            labelLine: {
-                                show: false
-                            },
-                            data: [
-                                { value: latestSkeletal, name: '骨骼肌', itemStyle: { color: '#8B9DC3' } },
-                                { value: latestBodyFat, name: '體脂肪', itemStyle: { color: '#D4A5A5' } },
-                                { value: other, name: '其他', itemStyle: { color: '#E8C5C5' } }
-                            ]
-                        }]
-                    };
+        const option = {
+            tooltip: {
+                trigger: 'item',
+                formatter: '{a} <br/>{b}: {c} kg ({d}%)',
+                backgroundColor: 'rgba(0,0,0,0.8)',
+                textStyle: {
+                    color: '#fff',
+                    fontSize: 14
+                }
+            },
+            legend: {
+                orient: 'horizontal',
+                bottom: '5%',
+                left: 'center',
+                itemGap: 15,
+                textStyle: {
+                    fontSize: 10,
+                    fontWeight: 'normal',
+                    color: '#333'
+                },
+                data: ['骨骼肌', '體脂肪', '其他']
+            },
+            series: [{
+                name: '身體組成',
+                type: 'pie',
+                radius: ['15%', '55%'],
+                center: ['50%', '40%'],
+                avoidLabelOverlap: true,
+                label: {
+                    show: true,
+                    position: 'outside',
+                    formatter: '{b}\n{d}%',
+                    fontSize: 12,
+                    fontWeight: 'normal',
+                    color: '#333',
+                    overflow: 'truncate',
+                    width: 100,
+                    lineHeight: 18
+                },
+                emphasis: {
+                    label: {
+                        show: true,
+                        fontSize: '14',
+                        fontWeight: 'normal',
+                        position: 'outside',
+                        formatter: '{b}\n{d}%',
+                        lineHeight: 18
+                    },
+                    itemStyle: {
+                        shadowBlur: 8,
+                        shadowOffsetX: 0,
+                        shadowColor: 'rgba(0, 0, 0, 0.3)'
+                    },
+                    scaleSize: 5
+                },
+                labelLine: {
+                    show: true,
+                    length: 35,
+                    length2: 25,
+                    lineStyle: {
+                        width: 2
+                    }
+                },
+                data: [
+                    { value: latestSkeletal, name: '骨骼肌', itemStyle: { color: '#B8C5D1' } },
+                    { value: latestBodyFat, name: '體脂肪', itemStyle: { color: '#E2C4C4' } },
+                    { value: other, name: '其他', itemStyle: { color: '#D1D5DB' } }
+                ]
+            }]
+        };
 
                     chart.setOption(option);
+                    console.log('身體組成比例圖表渲染成功');
 
                     // 讓圖表跟隨視窗大小縮放
                     window.addEventListener("resize", function () {
@@ -2281,11 +2400,28 @@
             // 不做任何操作，保持用戶數據
         });
 
+        // 成功提示 modal 關閉時清理 backdrop
+        document.getElementById('successModal').addEventListener('hidden.bs.modal', function () {
+            // 清理 backdrop
+            const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+            existingBackdrops.forEach(backdrop => backdrop.remove());
+            
+            // 確保 body 狀態正確
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        });
+
         // 設定目標功能
         document.getElementById('saveGoalBtn').addEventListener('click', function () {
+            const saveBtn = document.getElementById('saveGoalBtn');
             const goalWeight = document.getElementById('goal_weight').value;
             const goalFatPercentage = document.getElementById('goal_fat_percentage').value;
             const goalMuscle = document.getElementById('goal_muscle').value;
+
+            // 設置按鈕載入狀態
+            saveBtn.disabled = true;
+            saveBtn.textContent = '保存中...';
 
             // 更新顯示的目標值
             document.getElementById('goal-weight-display').textContent = goalWeight;
@@ -2298,20 +2434,37 @@
                 goal_weight: goalWeight,
                 goal_fat_percentage: goalFatPercentage,
                 goal_muscle: goalMuscle
+            })
+            .then(() => {
+                // 恢復按鈕狀態
+                saveBtn.disabled = false;
+                saveBtn.textContent = '設定目標';
+
+                // 關閉設定目標視窗
+                const setGoalModal = bootstrap.Modal.getInstance(document.getElementById('setGoalModal'));
+                if (setGoalModal) {
+                    setGoalModal.hide();
+                }
+                
+                // 等待 modal 完全關閉後再顯示成功提示
+                setTimeout(() => {
+                    // 更新目標達成率圖表
+                    if (window.goalProgressChart) {
+                        window.goalProgressChart.update();
+                    }
+
+                    // 顯示成功提示
+                    showModal('目標設定成功！', '提示！');
+                }, 500);
+            })
+            .catch((error) => {
+                // 恢復按鈕狀態
+                saveBtn.disabled = false;
+                saveBtn.textContent = '設定目標';
+                
+                console.error('保存目標失敗:', error);
+                showModal('保存目標時發生錯誤，請稍後再試', '錯誤');
             });
-
-            // 關閉設定目標視窗
-            const setGoalModal = bootstrap.Modal.getInstance(document.getElementById('setGoalModal'));
-            setGoalModal.hide();
-
-            // 更新目標達成率圖表
-            if (window.goalProgressChart) {
-                window.goalProgressChart.update();
-            }
-
-            // 顯示成功提示
-            // 顯示成功提示
-            showModal('目標設定成功！', '提示！');
         });
 
         // 多頁面表單管理
@@ -2528,7 +2681,7 @@
         });
 
         // 顯示「暫無數據」的占位畫面（維持高度避免排版縮掉）
-        function showPlaceholder(containerSelector, heightPx = 390) {
+        function showPlaceholder(containerSelector, heightPx = 550) {
             const el = document.querySelector(containerSelector);
             el.innerHTML = '';
             el.style.height = heightPx + 'px';
@@ -2542,7 +2695,13 @@
             const msgEl = document.getElementById('successMessage');
             if (titleEl) titleEl.textContent = title;
             if (msgEl) msgEl.textContent = message;
-            new bootstrap.Modal(document.getElementById('successModal')).show();
+            
+            const modal = new bootstrap.Modal(document.getElementById('successModal'), {
+                backdrop: true,
+                keyboard: true,
+                focus: true
+            });
+            modal.show();
         }
 
         // ========= 目標儲存/載入（資料庫版本） =========
@@ -2584,10 +2743,10 @@
             const userId = goals.user_id;
             if (!userId || userId === 'guest') {
                 console.error('無效的使用者ID，無法儲存目標');
-                return;
+                return Promise.reject(new Error('無效的使用者ID'));
             }
 
-            fetch('save_goals_mysqli.php', {
+            return fetch('save_goals_mysqli.php', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -2603,20 +2762,23 @@
             .then(result => {
                 if (result.success) {
                     console.log('健康目標儲存成功:', result.message);
+                    return result;
                 } else {
                     console.error('儲存目標失敗:', result.error);
-                    showModal(result.error || '儲存目標時發生錯誤', '錯誤');
+                    throw new Error(result.error || '儲存目標時發生錯誤');
                 }
             })
             .catch(error => {
                 console.error('儲存健康目標失敗:', error);
-                showModal('網路錯誤，請稍後再試', '錯誤');
+                throw error;
             });
         }
 
         function applyGoalsToUI(goals) {
             if (!goals) return;
             const { goal_weight, goal_fat_percentage, goal_muscle } = goals;
+
+            console.log('正在套用目標數據到 UI:', goals);
 
             if (goal_weight !== undefined && goal_weight !== null && goal_weight !== '') {
                 document.getElementById('goal-weight-display').textContent = goal_weight;
@@ -2634,9 +2796,23 @@
                 if (input) input.value = goal_muscle;
             }
 
-            if (window.goalProgressChart) {
-                window.goalProgressChart.update();
-            }
+            // 延遲更新圖表，確保 DOM 元素已經更新
+            setTimeout(() => {
+                console.log('目標數據已套用，開始更新圖表...');
+                if (window.goalProgressChart) {
+                    window.goalProgressChart.update();
+                    console.log('主圖表更新完成');
+                } else {
+                    console.log('主圖表尚未初始化，等待初始化完成...');
+                    // 如果圖表還沒初始化，再等一段時間
+                    setTimeout(() => {
+                        if (window.goalProgressChart) {
+                            window.goalProgressChart.update();
+                            console.log('延遲更新主圖表完成');
+                        }
+                    }, 1000);
+                }
+            }, 100);
         }
     </script>
     <!-- 若專案沒有打包 bootstrap.bundle，先用 CDN -->
