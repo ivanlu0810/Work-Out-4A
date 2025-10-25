@@ -17,18 +17,44 @@
 
     <link rel="stylesheet" href="assets/vendors/bootstrap-icons/bootstrap-icons.css">
     <link rel="stylesheet" href="assets/css/app.css">
+    <!-- 日期選擇器：Air Datepicker -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.3/air-datepicker.css">
 
     <link rel="stylesheet" href="assets/css/chatbox.css" />
     <link rel="shortcut icon" href="assets/images/favicon.svg" type="image/x-icon">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/zh.js"></script>
+    <!-- 使用 Air Datepicker 日期選擇器 -->
 
     <style>
-        .stats-icon.orange {
-            background-color: #ff9500;
-            color: white;
+        /* Air Datepicker 客製：選取日期顏色同「編輯」按鈕莫蘭迪藍灰 */
+        .air-datepicker-cell.-selected-,
+        .air-datepicker-cell.-selected-:hover {
+            background-color: #7f90a9 !important; /* 與 .btn-detail 一致 */
+            color: #fff !important;
+        }
+        /* 聚焦或游標移入時略為加深 */
+        .air-datepicker-cell.-focus- {
+            background-color: #67798f !important;
+            color: #fff !important;
+        }
+        /* 星期幾標題顏色改為黑色 */
+        .air-datepicker-body--day-name { color: #000 !important; }
+
+        /* 日期選擇器輸入框寬度調整 */
+        #start-date, #end-date {
+            width: 140px !important;
+            min-width: 140px;
+            text-align: center !important;
+        }
+
+        /* HTML5 日期選擇器樣式 */
+        input[type="date"] {
+            cursor: pointer;
+        }
+        
+        input[type="date"]:focus {
+            border-color: #80bdff;
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
         .stats-icon.teal {
@@ -680,13 +706,11 @@
                                             <div class="d-flex align-items-center">
 
                                                 <!-- 開始日期 -->
-                                                <input type="date" id="start-date" class="form-control me-2 date-input"
-                                                    placeholder="年／月／日">
+                                                <input type="text" id="start-date" class="form-control me-2" placeholder="年／月／日" />
                                                 <span class="me-2">至</span>
 
                                                 <!-- 結束日期 -->
-                                                <input type="date" id="end-date" class="form-control me-3 date-input"
-                                                    placeholder="年／月／日">
+                                                <input type="text" id="end-date" class="form-control me-3" placeholder="年／月／日" />
 
                                                 <!-- 操作按鈕 -->
                                                 <button class="btn date-btn btn-sm" id="apply-date-range">套用範圍</button>
@@ -2490,37 +2514,9 @@
                     errorModal.show();
                 });
         });
-        document.addEventListener("DOMContentLoaded", function () {
-            flatpickr("#start-date", {
-                dateFormat: "Y-m-d",   // 傳給後端的格式：2025-09-01
-                altInput: true,        // 顯示替代輸入框
-                altFormat: "Y年m月d日", // 使用者看到的格式：2025年09月01日
-                locale: "zh"           // 中文語系
-            });
-
-            flatpickr("#end-date", {
-                dateFormat: "Y-m-d",
-                altInput: true,
-                altFormat: "Y年m月d日",
-                locale: "zh"
-            });
-        });
-        document.addEventListener("DOMContentLoaded", function () {
-            // 開始日期
-            flatpickr("#start-date", {
-                dateFormat: "Y-m-d",     // 後端格式：2025-09-01
-                altInput: true,          // 顯示替代輸入框
-                altFormat: "Y年m月d日",   // 使用者看到的格式
-                locale: "zh"             // 中文介面
-            });
-
-            // 結束日期
-            flatpickr("#end-date", {
-                dateFormat: "Y-m-d",
-                altInput: true,
-                altFormat: "Y年m月d日",
-                locale: "zh"
-            });
+        // HTML5 原生日期選擇器 - 無需初始化
+        document.addEventListener("DOMContentLoaded", function() {
+            console.log('DOM 載入完成，使用 Air Datepicker 日期選擇器');
         });
         document.addEventListener("DOMContentLoaded", function () {
             const urlParams = new URLSearchParams(window.location.search);
@@ -2642,6 +2638,51 @@
                 window.goalProgressChart.update();
             }
         }
+    </script>
+    <!-- 若專案沒有打包 bootstrap.bundle，先用 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/air-datepicker@3.5.3/air-datepicker.js"></script>
+    <script>
+        // 初始化 Air Datepicker（繁體中文、yyyy-MM-dd）
+        document.addEventListener('DOMContentLoaded', function() {
+            try {
+                const zhTW = {
+                    days: ['星期日','星期一','星期二','星期三','星期四','星期五','星期六'],
+                    daysShort: ['日','一','二','三','四','五','六'],
+                    daysMin: ['日','一','二','三','四','五','六'],
+                    months: ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'],
+                    monthsShort: ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+                    today: '今天',
+                    clear: '清除',
+                    dateFormat: 'yyyy-MM-dd',
+                    firstDay: 0
+                };
+                
+                // 開始日期選擇器
+                const startEl = document.getElementById('start-date');
+                if (startEl && !startEl.dataset.dpInit) {
+                    startEl.dataset.dpInit = '1';
+                    new AirDatepicker(startEl, {
+                        locale: zhTW,
+                        dateFormat: 'yyyy-MM-dd',
+                        autoClose: true
+                    });
+                }
+                
+                // 結束日期選擇器
+                const endEl = document.getElementById('end-date');
+                if (endEl && !endEl.dataset.dpInit) {
+                    endEl.dataset.dpInit = '1';
+                    new AirDatepicker(endEl, {
+                        locale: zhTW,
+                        dateFormat: 'yyyy-MM-dd',
+                        autoClose: true
+                    });
+                }
+            } catch (e) {
+                console.warn('日期選擇器初始化失敗：', e);
+            }
+        });
     </script>
 </body>
 
