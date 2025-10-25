@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>API測試</title>
+</head>
+<body>
+    <h1>API測試頁面</h1>
+    <button onclick="testAPI()">測試API</button>
+    <div id="result"></div>
+
+    <script>
+        async function testAPI() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = '測試中...';
+            
+            try {
+                console.log('開始測試API...');
+                
+                // 測試 exercise-completion-api.php
+                const response = await fetch('../exercise-completion-api.php?action=get_calendar_data');
+                console.log('API回應狀態:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                const result = await response.json();
+                console.log('API回應資料:', result);
+                
+                if (result.success && result.data) {
+                    const dataKeys = Object.keys(result.data);
+                    resultDiv.innerHTML = `
+                        <h3>API測試成功！</h3>
+                        <p>成功載入 ${dataKeys.length} 個日期的資料</p>
+                        <p>日期: ${dataKeys.join(', ')}</p>
+                        <p>2025-10-25 有 ${result.data['2025-10-25'] ? result.data['2025-10-25'].length : 0} 個動作</p>
+                    `;
+                } else {
+                    resultDiv.innerHTML = `<h3>API回應無效</h3><p>${JSON.stringify(result)}</p>`;
+                }
+                
+            } catch (error) {
+                console.error('API測試失敗:', error);
+                resultDiv.innerHTML = `<h3>API測試失敗</h3><p>錯誤: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
+

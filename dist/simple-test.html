@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>簡單測試</title>
+</head>
+<body>
+    <h1>簡單測試</h1>
+    <button onclick="test()">測試</button>
+    <div id="result"></div>
+
+    <script>
+        function test() {
+            console.log('測試開始');
+            document.getElementById('result').innerHTML = '測試成功！';
+        }
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM載入完成');
+        });
+    </script>
+</body>
+</html>
+

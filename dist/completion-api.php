@@ -521,30 +521,67 @@ try {
                     }
                 }
             } elseif ($month) {
-                // 月統計 - 從個別動作記錄計算
-                $sql = "SELECT WEEK(created_at) as week_num, 
-                               COUNT(*) as total_exercises,
-                               SUM(CASE WHEN individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
-                        FROM training_plan_completion 
-                        WHERE user_id = ? AND YEAR(created_at) = ? AND MONTH(created_at) = ?
-                        AND exercise_id IS NOT NULL
-                        GROUP BY WEEK(created_at)
-                        ORDER BY week_num";
-        $stmt = $pdo->prepare($sql);
+                // 月統計 - 直接使用 exercise-completion-api 的邏輯
+                $sql = "SELECT 
+                           DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
+                               WHEN 'monday' THEN 0
+                               WHEN 'tuesday' THEN 1
+                               WHEN 'wednesday' THEN 2
+                               WHEN 'thursday' THEN 3
+                               WHEN 'friday' THEN 4
+                               WHEN 'saturday' THEN 5
+                               WHEN 'sunday' THEN 6
+                           END DAY) as exercise_date,
+                           COUNT(*) as total_exercises,
+                           SUM(CASE WHEN tpc.individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
+                        FROM training_plan_completion tpc
+                        JOIN training_plans tp ON tpc.plan_id = tp.id
+                        WHERE tpc.user_id = ? 
+                        AND YEAR(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
+                            WHEN 'monday' THEN 0
+                            WHEN 'tuesday' THEN 1
+                            WHEN 'wednesday' THEN 2
+                            WHEN 'thursday' THEN 3
+                            WHEN 'friday' THEN 4
+                            WHEN 'saturday' THEN 5
+                            WHEN 'sunday' THEN 6
+                        END DAY)) = ?
+                        AND MONTH(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
+                            WHEN 'monday' THEN 0
+                            WHEN 'tuesday' THEN 1
+                            WHEN 'wednesday' THEN 2
+                            WHEN 'thursday' THEN 3
+                            WHEN 'friday' THEN 4
+                            WHEN 'saturday' THEN 5
+                            WHEN 'sunday' THEN 6
+                        END DAY)) = ?
+                        AND tpc.exercise_id IS NOT NULL
+                        GROUP BY exercise_date
+                        ORDER BY exercise_date";
+                $stmt = $pdo->prepare($sql);
                 $stmt->execute([$user_id, $year, $month]);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
-                for ($i = 1; $i <= 4; $i++) {
-                    $weekData = array_filter($rows, function($row) use ($i) {
-                        return $row['week_num'] == $i;
-                    });
+                // 將按日期分組的數據轉換為按週分組
+                $weekData = [];
+                foreach ($rows as $row) {
+                    $exerciseDate = new DateTime($row['exercise_date']);
+                    $weekNum = ceil($exerciseDate->format('j') / 7); // 計算該日期是該月的第幾週
                     
-                    if (!empty($weekData)) {
-                        $weekRow = array_values($weekData)[0];
-                        $completionData["week{$i}"] = [
-                            'total_exercises' => (int)$weekRow['total_exercises'],
-                            'completed_exercises' => (int)$weekRow['completed_exercises']
+                    if (!isset($weekData[$weekNum])) {
+                        $weekData[$weekNum] = [
+                            'total_exercises' => 0,
+                            'completed_exercises' => 0
                         ];
+                    }
+                    
+                    $weekData[$weekNum]['total_exercises'] += (int)$row['total_exercises'];
+                    $weekData[$weekNum]['completed_exercises'] += (int)$row['completed_exercises'];
+                }
+                
+                for ($i = 1; $i <= 4; $i++) {
+                    if (isset($weekData[$i])) {
+                        $completionData["week{$i}"] = $weekData[$i];
                     } else {
                         $completionData["week{$i}"] = [
                             'total_exercises' => 0,
@@ -553,14 +590,33 @@ try {
                     }
                 }
             } else {
-                // 年統計 - 從個別動作記錄計算
-                $sql = "SELECT MONTH(created_at) as month_num, 
-                               COUNT(*) as total_exercises,
-                               SUM(CASE WHEN individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
-                        FROM training_plan_completion 
-                        WHERE user_id = ? AND YEAR(created_at) = ?
-                        AND exercise_id IS NOT NULL
-                        GROUP BY MONTH(created_at)
+                // 年統計 - 使用實際訓練日期
+                $sql = "SELECT 
+                           MONTH(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
+                               WHEN 'monday' THEN 0
+                               WHEN 'tuesday' THEN 1
+                               WHEN 'wednesday' THEN 2
+                               WHEN 'thursday' THEN 3
+                               WHEN 'friday' THEN 4
+                               WHEN 'saturday' THEN 5
+                               WHEN 'sunday' THEN 6
+                           END DAY)) as month_num,
+                           COUNT(*) as total_exercises,
+                           SUM(CASE WHEN tpc.individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
+                        FROM training_plan_completion tpc
+                        JOIN training_plans tp ON tpc.plan_id = tp.id
+                        WHERE tpc.user_id = ? 
+                        AND YEAR(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
+                            WHEN 'monday' THEN 0
+                            WHEN 'tuesday' THEN 1
+                            WHEN 'wednesday' THEN 2
+                            WHEN 'thursday' THEN 3
+                            WHEN 'friday' THEN 4
+                            WHEN 'saturday' THEN 5
+                            WHEN 'sunday' THEN 6
+                        END DAY)) = ?
+                        AND tpc.exercise_id IS NOT NULL
+                        GROUP BY month_num
                         ORDER BY month_num";
         $stmt = $pdo->prepare($sql);
                 $stmt->execute([$user_id, $year]);

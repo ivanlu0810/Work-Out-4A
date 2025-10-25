@@ -4508,60 +4508,71 @@
                 console.log('=== 年統計計算開始 ===');
                 console.log('傳入的 data:', data);
                 
+                let totalExercises = 0;
+                let completedExercises = 0;
+                
                 for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
                     const monthKey = `month_${monthIndex}`;
-                    const value = data[monthKey];
-                    console.log(`${monthIndex}月: 完成度 ${value}%`);
+                    const monthData = data[monthKey];
+                    console.log(`${monthIndex}月: 數據`, monthData);
                     
-                    if (value >= 0) { // 有訓練計畫的月（包括0%完成）
-                        totalDays += 1;
-                        if (value === 100) { // 只有100%完成才算已完成月
-                            completedDays += 1;
+                    if (monthData && monthData.total_exercises > 0) {
+                        totalExercises += monthData.total_exercises;
+                        completedExercises += monthData.completed_exercises;
+                        totalDays += 1; // 有訓練的月數
+                        if (monthData.completed_exercises === monthData.total_exercises) {
+                            completedDays += 1; // 完全完成的月數
                         }
                     }
                 }
                 
-                console.log('統計結果:', { totalDays, completedDays });
+                console.log('統計結果:', { totalDays, completedDays, totalExercises, completedExercises });
                 console.log('=== 年統計計算結束 ===');
             }
             
-            // 計算平均完成率（所有有訓練計畫天數的平均完成度）
-            let totalCompletion = 0;
-            let daysWithData = 0;
+            // 計算完成率
+            let completionRate = 0;
             
-            if (timeUnit === 'week') {
-                const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                for (const day of days) {
-                    const value = data[day];
-                    if (value >= 0) {
-                        totalCompletion += value;
-                        daysWithData += 1;
+            if (timeUnit === 'year') {
+                // 年統計：使用總動作數和完成動作數計算
+                const totalExercises = Object.values(data).reduce((sum, monthData) => {
+                    return sum + (monthData.total_exercises || 0);
+                }, 0);
+                const completedExercises = Object.values(data).reduce((sum, monthData) => {
+                    return sum + (monthData.completed_exercises || 0);
+                }, 0);
+                
+                completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100 * 10) / 10 : 0;
+                console.log('年統計完成率計算:', { totalExercises, completedExercises, completionRate });
+            } else {
+                // 週統計和月統計：使用平均完成度計算
+                let totalCompletion = 0;
+                let daysWithData = 0;
+                
+                if (timeUnit === 'week') {
+                    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+                    for (const day of days) {
+                        const value = data[day];
+                        if (value >= 0) {
+                            totalCompletion += value;
+                            daysWithData += 1;
+                        }
+                    }
+                } else if (timeUnit === 'month') {
+                    // 月模式：計算所有週的平均完成率
+                    for (let weekIndex = 1; weekIndex <= 4; weekIndex++) {
+                        const weekKey = `week${weekIndex}`;
+                        const value = data[weekKey];
+                        if (value >= 0) {
+                            totalCompletion += value;
+                            daysWithData += 1;
+                        }
                     }
                 }
-            } else if (timeUnit === 'month') {
-                // 月模式：計算所有週的平均完成率
-                for (let weekIndex = 1; weekIndex <= 4; weekIndex++) {
-                    const weekKey = `week${weekIndex}`;
-                    const value = data[weekKey];
-                    if (value >= 0) {
-                        totalCompletion += value;
-                        daysWithData += 1;
-                    }
-                }
-            } else if (timeUnit === 'year') {
-                for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
-                    const monthKey = `month_${monthIndex}`;
-                    const value = data[monthKey];
-                    if (value >= 0) {
-                        totalCompletion += value;
-                        daysWithData += 1;
-                    }
-                }
+                
+                completionRate = daysWithData > 0 ? Math.round(totalCompletion / daysWithData) : 0;
+                console.log('完成率計算:', { totalCompletion, daysWithData, completionRate });
             }
-            
-            const completionRate = daysWithData > 0 ? Math.round(totalCompletion / daysWithData) : 0;
-            
-            console.log('最終完成率計算:', { totalCompletion, daysWithData, completionRate });
             
             totalDaysEl.textContent = totalDays;
             completedDaysEl.textContent = completedDays;
@@ -4634,6 +4645,136 @@
             console.log(`清理完成，移除了 ${cleanedCount} 個無效數據`);
             showSuccessMessage(`清理完成，移除了 ${cleanedCount} 個無效數據`);
         }
+        
+        // 清理重複的訓練計畫
+        async function cleanDuplicateTrainingPlans() {
+            try {
+                console.log('=== 清理重複的訓練計畫 ===');
+                
+                const response = await fetch('completion-api.php?action=clean_duplicate_plans&user_id=9', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('重複計畫清理完成:', result.message);
+                    showSuccessMessage('重複計畫清理完成');
+                    
+                    // 重新載入行事曆資料
+                    await loadCalendarData();
+                } else {
+                    console.error('清理重複計畫失敗:', result.error);
+                    showErrorMessage('清理重複計畫失敗');
+                }
+            } catch (error) {
+                console.error('清理重複計畫時發生錯誤:', error);
+                showErrorMessage('清理重複計畫時發生錯誤');
+            }
+        }
+        
+        // 強力清理所有訓練資料（緊急修復用）
+        async function emergencyCleanAllTrainingData() {
+            try {
+                console.log('=== 緊急清理所有訓練資料 ===');
+                
+                if (!confirm('這將刪除所有訓練資料，確定要繼續嗎？')) {
+                    return;
+                }
+                
+                const response = await fetch('completion-api.php?action=emergency_clean_all&user_id=9', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    console.log('緊急清理完成:', result.message);
+                    showSuccessMessage('所有訓練資料已清理完成');
+                    
+                    // 清空記憶體中的資料
+                    calendarTrainingData = {};
+                    weeklyPlan = {
+                        monday: [],
+                        tuesday: [],
+                        wednesday: [],
+                        thursday: [],
+                        friday: [],
+                        saturday: [],
+                        sunday: []
+                    };
+                    
+                    // 重新渲染
+                    renderCalendar();
+                    renderWeeklyPlan();
+                } else {
+                    console.error('緊急清理失敗:', result.error);
+                    showErrorMessage('緊急清理失敗');
+                }
+            } catch (error) {
+                console.error('緊急清理時發生錯誤:', error);
+                showErrorMessage('緊急清理時發生錯誤');
+            }
+        }
+        
+        // 重新建立正確的全身訓練資料
+        async function rebuildCorrectFullbodyTraining() {
+            try {
+                console.log('=== 重新建立正確的全身訓練資料 ===');
+                
+                if (!confirm('這將刪除現有資料並重新建立正確的全身訓練計畫（週一、週三、週五），確定要繼續嗎？')) {
+                    return;
+                }
+                
+                // 1. 先清理所有現有資料
+                const cleanResponse = await fetch('completion-api.php?action=emergency_clean_all&user_id=9', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                
+                const cleanResult = await cleanResponse.json();
+                
+                if (!cleanResult.success) {
+                    console.error('清理現有資料失敗:', cleanResult.error);
+                    showErrorMessage('清理現有資料失敗');
+                    return;
+                }
+                
+                console.log('現有資料清理完成');
+                
+                // 2. 重新建立正確的全身訓練計畫
+                console.log('開始重新建立全身訓練計畫...');
+                
+                // 清空記憶體中的資料
+                calendarTrainingData = {};
+                weeklyPlan = {
+                    monday: [],
+                    tuesday: [],
+                    wednesday: [],
+                    thursday: [],
+                    friday: [],
+                    saturday: [],
+                    sunday: []
+                };
+                
+                // 應用全身訓練模板
+                applyFixedFullbodyRecommendations();
+                
+                // 同步到資料庫
+                await syncToDatabase();
+                
+                // 重新載入行事曆資料
+                await loadCalendarData();
+                
+                showSuccessMessage('已重新建立正確的全身訓練計畫（週一、週三、週五）');
+                
+            } catch (error) {
+                console.error('重新建立訓練資料時發生錯誤:', error);
+                showErrorMessage('重新建立訓練資料時發生錯誤');
+            }
+        }
         async function loadWeekCompletionData(year, month, week) {
             try {
                 const weekStart = getWeekStartDate(year, month, week);
@@ -4694,12 +4835,14 @@
         // 載入月完成度數據
         async function loadMonthCompletionData(year, month) {
             try {
-                const monthStart = new Date(year, month - 1, 1);
-                const monthEnd = new Date(year, month, 0);
+                console.log('=== loadMonthCompletionData 開始 ===');
+                console.log('查詢參數:', { year, month });
                 
                 // 從資料庫讀取完成狀態數據
                 const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&month=${month}&user_id=9`);
                 const result = await response.json();
+                
+                console.log('API 回應:', result);
                 
                 const completionData = {};
                 
@@ -4713,6 +4856,8 @@
                         const totalExercises = weekData.total_exercises || 0;
                         const completedExercises = weekData.completed_exercises || 0;
                         
+                        console.log(`第${weekIndex + 1}週數據:`, { weekKey, totalExercises, completedExercises });
+                        
                         if (totalExercises > 0) {
                             const weekCompletionPercentage = Math.round((completedExercises / totalExercises) * 100);
                             completionData[weekKey] = weekCompletionPercentage;
@@ -4721,18 +4866,63 @@
                         }
                     }
                 } else {
-                    // 如果資料庫沒有數據，設為 -1
-                    const weeks = ['week1', 'week2', 'week3', 'week4'];
-                    weeks.forEach(week => {
-                        completionData[week] = -1;
-                    });
+                    console.log('API 沒有返回數據，嘗試查詢所有月份');
+                    
+                    // 如果指定月份沒有數據，嘗試查詢所有月份
+                    const allMonthsResponse = await fetch(`completion-api.php?action=get_completion_data&year=${year}&user_id=9`);
+                    const allMonthsResult = await allMonthsResponse.json();
+                    
+                    console.log('所有月份 API 回應:', allMonthsResult);
+                    
+                    if (allMonthsResult && allMonthsResult.success && allMonthsResult.data) {
+                        // 找到有數據的月份
+                        const monthsWithData = Object.keys(allMonthsResult.data).filter(monthKey => {
+                            const monthData = allMonthsResult.data[monthKey];
+                            return monthData && monthData.total_exercises > 0;
+                        });
+                        
+                        console.log('有數據的月份:', monthsWithData);
+                        
+                        if (monthsWithData.length > 0) {
+                            // 使用第一個有數據的月份
+                            const firstMonthWithData = monthsWithData[0];
+                            const monthData = allMonthsResult.data[firstMonthWithData];
+                            
+                            console.log('使用月份數據:', firstMonthWithData, monthData);
+                            
+                            // 將月數據轉換為週數據格式
+                            const weeks = ['week1', 'week2', 'week3', 'week4'];
+                            weeks.forEach(week => {
+                                completionData[week] = monthData.completion_percentage || 0;
+                            });
+                        } else {
+                            // 如果沒有數據，設為 -1
+                            const weeks = ['week1', 'week2', 'week3', 'week4'];
+                            weeks.forEach(week => {
+                                completionData[week] = -1;
+                            });
+                        }
+                    } else {
+                        // 如果資料庫沒有數據，設為 -1
+                        const weeks = ['week1', 'week2', 'week3', 'week4'];
+                        weeks.forEach(week => {
+                            completionData[week] = -1;
+                        });
+                    }
                 }
                 
                 console.log('月完成度數據:', completionData);
+                console.log('=== loadMonthCompletionData 結束 ===');
                 return completionData;
             } catch (error) {
-                console.error('載入月數據失敗:', error);
-                return {};
+                console.error('載入月完成度數據失敗:', error);
+                // 返回空數據
+                const weeks = ['week1', 'week2', 'week3', 'week4'];
+                const emptyData = {};
+                weeks.forEach(week => {
+                    emptyData[week] = -1;
+                });
+                return emptyData;
             }
         }
 
@@ -5505,10 +5695,20 @@
         // 同步到資料庫（使用 completion-api，會自動覆蓋同週並刪除舊明細）
         async function syncToDatabase() {
             console.log('=== syncToDatabase 開始 ===');
-            const today = new Date();
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
+            console.log('currentWeek:', currentWeek);
+            
+            // 使用 selectedTemplateBaseDate 或當前日期來計算正確的週次
+            const baseDate = selectedTemplateBaseDate || new Date();
+            const startOfWeek = getWeekMonday(baseDate);
             const weekStartDate = startOfWeek.toISOString().split('T')[0];
+            
+            // 計算正確的週次（基於實際的週開始日期）
+            const weekNumber = getCurrentWeekInMonth(baseDate);
+            
+            console.log('baseDate:', baseDate);
+            console.log('startOfWeek:', startOfWeek);
+            console.log('weekStartDate:', weekStartDate);
+            console.log('weekNumber:', weekNumber);
 
             // 轉換 weeklyPlan => completion-api 所需 weekly_plan 結構
             const weekly_plan = {
@@ -5524,8 +5724,8 @@
             const payload = {
                 user_id: 9,
                 week_start_date: weekStartDate,
-                week_number: currentWeek,
-                plan_name: `第${currentWeek + 1}週訓練計畫`,
+                week_number: weekNumber,
+                plan_name: `行事曆訓練計畫`,
                 weekly_plan
             };
 
@@ -6056,44 +6256,41 @@
         }
 
         // 儲存每日訓練數據到記憶體（不再使用 localStorage）
-        function saveDailyTrainingData(date, exercises) {
+        function saveDailyTrainingData(date, exercises, forceOverwrite = false) {
             const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
             
-            // 更新記憶體中的每日訓練數據
-            calendarTrainingData[dateKey] = exercises;
-            
-            console.log('已儲存每日訓練數據到記憶體:', dateKey, exercises);
+            // 如果強制覆蓋或該日期沒有現有資料，則更新
+            if (forceOverwrite || !calendarTrainingData[dateKey] || calendarTrainingData[dateKey].length === 0) {
+                calendarTrainingData[dateKey] = exercises;
+                console.log('已儲存每日訓練數據到記憶體:', dateKey, exercises);
+            } else {
+                console.log('跳過覆蓋現有資料:', dateKey, '現有資料:', calendarTrainingData[dateKey].length, '個動作');
+            }
         }
 
-        // 清理行事曆資料，只保留當前週次
+        // 清理行事曆資料，保留所有有訓練資料的日期
         function clearCalendarDataExceptCurrentWeek() {
             console.log('=== clearCalendarDataExceptCurrentWeek 開始 ===');
-            
-            // 計算當前週次的日期範圍
-            const today = new Date();
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7));
-            
-            const currentWeekDates = [];
-            for (let i = 0; i < 7; i++) {
-                const dayDate = new Date(startOfWeek);
-                dayDate.setDate(startOfWeek.getDate() + i);
-                const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
-                currentWeekDates.push(dateKey);
-            }
-            
-            console.log('當前週次日期:', currentWeekDates);
             console.log('清理前的行事曆資料:', Object.keys(calendarTrainingData));
             
-            // 只保留當前週次的資料
-            const cleanedData = {};
-            currentWeekDates.forEach(dateKey => {
-                if (calendarTrainingData[dateKey]) {
-                    cleanedData[dateKey] = calendarTrainingData[dateKey];
+            // 只清理空資料或無效資料，保留所有有訓練資料的日期
+            Object.keys(calendarTrainingData).forEach(dateKey => {
+                if (!calendarTrainingData[dateKey] || calendarTrainingData[dateKey].length === 0) {
+                    // 只刪除空資料
+                    delete calendarTrainingData[dateKey];
+                    console.log('刪除空資料:', dateKey);
+                } else {
+                    // 檢查是否有非休息日的動作
+                    const hasRealExercises = calendarTrainingData[dateKey].some(exercise => exercise.id !== 0);
+                    if (!hasRealExercises) {
+                        // 只刪除沒有真實動作的資料
+                        delete calendarTrainingData[dateKey];
+                        console.log('刪除無效資料:', dateKey);
+                    } else {
+                        console.log('保留有效資料:', dateKey, calendarTrainingData[dateKey].length, '個動作');
+                    }
                 }
             });
-            
-            calendarTrainingData = cleanedData;
             
             console.log('清理後的行事曆資料:', Object.keys(calendarTrainingData));
             console.log('=== clearCalendarDataExceptCurrentWeek 結束 ===');
@@ -6103,12 +6300,24 @@
         function getDayTrainingData(targetDate) {
             const dateKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
             
+            console.log('getDayTrainingData - dateKey:', dateKey);
+            console.log('getDayTrainingData - calendarTrainingData[dateKey]:', calendarTrainingData[dateKey]);
+            
             // 只從記憶體中獲取該日期的訓練數據
             if (calendarTrainingData[dateKey]) {
-                return calendarTrainingData[dateKey].filter(exercise => exercise.id !== 0); // 排除休息日
+                const filteredData = [];
+                calendarTrainingData[dateKey].forEach((exercise, index) => {
+                    console.log(`過濾動作 ${index}:`, exercise, 'id:', exercise.id, 'id !== 0:', exercise.id !== 0);
+                    if (exercise.id !== 0) { // 排除休息日
+                        filteredData.push(exercise);
+                    }
+                });
+                console.log('過濾後的資料:', filteredData);
+                return filteredData;
             }
             
             // 如果記憶體中沒有，返回空陣列（不從 weeklyPlan 獲取）
+            console.log('沒有找到該日期的資料');
             return [];
         }
 
@@ -6195,8 +6404,8 @@
                 </div>
             `;
             
-            // 清除所有現有的backdrop
-            // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
+            // 立即清理所有模態框狀態
+            clearAllModalBackdrops();
             
             // 移除現有的模態框（如果有的話）
             const existingModal = document.getElementById('trainingDetailsModal');
@@ -6207,51 +6416,40 @@
             // 添加新的模態框到頁面
             document.body.insertAdjacentHTML('beforeend', modalHtml);
             
-            // 顯示模態框
-            console.log('準備顯示模態框...');
-            const modal = new bootstrap.Modal(document.getElementById('trainingDetailsModal'), {
-                backdrop: true,
-                keyboard: true,
-                focus: true
-            });
-            console.log('模態框實例創建完成:', modal);
-            
-            // 確保 backdrop 存在
+            // 延遲顯示模態框，確保清理完成
             setTimeout(() => {
-                modal.show();
-                console.log('模態框顯示命令已執行');
-                
-                // 檢查並確保 backdrop 存在
-                setTimeout(() => {
-                    const backdrops = document.querySelectorAll('.modal-backdrop');
-                    if (backdrops.length === 0) {
-                        console.log('沒有 backdrop，手動創建...');
-                        const backdrop = document.createElement('div');
-                        backdrop.className = 'modal-backdrop fade show';
-                        document.body.appendChild(backdrop);
-                    }
-                }, 100);
-            }, 50);
-            
-            // 模態框關閉時移除DOM元素和清除backdrop
-            document.getElementById('trainingDetailsModal').addEventListener('hidden.bs.modal', function () {
-                try {
-                    // 延遲清除，讓 Bootstrap 先完成清理
-                    setTimeout(() => {
-                        // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
-                        // 安全地移除DOM元素
-                        if (this && this.parentNode && document.body.contains(this)) {
-                            try {
-                                this.parentNode.removeChild(this);
-                            } catch (removeError) {
-                                console.warn('移除模態框元素時發生錯誤，可能已被移除:', removeError);
-                            }
-                        }
-                    }, 100);
-                } catch (error) {
-                    console.error('關閉模態框時發生錯誤:', error);
+                console.log('準備顯示模態框...');
+                const modalElement = document.getElementById('trainingDetailsModal');
+                if (modalElement) {
+                    const modal = new bootstrap.Modal(modalElement, {
+                        backdrop: true,
+                        keyboard: true,
+                        focus: true
+                    });
+                    console.log('模態框實例創建完成:', modal);
+                    
+                    modal.show();
+                    console.log('模態框顯示命令已執行');
+                } else {
+                    console.error('找不到模態框元素');
                 }
-            });
+            }, 200);
+            
+            // 模態框關閉時移除DOM元素
+            setTimeout(() => {
+                const modalElement = document.getElementById('trainingDetailsModal');
+                if (modalElement) {
+                    modalElement.addEventListener('hidden.bs.modal', function () {
+                        try {
+                            if (this && this.parentNode && document.body.contains(this)) {
+                                this.remove();
+                            }
+                        } catch (error) {
+                            console.warn('移除模態框時發生錯誤:', error);
+                        }
+                    });
+                }
+            }, 300);
         }
 
         // 編輯某一天的訓練內容
@@ -6589,25 +6787,52 @@
         // 清除所有模態框backdrop的函數
         function clearAllModalBackdrops() {
             try {
-                // 移除所有 modal-backdrop 元素
-                    const backdrops = document.querySelectorAll('.modal-backdrop');
-                    backdrops.forEach(backdrop => {
+                console.log('=== clearAllModalBackdrops 開始 ===');
+                
+                // 1. 移除所有 modal-backdrop 元素
+                const backdrops = document.querySelectorAll('.modal-backdrop');
+                console.log('找到 backdrop 數量:', backdrops.length);
+                backdrops.forEach((backdrop, index) => {
                     if (backdrop.parentNode) {
-                                backdrop.parentNode.removeChild(backdrop);
-                        }
-                    });
-                    
-                // 移除 modal-open 類別
-                    document.body.classList.remove('modal-open');
-                    document.body.style.overflow = '';
-                    document.body.style.paddingRight = '';
-                    
-                // 清理模態框實例
+                        backdrop.parentNode.removeChild(backdrop);
+                        console.log(`移除 backdrop ${index + 1}`);
+                    }
+                });
+                
+                // 2. 移除所有可見的模態框
+                const visibleModals = document.querySelectorAll('.modal.show');
+                console.log('找到可見模態框數量:', visibleModals.length);
+                visibleModals.forEach((modal, index) => {
+                    modal.classList.remove('show');
+                    modal.style.display = 'none';
+                    modal.setAttribute('aria-hidden', 'true');
+                    console.log(`隱藏模態框 ${index + 1}:`, modal.id);
+                });
+                
+                // 3. 移除 modal-open 類別和相關樣式
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+                
+                // 4. 清理所有模態框實例
                 if (typeof modalManager !== 'undefined') {
                     modalManager.disposeAllModals();
                 }
                 
-                console.log('已清理所有 modal backdrop');
+                // 5. 清理 Bootstrap 實例
+                const allModals = document.querySelectorAll('.modal');
+                allModals.forEach(modal => {
+                    const instance = bootstrap.Modal.getInstance(modal);
+                    if (instance) {
+                        try {
+                            instance.dispose();
+                        } catch (e) {
+                            console.warn('清理 Bootstrap 實例失敗:', modal.id, e);
+                        }
+                    }
+                });
+                
+                console.log('=== clearAllModalBackdrops 結束 ===');
             } catch (error) {
                 console.error('清理模態框實例失敗:', error);
             }
@@ -8021,9 +8246,68 @@
                 const result = await response.json();
                 
                 if (result.success && result.data) {
+                    console.log('原始行事曆資料:', result.data);
+                    console.log('原始資料的日期:', Object.keys(result.data));
+                    
+                    // 先檢查是否有任何資料
+                    if (Object.keys(result.data).length === 0) {
+                        console.warn('API 返回空資料');
+                        calendarTrainingData = {};
+                        renderCalendar();
+                        return false;
+                    }
+                    
+                    // 強力修復：重新計算正確的訓練日期
+                    const correctedData = {};
+                    
+                    Object.keys(result.data).forEach(dateKey => {
+                        const exercises = result.data[dateKey];
+                        if (exercises && exercises.length > 0) {
+                            console.log(`處理日期 ${dateKey}:`, exercises);
+                            
+                            // 檢查這個日期是否應該是全身訓練日
+                            const date = new Date(dateKey);
+                            const dayOfWeek = date.getDay(); // 0=週日, 1=週一, ..., 6=週六
+                            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                            const dayName = dayNames[dayOfWeek];
+                            
+                            console.log(`日期 ${dateKey} 是 ${dayName}`);
+                            
+                            // 只保留全身訓練的標準天數（週一、週三、週五）
+                            if (dayName === 'monday' || dayName === 'wednesday' || dayName === 'friday') {
+                                // 去重：基於 exercise_id 和 name
+                                const uniqueExercises = [];
+                                const seen = new Set();
+                                
+                                exercises.forEach(exercise => {
+                                    const key = `${exercise.id}-${exercise.name}`;
+                                    if (!seen.has(key)) {
+                                        seen.add(key);
+                                        uniqueExercises.push(exercise);
+                                    }
+                                });
+                                
+                                if (uniqueExercises.length > 0) {
+                                    correctedData[dateKey] = uniqueExercises;
+                                    console.log(`✅ 保留全身訓練 ${dateKey} (${dayName}): ${uniqueExercises.length} 個動作`);
+                                }
+                            } else {
+                                console.log(`❌ 跳過非全身訓練日 ${dateKey} (${dayName}) - 這不是週一、週三或週五`);
+                            }
+                        }
+                    });
+                    
                     // 更新 calendarTrainingData
-                    calendarTrainingData = result.data;
-                    console.log('行事曆資料載入成功:', Object.keys(calendarTrainingData));
+                    calendarTrainingData = correctedData;
+                    console.log('修復後的行事曆資料:', Object.keys(calendarTrainingData));
+                    console.log('修復後的資料數量:', Object.keys(calendarTrainingData).length);
+                    
+                    // 如果修復後沒有資料，顯示警告
+                    if (Object.keys(calendarTrainingData).length === 0) {
+                        console.warn('⚠️ 修復後沒有找到符合全身訓練標準的資料');
+                        console.warn('這表示資料庫中的資料可能不是全身訓練格式');
+                        showWarningMessage('沒有找到符合全身訓練標準的資料（週一、週三、週五）');
+                    }
                     
                     // 重新渲染行事曆
                     renderCalendar();
@@ -8031,11 +8315,43 @@
                     return true;
                 } else {
                     console.warn('載入行事曆資料失敗:', result.error);
+                    console.warn('API 回應:', result);
+                    calendarTrainingData = {};
+                    renderCalendar();
                     return false;
                 }
             } catch (error) {
                 console.error('載入行事曆資料時發生錯誤:', error);
+                calendarTrainingData = {};
+                renderCalendar();
                 return false;
+            }
+        }
+
+        // 自動切換到有資料的月份
+        async function switchToDataMonth() {
+            try {
+                console.log('=== switchToDataMonth 開始 ===');
+                console.log('當前行事曆資料:', Object.keys(calendarTrainingData));
+                
+                if (Object.keys(calendarTrainingData).length === 0) {
+                    console.log('沒有行事曆資料，保持當前月份');
+                    return;
+                }
+                
+                // 找到最早的資料日期
+                const dataDates = Object.keys(calendarTrainingData).sort();
+                const earliestDate = new Date(dataDates[0]);
+                
+                console.log('最早的資料日期:', earliestDate);
+                
+                // 切換行事曆到該月份
+                currentCalendarDate = new Date(earliestDate.getFullYear(), earliestDate.getMonth(), 1);
+                console.log('切換行事曆到:', currentCalendarDate);
+                
+                console.log('=== switchToDataMonth 結束 ===');
+            } catch (error) {
+                console.error('切換到資料月份時發生錯誤:', error);
             }
         }
 
@@ -8271,11 +8587,13 @@
                 showLoadingIndicator();
             
             try {
+                // 初始化當前週次
+                const today = new Date();
+                currentWeek = getCurrentWeekInMonth(today) - 1; // 轉換為 0-based 索引
+                console.log('初始化 currentWeek:', currentWeek, 'for date:', today);
+                
                 // 先載入動作資料
                 await loadExercises();
-                
-                // 載入行事曆資料
-                await loadCalendarData();
                 
                 // 載入肌群選項
                 await loadMuscleGroupOptions();
@@ -8286,6 +8604,12 @@
                 renderWeeklyPlan();
                 updateStats();
                 updateWeekCompletion(); // 初始化完成度
+                
+                // 載入行事曆資料（在 loadPlan 之後，避免被清空）
+                await loadCalendarData();
+                
+                // 自動切換到有資料的月份
+                await switchToDataMonth();
                 
                 // 初始化行事曆
                 renderCalendar();
@@ -8995,7 +9319,14 @@
                     dayDate.setDate(startOfWeek.getDate() + index); // 直接加天數，因為startOfWeek已經是週一
                     const exercisesForDay = Array.isArray(weeklyPlan[dayName]) ? weeklyPlan[dayName] : [];
                     console.log(`同步 ${dayName} (${dayDate.toDateString()}): ${exercisesForDay.length} 個動作`);
-                    saveDailyTrainingData(dayDate, exercisesForDay);
+                    
+                    // 只有在該日期沒有現有資料時才同步，避免覆蓋從資料庫載入的資料
+                    const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
+                    if (!calendarTrainingData[dateKey] || calendarTrainingData[dateKey].length === 0) {
+                        saveDailyTrainingData(dayDate, exercisesForDay);
+                    } else {
+                        console.log(`跳過同步 ${dayName} (${dayDate.toDateString()})，該日期已有資料:`, calendarTrainingData[dateKey].length, '個動作');
+                    }
                 });
                 
                 if (typeof updateCalendarTrainingData === 'function') updateCalendarTrainingData();
@@ -9458,8 +9789,7 @@
         function selectTemplateMode(templateId, mode) {
             const template = trainingTemplates.find(t => t.id === templateId);
             if (template) {
-                // 使用模態框管理器安全地關閉模態視窗
-                modalManager.hideModal('templateOptionsModal');
+                console.log('選擇模板模式:', templateId, mode);
                 
                 // 記錄使用者選擇的日期（若未選擇則為今日）
                 try {
@@ -9471,7 +9801,10 @@
                     }
                 } catch (e) { selectedTemplateBaseDate = new Date(); }
                 
-                // 延遲顯示確認對話框，確保前一個模態框完全關閉
+                // 立即清理所有模態框狀態
+                clearAllModalBackdrops();
+                
+                // 延遲顯示確認對話框，確保清理完成
                 setTimeout(() => {
                     showTemplateConfirm(template.name, mode, templateId);
                 }, 200);
@@ -9523,11 +9856,14 @@
         function confirmApplyTemplate(templateId, mode) {
             const template = trainingTemplates.find(t => t.id === templateId);
             if (template) {
-                // 使用模態框管理器安全地關閉模態框
-                modalManager.hideModal('confirmTemplateModal');
+                console.log('確認應用模板:', templateId, mode);
                 
+                // 立即清理所有模態框狀態
+                clearAllModalBackdrops();
+                
+                // 延遲應用模板，確保清理完成
                 setTimeout(() => {
-                    // clearAllModalBackdrops(); // 移除這行，讓 Bootstrap 自動管理 backdrop
+                    // 應用模板
                     if (templateId === 'fullbody' && mode === 'recommended') {
                         // 全身訓練推薦模式使用固定的專業菜單
                         applyFixedFullbodyRecommendations();
@@ -9549,7 +9885,7 @@
                     showSuccessMessage(`${template.name} (${mode === 'random' ? '隨機模式' : '推薦模式'}) 已應用到整週`);
                     // 立即把本週每日菜單渲染到行事曆（以所選日期所在週為基準，週一起算）
                     syncWeeklyPlanToCalendarForCurrentWeek(selectedTemplateBaseDate);
-                }, 50);
+                }, 200);
             }
         }
 
@@ -11254,6 +11590,4 @@
 
 </body>
 
-</html>
-</html>
 </html>
