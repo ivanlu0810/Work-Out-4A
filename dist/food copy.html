@@ -651,6 +651,13 @@ $email = $_SESSION['email'] ?? 'No email';
             box-shadow: none !important;
             outline: none !important;
         }
+        
+            border: 1px solid #e9ecef;
+            border-top: none;
+            border-radius: 0 0 8px 8px;
+            padding: 1.5rem;
+            background-color: #ffffff;
+        }
 
         /* 餐食建議卡片 */
         .meal-card {
@@ -918,196 +925,6 @@ $email = $_SESSION['email'] ?? 'No email';
         /* 確保頁面內容有適當的間距 */
         .tab-pane .section {
             margin-bottom: 30px;
-        }
-
-        /* 行事曆樣式 */
-        .meal-calendar-wrapper {
-            overflow: hidden;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-        }
-
-        .meal-calendar {
-            border-collapse: separate;
-            border-spacing: 0;
-            width: 100%;
-            table-layout: fixed;
-            background: #ffffff;
-        }
-
-        .meal-calendar th,
-        .meal-calendar td {
-            border: 1px solid #e9ecef;
-            padding: 12px 4px;
-            text-align: center;
-            vertical-align: middle;
-            transition: all 0.3s ease;
-            word-wrap: break-word;
-            overflow: hidden;
-        }
-
-        .calendar-weekdays th {
-            background: #d0d0d2;
-            color: #4a4a4c;
-            font-weight: 600;
-            font-size: 0.9rem;
-            padding: 10px 8px;
-        }
-
-        /* 日期格子 */
-        .calendar-day {
-            cursor: pointer;
-            background: #f5f5f5;
-            min-height: 60px;
-            position: relative;
-        }
-
-        .calendar-day:hover {
-            background: #e8e8ea !important;
-            transform: scale(1.02);
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-            z-index: 1;
-        }
-
-        /* 狀態指示 */
-        .calendar-day.legend-empty {
-            background: #f5f5f5;
-        }
-
-        .calendar-day.legend-planned {
-            background: #d0d0d2;
-            border: 2px solid #b8b8ba;
-        }
-
-        .calendar-day.legend-complete {
-            background: #8b8b8d;
-            color: #ffffff;
-            font-weight: 600;
-        }
-
-        .calendar-day.legend-today {
-            background: #6b6b6d;
-            color: #ffffff;
-            font-weight: 700;
-            box-shadow: 0 4px 12px rgba(107, 107, 109, 0.3);
-        }
-
-        .calendar-day.legend-today:hover {
-            background: #5a5a5c !important;
-            box-shadow: 0 4px 15px rgba(90, 90, 92, 0.4);
-        }
-
-        /* 日期數字 */
-        .day-number {
-            font-size: 1rem;
-            font-weight: 500;
-            margin-bottom: 4px;
-        }
-
-        /* 餐食指示器 */
-        .meal-indicator {
-            display: flex;
-            justify-content: center;
-            gap: 3px;
-            margin-top: 4px;
-        }
-
-        .meal-dot {
-            width: 6px;
-            height: 6px;
-            border-radius: 50%;
-            display: inline-block;
-        }
-
-        .meal-dot.breakfast {
-            background-color: #ffb74d;
-        }
-
-        .meal-dot.lunch {
-            background-color: #64b5f6;
-        }
-
-        .meal-dot.dinner {
-            background-color: #ba68c8;
-        }
-
-        /* 上月/下月日期 */
-        .calendar-day.other-month {
-            color: #c0c0c2;
-            background: #fafafa;
-        }
-
-        .calendar-day.other-month:hover {
-            background: #f0f0f0;
-        }
-
-        /* 圖例樣式 */
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .legend-dot {
-            width: 16px;
-            height: 16px;
-            border-radius: 4px;
-            display: inline-block;
-        }
-
-        .legend-empty {
-            background: #f5f5f5;
-            border: 1px solid #d0d0d2;
-        }
-
-        .legend-planned {
-            background: #d0d0d2;
-        }
-
-        .legend-complete {
-            background: #8b8b8d;
-        }
-
-        .legend-today {
-            background: #6b6b6d;
-        }
-
-        /* 響應式設計 */
-        @media (max-width: 768px) {
-            .day-number {
-                font-size: 0.85rem;
-            }
-
-            .meal-calendar th,
-            .meal-calendar td {
-                padding: 8px 2px;
-                min-height: 50px;
-            }
-
-            .calendar-weekdays th {
-                padding: 8px 2px;
-                font-size: 0.8rem;
-            }
-        }
-
-        @media (max-width: 576px) {
-            .calendar-day {
-                min-height: 45px;
-            }
-
-            .day-number {
-                font-size: 0.8rem;
-            }
-
-            .meal-dot {
-                width: 4px;
-                height: 4px;
-            }
-
-            .meal-calendar th,
-            .meal-calendar td {
-                padding: 6px 2px;
-            }
         }
     </style>
 </head>
@@ -1450,68 +1267,209 @@ $email = $_SESSION['email'] ?? 'No email';
                         <!-- 三餐客製化 -->
                         <section class="section" id="mealPlannerSection" style="display: block;">
                             <div class="card">
-                        <div class="card-header d-flex justify-content-between align-items-start">
-                            <div>
-                                <h4 class="mb-0"><i class="bi bi-journal-plus me-2" style="vertical-align: middle; transform: translateY(1px);"></i>三餐客製化</h4>
-                                <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
-                            </div>
-                            <div class="d-flex align-items-center">
-                                <div class="d-flex align-items-center" style="gap: 4px;">
-                                    <button class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; padding: 0; font-size: 12px;" onclick="previousMonth()" title="上一個月">
-                                        <i class="bi bi-chevron-left"></i>
-                                    </button>
-                                    <h6 class="mb-0" id="calendarMonthYear" style="min-width: 85px; text-align: center; font-size: 13px;">2024年1月</h6>
-                                    <button class="btn btn-sm btn-outline-secondary rounded-circle d-flex align-items-center justify-content-center" style="width: 28px; height: 28px; padding: 0; font-size: 12px;" onclick="nextMonth()" title="下一個月">
-                                        <i class="bi bi-chevron-right"></i>
-                                    </button>
-                                </div>
-                                <button class="btn btn-sm btn-secondary ms-3 d-flex align-items-center" style="font-size: 12px; padding: 0.25rem 0.5rem; gap: 2px;" onclick="goToCurrentMonth()">
-                                    <i class="bi bi-calendar-check"></i>今天
-                                </button>
-                            </div>
+                        <div class="card-header">
+                            <h4 class="mb-0"><i class="bi bi-journal-plus me-2" style="vertical-align: middle; transform: translateY(1px);"></i>三餐客製化</h4>
+                            <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
                         </div>
                         <div class="card-body">
+                            <!-- 日期選擇與功能按鈕 -->
+                            <div class="row mb-4">
+                                <div class="col-lg-4 col-md-6 mb-3">
+                                    <label for="mealDate" class="form-label fw-semibold">選擇日期：</label>
+                                    <div class="input-group">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="navigateDate(-1)" title="前一天">
+                                            <i class="bi bi-chevron-left"></i>
+                                        </button>
+                                        <input type="date" id="mealDate" class="form-control"
+                                            onchange="changeMealDate()">
+                                        <button class="btn btn-outline-secondary" type="button"
+                                            onclick="navigateDate(1)" title="後一天">
+                                            <i class="bi bi-chevron-right"></i>
+                                        </button>
+                                    </div>
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-info me-2"
+                                            onclick="goToToday()">今天</button>
+                                        <button class="btn btn-sm btn-outline-warning"
+                                            onclick="goToTomorrow()">明天</button>
+                                    </div>
+                                </div>
 
-                            <!-- 行事曆表格 -->
-                            <div class="meal-calendar-wrapper">
-                                <table class="table table-bordered meal-calendar mb-0">
-                                    <thead>
-                                        <tr class="calendar-weekdays">
-                                            <th class="text-center">日</th>
-                                            <th class="text-center">一</th>
-                                            <th class="text-center">二</th>
-                                            <th class="text-center">三</th>
-                                            <th class="text-center">四</th>
-                                            <th class="text-center">五</th>
-                                            <th class="text-center">六</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="calendarBody">
-                                        <!-- 行事曆內容將由 JavaScript 動態生成 -->
-                                        <tr>
-                                            <td colspan="7" class="text-center py-5">
-                                                <div class="spinner-border text-primary" role="status">
-                                                    <span class="visually-hidden">載入中...</span>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
+                                <div class="col-lg-8 col-md-6">
+                                    <label class="form-label fw-semibold">功能操作：</label>
+                                    <div class="d-flex flex-wrap gap-2">
+                                        <button class="btn btn-primary" onclick="saveMealPlan()">
+                                            <i class="bi bi-save me-1"></i>儲存餐點
+                                        </button>
+                                        <button class="btn btn-info" onclick="loadMealHistory()">
+                                            <i class="bi bi-clock-history me-1"></i>查詢紀錄
+                                        </button>
+                                        <button class="btn btn-outline-danger" onclick="clearAllMeals()">
+                                            <i class="bi bi-trash me-1"></i>清空所有
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
 
-                            <!-- 日期詳細資訊 -->
-                            <div id="selectedDateInfo" class="mt-4" style="display: none;">
-                                <div class="card bg-light">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">
-                                            <i class="bi bi-calendar-event me-2"></i>
-                                            <span id="selectedDateText">選擇日期</span>
-                                        </h6>
+                            <!-- 營養目標進度追蹤 -->
+                            <div class="row g-4 mb-4">
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-primary text-white rounded-circle me-3">
+                                                <i class="bi bi-fire"></i>
+                                            </div>
+                                            <div>
+                                                <div class="stats-number" id="planTotalCalories">0</div>
+                                                <div class="stats-label">今日已選熱量</div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-primary" id="caloriesProgress"
+                                                role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="caloriesTarget">目標: 0 卡</small>
                                     </div>
-                                    <div class="card-body" id="selectedDateMeals">
-                                        <!-- 選中日期的餐食內容 -->
-                                        <p class="text-muted text-center">請選擇一個日期查看餐食內容</p>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-danger text-white rounded-circle me-3">
+                                                <i class="bi bi-droplet"></i>
+                                            </div>
+                                            <div>
+                                                <div class="stats-number" id="planProtein">0g</div>
+                                                <div class="stats-label">蛋白質</div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-danger" id="proteinProgress" role="progressbar"
+                                                style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="proteinTarget">目標: 0g</small>
                                     </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-info text-white rounded-circle me-3">
+                                                <i class="bi bi-basket"></i>
+                                            </div>
+                                            <div>
+                                                <div class="stats-number" id="planCarbs">0g</div>
+                                                <div class="stats-label">碳水化合物</div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-info" id="carbsProgress" role="progressbar"
+                                                style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="carbsTarget">目標: 0g</small>
+                                    </div>
+                                </div>
+                                <div class="col-lg-3 col-md-6">
+                                    <div class="stats-card h-100">
+                                        <div class="d-flex align-items-center mb-3">
+                                            <div class="stats-icon bg-warning text-white rounded-circle me-3">
+                                                <i class="bi bi-heart"></i>
+                                            </div>
+                                            <div>
+                                                <div class="stats-number" id="planFat">0g</div>
+                                                <div class="stats-label">脂肪</div>
+                                            </div>
+                                        </div>
+                                        <div class="progress mb-2" style="height: 8px;">
+                                            <div class="progress-bar bg-warning" id="fatProgress" role="progressbar"
+                                                style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted" id="fatTarget">目標: 0g</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 進度圖表 -->
+
+                            <!-- 今日營養完成度（獨立區塊） -->
+                            <div class="row mt-4">
+                                <div class="col-12">
+                                    <div class="card bg-light">
+                                        <div class="card-header bg-info text-white">
+                                            <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>今日營養完成度</h6>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row g-3">
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-primary"
+                                                                id="overallCaloriesProgress" role="progressbar"
+                                                                style="width: 0%">
+                                                                <span class="fw-bold"
+                                                                    id="overallCaloriesPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">熱量</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-danger"
+                                                                id="overallProteinProgress" role="progressbar"
+                                                                style="width: 0%">
+                                                                <span class="fw-bold"
+                                                                    id="overallProteinPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">蛋白質</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-info" id="overallCarbsProgress"
+                                                                role="progressbar" style="width: 0%">
+                                                                <span class="fw-bold" id="overallCarbsPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">碳水化合物</small>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-3">
+                                                    <div class="text-center">
+                                                        <div class="progress mb-2" style="height: 25px;">
+                                                            <div class="progress-bar bg-warning" id="overallFatProgress"
+                                                                role="progressbar" style="width: 0%">
+                                                                <span class="fw-bold" id="overallFatPercent">0%</span>
+                                                            </div>
+                                                        </div>
+                                                        <small class="text-muted">脂肪</small>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 智能建議（動態顯示） -->
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div id="smartSuggestions" class="alert alert-info" style="display: none;">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <i class="bi bi-lightbulb me-2"></i>
+                                            <strong>今日建議</strong>
+                                        </div>
+                                        <div id="suggestionContent" class="small"></div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 各餐區塊 -->
+                            <div class="row mt-4" id="plannerMeals">
+                                <div class="col-12">
+                                    <!-- 各餐區塊渲染 -->
                                 </div>
                             </div>
                         </div>
@@ -4177,7 +4135,7 @@ $email = $_SESSION['email'] ?? 'No email';
                     <td class="text-end">${f.Protein}</td>
                     <td class="text-end">${f.Carbs}</td>
                     <td class="text-end">${f.Fat}</td>
-                    <td class="text-end"><button class="btn btn-sm btn-secondary rounded-pill" onclick="addFoodToMeal(${f.food_id})">加入</button></td>
+                    <td class="text-end"><button class="btn btn-sm btn-outline-primary" onclick="addFoodToMeal(${f.food_id})">加入</button></td>
                 </tr>
             `).join('');
         }
@@ -5060,347 +5018,6 @@ $email = $_SESSION['email'] ?? 'No email';
                 container.appendChild(col);
             });
         }
-
-        // ===== 行事曆功能 =====
-        let currentCalendarMonth = new Date().getMonth();
-        let currentCalendarYear = new Date().getFullYear();
-        let mealPlans = {}; // 儲存每天的餐食計畫 { '2024-01-15': {...} }
-
-        // 初始化行事曆
-        function initMealCalendar() {
-            updateCalendar();
-        }
-
-        // 更新行事曆顯示
-        function updateCalendar() {
-            const tbody = document.getElementById('calendarBody');
-            const monthYearEl = document.getElementById('calendarMonthYear');
-            
-            if (!tbody) return;
-
-            // 更新月份標題
-            const monthNames = ['1月', '2月', '3月', '4月', '5月', '6月',
-                              '7月', '8月', '9月', '10月', '11月', '12月'];
-            monthYearEl.textContent = `${currentCalendarYear}年${monthNames[currentCalendarMonth]}`;
-
-            // 計算該月的第一天是星期幾
-            const firstDay = new Date(currentCalendarYear, currentCalendarMonth, 1).getDay();
-            const daysInMonth = new Date(currentCalendarYear, currentCalendarMonth + 1, 0).getDate();
-            const today = new Date();
-            const isCurrentMonth = today.getMonth() === currentCalendarMonth && today.getFullYear() === currentCalendarYear;
-
-            let html = '';
-            let dayCount = 1;
-            let rowCount = 0;
-
-            // 生成行事曆
-            while (dayCount <= daysInMonth) {
-                let row = '<tr>';
-                
-                for (let i = 0; i < 7; i++) {
-                    const cellDate = (rowCount === 0 && i < firstDay) ? 
-                        new Date(currentCalendarYear, currentCalendarMonth - 1, 
-                               new Date(currentCalendarYear, currentCalendarMonth, 0).getDate() - firstDay + i + 1) :
-                        (dayCount <= daysInMonth) ? 
-                        new Date(currentCalendarYear, currentCalendarMonth, dayCount) : null;
-
-                    if (cellDate && (rowCount === 0 && i < firstDay)) {
-                        // 上個月的日期
-                        const dateStr = formatDateString(cellDate);
-                        row += `<td class="calendar-day other-month">
-                                    <div class="day-number">${cellDate.getDate()}</div>
-                                </td>`;
-                    } else if (cellDate && dayCount <= daysInMonth) {
-                        // 當月的日期
-                        const dateStr = formatDateString(cellDate);
-                        const isToday = isCurrentMonth && cellDate.getDate() === today.getDate();
-                        const mealStatus = getMealStatus(dateStr);
-                        
-                        const classes = ['calendar-day', mealStatus.status];
-                        if (isToday) classes.push('legend-today');
-                        
-                        row += `<td class="${classes.join(' ')}" onclick="selectDate('${dateStr}')">
-                                    <div class="day-number">${dayCount}</div>
-                                    ${mealStatus.hasMeals ? '<div class="meal-indicator">' + 
-                                        mealStatus.indicators + '</div>' : ''}
-                                </td>`;
-                        dayCount++;
-                    } else {
-                        // 下個月的日期
-                        row += `<td class="calendar-day other-month"></td>`;
-                    }
-                }
-                
-                row += '</tr>';
-                html += row;
-                rowCount++;
-            }
-
-            tbody.innerHTML = html;
-        }
-
-        // 格式化日期字串 YYYY-MM-DD
-        function formatDateString(date) {
-            const year = date.getFullYear();
-            const month = String(date.getMonth() + 1).padStart(2, '0');
-            const day = String(date.getDate()).padStart(2, '0');
-            return `${year}-${month}-${day}`;
-        }
-
-        // 取得餐食狀態
-        function getMealStatus(dateStr) {
-            const mealData = mealPlans[dateStr];
-            if (!mealData) {
-                return { status: 'legend-empty', hasMeals: false, indicators: '' };
-            }
-
-            const indicators = [];
-            let completeMeals = 0;
-
-            // 檢查各餐是否有內容
-            if (mealData.breakfast && mealData.breakfast.length > 0) {
-                indicators.push('<span class="meal-dot breakfast" title="早餐"></span>');
-                completeMeals++;
-            }
-            if (mealData.lunch && mealData.lunch.length > 0) {
-                indicators.push('<span class="meal-dot lunch" title="午餐"></span>');
-                completeMeals++;
-            }
-            if (mealData.dinner && mealData.dinner.length > 0) {
-                indicators.push('<span class="meal-dot dinner" title="晚餐"></span>');
-                completeMeals++;
-            }
-
-            const hasMeals = indicators.length > 0;
-            let status = 'legend-empty';
-            
-            if (hasMeals) {
-                status = completeMeals >= 3 ? 'legend-complete' : 'legend-planned';
-            }
-
-            return { status, hasMeals, indicators: indicators.join('') };
-        }
-
-        // 選擇日期
-        let lastSelectedDate = null; // 記錄上一次選擇的日期
-        
-        function selectDate(dateStr) {
-            const infoDiv = document.getElementById('selectedDateInfo');
-            
-            // 如果點選的是同一個日期，則收起資訊
-            if (lastSelectedDate === dateStr && infoDiv.style.display !== 'none') {
-                infoDiv.style.display = 'none';
-                lastSelectedDate = null;
-                return;
-            }
-            
-            // 選擇新日期
-            lastSelectedDate = dateStr;
-            const mealData = mealPlans[dateStr] || { breakfast: [], lunch: [], dinner: [] };
-            displaySelectedDateMeals(dateStr, mealData);
-        }
-
-        // 顯示選中日期的餐食內容
-        function displaySelectedDateMeals(dateStr, mealData) {
-            const infoDiv = document.getElementById('selectedDateInfo');
-            const textSpan = document.getElementById('selectedDateText');
-            const mealsDiv = document.getElementById('selectedDateMeals');
-
-            if (!infoDiv || !textSpan || !mealsDiv) return;
-
-            // 顯示日期資訊區塊
-            infoDiv.style.display = 'block';
-            
-            // 格式化日期顯示
-            const date = new Date(dateStr);
-            const dateText = `${date.getFullYear()}年${date.getMonth() + 1}月${date.getDate()}日`;
-            textSpan.textContent = dateText;
-            textSpan.dataset.date = dateStr; // 保存日期給按鈕使用
-
-            // 顯示餐食內容
-            let totalCalories = 0;
-            let totalProtein = 0;
-            let totalCarbs = 0;
-            let totalFat = 0;
-
-            const allMeals = [
-                ...mealData.breakfast.map(m => ({ meal: '早餐', ...m })),
-                ...mealData.lunch.map(m => ({ meal: '午餐', ...m })),
-                ...mealData.dinner.map(m => ({ meal: '晚餐', ...m }))
-            ];
-
-            allMeals.forEach(item => {
-                const calories = (item.caloriesPer100 * item.grams / 100) || 0;
-                const protein = (item.proteinPer100 * item.grams / 100) || 0;
-                const carbs = (item.carbsPer100 * item.grams / 100) || 0;
-                const fat = (item.fatPer100 * item.grams / 100) || 0;
-                
-                totalCalories += calories;
-                totalProtein += protein;
-                totalCarbs += carbs;
-                totalFat += fat;
-            });
-
-            if (allMeals.length === 0) {
-                mealsDiv.innerHTML = `
-                    <div class="row g-2">
-                        <div class="col-12">
-                            <div class="card border-light">
-                                <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                                    <div class="d-flex align-items-center">
-                                        <h6 class="mb-0">早餐</h6>
-                                    </div>
-                                    <button class="btn btn-sm btn-secondary" style="font-size: 12px;" onclick="openFoodPicker('breakfast', '${dateStr}')">
-                                        <i class="bi bi-plus-circle" style="font-size: 12px; vertical-align: -0.1em; margin-right: 4px;"></i>新增
-                                    </button>
-                                </div>
-                                <div class="card-body p-3">
-                                    <p class="text-muted small mb-0">建議：輕食為主，如燕麥片、雞蛋、全麥吐司</p>
-                                    <div id="breakfastList"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="card border-light">
-                                <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                                    <div class="d-flex align-items-center">
-                                        <h6 class="mb-0">午餐</h6>
-                                    </div>
-                                    <button class="btn btn-sm btn-secondary" style="font-size: 12px;" onclick="openFoodPicker('lunch', '${dateStr}')">
-                                        <i class="bi bi-plus-circle" style="font-size: 12px; vertical-align: -0.1em; margin-right: 4px;"></i>新增
-                                    </button>
-                                </div>
-                                <div class="card-body p-3">
-                                    <p class="text-muted small mb-0">建議：均衡營養，如雞胸肉、糙米飯、蔬菜</p>
-                                    <div id="lunchList"></div>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="card border-light">
-                                <div class="card-header d-flex justify-content-between align-items-center bg-light">
-                                    <div class="d-flex align-items-center">
-                                        <h6 class="mb-0">晚餐</h6>
-                                    </div>
-                                    <button class="btn btn-sm btn-secondary" style="font-size: 12px;" onclick="openFoodPicker('dinner', '${dateStr}')">
-                                        <i class="bi bi-plus-circle" style="font-size: 12px; vertical-align: -0.1em; margin-right: 4px;"></i>新增
-                                    </button>
-                                </div>
-                                <div class="card-body p-3">
-                                    <p class="text-muted small mb-0">建議：適量蛋白質與蔬菜，如鮭魚、地瓜、花椰菜</p>
-                                    <div id="dinnerList"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            } else {
-                mealsDiv.innerHTML = `
-                    <div class="mb-3">
-                        <h6>餐食內容：</h6>
-                        ${allMeals.map(item => `
-                            <div class="alert alert-light mb-2">
-                                <strong>${item.meal}：</strong> ${item.name} ${item.grams}g
-                                <small class="text-muted ms-2">${Math.round((item.caloriesPer100 * item.grams / 100))}卡</small>
-                            </div>
-                        `).join('')}
-                    </div>
-                    <div class="row text-center">
-                        <div class="col-3">
-                            <div class="fw-bold text-primary">${Math.round(totalCalories)}</div>
-                            <small class="text-muted">熱量</small>
-                        </div>
-                        <div class="col-3">
-                            <div class="fw-bold text-danger">${totalProtein.toFixed(1)}g</div>
-                            <small class="text-muted">蛋白</small>
-                        </div>
-                        <div class="col-3">
-                            <div class="fw-bold text-info">${totalCarbs.toFixed(1)}g</div>
-                            <small class="text-muted">碳水</small>
-                        </div>
-                        <div class="col-3">
-                            <div class="fw-bold text-warning">${totalFat.toFixed(1)}g</div>
-                            <small class="text-muted">脂肪</small>
-                        </div>
-                    </div>
-                    <div class="mt-3">
-                        <button class="btn btn-primary" onclick="startPlanning('${dateStr}')">
-                            <i class="bi bi-pencil me-1"></i>編輯餐食
-                        </button>
-                        <button class="btn btn-outline-danger" onclick="deleteDateMeals('${dateStr}')">
-                            <i class="bi bi-trash me-1"></i>刪除
-                        </button>
-                    </div>
-                `;
-            }
-        }
-
-        // 開始規劃餐食
-        function startPlanning(dateStr) {
-            // 這裡可以整合原有的餐食規劃功能
-            currentMealDate = dateStr;
-            // TODO: 載入該日期的餐食計畫或創建新的計畫
-        }
-
-        // 刪除日期餐食
-        function deleteDateMeals(dateStr) {
-            if (confirm(`確定要刪除 ${dateStr} 的所有餐食嗎？`)) {
-                delete mealPlans[dateStr];
-                updateCalendar();
-                document.getElementById('selectedDateInfo').style.display = 'none';
-                showToast('已刪除該日期的餐食', 'success');
-            }
-        }
-
-        // 上一個月
-        function previousMonth() {
-            currentCalendarMonth--;
-            if (currentCalendarMonth < 0) {
-                currentCalendarMonth = 11;
-                currentCalendarYear--;
-            }
-            updateCalendar();
-        }
-
-        // 下一個月
-        function nextMonth() {
-            currentCalendarMonth++;
-            if (currentCalendarMonth > 11) {
-                currentCalendarMonth = 0;
-                currentCalendarYear++;
-            }
-            updateCalendar();
-        }
-
-        // 跳轉到今天
-        function goToCurrentMonth() {
-            const now = new Date();
-            currentCalendarMonth = now.getMonth();
-            currentCalendarYear = now.getFullYear();
-            updateCalendar();
-        }
-
-        // 清空行事曆
-        function clearMealCalendar() {
-            if (confirm('確定要清空所有餐食計畫嗎？此操作無法復原。')) {
-                mealPlans = {};
-                updateCalendar();
-                document.getElementById('selectedDateInfo').style.display = 'none';
-                showToast('已清空所有餐食計畫', 'success');
-            }
-        }
-
-        // 載入餐食計畫
-        function loadMealPlanForCalendar() {
-            // TODO: 從後端載入已儲存的餐食計畫
-            // mealPlans = result.data;
-            console.log('載入餐食計畫');
-        }
-
-        // 在頁面載入時初始化行事曆
-        document.addEventListener('DOMContentLoaded', function() {
-            initMealCalendar();
-        });
     </script>
 </body>
 
