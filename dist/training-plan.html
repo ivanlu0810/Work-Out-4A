@@ -5709,6 +5709,18 @@
             console.log('startOfWeek:', startOfWeek);
             console.log('weekStartDate:', weekStartDate);
             console.log('weekNumber:', weekNumber);
+            
+            // 計算實際會出現的日期
+            const actualDates = {
+                monday: new Date(weekStartDate + 'T00:00:00').toISOString().split('T')[0],
+                tuesday: new Date(new Date(weekStartDate + 'T00:00:00').getTime() + 1*24*60*60*1000).toISOString().split('T')[0],
+                wednesday: new Date(new Date(weekStartDate + 'T00:00:00').getTime() + 2*24*60*60*1000).toISOString().split('T')[0],
+                thursday: new Date(new Date(weekStartDate + 'T00:00:00').getTime() + 3*24*60*60*1000).toISOString().split('T')[0],
+                friday: new Date(new Date(weekStartDate + 'T00:00:00').getTime() + 4*24*60*60*1000).toISOString().split('T')[0],
+                saturday: new Date(new Date(weekStartDate + 'T00:00:00').getTime() + 5*24*60*60*1000).toISOString().split('T')[0],
+                sunday: new Date(new Date(weekStartDate + 'T00:00:00').getTime() + 6*24*60*60*1000).toISOString().split('T')[0]
+            };
+            console.log('實際訓練日期:', actualDates);
 
             // 轉換 weeklyPlan => completion-api 所需 weekly_plan 結構
             const weekly_plan = {
@@ -5720,6 +5732,16 @@
                 saturday: weeklyPlan.saturday || [],
                 sunday: weeklyPlan.sunday || [],
             };
+            
+            console.log('每天動作數量:', {
+                monday: weekly_plan.monday.length,
+                tuesday: weekly_plan.tuesday.length,
+                wednesday: weekly_plan.wednesday.length,
+                thursday: weekly_plan.thursday.length,
+                friday: weekly_plan.friday.length,
+                saturday: weekly_plan.saturday.length,
+                sunday: weekly_plan.sunday.length
+            });
 
             const payload = {
                 user_id: 9,
@@ -5760,6 +5782,18 @@
             console.log('=== syncWeeklyPlanToExerciseTable 開始 ===');
             
             try {
+                // 檢查每個天的動作數量
+                const dayCounts = {
+                    monday: weeklyPlan.monday?.length || 0,
+                    tuesday: weeklyPlan.tuesday?.length || 0,
+                    wednesday: weeklyPlan.wednesday?.length || 0,
+                    thursday: weeklyPlan.thursday?.length || 0,
+                    friday: weeklyPlan.friday?.length || 0,
+                    saturday: weeklyPlan.saturday?.length || 0,
+                    sunday: weeklyPlan.sunday?.length || 0
+                };
+                console.log('每天的動作數量:', dayCounts);
+                
                 const payload = {
                     plan_id: planId,
                     user_id: 9,
@@ -5768,6 +5802,7 @@
                 };
                 
                 console.log('同步週計畫到個別動作表格:', payload);
+                console.log('currentWeek:', currentWeek, 'planId:', planId);
                 
                 const response = await fetch('../exercise-completion-api.php?action=sync_weekly_plan_to_exercises', {
                     method: 'POST',
@@ -6300,24 +6335,18 @@
         function getDayTrainingData(targetDate) {
             const dateKey = `${targetDate.getFullYear()}-${String(targetDate.getMonth() + 1).padStart(2, '0')}-${String(targetDate.getDate()).padStart(2, '0')}`;
             
-            console.log('getDayTrainingData - dateKey:', dateKey);
-            console.log('getDayTrainingData - calendarTrainingData[dateKey]:', calendarTrainingData[dateKey]);
-            
             // 只從記憶體中獲取該日期的訓練數據
             if (calendarTrainingData[dateKey]) {
                 const filteredData = [];
-                calendarTrainingData[dateKey].forEach((exercise, index) => {
-                    console.log(`過濾動作 ${index}:`, exercise, 'id:', exercise.id, 'id !== 0:', exercise.id !== 0);
+                calendarTrainingData[dateKey].forEach((exercise) => {
                     if (exercise.id !== 0) { // 排除休息日
                         filteredData.push(exercise);
                     }
                 });
-                console.log('過濾後的資料:', filteredData);
                 return filteredData;
             }
             
             // 如果記憶體中沒有，返回空陣列（不從 weeklyPlan 獲取）
-            console.log('沒有找到該日期的資料');
             return [];
         }
 
@@ -8246,67 +8275,16 @@
                 const result = await response.json();
                 
                 if (result.success && result.data) {
-                    console.log('原始行事曆資料:', result.data);
-                    console.log('原始資料的日期:', Object.keys(result.data));
+                    // 直接使用原始資料，不要過濾（因為不同模板有不同訓練日）
+                    calendarTrainingData = result.data;
                     
-                    // 先檢查是否有任何資料
-                    if (Object.keys(result.data).length === 0) {
-                        console.warn('API 返回空資料');
+                    // 只輸出關鍵信息，不要輸出所有資料
+                    if (Object.keys(calendarTrainingData).length > 0) {
+                        console.log('✅ 行事曆資料載入成功，共 ' + Object.keys(calendarTrainingData).length + ' 天的資料');
+                        console.log('有資料的日期:', Object.keys(calendarTrainingData).slice(0, 10).join(', '));
+                    } else {
+                        console.warn('⚠️ 資料庫沒有找到任何訓練資料');
                         calendarTrainingData = {};
-                        renderCalendar();
-                        return false;
-                    }
-                    
-                    // 強力修復：重新計算正確的訓練日期
-                    const correctedData = {};
-                    
-                    Object.keys(result.data).forEach(dateKey => {
-                        const exercises = result.data[dateKey];
-                        if (exercises && exercises.length > 0) {
-                            console.log(`處理日期 ${dateKey}:`, exercises);
-                            
-                            // 檢查這個日期是否應該是全身訓練日
-                            const date = new Date(dateKey);
-                            const dayOfWeek = date.getDay(); // 0=週日, 1=週一, ..., 6=週六
-                            const dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-                            const dayName = dayNames[dayOfWeek];
-                            
-                            console.log(`日期 ${dateKey} 是 ${dayName}`);
-                            
-                            // 只保留全身訓練的標準天數（週一、週三、週五）
-                            if (dayName === 'monday' || dayName === 'wednesday' || dayName === 'friday') {
-                                // 去重：基於 exercise_id 和 name
-                                const uniqueExercises = [];
-                                const seen = new Set();
-                                
-                                exercises.forEach(exercise => {
-                                    const key = `${exercise.id}-${exercise.name}`;
-                                    if (!seen.has(key)) {
-                                        seen.add(key);
-                                        uniqueExercises.push(exercise);
-                                    }
-                                });
-                                
-                                if (uniqueExercises.length > 0) {
-                                    correctedData[dateKey] = uniqueExercises;
-                                    console.log(`✅ 保留全身訓練 ${dateKey} (${dayName}): ${uniqueExercises.length} 個動作`);
-                                }
-                            } else {
-                                console.log(`❌ 跳過非全身訓練日 ${dateKey} (${dayName}) - 這不是週一、週三或週五`);
-                            }
-                        }
-                    });
-                    
-                    // 更新 calendarTrainingData
-                    calendarTrainingData = correctedData;
-                    console.log('修復後的行事曆資料:', Object.keys(calendarTrainingData));
-                    console.log('修復後的資料數量:', Object.keys(calendarTrainingData).length);
-                    
-                    // 如果修復後沒有資料，顯示警告
-                    if (Object.keys(calendarTrainingData).length === 0) {
-                        console.warn('⚠️ 修復後沒有找到符合全身訓練標準的資料');
-                        console.warn('這表示資料庫中的資料可能不是全身訓練格式');
-                        showWarningMessage('沒有找到符合全身訓練標準的資料（週一、週三、週五）');
                     }
                     
                     // 重新渲染行事曆
@@ -8840,23 +8818,12 @@
             console.log('loadWeeklyPlan 已廢棄，請使用 loadPlan() 從資料庫載入');
         }
 
-        // 儲存週計畫（僅同步到資料庫，不使用 localStorage）
+        // 儲存週計畫（已禁用自動同步，只在用戶明確操作時才同步）
         function saveWeeklyPlan() {
-            // 重新啟用自動同步功能
-            console.log('儲存週計畫到資料庫:', { currentWeek, weeklyPlan });
-            
-            // 檢查是否有實際的訓練數據
-            const hasTrainingData = Object.keys(weeklyPlan).some(day => {
-                const exercises = Array.isArray(weeklyPlan[day]) ? weeklyPlan[day] : [];
-                return exercises.length > 0 && exercises.some(ex => ex.id !== 0); // 排除休息日
-            });
-            
-            if (hasTrainingData) {
-                console.log('檢測到訓練數據變更，自動同步到資料庫');
-                syncToDatabase().catch(error => {
-                    console.error('自動同步到資料庫失敗:', error);
-                });
-            }
+            console.log('saveWeeklyPlan 調用 - 資料已更新記憶體，但不自動同步到資料庫');
+            console.log('只有當用戶明確操作（添加動作、應用模板等）時才會同步到資料庫');
+            // 不再自動同步，避免覆蓋資料庫中完整的資料
+            // 同步將在特定操作時手動觸發（如 addExercise, applyTemplate 等）
         }
         // 渲染週計畫
         function renderWeeklyPlan() {
@@ -9885,6 +9852,12 @@
                     showSuccessMessage(`${template.name} (${mode === 'random' ? '隨機模式' : '推薦模式'}) 已應用到整週`);
                     // 立即把本週每日菜單渲染到行事曆（以所選日期所在週為基準，週一起算）
                     syncWeeklyPlanToCalendarForCurrentWeek(selectedTemplateBaseDate);
+                    // 同步到資料庫保存（永久儲存）
+                    syncToDatabase().then(() => {
+                        console.log('模板已同步到資料庫');
+                    }).catch(error => {
+                        console.error('同步到資料庫失敗:', error);
+                    });
                 }, 200);
             }
         }

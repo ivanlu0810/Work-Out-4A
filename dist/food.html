@@ -480,12 +480,12 @@ $email = $_SESSION['email'] ?? 'No email';
         }
         
         .nutrition-icon {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
+            font-size: 1rem;
             box-shadow: 0 2px 8px rgba(0,0,0,0.15);
             line-height: 1;
         }
@@ -1109,6 +1109,140 @@ $email = $_SESSION['email'] ?? 'No email';
                 padding: 6px 2px;
             }
         }
+
+        /* 日曆圖標與文字垂直對齊 */
+        .card-header h6 i[class^="bi"] {
+            vertical-align: middle;
+        }
+
+        /* 新增食材 Modal 樣式 */
+        #foodPickerModal .modal-dialog {
+            max-width: 70% !important; /* 限制 modal 寬度為螢幕的 70% */
+        }
+
+        #foodPickerModal .table {
+            table-layout: fixed; /* 使用固定表格布局以精確控制 */
+            width: 100%; /* 確保表格填滿容器 */
+        }
+
+        #foodPickerModal th,
+        #foodPickerModal td {
+            vertical-align: middle;
+            padding: 0.3rem 0.2rem; /* 減少 padding 讓內容更緊湊 */
+            word-wrap: break-word; /* 允許文字換行 */
+            font-size: 0.875rem; /* 稍微縮小字體 */
+        }
+
+        /* 根據內容調整欄位寬度 - 減少寬度 */
+        #foodPickerModal th:nth-child(1),
+        #foodPickerModal td:nth-child(1) {
+            width: 21%; /* 名稱欄位 */
+        }
+
+        #foodPickerModal th:nth-child(2),
+        #foodPickerModal td:nth-child(2) {
+            width: 11%; /* 分類欄位 */
+        }
+
+        /* 營養素欄位最窄 */
+        #foodPickerModal th:nth-child(3),
+        #foodPickerModal td:nth-child(3) {
+            width: 9%; /* 卡/100g */
+        }
+
+        #foodPickerModal th:nth-child(4),
+        #foodPickerModal td:nth-child(4) {
+            width: 7%; /* 蛋白 */
+        }
+
+        #foodPickerModal th:nth-child(5),
+        #foodPickerModal td:nth-child(5) {
+            width: 7%; /* 碳水 */
+        }
+
+        #foodPickerModal th:nth-child(6),
+        #foodPickerModal td:nth-child(6) {
+            width: 7%; /* 脂肪 */
+        }
+
+        #foodPickerModal th:nth-child(7),
+        #foodPickerModal td:nth-child(7) {
+            width: 30%; /* 備註欄位 */
+            text-align: center; /* 備註欄位置中 */
+        }
+
+        /* 操作欄位標題置中 */
+        #foodPickerModal th:nth-child(8),
+        #foodPickerModal td:nth-child(8) {
+            width: 8%; /* 操作欄位 */
+            text-align: center; /* 操作欄位標題置中 */
+        }
+
+        /* 營養追蹤提示框 - 灰色 */
+        .morandi-alert {
+            background-color: #f5f5f5 !important; /* 淺灰色 */
+            border: none;
+            color: #333; /* 深灰色文字 */
+        }
+
+        .morandi-alert i,
+        .morandi-alert strong {
+            color: #333 !important;
+        }
+
+        /* 智慧菜單按鈕 - 淺綠色 */
+        .btn-light-green {
+            background-color: #d8f0e8;
+            border-color: #d8f0e8;
+            color: #000 !important;
+        }
+
+        .btn-light-green:hover {
+            background-color: #c8e0d8;
+            border-color: #c8e0d8;
+            color: #000 !important;
+        }
+
+        .btn-light-green i {
+            color: #000 !important;
+        }
+
+        /* 手動新增按鈕 - 超淺灰色 */
+        .btn-light-gray {
+            background-color: #e8e8e8;
+            border-color: #e8e8e8;
+            color: #000 !important;
+        }
+
+        .btn-light-gray:hover {
+            background-color: #d8d8d8;
+            border-color: #d8d8d8;
+            color: #000 !important;
+        }
+
+        .btn-light-gray i {
+            color: #000 !important;
+        }
+
+        /* 莫蘭迪紅色刪除按鈕 */
+        .btn-morandi-red {
+            background-color: #a27e7e;
+            border-color: #a27e7e;
+            color: white !important;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-morandi-red:hover {
+            background-color: #926e6e;
+            border-color: #926e6e;
+            color: white !important;
+        }
+
+        .btn-morandi-red i {
+            color: white !important;
+        }
     </style>
 </head>
 
@@ -1447,6 +1581,87 @@ $email = $_SESSION['email'] ?? 'No email';
 
                     <!-- 第二頁：三餐規劃 -->
                     <div class="tab-pane fade" id="meal-plan-page" role="tabpanel" aria-labelledby="meal-plan-tab">
+                        <!-- 營養追蹤區塊 -->
+                        <section class="section" id="nutritionTrackerSection" style="display: block;">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h4 class="mb-0"><i class="bi bi-graph-up me-2"></i>營養追蹤</h4>
+                                    <small class="text-muted">追蹤今日攝取的營養是否達到目標</small>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <!-- 熱量追蹤 -->
+                                        <div class="col-12">
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="fw-bold">
+                                                        <i class="bi bi-fire text-warning me-1"></i>熱量
+                                                    </span>
+                                                    <span id="caloriesProgressText">0 / 0 卡路里</span>
+                                                </div>
+                                                <div class="progress" style="height: 20px;">
+                                                    <div class="progress-bar bg-warning" id="caloriesProgressBar" role="progressbar" 
+                                                         style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small class="text-muted d-block mt-1 text-center" id="caloriesProgressPercent">0%</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 蛋白質追蹤 -->
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="fw-bold small">蛋白質</span>
+                                                    <span id="proteinProgressText" class="small">0 / 0 g</span>
+                                                </div>
+                                                <div class="progress" style="height: 15px;">
+                                                    <div class="progress-bar bg-danger" id="proteinProgressBar" role="progressbar" 
+                                                         style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small class="text-muted d-block mt-1 text-center" id="proteinPercentText">0%</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 碳水化合物追蹤 -->
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="fw-bold small">碳水化合物</span>
+                                                    <span id="carbsProgressText" class="small">0 / 0 g</span>
+                                                </div>
+                                                <div class="progress" style="height: 15px;">
+                                                    <div class="progress-bar bg-info" id="carbsProgressBar" role="progressbar" 
+                                                         style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small class="text-muted d-block mt-1 text-center" id="carbsPercentText">0%</small>
+                                            </div>
+                                        </div>
+                                        
+                                        <!-- 脂肪追蹤 -->
+                                        <div class="col-md-4">
+                                            <div class="mb-3">
+                                                <div class="d-flex justify-content-between mb-2">
+                                                    <span class="fw-bold small">脂肪</span>
+                                                    <span id="fatProgressText" class="small">0 / 0 g</span>
+                                                </div>
+                                                <div class="progress" style="height: 15px;">
+                                                    <div class="progress-bar bg-warning" id="fatProgressBar" role="progressbar" 
+                                                         style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                                                </div>
+                                                <small class="text-muted d-block mt-1 text-center" id="fatPercentText">0%</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- 提示訊息 -->
+                                    <div class="alert mt-3 morandi-alert" id="nutritionTrackerAlert">
+                                        <i class="bi bi-info-circle me-2"></i>
+                                        <strong>開始使用：</strong>請先前往「營養計算」頁面計算您的營養需求，即可開始追蹤每日營養攝取。
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                        
                         <!-- 三餐客製化 -->
                         <section class="section" id="mealPlannerSection" style="display: block;">
                             <div class="card">
@@ -1518,66 +1733,6 @@ $email = $_SESSION['email'] ?? 'No email';
                     </div>
                 </section>
 
-                <!-- 食物數據一覽 -->
-                <section class="section">
-                    <div class="card">
-                        <div class="card-header" data-bs-toggle="collapse" data-bs-target="#foodDataCollapse"
-                            aria-expanded="false" aria-controls="foodDataCollapse" style="cursor: pointer;">
-                            <h4><i class="bi bi-database me-2"></i>食物數據一覽</h4>
-                            <small class="text-muted">點擊展開查看所有食物資料</small>
-                        </div>
-                        <div class="collapse" id="foodDataCollapse">
-                            <div class="card-body">
-                                <div class="mb-3">
-                                    <div class="row">
-                                        <div class="col-md-6">
-                                            <input type="text" class="form-control" id="foodSearchInput"
-                                                placeholder="搜尋食物名稱..." onkeyup="filterFoodTable()">
-                                        </div>
-                                        <div class="col-md-3">
-                                            <select class="form-select" id="categoryFilter"
-                                                onchange="filterFoodTable()">
-                                                <option value="">所有類別</option>
-                                                <option value="穀物類">穀物類</option>
-                                                <option value="肉類">肉類</option>
-                                                <option value="蔬菜類">蔬菜類</option>
-                                                <option value="水果類">水果類</option>
-                                                <option value="乳製品">乳製品</option>
-                                                <option value="堅果類">堅果類</option>
-                                            </select>
-                                        </div>
-                                        <div class="col-md-3">
-                                            <button class="btn btn-outline-primary w-100" onclick="loadAllFoods()">
-                                                <i class="bi bi-arrow-clockwise me-1"></i>重新載入
-                                            </button>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="table-responsive">
-                                    <table class="table table-hover" id="foodDataTable">
-                                        <thead class="table-primary">
-                                            <tr>
-                                                <th>食物名稱</th>
-                                                <th>類別</th>
-                                                <th class="text-end">熱量(卡/100g)</th>
-                                                <th class="text-end">蛋白質(g)</th>
-                                                <th class="text-end">碳水化合物(g)</th>
-                                                <th class="text-end">脂肪(g)</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody id="foodDataTableBody">
-                                            <tr>
-                                                <td colspan="6" class="text-center text-muted py-4">
-                                                    <i class="bi bi-hourglass-split me-2"></i>正在載入食物資料...
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
                     </div>
 
                     <!-- 第三頁：增肌知識 -->
@@ -1863,7 +2018,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
                 <!-- 食材選取 Modal -->
                 <div class="modal fade" id="foodPickerModal" tabindex="-1" aria-hidden="true">
-                    <div class="modal-dialog modal-lg">
+                    <div class="modal-dialog modal-xl">
                         <div class="modal-content">
                             <div class="modal-header">
                                 <h5 class="modal-title">新增食材</h5>
@@ -1896,7 +2051,8 @@ $email = $_SESSION['email'] ?? 'No email';
                                                 <th class="text-end">蛋白</th>
                                                 <th class="text-end">碳水</th>
                                                 <th class="text-end">脂肪</th>
-                                                <th class="text-end">操作</th>
+                                                <th class="text-center">備註</th>
+                                                <th class="text-center">操作</th>
                                             </tr>
                                         </thead>
                                         <tbody id="pickerTable"></tbody>
@@ -2574,6 +2730,9 @@ $email = $_SESSION['email'] ?? 'No email';
                 // 更新目標數值到餐食規劃區域
                 updateTargetValues(result);
 
+                // 顯示並初始化營養追蹤區塊
+                updateNutritionTracker(result);
+
             } catch (error) {
                 console.error('顯示營養結果時發生錯誤:', error);
                 // 靜默處理錯誤，不中斷程式執行
@@ -2601,6 +2760,109 @@ $email = $_SESSION['email'] ?? 'No email';
                 carbs: result.macros.carbs.grams,
                 fat: result.macros.fat.grams
             };
+        }
+
+        // 更新營養追蹤區塊
+        function updateNutritionTracker(result) {
+            // 顯示營養追蹤區塊
+            const trackerSection = document.getElementById('nutritionTrackerSection');
+            if (trackerSection) {
+                trackerSection.style.display = 'block';
+            }
+
+            // 計算目前攝取的營養素
+            updateNutritionProgress(result);
+        }
+
+        // 更新營養進度條
+        function updateNutritionProgress(targetResult) {
+            if (!targetResult) return;
+
+            // 計算目前攝取的營養素（從 mealPlan）
+            const totals = computeTotals();
+
+            const actualCalories = totals.calories;
+            const actualProtein = totals.protein;
+            const actualCarbs = totals.carbs;
+            const actualFat = totals.fat;
+
+            // 取得目標值
+            const targetCalories = targetResult.target_calories;
+            const targetProtein = targetResult.macros.protein.grams;
+            const targetCarbs = targetResult.macros.carbs.grams;
+            const targetFat = targetResult.macros.fat.grams;
+
+            // 計算百分比（最多顯示100%）
+            const caloriesPercent = Math.min((actualCalories / targetCalories) * 100, 100);
+            const proteinPercent = Math.min((actualProtein / targetProtein) * 100, 100);
+            const carbsPercent = Math.min((actualCarbs / targetCarbs) * 100, 100);
+            const fatPercent = Math.min((actualFat / targetFat) * 100, 100);
+
+            // 更新熱量
+            const caloriesText = document.getElementById('caloriesProgressText');
+            const caloriesBar = document.getElementById('caloriesProgressBar');
+            const caloriesPercentText = document.getElementById('caloriesProgressPercent');
+            if (caloriesText) caloriesText.textContent = `${Math.round(actualCalories)} / ${targetCalories} 卡路里`;
+            if (caloriesBar) {
+                caloriesBar.style.width = caloriesPercent + '%';
+                caloriesBar.setAttribute('aria-valuenow', caloriesPercent);
+            }
+            if (caloriesPercentText) caloriesPercentText.textContent = `${Math.round(caloriesPercent)}%`;
+
+            // 更新蛋白質
+            const proteinText = document.getElementById('proteinProgressText');
+            const proteinBar = document.getElementById('proteinProgressBar');
+            const proteinPercentText = document.getElementById('proteinPercentText');
+            if (proteinText) proteinText.textContent = `${Math.round(actualProtein)} / ${targetProtein} g`;
+            if (proteinBar) {
+                proteinBar.style.width = proteinPercent + '%';
+                proteinBar.setAttribute('aria-valuenow', proteinPercent);
+            }
+            if (proteinPercentText) proteinPercentText.textContent = `${Math.round(proteinPercent)}%`;
+
+            // 更新碳水化合物
+            const carbsText = document.getElementById('carbsProgressText');
+            const carbsBar = document.getElementById('carbsProgressBar');
+            const carbsPercentText = document.getElementById('carbsPercentText');
+            if (carbsText) carbsText.textContent = `${Math.round(actualCarbs)} / ${targetCarbs} g`;
+            if (carbsBar) {
+                carbsBar.style.width = carbsPercent + '%';
+                carbsBar.setAttribute('aria-valuenow', carbsPercent);
+            }
+            if (carbsPercentText) carbsPercentText.textContent = `${Math.round(carbsPercent)}%`;
+
+            // 更新脂肪
+            const fatText = document.getElementById('fatProgressText');
+            const fatBar = document.getElementById('fatProgressBar');
+            const fatPercentText = document.getElementById('fatPercentText');
+            if (fatText) fatText.textContent = `${Math.round(actualFat)} / ${targetFat} g`;
+            if (fatBar) {
+                fatBar.style.width = fatPercent + '%';
+                fatBar.setAttribute('aria-valuenow', fatPercent);
+            }
+            if (fatPercentText) fatPercentText.textContent = `${Math.round(fatPercent)}%`;
+
+            // 根據完成度改變進度條顏色
+            updateProgressBarColorForTracker('caloriesProgressBar', caloriesPercent);
+            updateProgressBarColorForTracker('proteinProgressBar', proteinPercent);
+            updateProgressBarColorForTracker('carbsProgressBar', carbsPercent);
+            updateProgressBarColorForTracker('fatProgressBar', fatPercent);
+        }
+
+        // 更新進度條顏色
+        function updateProgressBarColorForTracker(elementId, percent) {
+            const element = document.getElementById(elementId);
+            if (!element) return;
+
+            element.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-info', 'bg-primary');
+
+            if (percent >= 95 && percent <= 105) {
+                element.classList.add('bg-success');
+            } else if (percent < 95) {
+                element.classList.add('bg-warning');
+            } else if (percent > 105) {
+                element.classList.add('bg-danger');
+            }
         }
 
         // 載入健身小提醒
@@ -2768,67 +3030,64 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         function renderPlanner(nutritionResult) {
-            const wrap = document.getElementById('plannerMeals');
-            if (!wrap) {
-                console.log('plannerMeals 元素不存在，跳過渲染餐食規劃');
-                return;
+            // 更新早餐、午餐、晚餐的食材列表（在日期顯示區塊中）
+            const breakfastList = document.getElementById('breakfastList');
+            const lunchList = document.getElementById('lunchList');
+            const dinnerList = document.getElementById('dinnerList');
+
+            if (breakfastList) {
+                if (mealPlan.breakfast.length > 0) {
+                    breakfastList.innerHTML = '<div class="mt-3">' + mealPlan.breakfast.map((item, idx) => `
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <div>
+                                <span class="fw-bold">${item.name}</span>
+                                <span class="text-muted small ms-2">${item.grams}g</span>
+                            </div>
+                            <button class="btn btn-sm btn-morandi-red" onclick="removeItem('breakfast', ${idx})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    `).join('') + '</div>';
+                } else {
+                    breakfastList.innerHTML = '<p class="text-muted text-center small">尚未添加任何食材</p>';
+                }
             }
 
-            wrap.innerHTML = '';
-
-            mealTypesOrder.forEach(mt => {
-                const col = document.createElement('div');
-                col.className = 'col-12 mb-4 text-start';
-                const rows = mealPlan[mt].map((item, idx) => `
-                    <tr>
-                        <td class="fw-bold">${item.name}</td>
-                        <td class="text-end"><input type="number" min="1" value="${item.grams}" class="form-control form-control-sm" style="width:80px" onchange="updateGrams('${mt}', ${idx}, this.value)"></td>
-                        <td class="text-end fw-bold text-primary">${(item.caloriesPer100 * item.grams / 100).toFixed(0)}</td>
-                        <td class="text-end text-danger">${(item.proteinPer100 * item.grams / 100).toFixed(1)}</td>
-                        <td class="text-end text-info">${(item.carbsPer100 * item.grams / 100).toFixed(1)}</td>
-                        <td class="text-end text-warning">${(item.fatPer100 * item.grams / 100).toFixed(1)}</td>
-                        <td class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="removeItem('${mt}', ${idx})"><i class="bi bi-trash"></i></button></td>
-                    </tr>
-                `).join('');
-
-                col.innerHTML = `
-                    <div class="card h-100">
-                        <div class="card-header d-flex justify-content-between align-items-center bg-primary text-white">
-                            <h5 class="mb-0"><i class="bi bi-${mt === 'breakfast' ? 'sunrise' : mt === 'lunch' ? 'sun' : 'moon'} me-2"></i>${mealTypeName[mt]}</h5>
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-sm btn-light" onclick="generateSmartMenu('${mt}')" title="智能推薦">
-                                    <i class="bi bi-magic me-1"></i>智能菜單
-                                </button>
-                                <button class="btn btn-sm btn-warning" onclick="openFoodPicker('${mt}')">
-                                    <i class="bi bi-plus-lg me-1"></i>手動新增
-                                </button>
-                        </div>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-hover mb-0">
-                                    <thead class="table-primary">
-                                        <tr>
-                                            <th><i class="bi bi-basket me-1"></i>食材</th>
-                                            <th class="text-end"><i class="bi bi-rulers me-1"></i>份量(g)</th>
-                                            <th class="text-end"><i class="bi bi-fire me-1"></i>卡</th>
-                                            <th class="text-end"><i class="bi bi-droplet me-1"></i>蛋白</th>
-                                            <th class="text-end"><i class="bi bi-basket me-1"></i>碳水</th>
-                                            <th class="text-end"><i class="bi bi-heart me-1"></i>脂肪</th>
-                                            <th class="text-end"><i class="bi bi-gear me-1"></i>操作</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        ${rows || ''}
-                                        ${rows ? '' : '<tr><td colspan="7" class="text-center text-muted py-4"><i class="bi bi-plus-circle me-2"></i>尚未添加任何食材</td></tr>'}
-                                    </tbody>
-                                </table>
+            if (lunchList) {
+                if (mealPlan.lunch.length > 0) {
+                    lunchList.innerHTML = '<div class="mt-3">' + mealPlan.lunch.map((item, idx) => `
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <div>
+                                <span class="fw-bold">${item.name}</span>
+                                <span class="text-muted small ms-2">${item.grams}g</span>
                             </div>
+                            <button class="btn btn-sm btn-morandi-red" onclick="removeItem('lunch', ${idx})">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </div>
-                    </div>
-                `;
-                wrap.appendChild(col);
-            });
+                    `).join('') + '</div>';
+                } else {
+                    lunchList.innerHTML = '<p class="text-muted text-center small">尚未添加任何食材</p>';
+                }
+            }
+
+            if (dinnerList) {
+                if (mealPlan.dinner.length > 0) {
+                    dinnerList.innerHTML = '<div class="mt-3">' + mealPlan.dinner.map((item, idx) => `
+                        <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+                            <div>
+                                <span class="fw-bold">${item.name}</span>
+                                <span class="text-muted small ms-2">${item.grams}g</span>
+                            </div>
+                            <button class="btn btn-sm btn-morandi-red" onclick="removeItem('dinner', ${idx})">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </div>
+                    `).join('') + '</div>';
+                } else {
+                    dinnerList.innerHTML = '<p class="text-muted text-center small">尚未添加任何食材</p>';
+                }
+            }
 
             // 更新合計顯示（安全檢查）
             const totals = computeTotals();
@@ -2847,6 +3106,11 @@ $email = $_SESSION['email'] ?? 'No email';
 
             // 檢查是否有變更
             checkForChanges();
+            
+            // 更新營養追蹤進度條
+            if (nutritionResult) {
+                updateNutritionProgress(nutritionResult);
+            }
         }
 
         function computeTotals() {
@@ -3267,6 +3531,9 @@ $email = $_SESSION['email'] ?? 'No email';
                 // 重新渲染
                 renderPlanner(currentNutritionResult);
                 showToast('智能菜單已生成！專注原型食物和健康選擇', 'success');
+
+                // 更新營養追蹤進度條
+                updateNutritionProgress(currentNutritionResult);
 
                 // 標記為有變更
                 hasUnsavedChanges = true;
@@ -3898,6 +4165,11 @@ $email = $_SESSION['email'] ?? 'No email';
                 renderPlanner(currentNutritionResult);
                 showToast('已清空所有餐食', 'info');
 
+                // 更新營養追蹤進度條
+                if (currentNutritionResult) {
+                    updateNutritionProgress(currentNutritionResult);
+                }
+
                 // 標記為有變更
                 hasUnsavedChanges = true;
                 checkForChanges();
@@ -4177,7 +4449,8 @@ $email = $_SESSION['email'] ?? 'No email';
                     <td class="text-end">${f.Protein}</td>
                     <td class="text-end">${f.Carbs}</td>
                     <td class="text-end">${f.Fat}</td>
-                    <td class="text-end"><button class="btn btn-sm btn-secondary rounded-pill" onclick="addFoodToMeal(${f.food_id})">加入</button></td>
+                    <td class="text-center">${f.Notes || '無備註'}</td>
+                    <td class="text-center"><button class="btn btn-sm btn-secondary rounded-pill" onclick="addFoodToMeal(${f.food_id})">加入</button></td>
                 </tr>
             `).join('');
         }
@@ -4231,23 +4504,16 @@ $email = $_SESSION['email'] ?? 'No email';
         function addFoodToMeal(foodId) {
             const food = allFoods.find(f => f.food_id === foodId);
             if (!food) {
-                alert('找不到該食物資料，請重新選擇');
                 return;
             }
 
             // 檢查是否已經添加過相同食物
             const existingFood = mealPlan[currentPickMeal].find(item => item.name === food.Food_Name);
             if (existingFood) {
-                if (confirm(`「${food.Food_Name}」已經在${mealTypeName[currentPickMeal]}中了，是否要增加份量？`)) {
-                    existingFood.grams += 100;
-                } else {
-                    return;
-                }
+                // 如果已存在，直接增加份量
+                existingFood.grams += 100;
             } else {
-                if (usedFoodNames.has(food.Food_Name)) {
-                    alert('今日菜單已包含此食材，請選擇其他食材');
-                    return;
-                }
+                // 如果不存在，直接添加
                 mealPlan[currentPickMeal].push({
                     name: food.Food_Name,
                     grams: 100,
@@ -4259,27 +4525,39 @@ $email = $_SESSION['email'] ?? 'No email';
                 usedFoodNames.add(food.Food_Name);
             }
 
+            // 重新渲染
             renderPlanner(currentNutritionResult);
 
-            // 顯示成功提示
-            showToast(`已將「${food.Food_Name}」加入${mealTypeName[currentPickMeal]}！`, 'success');
+            // 更新營養追蹤進度條
+            if (currentNutritionResult) {
+                updateNutritionProgress(currentNutritionResult);
+            }
 
-            // 不自動關閉彈窗，讓用戶可以繼續添加
-            // setTimeout(() => {
-            //     closeFoodPicker();
-            // }, 800);
+            // 標記為有變更
+            hasUnsavedChanges = true;
+            checkForChanges();
         }
 
         function updateGrams(mealType, index, grams) {
             const g = Math.max(1, parseInt(grams || '0'));
             mealPlan[mealType][index].grams = g;
             renderPlanner(currentNutritionResult);
+            
+            // 更新營養追蹤進度條
+            if (currentNutritionResult) {
+                updateNutritionProgress(currentNutritionResult);
+            }
         }
 
         function removeItem(mealType, index) {
             mealPlan[mealType].splice(index, 1);
             renderPlanner(currentNutritionResult);
             showToast('已移除食材', 'info');
+            
+            // 更新營養追蹤進度條
+            if (currentNutritionResult) {
+                updateNutritionProgress(currentNutritionResult);
+            }
         }
 
         // Toast 提示功能
@@ -4298,18 +4576,21 @@ $email = $_SESSION['email'] ?? 'No email';
 
             // 根據類型設定顏色
             const typeConfig = {
-                'success': { icon: 'check-circle', title: '成功', color: 'text-success' },
+                'success': { icon: 'check-circle', title: '成功', color: 'text-primary' },
                 'error': { icon: 'exclamation-circle', title: '錯誤', color: 'text-danger' },
                 'info': { icon: 'info-circle', title: '提示', color: 'text-info' }
             };
 
             const config = typeConfig[type] || typeConfig['info'];
 
+            // 成功類型使用藍黑色
+            const iconColor = type === 'success' ? 'style="color: #2c3e50;"' : '';
+            
             const toastHtml = `
                 <div id="${toastId}" class="toast toast-${type} show" role="alert" aria-live="assertive" aria-atomic="true" style="display: block !important;">
                     <div class="toast-header">
-                        <i class="bi bi-${config.icon} ${config.color} me-2"></i>
-                        <strong class="me-auto">${config.title}</strong>
+                        <i class="bi bi-${config.icon} me-2" ${iconColor}></i>
+                        <strong class="me-auto" ${iconColor}>${config.title}</strong>
                         <button type="button" class="btn-close" onclick="closeToast('${toastId}')" aria-label="關閉"></button>
                     </div>
                     <div class="toast-body">
@@ -5250,9 +5531,14 @@ $email = $_SESSION['email'] ?? 'No email';
                                     <div class="d-flex align-items-center">
                                         <h6 class="mb-0">早餐</h6>
                                     </div>
-                                    <button class="btn btn-sm btn-secondary" style="font-size: 12px;" onclick="openFoodPicker('breakfast', '${dateStr}')">
-                                        <i class="bi bi-plus-circle" style="font-size: 12px; vertical-align: -0.1em; margin-right: 4px;"></i>新增
-                                    </button>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('breakfast')">
+                                            <span>✨</span><span>智慧菜單</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('breakfast', '${dateStr}')">
+                                            <span>➕</span><span>手動新增</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="card-body p-3">
                                     <p class="text-muted small mb-0">建議：輕食為主，如燕麥片、雞蛋、全麥吐司</p>
@@ -5266,9 +5552,14 @@ $email = $_SESSION['email'] ?? 'No email';
                                     <div class="d-flex align-items-center">
                                         <h6 class="mb-0">午餐</h6>
                                     </div>
-                                    <button class="btn btn-sm btn-secondary" style="font-size: 12px;" onclick="openFoodPicker('lunch', '${dateStr}')">
-                                        <i class="bi bi-plus-circle" style="font-size: 12px; vertical-align: -0.1em; margin-right: 4px;"></i>新增
-                                    </button>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('lunch')">
+                                            <span>✨</span><span>智慧菜單</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('lunch', '${dateStr}')">
+                                            <span>➕</span><span>手動新增</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="card-body p-3">
                                     <p class="text-muted small mb-0">建議：均衡營養，如雞胸肉、糙米飯、蔬菜</p>
@@ -5282,9 +5573,14 @@ $email = $_SESSION['email'] ?? 'No email';
                                     <div class="d-flex align-items-center">
                                         <h6 class="mb-0">晚餐</h6>
                                     </div>
-                                    <button class="btn btn-sm btn-secondary" style="font-size: 12px;" onclick="openFoodPicker('dinner', '${dateStr}')">
-                                        <i class="bi bi-plus-circle" style="font-size: 12px; vertical-align: -0.1em; margin-right: 4px;"></i>新增
-                                    </button>
+                                    <div class="btn-group btn-group-sm">
+                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('dinner')">
+                                            <span>✨</span><span>智慧菜單</span>
+                                        </button>
+                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('dinner', '${dateStr}')">
+                                            <span>➕</span><span>手動新增</span>
+                                        </button>
+                                    </div>
                                 </div>
                                 <div class="card-body p-3">
                                     <p class="text-muted small mb-0">建議：適量蛋白質與蔬菜，如鮭魚、地瓜、花椰菜</p>

@@ -122,27 +122,25 @@ try {
     try {
         $pdo->beginTransaction();
         
-        // 檢查是否已存在相同週數的計畫
-        $check_sql = "SELECT id FROM training_plans WHERE user_id = ? AND week_number = ? AND week_start_date = ?";
+        // 檢查是否已存在相同週數的計畫（僅檢查 user_id 和 week_number，配合資料庫唯一約束）
+        $check_sql = "SELECT id FROM training_plans WHERE user_id = ? AND week_number = ?";
         $check_stmt = $pdo->prepare($check_sql);
-        $check_stmt->execute([$input['user_id'], $input['week_number'], $input['week_start_date']]);
+        $check_stmt->execute([$input['user_id'], $input['week_number']]);
         
         if ($check_stmt->rowCount() > 0) {
             // 更新現有計畫
             $plan_id = $check_stmt->fetchColumn();
-            $update_sql = "UPDATE training_plans SET plan_name = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
+            $update_sql = "UPDATE training_plans SET plan_name = ?, week_start_date = ?, updated_at = CURRENT_TIMESTAMP WHERE id = ?";
             $update_stmt = $pdo->prepare($update_sql);
-            $update_stmt->execute([$input['plan_name'], $plan_id]);
+            $update_stmt->execute([$input['plan_name'], $input['week_start_date'], $plan_id]);
             
-            // 刪除現有的運動記錄
+            // 刪除現有的運動記錄（training_plan_exercises）
             $delete_exercises_sql = "DELETE FROM training_plan_exercises WHERE plan_id = ?";
             $delete_exercises_stmt = $pdo->prepare($delete_exercises_sql);
             $delete_exercises_stmt->execute([$plan_id]);
             
-                // 刪除現有的完成記錄
-            $delete_completion_sql = "DELETE FROM training_plan_completion WHERE plan_id = ?";
-            $delete_completion_stmt = $pdo->prepare($delete_completion_sql);
-            $delete_completion_stmt->execute([$plan_id]);
+            // 注意：不刪除 training_plan_completion 記錄，因為這是由 syncWeeklyPlanToExerciseTable 管理的
+            // syncWeeklyPlanToExerciseTable 會負責更新這些記錄
         } else {
             // 插入新計畫
             $insert_sql = "INSERT INTO training_plans (user_id, week_start_date, week_number, plan_name, is_active) VALUES (?, ?, ?, ?, 1)";

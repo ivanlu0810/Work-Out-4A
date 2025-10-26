@@ -98,7 +98,7 @@ try {
             Notes
             FROM food 
             ORDER BY Category, Food_Name
-            LIMIT 25";
+            LIMIT 1000";
     
     $result = $conn->query($sql);
     
@@ -108,7 +108,7 @@ try {
                 Calories, Protein, Carbs, Fat, Notes
                 FROM food 
                 ORDER BY Category, Food_Name
-                LIMIT 100";
+                LIMIT 1000";
         
         $result = $conn->query($sql2);
         if ($result === false) {
