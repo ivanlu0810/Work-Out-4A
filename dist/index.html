@@ -946,7 +946,7 @@
                                         <h4 class="text-center">身體組成比例</h4>
                                     </div>
                                 <div class="card-body d-flex flex-column justify-content-center align-items-center" style="height: 320px;">
-                                    <div id="body-composition-pie-chart-page2" style="width: 100%; height: 100%;"></div>
+                                    <div id="body-composition-pie-chart-page2" style="width: 280px; height: 280px;"></div>
                                 </div>
                                 </div>
                             </div>
@@ -1078,9 +1078,9 @@
                                         step="0.1">
                                 </div>
                                 <div class="col-md-6 mb-3">
-                                    <label for="basal_metabolism" class="form-label">基礎代謝量 (kcal)</label>
+                                    <label for="basal_metabolism" class="form-label">基礎代謝量 (kcal) *</label>
                                     <input type="number" class="form-control" id="basal_metabolism" name="basal_metabolism"
-                                        step="0.1">
+                                        step="0.1" required>
                                 </div>
                             </div>
                             <div class="row">
@@ -1784,6 +1784,13 @@
             
             if (targetPage) {
                 targetPage.style.display = 'block';
+                
+                // 如果切換到身體組成比例頁面，重新初始化圖表
+                if (pageNumber === 2) {
+                    setTimeout(() => {
+                        createBodyCompositionPieChartForPage('#body-composition-pie-chart-page2');
+                    }, 50);
+                }
             }
             if (targetIndicator) {
                 targetIndicator.classList.add('active');
@@ -2224,7 +2231,14 @@
 
                     console.log('身體組成數據:', {latestSkeletal, latestBodyFat, latestWeight, other});
 
-                    const chart = echarts.init(chartContainer);
+                    // 確保容器有明確的尺寸
+                    chartContainer.style.width = '280px';
+                    chartContainer.style.height = '280px';
+                    
+                    const chart = echarts.init(chartContainer, null, {
+                        width: 280,
+                        height: 280
+                    });
         const option = {
             tooltip: {
                 trigger: 'item',
@@ -2250,28 +2264,28 @@
             series: [{
                 name: '身體組成',
                 type: 'pie',
-                radius: ['15%', '55%'],
-                center: ['50%', '40%'],
+                radius: ['25%', '45%'],
+                center: ['50%', '45%'],
                 avoidLabelOverlap: true,
                 label: {
                     show: true,
                     position: 'outside',
                     formatter: '{b}\n{d}%',
-                    fontSize: 12,
+                    fontSize: 10,
                     fontWeight: 'normal',
                     color: '#333',
                     overflow: 'truncate',
-                    width: 100,
-                    lineHeight: 18
+                    width: 70,
+                    lineHeight: 14
                 },
                 emphasis: {
                     label: {
                         show: true,
-                        fontSize: '14',
+                        fontSize: '11',
                         fontWeight: 'normal',
                         position: 'outside',
                         formatter: '{b}\n{d}%',
-                        lineHeight: 18
+                        lineHeight: 14
                     },
                     itemStyle: {
                         shadowBlur: 8,
@@ -2282,10 +2296,10 @@
                 },
                 labelLine: {
                     show: true,
-                    length: 35,
-                    length2: 25,
+                    length: 15,
+                    length2: 10,
                     lineStyle: {
-                        width: 2
+                        width: 1.5
                     }
                 },
                 data: [
@@ -2315,8 +2329,7 @@
             // 創建目標達成率圖表
             createGoalProgressChartForPage('#goal-progress-chart-page1');
             
-            // 創建身體組成比例圖表
-            createBodyCompositionPieChartForPage('#body-composition-pie-chart-page2');
+            // 身體組成比例圖表不在此處初始化，改為在分頁切換時初始化
             
             console.log('右側卡片圖表初始化完成');
         }
@@ -2539,7 +2552,7 @@
         function validateCurrentPage() {
             if (currentPage === 1) {
                 // 驗證第一頁的必填欄位
-                const requiredFields = ['age', 'height_cm', 'weight_kg'];
+                const requiredFields = ['age', 'height_cm', 'weight_kg', 'basal_metabolism'];
                 for (let field of requiredFields) {
                     const input = document.getElementById(field);
                     if (!input.value.trim()) {
