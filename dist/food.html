@@ -45,8 +45,8 @@ $email = $_SESSION['email'] ?? 'No email';
             border-radius: 12px 12px 0 0;
             border-bottom: none;
             padding: 0.75rem 1rem;
-            background: linear-gradient(135deg, #8b9a8b 0%, #7a8a7a 100%);
-            color: #f5f3f0;
+            background: #e6edf3 !important;
+            color: #155724 !important;
         }
         
         .toast-body {
@@ -121,65 +121,79 @@ $email = $_SESSION['email'] ?? 'No email';
             color: #495057 !important;
         }
 
-        /* 莫蘭迪色系卡片樣式 - 淺色無綠黃配色 */
+        /* 🌸 蛋白質重點卡片 - 加強優先級 */
         .alert.morandi-protein {
-            background-color: #f5f5f7 !important;
+            background-color: #f0f1f5 !important; /* 更淺的灰色 */
             border: none !important;
-            color: #4a4a4c !important;
+            color: #2d2d2d !important; /* 深灰色 */
         }
         
         .alert.morandi-protein .text-muted {
-            color: #6a6a6c !important;
+            color: #6a6a6c !important; /* 中灰色 */
         }
         
         .alert.morandi-protein strong {
-            color: #4a4a4c !important;
+            color: #2d2d2d !important; /* 深灰色 */
         }
         
-        .alert.morandi-protein i {
-            color: #2a2a2c !important;
+        .alert.morandi-protein i,
+        .alert.morandi-protein span {
+            color: #2a2a2c !important; /* 深灰色閃電圖示 */
             font-size: 1.2rem !important;
             display: inline-block !important;
             visibility: visible !important;
         }
         
+        /* 🌊 碳水化合物卡片 - 加強優先級 */
         .alert.morandi-carb {
-            background-color: #f0f0f2 !important;
+            background-color: #f0f1f5 !important; /* 更淺的灰色 */
             border: none !important;
-            color: #4a4a4c !important;
+            color: #2d2d2d !important; /* 深灰色 */
         }
         
         .alert.morandi-carb .text-muted {
-            color: #6a6a6c !important;
+            color: #6a6a6c !important; /* 中灰色 */
         }
         
         .alert.morandi-carb strong {
-            color: #4a4a4c !important;
+            color: #2d2d2d !important; /* 深灰色 */
         }
         
-        .alert.morandi-carb i {
-            color: #2a2a2c !important;
+        .alert.morandi-carb i,
+        .alert.morandi-carb span {
+            color: #2a2a2c !important; /* 深灰色火焰圖示 */
             font-size: 1.2rem !important;
             display: inline-block !important;
             visibility: visible !important;
         }
         
+        /* 🌿 健康脂肪卡片 - 加強優先級 */
         .alert.morandi-fat {
-            background-color: #ebebed !important;
+            background-color: #f0f1f5 !important; /* 更淺的灰色 */
             border: none !important;
-            color: #4a4a4c !important;
+            color: #2d2d2d !important; /* 深灰色 */
         }
         
         .alert.morandi-fat .text-muted {
-            color: #6a6a6c !important;
+            color: #6a6a6c !important; /* 中灰色 */
+        }
+        
+        /* 覆蓋 Bootstrap 預設的綠色樣式 */
+        .bg-success {
+            background-color: #e6edf3 !important;
+        }
+        
+        .border-success {
+            border-color: #d4dae2 !important;
         }
         
         .alert.morandi-fat strong {
-            color: #4a4a4c !important;
+            color: #2d2d2d !important; /* 深灰色 */
         }
         
-        .alert.morandi-fat i {
-            color: #2a2a2c !important;
+        .alert.morandi-fat i,
+        .alert.morandi-fat span {
+            color: #2a2a2c !important; /* 深灰色愛心圖示 */
             font-size: 1.2rem !important;
             display: inline-block !important;
             visibility: visible !important;
@@ -318,7 +332,7 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         .toast-header {
-            background-color: #f8f9fa;
+            background-color: #e6edf3 !important;
             border-bottom: 1px solid rgba(0, 0, 0, 0.1);
             padding: 0.5rem 0.75rem;
             border-radius: 0.375rem 0.375rem 0 0;
@@ -509,7 +523,69 @@ $email = $_SESSION['email'] ?? 'No email';
 
         /* 標籤頁樣式 */
         .nav-tabs {
-            border-bottom: 2px solid #e9ecef;
+            border-bottom: none !important;
+        }
+        
+        /* 進度條式步驟指示器 - 清新配色 */
+        .progress-step-container {
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+        }
+        
+        .progress-step-bar {
+            background-color: #f8f6f6;
+            height: 8px;
+            border-radius: 4px;
+            position: relative;
+            margin-bottom: 2rem;
+        }
+        
+        .progress-step-fill {
+            background-color: #eee8e8;
+            height: 100%;
+            border-radius: 4px;
+            transition: width 0.3s ease;
+            width: 33.33%; /* 起始在第1步 */
+            box-shadow: 0 2px 8px rgba(238, 232, 232, 0.3);
+        }
+        
+        .progress-step-buttons {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+        }
+        
+        .progress-step-button {
+            flex: 1;
+            background-color: #f8f6f6;
+            border: none;
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin: 0 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            color: #757575;
+        }
+        
+        .progress-step-button:hover {
+            background-color: #eeeeee;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            color: #757575;
+        }
+        
+        .progress-step-button.active {
+            background-color: #eee8e8;
+            color: #5c4a3a;
+            box-shadow: 0 4px 12px rgba(238, 232, 232, 0.4);
+        }
+        
+        .progress-step-button i {
+            font-size: 1.5rem;
+            display: block;
+            margin-bottom: 0.5rem;
         }
         
         .nav-tabs .nav-link {
@@ -531,10 +607,51 @@ $email = $_SESSION['email'] ?? 'No email';
             color: #495057;
             background-color: #ffffff;
             border-color: #e9ecef #e9ecef #ffffff;
-            border-bottom: 2px solid #ffffff;
+            border-bottom: 2px solid #6c6c6c;
         }
         
-        .tab-content {
+        /* 自定義知識標籤頁按鈕樣式 - 莫蘭迪色系 */
+        #knowledgeTabs .nav-link {
+            background-color: #e8e2d5 !important; /* 莫蘭迪米色 */
+            border: 0 !important;
+            border-top: 0 !important;
+            border-left: 0 !important;
+            border-right: 0 !important;
+            border-bottom: 0 !important;
+            border-width: 0 !important;
+            border-style: none !important;
+            border-color: transparent !important;
+            color: #8b7355 !important; /* 莫蘭迪棕色文字 */
+            border-radius: 8px !important;
+            margin: 0 2px !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        #knowledgeTabs .nav-link.active {
+            background-color: #d4c4b0 !important; /* 莫蘭迪淺棕色 */
+            color: #6b5b47 !important; /* 莫蘭迪深棕色文字 */
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        #knowledgeTabs .nav-link:hover {
+            background-color: #ede7dd !important; /* 莫蘭迪淺米色 */
+            color: #7a6a5a !important; /* 莫蘭迪中棕色文字 */
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
+        #knowledgeTabs .nav-link.active:hover {
+            background-color: #c4b4a0 !important; /* 莫蘭迪中棕色 */
+            color: #6b5b47 !important; /* 莫蘭迪深棕色文字 */
+            border: none !important;
+            box-shadow: none !important;
+            outline: none !important;
+        }
+        
             border: 1px solid #e9ecef;
             border-top: none;
             border-radius: 0 0 8px 8px;
@@ -550,12 +667,6 @@ $email = $_SESSION['email'] ?? 'No email';
             margin-bottom: 1.5rem;
             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
             border: 1px solid #e9ecef;
-            transition: all 0.3s ease;
-        }
-
-        .meal-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
         }
 
         .meal-card h5 {
@@ -699,8 +810,8 @@ $email = $_SESSION['email'] ?? 'No email';
 
 
         .toast-success {
-            background-color: #d4edda;
-            border-color: #c3e6cb;
+            background-color: #e6edf3;
+            border-color: #d4dae2;
             color: #155724;
         }
 
@@ -736,8 +847,8 @@ $email = $_SESSION['email'] ?? 'No email';
             box-shadow: none !important;
             flex: 1;
             margin: 0 5px;
-            background-color: #F5F1EB; /* 淡雅米白色 */
-            color: #5A4A3A; /* 深棕色文字 */
+            background-color: #DADADC !important; /* 淺灰色背景 */
+            color: #6c6c6c !important; /* 深灰色文字 */
             display: flex;
             align-items: center;
             justify-content: center;
@@ -751,8 +862,8 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         .nav-pills .nav-link:hover {
-            background-color: #EDE7DD; /* 淡雅淺米色 */
-            color: #4A3A2A; /* 更深的棕色文字 */
+            background-color: #e0e0e0 !important; /* 稍深的淺灰色 */
+            color: #5a5a5a !important; /* 更深的灰色文字 */
             transform: translateY(-2px);
             box-shadow: 0 4px 8px rgba(184, 169, 154, 0.15) !important;
             border: none !important;
@@ -760,8 +871,8 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         .nav-pills .nav-link.active {
-            background-color: #E8E2D5; /* 淡雅灰米色 */
-            color: #3A2A1A; /* 深棕色文字 */
+            background-color: #d0d0d0 !important; /* 淺灰色 */
+            color: #4a4a4a !important; /* 深灰色文字 */
             box-shadow: 0 4px 12px rgba(232, 226, 213, 0.25) !important;
             transform: translateY(-2px);
             border: none !important;
@@ -900,7 +1011,7 @@ $email = $_SESSION['email'] ?? 'No email';
                         <div class="col-12 col-md-6 order-md-2 order-first">
                             <nav aria-label="breadcrumb" class="breadcrumb-header float-start float-lg-end">
                                 <ol class="breadcrumb">
-                                    <li class="breadcrumb-item"><a href="index.php">健康儀表板</a></li>
+                                    <li class="breadcrumb-item"><a href="index.html">健康儀表板</a></li>
                                     <li class="breadcrumb-item active" aria-current="page">飲食指南</li>
                                 </ol>
                             </nav>
@@ -970,15 +1081,15 @@ $email = $_SESSION['email'] ?? 'No email';
                         <!-- Toast 通知容器 -->
                         <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
                             <div id="dataSuccessToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
-                                <div class="toast-header bg-success text-white">
+                                <div class="toast-header" style="background-color: #e6edf3 !important; color: #495057 !important;">
                                     <i class="bi bi-check-circle-fill me-2"></i>
                                     <strong class="me-auto">資料載入成功！</strong>
-                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="toast" aria-label="關閉"></button>
+                                    <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="關閉" style="filter: brightness(0) invert(0.2);"></button>
                                 </div>
                                 <div class="toast-body">
                                     <div id="dataSourceInfo" class="mb-2">已從資料庫載入您的身體資料，系統將自動填入表單。</div>
                                     <div class="d-flex gap-2">
-                                        <button class="btn btn-sm" onclick="reloadUserData()" style="background-color: #8b9a8b; border: none !important; outline: none !important; box-shadow: none !important; color: white;" onmouseover="this.style.backgroundColor='#7a8a7a'" onmouseout="this.style.backgroundColor='#8b9a8b'" onmousedown="this.style.backgroundColor='#6b7a6b'" onmouseup="this.style.backgroundColor='#7a8a7a'">
+                                        <button class="btn btn-sm" onclick="reloadUserData()" style="background-color: #e6edf3; border: none !important; outline: none !important; box-shadow: none !important; color: #495057;" onmouseover="this.style.backgroundColor='#d0dae5'" onmouseout="this.style.backgroundColor='#e6edf3'" onmousedown="this.style.backgroundColor='#b8c6d7'" onmouseup="this.style.backgroundColor='#d0dae5'">
                                             <i class="bi bi-arrow-clockwise me-1"></i>重新載入資料
                                         </button>
                                         <button class="btn btn-sm" data-bs-dismiss="toast" style="background-color: #f8f9fa; border: none !important; outline: none !important; box-shadow: none !important; color: #495057;" onmouseover="this.style.backgroundColor='#e9ecef'" onmouseout="this.style.backgroundColor='#f8f9fa'" onmousedown="this.style.backgroundColor='#dee2e6'" onmouseup="this.style.backgroundColor='#e9ecef'">
@@ -995,7 +1106,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                 <div class="col-md-4">
                                     <div class="alert morandi-protein mb-0">
                                         <div class="d-flex align-items-center mb-1">
-                                            <span class="me-2 d-flex align-items-center" style="color: #2a2a2c; font-size: 1.2rem; line-height: 1;">⚡</span>
+                                            <span class="me-2 d-flex align-items-center">🥚</span>
                                             <strong class="align-middle">蛋白質重點</strong>
                                         </div>
                                         <div class="small text-muted">每餐20–30g；訓練後30分鐘內補充</div>
@@ -1004,7 +1115,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                 <div class="col-md-4">
                                     <div class="alert morandi-carb mb-0">
                                         <div class="d-flex align-items-center mb-1">
-                                            <span class="me-2 d-flex align-items-center" style="color: #2a2a2c; font-size: 1.2rem; line-height: 1;">🔥</span>
+                                            <span class="me-2 d-flex align-items-center">🔥</span>
                                             <strong class="align-middle">碳水化合物</strong>
                                         </div>
                                         <div class="small text-muted">選複合碳水；訓練前後補充能量</div>
@@ -1013,7 +1124,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                 <div class="col-md-4">
                                     <div class="alert morandi-fat mb-0">
                                         <div class="d-flex align-items-center mb-1">
-                                            <span class="me-2 d-flex align-items-center" style="color: #2a2a2c; font-size: 1.2rem; line-height: 1;">❤️</span>
+                                            <span class="me-2 d-flex align-items-center">❤️</span>
                                             <strong class="align-middle">健康脂肪</strong>
                                         </div>
                                         <div class="small text-muted">優先不飽和脂肪；控制用量</div>
@@ -1112,12 +1223,12 @@ $email = $_SESSION['email'] ?? 'No email';
 
                                 <!-- 營養素分配比例 -->
                                 <div class="mt-4">
-                                    <h6 class="text-center mb-3">營養素分配比例</h6>
+                                    <h6 class="text-center mb-3">營養素分配標準比例</h6>
                                     <div class="row g-3">
                                         <div class="col-md-4">
                                             <div class="nutrition-ratio-card text-center p-3">
                                                 <div class="nutrition-icon morandi-protein text-white rounded-circle mx-auto mb-2">
-                                                    <i class="bi bi-droplet"></i>
+                                                    <i class="bi bi-egg"></i>
                                                 </div>
                                                 <h5 class="mb-1">25%</h5>
                                                 <h6 class="text-muted mb-0">蛋白質</h6>
@@ -1127,7 +1238,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                         <div class="col-md-4">
                                             <div class="nutrition-ratio-card text-center p-3">
                                                 <div class="nutrition-icon morandi-carbs text-white rounded-circle mx-auto mb-2">
-                                                    <i class="bi bi-basket"></i>
+                                                    <i class="bi bi-droplet"></i>
                                                 </div>
                                                 <h5 class="mb-1">50%</h5>
                                                 <h6 class="text-muted mb-0">碳水化合物</h6>
@@ -1147,54 +1258,6 @@ $email = $_SESSION['email'] ?? 'No email';
                                     </div>
                                 </div>
 
-                                <!-- 營養攝取進度追蹤 -->
-                                <div class="mt-4">
-                                    <h6 class="text-center mb-3">營養攝取進度</h6>
-                                    
-                                    <!-- 目標熱量進度條 -->
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span><i class="bi bi-fire me-1"></i>目標熱量</span>
-                                            <span><span id="caloriesProgressText">0</span> / <span id="caloriesTargetText">0</span> 卡路里</span>
-                                        </div>
-                                        <div class="progress" id="caloriesProgressBar" style="height: 15px;">
-                                            <div class="progress-bar bg-primary" role="progressbar" style="width: 0%; transition: width 0.5s ease-in-out;"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- 蛋白質進度條 -->
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span><i class="bi bi-droplet me-1"></i>蛋白質</span>
-                                            <span><span id="proteinProgressText">0</span> / <span id="proteinTargetText">0</span> 克</span>
-                                        </div>
-                                        <div class="progress" id="proteinProgressBar" style="height: 15px;">
-                                            <div class="progress-bar bg-danger" role="progressbar" style="width: 0%; transition: width 0.5s ease-in-out;"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- 碳水化合物進度條 -->
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span><i class="bi bi-basket me-1"></i>碳水化合物</span>
-                                            <span><span id="carbsProgressText">0</span> / <span id="carbsTargetText">0</span> 克</span>
-                                        </div>
-                                        <div class="progress" id="carbsProgressBar" style="height: 15px;">
-                                            <div class="progress-bar bg-info" role="progressbar" style="width: 0%; transition: width 0.5s ease-in-out;"></div>
-                                        </div>
-                                    </div>
-
-                                    <!-- 脂肪進度條 -->
-                                    <div class="mb-3">
-                                        <div class="d-flex justify-content-between mb-1">
-                                            <span><i class="bi bi-heart me-1"></i>脂肪</span>
-                                            <span><span id="fatProgressText">0</span> / <span id="fatTargetText">0</span> 克</span>
-                                        </div>
-                                        <div class="progress" id="fatProgressBar" style="height: 15px;">
-                                            <div class="progress-bar bg-warning" role="progressbar" style="width: 0%; transition: width 0.5s ease-in-out;"></div>
-                                        </div>
-                                    </div>
-                                </div>
                             </div>
                         </section>
                     </div>
@@ -1205,7 +1268,7 @@ $email = $_SESSION['email'] ?? 'No email';
                         <section class="section" id="mealPlannerSection" style="display: block;">
                             <div class="card">
                         <div class="card-header">
-                            <h4 class="mb-0"><i class="bi bi-journal-plus me-2"></i>三餐客製化</h4>
+                            <h4 class="mb-0"><i class="bi bi-journal-plus me-2" style="vertical-align: middle; transform: translateY(1px);"></i>三餐客製化</h4>
                             <small class="text-muted">依照目標熱量與三大營養素，自由搭配每天的三餐</small>
                         </div>
                         <div class="card-body">
@@ -1481,75 +1544,108 @@ $email = $_SESSION['email'] ?? 'No email';
                         <section class="section">
                             <div class="card">
                                 <div class="card-header">
-                                    <h4><i class="bi bi-book me-2"></i>增肌知識與建議</h4>
+                                    <h4><i class="bi bi-book me-2" style="vertical-align: middle; transform: translateY(1px);"></i>增肌知識與建議</h4>
                                 </div>
                                 <div class="card-body">
-                                    <!-- 標籤頁導航 -->
-                                    <ul class="nav nav-tabs nav-fill mb-4" id="knowledgeTabs" role="tablist">
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link active" id="knowledge-diet-tab" data-bs-toggle="tab" data-bs-target="#knowledge-diet" type="button" role="tab" aria-controls="knowledge-diet" aria-selected="true">
-                                                <i class="bi bi-book me-2"></i>飲食知識
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="knowledge-timing-tab" data-bs-toggle="tab" data-bs-target="#knowledge-timing" type="button" role="tab" aria-controls="knowledge-timing" aria-selected="false">
-                                                <i class="bi bi-clock me-2"></i>訓練時機
-                                            </button>
-                                        </li>
-                                        <li class="nav-item" role="presentation">
-                                            <button class="nav-link" id="knowledge-tips-tab" data-bs-toggle="tab" data-bs-target="#knowledge-tips" type="button" role="tab" aria-controls="knowledge-tips" aria-selected="false">
-                                                <i class="bi bi-lightbulb me-2"></i>健身提醒
-                                            </button>
-                                        </li>
-                                    </ul>
+                                    <!-- 進度條式步驟指示器 -->
+                                    <div class="progress-step-container">
+                                        <!-- 進度條 -->
+                                        <div class="progress-step-bar">
+                                            <div class="progress-step-fill" id="stepProgress"></div>
+                                        </div>
+                                        
+                                        <!-- 步驟按鈕 -->
+                                        <div class="progress-step-buttons">
+                                            <div class="progress-step-button active" onclick="showStep(0)">
+                                                <i class="bi bi-emoji-smile"></i>
+                                                <div>飲食知識</div>
+                                            </div>
+                                            <div class="progress-step-button" onclick="showStep(1)">
+                                                <i class="bi bi-clock"></i>
+                                                <div>訓練時機</div>
+                                            </div>
+                                            <div class="progress-step-button" onclick="showStep(2)">
+                                                <i class="bi bi-lightbulb"></i>
+                                                <div>健身提醒</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     
                                     <!-- 標籤頁內容 -->
                                     <div class="tab-content" id="knowledgeTabsContent">
                                         <!-- 增肌飲食知識標籤頁 -->
                                         <div class="tab-pane fade show active" id="knowledge-diet" role="tabpanel" aria-labelledby="knowledge-diet-tab">
-                                            <div class="row">
-                                                <div class="col-md-4 mb-4">
-                                                    <div class="text-center">
-                                                        <div class="mb-3">
-                                                            <i class="bi bi-lightning-charge-fill text-primary"
-                                                                style="font-size: 2rem;"></i>
+                                            <div class="row g-4">
+                                                <div class="col-md-4">
+                                                    <div class="meal-card">
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <i class="bi bi-lightning-charge-fill text-primary me-2" style="font-size: 1.5rem;"></i>
+                                                            <h6 class="mb-0">💪 蛋白質的重要性</h6>
                                                         </div>
-                                                        <h6 class="text-primary">💪 蛋白質的重要性</h6>
-                                                        <ul class="list-unstyled text-start">
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>修復肌肉組織</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>建議攝取量：1.6-2.2g/kg體重
-                                                            </li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>訓練後30分鐘內補充</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>每餐至少20-30g</li>
-                                                        </ul>
+                                                        <div class="meal-item">
+                                                            <ul class="mt-2 mb-0">
+                                                                <li>修復肌肉組織</li>
+                                                                <li>建議攝取量：1.6-2.2g/kg體重</li>
+                                                                <li>訓練後30分鐘內補充</li>
+                                                                <li>每餐至少20-30g</li>
+                                                            </ul>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4 mb-4">
-                                                    <div class="text-center">
-                                                        <div class="mb-3">
-                                                            <i class="bi bi-fire text-warning" style="font-size: 2rem;"></i>
+                                                <div class="col-md-4">
+                                                    <div class="meal-card">
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <i class="bi bi-fire text-warning me-2" style="font-size: 1.5rem;"></i>
+                                                            <h6 class="mb-0">⚡ 碳水化合物的作用</h6>
                                                         </div>
-                                                        <h6 class="text-warning">⚡ 碳水化合物的作用</h6>
-                                                        <ul class="list-unstyled text-start">
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>提供訓練能量</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>促進肌肉合成</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>訓練前後補充</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>選擇複合碳水</li>
-                                                        </ul>
+                                                        <div class="meal-item">
+                                                            <ul class="mt-2 mb-0">
+                                                                <li>提供訓練能量</li>
+                                                                <li>促進肌肉合成</li>
+                                                                <li>訓練前後補充</li>
+                                                                <li>選擇複合碳水</li>
+                                                            </ul>
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div class="col-md-4 mb-4">
-                                                    <div class="text-center">
-                                                        <div class="mb-3">
-                                                            <i class="bi bi-heart-fill text-danger" style="font-size: 2rem;"></i>
+                                                <div class="col-md-4">
+                                                    <div class="meal-card">
+                                                        <div class="d-flex align-items-center mb-3">
+                                                            <div style="width: 1.5rem; margin-right: 0.5rem;"></div>
+                                                            <h6 class="mb-0">🥑 健康脂肪的價值</h6>
                                                         </div>
-                                                        <h6 class="text-danger">🥑 健康脂肪的價值</h6>
-                                                        <ul class="list-unstyled text-start">
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>支持荷爾蒙分泌</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>促進營養吸收</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>提供飽足感</li>
-                                                            <li><i class="bi bi-check-circle text-success me-2"></i>選擇不飽和脂肪</li>
-                                                        </ul>
+                                                        <div class="meal-item">
+                                                            <ul class="mt-2 mb-0">
+                                                                <li>支持荷爾蒙分泌</li>
+                                                                <li>促進營養吸收</li>
+                                                                <li>提供飽足感</li>
+                                                                <li>選擇不飽和脂肪</li>
+                                                            </ul>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        
+                                        <style>
+                                            .timeline .bg-primary, .timeline .bg-warning, .timeline .bg-danger {
+                                                transition: transform 0.3s ease;
+                                            }
+                                            .timeline .bg-primary:hover, .timeline .bg-warning:hover, .timeline .bg-danger:hover {
+                                                transform: scale(1.1);
+                                            }
+                                        </style>
+                                        
+                                        <!-- 營養資訊模態視窗 -->
+                                        <div class="modal fade" id="nutritionModal" tabindex="-1" aria-labelledby="nutritionModalLabel" aria-hidden="true">
+                                            <div class="modal-dialog modal-lg modal-dialog-centered">
+                                                <div class="modal-content">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title" id="nutritionModalLabel"></h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                                                    </div>
+                                                    <div class="modal-body" id="nutritionModalBody">
+                                                        <!-- 內容將動態載入 -->
                                                     </div>
                                                 </div>
                                             </div>
@@ -1561,8 +1657,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                                 <div class="col-md-6 mb-4">
                                                     <div class="meal-card">
                                                         <div class="d-flex align-items-center mb-3">
-                                                            <i class="bi bi-arrow-up-circle-fill text-success me-2" style="font-size: 1.5rem;"></i>
-                                                            <h6 class="mb-0 text-success">🏋️ 訓練前 (1-2小時)</h6>
+                                                            <h6 class="mb-0" style="padding-left: 2rem;">🏋️ 訓練前 (1-2小時)</h6>
                                                         </div>
                                                         <div class="meal-item">
                                                             <strong>推薦組合：</strong>
@@ -1578,8 +1673,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                                 <div class="col-md-6 mb-4">
                                                     <div class="meal-card">
                                                         <div class="d-flex align-items-center mb-3">
-                                                            <i class="bi bi-arrow-down-circle-fill text-primary me-2" style="font-size: 1.5rem;"></i>
-                                                            <h6 class="mb-0 text-primary">💪 訓練後 (30分鐘內)</h6>
+                                                            <h6 class="mb-0" style="padding-left: 2rem;">💪 訓練後 (30分鐘內)</h6>
                                                         </div>
                                                         <div class="meal-item">
                                                             <strong>推薦組合：</strong>
@@ -1599,69 +1693,69 @@ $email = $_SESSION['email'] ?? 'No email';
                                         <div class="tab-pane fade" id="knowledge-tips" role="tabpanel" aria-labelledby="knowledge-tips-tab">
                                             <div class="row" id="knowledgeMealCards">
                                                 <!-- 增肌健身提醒內容 -->
-                                                <div class="col-md-6 mb-4">
+                                                <div class="col-md-3 mb-4">
                                                     <div class="card h-100 border-success">
-                                                        <div class="card-header bg-success text-white">
-                                                            <h6 class="mb-0"><i class="bi bi-lightning-charge me-2"></i>訓練前準備</h6>
+                                                        <div class="card-header text-white" style="background-color: #e7ecee;">
+                                                            <h6 class="mb-0"><i class="bi bi-clock me-2" style="vertical-align: middle;"></i>訓練前準備</h6>
                                                         </div>
-                                                        <div class="card-body">
-                                                            <ul class="list-unstyled mb-0">
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>訓練前1-2小時進食</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>補充適量碳水化合物</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>充分熱身10-15分鐘</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-success me-2"></i>保持充足水分攝取</li>
-                                                                <li class="mb-0"><i class="bi bi-check-circle text-success me-2"></i>確保充足睡眠</li>
+                                                        <div class="card-body" style="padding-top: 1.75rem;">
+                                                            <ul class="mb-0" style="list-style-type: disc; padding-left: 1.5rem;">
+                                                                <li class="mb-2">訓練前1-2小時進食</li>
+                                                                <li class="mb-2">補充適量碳水化合物</li>
+                                                                <li class="mb-2">充分熱身10-15分鐘</li>
+                                                                <li class="mb-2">保持充足水分攝取</li>
+                                                                <li class="mb-0">確保充足睡眠</li>
                                                             </ul>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 
-                                                <div class="col-md-6 mb-4">
+                                                <div class="col-md-3 mb-4">
                                                     <div class="card h-100 border-primary">
-                                                        <div class="card-header bg-primary text-white">
-                                                            <h6 class="mb-0"><i class="bi bi-heart-pulse me-2"></i>訓練後恢復</h6>
+                                                        <div class="card-header text-white" style="background-color: #e7ecee;">
+                                                            <h6 class="mb-0"><i class="bi bi-heart me-2" style="vertical-align: middle;"></i>訓練後恢復</h6>
                                                         </div>
-                                                        <div class="card-body">
-                                                            <ul class="list-unstyled mb-0">
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-primary me-2"></i>訓練後30分鐘內補充蛋白質</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-primary me-2"></i>補充碳水化合物恢復肝醣</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-primary me-2"></i>進行適當的伸展運動</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-primary me-2"></i>充足休息讓肌肉修復</li>
-                                                                <li class="mb-0"><i class="bi bi-check-circle text-primary me-2"></i>保持規律作息</li>
+                                                        <div class="card-body" style="padding-top: 1.75rem;">
+                                                            <ul class="mb-0" style="list-style-type: disc; padding-left: 1.5rem;">
+                                                                <li class="mb-2">訓練後30分鐘內補充蛋白質</li>
+                                                                <li class="mb-2">補充碳水化合物恢復肝醣</li>
+                                                                <li class="mb-2">進行適當的伸展運動</li>
+                                                                <li class="mb-2">充足休息讓肌肉修復</li>
+                                                                <li class="mb-0">保持規律作息</li>
                                                             </ul>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 
-                                                <div class="col-md-6 mb-4">
+                                                <div class="col-md-3 mb-4">
                                                     <div class="card h-100 border-warning">
-                                                        <div class="card-header bg-warning text-dark">
-                                                            <h6 class="mb-0"><i class="bi bi-graph-up me-2"></i>增肌關鍵</h6>
+                                                        <div class="card-header text-white" style="background-color: #e7ecee;">
+                                                            <h6 class="mb-0"><i class="bi bi-graph-up me-2" style="vertical-align: middle;"></i>增肌關鍵</h6>
                                                         </div>
-                                                        <div class="card-body">
-                                                            <ul class="list-unstyled mb-0">
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-warning me-2"></i>漸進式增加訓練強度</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-warning me-2"></i>複合動作優先</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-warning me-2"></i>適當的訓練頻率</li>
-                                                                <li class="mb-2"><i class="bi bi-check-circle text-warning me-2"></i>充足的蛋白質攝取</li>
-                                                                <li class="mb-0"><i class="bi bi-check-circle text-warning me-2"></i>耐心與堅持</li>
+                                                        <div class="card-body" style="padding-top: 1.75rem;">
+                                                            <ul class="mb-0" style="list-style-type: disc; padding-left: 1.5rem;">
+                                                                <li class="mb-2">漸進式增加訓練強度</li>
+                                                                <li class="mb-2">複合動作優先</li>
+                                                                <li class="mb-2">適當的訓練頻率</li>
+                                                                <li class="mb-2">充足的蛋白質攝取</li>
+                                                                <li class="mb-0">耐心與堅持</li>
                                                             </ul>
                                                         </div>
                                                     </div>
                                                 </div>
                                                 
-                                                <div class="col-md-6 mb-4">
+                                                <div class="col-md-3 mb-4">
                                                     <div class="card h-100 border-info">
-                                                        <div class="card-header bg-info text-white">
-                                                            <h6 class="mb-0"><i class="bi bi-shield-check me-2"></i>注意事項</h6>
+                                                        <div class="card-header text-white" style="background-color: #e7ecee;">
+                                                            <h6 class="mb-0"><i class="bi bi-shield-check me-2" style="vertical-align: middle;"></i>注意事項</h6>
                                                         </div>
-                                                        <div class="card-body">
-                                                            <ul class="list-unstyled mb-0">
-                                                                <li class="mb-2"><i class="bi bi-exclamation-triangle text-info me-2"></i>避免過度訓練</li>
-                                                                <li class="mb-2"><i class="bi bi-exclamation-triangle text-info me-2"></i>注意動作正確性</li>
-                                                                <li class="mb-2"><i class="bi bi-exclamation-triangle text-info me-2"></i>聆聽身體訊號</li>
-                                                                <li class="mb-2"><i class="bi bi-exclamation-triangle text-info me-2"></i>適時調整計畫</li>
-                                                                <li class="mb-0"><i class="bi bi-exclamation-triangle text-info me-2"></i>尋求專業指導</li>
+                                                        <div class="card-body" style="padding-top: 1.75rem;">
+                                                            <ul class="mb-0" style="list-style-type: disc; padding-left: 1.5rem;">
+                                                                <li class="mb-2">避免過度訓練</li>
+                                                                <li class="mb-2">注意動作正確性</li>
+                                                                <li class="mb-2">聆聽身體訊號</li>
+                                                                <li class="mb-2">適時調整計畫</li>
+                                                                <li class="mb-0">尋求專業指導</li>
                                                             </ul>
                                                         </div>
                                                     </div>
@@ -1854,6 +1948,176 @@ $email = $_SESSION['email'] ?? 'No email';
         function initializePageTabs() {
             // Bootstrap會自動處理標籤頁切換，不需要自定義邏輯
             console.log('頁面標籤已初始化，Bootstrap將自動處理切換');
+        }
+        
+        // 進度條式步驟切換功能
+        function showStep(stepIndex) {
+            const stepButtons = document.querySelectorAll('.progress-step-button');
+            const tabPanes = document.querySelectorAll('#knowledgeTabsContent .tab-pane');
+            const progressFill = document.getElementById('stepProgress');
+            
+            // 計算進度條寬度
+            const progressWidth = ((stepIndex + 1) / 3) * 100;
+            
+            // 更新進度條
+            if (progressFill) {
+                progressFill.style.width = progressWidth + '%';
+            }
+            
+            // 移除所有 active 類別
+            stepButtons.forEach((button, index) => {
+                button.classList.remove('active');
+                if (tabPanes[index]) {
+                    tabPanes[index].classList.remove('show', 'active');
+                }
+            });
+            
+            // 添加 active 類別到選中的步驟
+            if (stepButtons[stepIndex]) {
+                stepButtons[stepIndex].classList.add('active');
+                if (tabPanes[stepIndex]) {
+                    tabPanes[stepIndex].classList.add('show', 'active');
+                }
+            }
+        }
+        
+        // 顯示營養資訊模態視窗
+        function showNutritionModal(type) {
+            const modal = new bootstrap.Modal(document.getElementById('nutritionModal'));
+            const titleElement = document.getElementById('nutritionModalLabel');
+            const bodyElement = document.getElementById('nutritionModalBody');
+            
+            const data = {
+                protein: {
+                    title: '💪 蛋白質的重要性',
+                    icon: 'bi-lightning-charge-fill',
+                    color: 'primary',
+                    items: [
+                        '修復肌肉組織',
+                        '建議攝取量：1.6-2.2g/kg體重',
+                        '訓練後30分鐘內補充',
+                        '每餐至少20-30g'
+                    ]
+                },
+                carb: {
+                    title: '⚡ 碳水化合物的作用',
+                    icon: 'bi-fire',
+                    color: 'warning',
+                    items: [
+                        '提供訓練能量',
+                        '促進肌肉合成',
+                        '訓練前後補充',
+                        '選擇複合碳水'
+                    ]
+                },
+                fat: {
+                    title: '🥑 健康脂肪的價值',
+                    icon: 'bi-heart',
+                    color: 'danger',
+                    items: [
+                        '支持荷爾蒙分泌',
+                        '促進營養吸收',
+                        '提供飽足感',
+                        '選擇不飽和脂肪'
+                    ]
+                }
+            };
+            
+            const nutrition = data[type];
+            if (nutrition) {
+                titleElement.innerHTML = `<i class="bi ${nutrition.icon} text-${nutrition.color} me-2"></i>${nutrition.title}`;
+                bodyElement.innerHTML = `
+                    <div class="row">
+                        <div class="col-12">
+                            <ul class="list-group">
+                                ${nutrition.items.map(item => `
+                                    <li class="list-group-item">
+                                        <i class="bi bi-check-circle text-${nutrition.color} me-2"></i>
+                                        ${item}
+                                    </li>
+                                `).join('')}
+                            </ul>
+                        </div>
+                    </div>
+                `;
+                modal.show();
+            }
+        }
+        
+        // 時間軸展開詳細資訊
+        function toggleTimelineDetails(type) {
+            const detailsElements = ['proteinDetails', 'carbDetails', 'fatDetails'];
+            const currentElement = document.getElementById(type + 'Details');
+            
+            // 先關閉所有其他詳情
+            detailsElements.forEach(id => {
+                const element = document.getElementById(id);
+                if (element && element.id !== type + 'Details') {
+                    element.style.display = 'none';
+                    element.innerHTML = '';
+                }
+            });
+            
+            // 切換當前詳情
+            if (currentElement.style.display === 'none' || currentElement.style.display === '') {
+                const data = {
+                    protein: {
+                        items: ['修復肌肉組織', '建議攝取量：1.6-2.2g/kg體重', '訓練後30分鐘內補充', '每餐至少20-30g'],
+                        color: 'primary'
+                    },
+                    carb: {
+                        items: ['提供訓練能量', '促進肌肉合成', '訓練前後補充', '選擇複合碳水'],
+                        color: 'warning'
+                    },
+                    fat: {
+                        items: ['支持荷爾蒙分泌', '促進營養吸收', '提供飽足感', '選擇不飽和脂肪'],
+                        color: 'danger'
+                    }
+                };
+                
+                const nutrition = data[type];
+                currentElement.innerHTML = `
+                    <div class="bg-light p-4 rounded" style="max-width: 400px; margin: 0 auto;">
+                        <ul class="list-unstyled mb-0">
+                            ${nutrition.items.map(item => `
+                                <li class="mb-2 d-flex align-items-start">
+                                    <i class="bi bi-check-circle text-${nutrition.color} me-2 mt-1"></i>
+                                    <span>${item}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                `;
+                currentElement.style.display = 'block';
+            } else {
+                currentElement.style.display = 'none';
+                currentElement.innerHTML = '';
+            }
+        }
+        
+        // 切換顯示模式
+        function switchViewMode(mode) {
+            const gridView = document.getElementById('gridView');
+            const listView = document.getElementById('listView');
+            const cardView = document.getElementById('cardView');
+            
+            // 隱藏所有視圖
+            if (gridView) gridView.style.display = 'none';
+            if (listView) listView.style.display = 'none';
+            if (cardView) cardView.style.display = 'none';
+            
+            // 顯示選中的視圖
+            switch(mode) {
+                case 'grid':
+                    if (gridView) gridView.style.display = 'block';
+                    break;
+                case 'list':
+                    if (listView) listView.style.display = 'block';
+                    break;
+                case 'card':
+                    if (cardView) cardView.style.display = 'block';
+                    break;
+            }
         }
 
         // 頁面載入時初始化
@@ -2259,8 +2523,6 @@ $email = $_SESSION['email'] ?? 'No email';
                 if (carbGramsEl) carbGramsEl.textContent = result.macros.carbs.grams;
                 if (fatGramsEl) fatGramsEl.textContent = result.macros.fat.grams;
 
-                // 更新營養攝取進度條
-                updateNutritionProgressBars(result);
 
                 // 顯示結果區域，但讓版面可以往下延伸
                 const res = document.getElementById('nutritionResult');
@@ -2275,66 +2537,6 @@ $email = $_SESSION['email'] ?? 'No email';
             }
         }
 
-        // 更新營養攝取進度條
-        function updateNutritionProgressBars(result) {
-            try {
-                // 獲取進度條元素
-                const caloriesBar = document.getElementById('caloriesProgressBar').querySelector('.progress-bar');
-                const proteinBar = document.getElementById('proteinProgressBar').querySelector('.progress-bar');
-                const carbsBar = document.getElementById('carbsProgressBar').querySelector('.progress-bar');
-                const fatBar = document.getElementById('fatProgressBar').querySelector('.progress-bar');
-
-                // 獲取文字顯示元素
-                const caloriesProgressText = document.getElementById('caloriesProgressText');
-                const caloriesTargetText = document.getElementById('caloriesTargetText');
-                const proteinProgressText = document.getElementById('proteinProgressText');
-                const proteinTargetText = document.getElementById('proteinTargetText');
-                const carbsProgressText = document.getElementById('carbsProgressText');
-                const carbsTargetText = document.getElementById('carbsTargetText');
-                const fatProgressText = document.getElementById('fatProgressText');
-                const fatTargetText = document.getElementById('fatTargetText');
-
-                // 更新目標數值
-                if (caloriesTargetText) caloriesTargetText.textContent = result.target_calories;
-                if (proteinTargetText) proteinTargetText.textContent = result.macros.protein.grams;
-                if (carbsTargetText) carbsTargetText.textContent = result.macros.carbs.grams;
-                if (fatTargetText) fatTargetText.textContent = result.macros.fat.grams;
-
-                // 初始狀態：攝取量為0，進度條為0%
-                if (caloriesProgressText) caloriesProgressText.textContent = '0';
-                if (proteinProgressText) proteinProgressText.textContent = '0';
-                if (carbsProgressText) carbsProgressText.textContent = '0';
-                if (fatProgressText) fatProgressText.textContent = '0';
-
-                // 設置進度條為0%
-                if (caloriesBar) {
-                    caloriesBar.style.width = '0%';
-                    caloriesBar.setAttribute('aria-valuenow', 0);
-                }
-                if (proteinBar) {
-                    proteinBar.style.width = '0%';
-                    proteinBar.setAttribute('aria-valuenow', 0);
-                }
-                if (carbsBar) {
-                    carbsBar.style.width = '0%';
-                    carbsBar.setAttribute('aria-valuenow', 0);
-                }
-                if (fatBar) {
-                    fatBar.style.width = '0%';
-                    fatBar.setAttribute('aria-valuenow', 0);
-                }
-
-                console.log('營養攝取進度條已初始化:', {
-                    calories: '0 / ' + result.target_calories,
-                    protein: '0 / ' + result.macros.protein.grams,
-                    carbs: '0 / ' + result.macros.carbs.grams,
-                    fat: '0 / ' + result.macros.fat.grams
-                });
-
-            } catch (error) {
-                console.error('更新營養攝取進度條時發生錯誤:', error);
-            }
-        }
 
         // 更新目標數值到餐食規劃區域
         function updateTargetValues(result) {
