@@ -809,15 +809,15 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         .toast-error {
-            background-color: #f8d7da;
-            border-color: #f5c6cb;
-            color: #721c24;
+            background-color: #e6edf3;
+            border-color: #d4dae2;
+            color: #155724;
         }
 
         .toast-info {
-            background-color: #d1ecf1;
-            border-color: #bee5eb;
-            color: #0c5460;
+            background-color: #e6edf3;
+            border-color: #d4dae2;
+            color: #155724;
         }
 
         .mb-4-3 {
@@ -1190,16 +1190,16 @@ $email = $_SESSION['email'] ?? 'No email';
             color: #333 !important;
         }
 
-        /* 智慧菜單按鈕 - 淺綠色 */
+        /* 智慧菜單按鈕 */
         .btn-light-green {
-            background-color: #d8f0e8;
-            border-color: #d8f0e8;
+            background-color: #ececea;
+            border-color: #ececea;
             color: #000 !important;
         }
 
         .btn-light-green:hover {
-            background-color: #c8e0d8;
-            border-color: #c8e0d8;
+            background-color: #dcdcda;
+            border-color: #dcdcda;
             color: #000 !important;
         }
 
@@ -1207,21 +1207,26 @@ $email = $_SESSION['email'] ?? 'No email';
             color: #000 !important;
         }
 
-        /* 手動新增按鈕 - 超淺灰色 */
+        /* 手動新增按鈕 */
         .btn-light-gray {
-            background-color: #e8e8e8;
-            border-color: #e8e8e8;
-            color: #000 !important;
+            background-color: #939391;
+            border-color: #939391;
+            color: white !important;
         }
 
         .btn-light-gray:hover {
-            background-color: #d8d8d8;
-            border-color: #d8d8d8;
-            color: #000 !important;
+            background-color: #838381;
+            border-color: #838381;
+            color: white !important;
         }
 
         .btn-light-gray i {
-            color: #000 !important;
+            color: white !important;
+        }
+
+        /* 營養追蹤進度條自訂顏色 */
+        .nutrition-progress-bar {
+            background-color: #939391 !important;
         }
 
         /* 莫蘭迪紅色刪除按鈕 */
@@ -2854,12 +2859,13 @@ $email = $_SESSION['email'] ?? 'No email';
             const element = document.getElementById(elementId);
             if (!element) return;
 
-            element.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-info', 'bg-primary');
+            element.classList.remove('bg-success', 'bg-warning', 'bg-danger', 'bg-info', 'bg-primary', 'bg-dark');
 
             if (percent >= 95 && percent <= 105) {
                 element.classList.add('bg-success');
             } else if (percent < 95) {
-                element.classList.add('bg-warning');
+                element.classList.add('nutrition-progress-bar');
+                element.style.backgroundColor = '#939391';
             } else if (percent > 105) {
                 element.classList.add('bg-danger');
             }
@@ -4578,13 +4584,13 @@ $email = $_SESSION['email'] ?? 'No email';
             const typeConfig = {
                 'success': { icon: 'check-circle', title: '成功', color: 'text-primary' },
                 'error': { icon: 'exclamation-circle', title: '錯誤', color: 'text-danger' },
-                'info': { icon: 'info-circle', title: '提示', color: 'text-info' }
+                'info': { icon: 'info-circle', title: '提示', color: 'text-primary' }
             };
 
             const config = typeConfig[type] || typeConfig['info'];
 
-            // 成功類型使用藍黑色
-            const iconColor = type === 'success' ? 'style="color: #2c3e50;"' : '';
+            // 所有類型都使用藍黑色
+            const iconColor = 'style="color: #2c3e50;"';
             
             const toastHtml = `
                 <div id="${toastId}" class="toast toast-${type} show" role="alert" aria-live="assertive" aria-atomic="true" style="display: block !important;">
@@ -5529,14 +5535,15 @@ $email = $_SESSION['email'] ?? 'No email';
                             <div class="card border-light">
                                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
                                     <div class="d-flex align-items-center">
+                                        <span class="me-2" style="font-size: 1rem;">🌅</span>
                                         <h6 class="mb-0">早餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
                                         <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('breakfast')">
-                                            <span>✨</span><span>智慧菜單</span>
+                                            智慧菜單
                                         </button>
                                         <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('breakfast', '${dateStr}')">
-                                            <span>➕</span><span>手動新增</span>
+                                            手動新增
                                         </button>
                                     </div>
                                 </div>
@@ -5550,14 +5557,15 @@ $email = $_SESSION['email'] ?? 'No email';
                             <div class="card border-light">
                                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
                                     <div class="d-flex align-items-center">
+                                        <span class="me-2" style="font-size: 1rem;">☀</span>
                                         <h6 class="mb-0">午餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
                                         <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('lunch')">
-                                            <span>✨</span><span>智慧菜單</span>
+                                            智慧菜單
                                         </button>
                                         <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('lunch', '${dateStr}')">
-                                            <span>➕</span><span>手動新增</span>
+                                            手動新增
                                         </button>
                                     </div>
                                 </div>
@@ -5571,14 +5579,15 @@ $email = $_SESSION['email'] ?? 'No email';
                             <div class="card border-light">
                                 <div class="card-header d-flex justify-content-between align-items-center bg-light">
                                     <div class="d-flex align-items-center">
+                                        <span class="me-2" style="font-size: 1rem;">🌙</span>
                                         <h6 class="mb-0">晚餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
                                         <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('dinner')">
-                                            <span>✨</span><span>智慧菜單</span>
+                                            智慧菜單
                                         </button>
                                         <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('dinner', '${dateStr}')">
-                                            <span>➕</span><span>手動新增</span>
+                                            手動新增
                                         </button>
                                     </div>
                                 </div>
