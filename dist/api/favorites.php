@@ -84,6 +84,19 @@ try {
             $item['favorite_id'] = (int)$row['id'];
             $item['created_at'] = $row['created_at'];
             $item['updated_at'] = $row['updated_at'];
+            
+            // 從 exercises 表中獲取最新的 video_url
+            $stmt2 = $mysqli->prepare('SELECT video_url FROM exercises WHERE name = ? LIMIT 1');
+            $stmt2->bind_param('s', $row['name']);
+            $stmt2->execute();
+            $videoResult = $stmt2->get_result();
+            if ($videoRow = $videoResult->fetch_assoc()) {
+                if (!empty($videoRow['video_url'])) {
+                    $item['video_url'] = $videoRow['video_url'];
+                }
+            }
+            $stmt2->close();
+            
             $rows[] = $item;
         }
         echo json_encode(['success' => true, 'data' => $rows], JSON_UNESCAPED_UNICODE);
