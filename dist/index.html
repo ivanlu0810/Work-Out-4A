@@ -446,6 +446,11 @@
             border-color: #87a3bb !important;
             color: white !important;
         }
+
+        /* Modal backdrop 統一透明度 */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
     </style>
 </head>
 
@@ -549,11 +554,18 @@
 
             <div class="page-heading">
                 <div class="d-flex align-items-center">
-                    <h3 class="mb-0 me-3">健康儀表板🔎
-                    </h3>
+                    <h3 class="mb-0 me-3">健康儀表板🔎</h3>
                     <button class="btn btn-custom d-flex align-items-center" data-bs-toggle="modal"
                         data-bs-target="#addDataModal">
                         <i class="bi bi-plus-circle me-2"></i>新增數據
+                    </button>
+                    <button type="button" 
+                            class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center ms-3" 
+                            style="width: 28px; height: 28px; padding: 0; line-height: 1; background-color: #c8cbd8; border-color: #c8cbd8;"
+                            data-bs-toggle="modal" 
+                            data-bs-target="#usageGuideModal"
+                            title="使用說明">
+                        <i class="bi bi-question" style="font-size: 1rem; color: #495057;"></i>
                     </button>
                 </div>
             </div>
@@ -2413,16 +2425,22 @@
             // 不做任何操作，保持用戶數據
         });
 
-        // 成功提示 modal 關閉時清理 backdrop
+        // 成功提示 modal 關閉時清理 backdrop（僅在所有 modal 都關閉時）
         document.getElementById('successModal').addEventListener('hidden.bs.modal', function () {
-            // 清理 backdrop
-            const existingBackdrops = document.querySelectorAll('.modal-backdrop');
-            existingBackdrops.forEach(backdrop => backdrop.remove());
+            // 檢查是否還有其他打開的 modal
+            const allModals = document.querySelectorAll('.modal.show');
             
-            // 確保 body 狀態正確
-            document.body.classList.remove('modal-open');
-            document.body.style.overflow = '';
-            document.body.style.paddingRight = '';
+            // 如果沒有其他打開的 modal 才清理
+            if (allModals.length === 0) {
+                // 清理 backdrop
+                const existingBackdrops = document.querySelectorAll('.modal-backdrop');
+                existingBackdrops.forEach(backdrop => backdrop.remove());
+                
+                // 確保 body 狀態正確
+                document.body.classList.remove('modal-open');
+                document.body.style.overflow = '';
+                document.body.style.paddingRight = '';
+            }
         });
 
         // 設定目標功能
@@ -2873,6 +2891,113 @@
             }
         });
     </script>
+
+    <!-- 使用說明 Modal -->
+    <div class="modal fade" id="usageGuideModal" tabindex="-1" aria-labelledby="usageGuideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 800px;">
+            <div class="modal-content" style="max-height: 75vh;">
+                <div class="modal-header" style="background-color: #dce0e8;">
+                    <h5 class="modal-title" id="usageGuideModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>使用說明
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body" style="overflow-y: auto; max-height: calc(75vh - 120px);">
+                    <div class="usage-guide-content">
+                        <!-- 快速入門 -->
+                        <div class="mb-4">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-lightbulb-fill me-2" style="vertical-align: middle;"></i>快速入門
+                            </h6>
+                            <p class="text-muted">
+                                這個頁面幫助您追蹤身體數據變化，掌握健康趨勢。只需三個簡單步驟：
+                            </p>
+                            <ol class="ps-3">
+                                <li class="mb-2">點擊「新增數據」按鈕輸入最新身體數據</li>
+                                <li class="mb-2">查看下方圖表了解各項數據變化趨勢</li>
+                                <li class="mb-2">設定健康目標，追蹤達成進度</li>
+                            </ol>
+                        </div>
+
+                        <hr>
+
+                        <!-- 功能說明 -->
+                        <div class="mb-4">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-grid-3x3-gap-fill me-2" style="vertical-align: middle;"></i>主要功能
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-plus-circle-fill text-primary me-3 fs-5"></i>
+                                        <div>
+                                            <strong>新增數據</strong>
+                                            <p class="text-muted mb-0 small">定期記錄身體數據，系統會自動計算趨勢和統計資訊</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-calendar-range text-primary me-3 fs-5"></i>
+                                        <div>
+                                            <strong>時間範圍篩選</strong>
+                                            <p class="text-muted mb-0 small">選擇特定時間查看該區間的數據變化趨勢</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-graph-up text-success me-3 fs-5"></i>
+                                        <div>
+                                            <strong>圖表分析</strong>
+                                            <p class="text-muted mb-0 small">透過折線圖了解體重、BMI、身體組成等數據變化</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-bullseye text-info me-3 fs-5"></i>
+                                        <div>
+                                            <strong>目標追蹤</strong>
+                                            <p class="text-muted mb-0 small">設定並追蹤健康目標，查看達成進度</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- 圖表說明 -->
+                        <div class="mb-3">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-graph-up-arrow me-2" style="vertical-align: middle;"></i>圖表說明
+                            </h6>
+                            <div class="alert alert-light">
+                                <p class="mb-2"><strong>基本數據</strong>：包含體重、BMI 等基本指標變化趨勢</p>
+                                <p class="mb-2"><strong>身體組成</strong>：展示骨骼肌、體脂肪、體脂率等組成數據</p>
+                                <p class="mb-0 small text-muted">
+                                    透過切換不同分頁，您可以查看不同類型的數據分析圖表。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info d-flex align-items-start mb-0" style="background-color: #9ca2b3; border-color: #9ca2b3;">
+                            <i class="bi bi-lightbulb me-2 fs-6 text-white" style="margin-top: 2px;"></i>
+                            <div class="text-white">
+                                <strong>小提示：</strong>建議每週記錄1-2次身體數據，持續追蹤才能有效掌握健康趨勢。設定明確的目標有助於保持動力！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-dismiss="modal">
+                        <i class="bi bi-check-circle me-1" style="font-size: 0.9rem;"></i><span>我已了解</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

@@ -1248,6 +1248,11 @@ $email = $_SESSION['email'] ?? 'No email';
         .btn-morandi-red i {
             color: white !important;
         }
+
+        /* Modal backdrop 統一透明度 */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
     </style>
 </head>
 
@@ -1325,7 +1330,17 @@ $email = $_SESSION['email'] ?? 'No email';
                 <div class="page-title">
                     <div class="row">
                         <div class="col-12 col-md-6 order-md-1 order-last">
-                            <h3 class="mb-4-3 me-3">飲食指南🍴</h3>
+                            <div class="d-flex align-items-center mb-4-3">
+                                <h3 class="mb-0 me-3">飲食指南🍴</h3>
+                                <button type="button" 
+                                        class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                                        style="width: 28px; height: 28px; padding: 0; line-height: 1; background-color: #c8cbd8; border-color: #c8cbd8;"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#usageGuideModal"
+                                        title="使用說明">
+                                    <i class="bi bi-question" style="font-size: 1rem; color: #495057;"></i>
+                                </button>
+                            </div>
                             <p class="text-muted mt-2 mb-4"
                                 style="font-size: 1rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">
                                 專為增肌設計的營養計算，科學制定個人化飲食計畫，讓肌肉增長更有效率。</p>
@@ -1380,23 +1395,23 @@ $email = $_SESSION['email'] ?? 'No email';
                     <div class="tab-pane fade show active" id="nutrition-page" role="tabpanel" aria-labelledby="nutrition-tab">
                         <!-- 資料引導提示 -->
                         <section class="section" id="dataGuideSection" style="display: none;">
-                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                                <div class="d-flex align-items-center">
-                                    <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.5rem;"></i>
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert" style="background-color: #dce0e8; border-color: #c9c9cb; color: #3a3a3c;">
+                                <div class="d-flex align-items-start">
+                                    <i class="bi bi-exclamation-triangle-fill me-3" style="font-size: 1.2rem; color: #6b757d; margin-top: -0.05rem;"></i>
                                     <div>
-                                        <h5 class="alert-heading mb-2">需要您的身體資料</h5>
-                                        <p class="mb-2">為了提供更精確的營養建議，請先填寫您的基本身體資料。</p>
+                                        <h5 class="alert-heading mb-2" style="color: #3a3a3c; font-size: 1.1rem; margin-top: 0;">需要您的身體資料</h5>
+                                        <p class="mb-2" style="color: #5a5a5c;">為了提供更精確的營養建議，請先至「健康儀表板」新增身體數據。</p>
                                         <div class="d-flex gap-2">
-                                            <button class="btn btn-warning btn-sm" onclick="reloadUserData()">
-                                                <i class="bi bi-arrow-clockwise me-1"></i>重新載入資料
+                                            <button class="btn btn-sm rounded" onclick="reloadUserData()" style="background-color: #9db3c6; border-color: #9db3c6; color: white; font-size: 0.85rem; padding: 0.25rem 0.5rem;">
+                                                <i class="bi bi-arrow-clockwise me-1" style="vertical-align: middle;"></i>重新載入資料
                                             </button>
-                                            <a href="index.php" class="btn btn-primary btn-sm">
-                                                <i class="bi bi-plus-circle me-1"></i>前往新增資料
+                                            <a href="index.html" class="btn btn-primary btn-sm rounded" style="font-size: 0.85rem; padding: 0.25rem 0.5rem;">
+                                                <i class="bi bi-plus-circle me-1" style="vertical-align: middle;"></i>前往新增資料
                                             </a>
                                         </div>
                                     </div>
                                 </div>
-                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉"></button>
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="關閉" style="opacity: 0.6;"></button>
                             </div>
                         </section>
 
@@ -5707,6 +5722,114 @@ $email = $_SESSION['email'] ?? 'No email';
             initMealCalendar();
         });
     </script>
+
+    <!-- 使用說明 Modal -->
+    <div class="modal fade" id="usageGuideModal" tabindex="-1" aria-labelledby="usageGuideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 800px;">
+            <div class="modal-content" style="max-height: 75vh;">
+                <div class="modal-header" style="background-color: #dce0e8;">
+                    <h5 class="modal-title" id="usageGuideModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>使用說明
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body" style="overflow-y: auto; max-height: calc(75vh - 120px);">
+                    <div class="usage-guide-content">
+                        <!-- 快速入門 -->
+                        <div class="mb-4">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-lightbulb-fill me-2" style="vertical-align: middle;"></i>快速入門
+                            </h6>
+                            <p class="text-muted">
+                                這個頁面幫助您規劃增肌飲食，計算每日營養需求。只需四個簡單步驟：
+                            </p>
+                            <ol class="ps-3">
+                                <li class="mb-2">根據身體數據與目標強度，自動計算個人化營養需求</li>
+                                <li class="mb-2">選擇行事曆日期，從食材庫挑選並新增喜愛的食物</li>
+                                <li class="mb-2">使用智慧菜單功能，自動規劃每日營養攝取分量</li>
+                                <li class="mb-2">查看營養分析圖表，追蹤營養攝取進度</li>
+                            </ol>
+                        </div>
+
+                        <hr>
+
+                        <!-- 功能說明 -->
+                        <div class="mb-4">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-grid-3x3-gap-fill me-2" style="vertical-align: middle;"></i>主要功能
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-bullseye text-primary me-3 fs-5"></i>
+                                        <div>
+                                            <strong>營養目標設定</strong>
+                                            <p class="text-muted mb-0 small">依個人需求設定每日熱量與營養素目標</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-search text-primary me-3 fs-5"></i>
+                                        <div>
+                                            <strong>食物搜尋</strong>
+                                            <p class="text-muted mb-0 small">搜尋並新增喜愛的食物到每日飲食</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-graph-up text-success me-3 fs-5"></i>
+                                        <div>
+                                            <strong>營養分析</strong>
+                                            <p class="text-muted mb-0 small">即時查看營養素攝取狀況與達成進度</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-calendar-check text-info me-3 fs-5"></i>
+                                        <div>
+                                            <strong>飲食記錄</strong>
+                                            <p class="text-muted mb-0 small">記錄每日三餐，追蹤長期飲食習慣</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- 營養說明 -->
+                        <div class="mb-3">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-graph-up-arrow me-2" style="vertical-align: middle;"></i>營養說明
+                            </h6>
+                            <div class="alert alert-light">
+                                <p class="mb-2"><strong>三大營養素</strong>：蛋白質、碳水化合物、脂肪的黃金比例搭配</p>
+                                <p class="mb-2"><strong>微量營養素</strong>：維生素、礦物質等微量元素追蹤</p>
+                                <p class="mb-0 small text-muted">
+                                    增肌期間建議蛋白質攝取量為每公斤體重 1.6-2.2 克，並保持適當的卡路里盈餘。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info d-flex align-items-start mb-0" style="background-color: #9ca2b3; border-color: #9ca2b3;">
+                            <i class="bi bi-lightbulb me-2 fs-6 text-white" style="margin-top: 2px;"></i>
+                            <div class="text-white">
+                                <strong>小提示：</strong>規劃飲食時建議以天然食物為主，均衡攝取各種營養素。記得搭配訓練計畫，才能達到最佳的增肌效果！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-dismiss="modal">
+                        <i class="bi bi-check-circle me-1" style="font-size: 0.9rem;"></i><span>我已了解</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>

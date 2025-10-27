@@ -3077,7 +3077,12 @@
             color: #333 !important;
             /* 調整字色避免太淡 */
             border-bottom: 1px solid #e9ecef;
-            /* 底線同樣保持淡灰 */
+        }
+        
+        /* 使用說明 Modal 的標題列使用特殊顏色 */
+        #usageGuideModal .modal-header {
+            background-color: #dce0e8 !important;
+            color: #333 !important;
         }
 
         /* 確保模態框內容背景色不會變暗 */
@@ -3192,6 +3197,11 @@
             font-size: 0.8rem;
             padding: 0.5rem 0.75rem;
         }
+
+        /* Modal backdrop 統一透明度 */
+        .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5) !important;
+        }
     </style>
 </head>
 
@@ -3269,7 +3279,17 @@
                 <div class="page-title">
                     <div class="row">
                         <div class="col-12 col-md-6 order-md-1 order-last">
-                            <h3 class="mb-4-3 me-3">訓練計畫📅</h3>
+                            <div class="d-flex align-items-center mb-4-3">
+                                <h3 class="mb-0 me-3">訓練計畫📅</h3>
+                                <button type="button" 
+                                        class="btn btn-sm rounded-circle d-flex align-items-center justify-content-center" 
+                                        style="width: 28px; height: 28px; padding: 0; line-height: 1; background-color: #c8cbd8; border-color: #c8cbd8;"
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#usageGuideModal"
+                                        title="使用說明">
+                                    <i class="bi bi-question" style="font-size: 1rem; color: #495057;"></i>
+                                </button>
+                            </div>
                             <p class="text-muted mt-2 mb-4" style="font-size: 1rem;">
                                 規劃您的每週訓練課表，選擇適合的動作並設定組數次數，系統會根據您的目標提供建議。
                             </p>
@@ -3829,6 +3849,7 @@
         let allTrainingPlans = {}; // 儲存所有週的訓練計畫
         let completionRecords = []; // 儲存完成記錄
         let planIds = {}; // 儲存計畫ID
+        let userFavorites = []; // 儲存用戶的我的最愛列表
         
         // 初始化全域變數（不再使用 localStorage）
         function initializeGlobalVariables() {
@@ -9829,20 +9850,20 @@
                 clearAllModalBackdrops();
                 
                 // 延遲應用模板，確保清理完成
-                setTimeout(() => {
+                setTimeout(async () => {
                     // 應用模板
                     if (templateId === 'fullbody' && mode === 'recommended') {
                         // 全身訓練推薦模式使用固定的專業菜單
                         applyFixedFullbodyRecommendations();
                     } else if (templateId === 'upperlower' && mode === 'random') {
                         // 二分化隨機模式使用新的隨機菜單生成
-                        generateUpperLowerSplitRandom();
+                        await generateUpperLowerSplitRandom();
                     } else if (templateId === 'upperlower' && mode === 'recommended') {
                         // 二分化推薦模式使用Level 1兩天連續練菜單
                         applyLevel1ContinuousRecommendations();
                     } else if (templateId === 'pushpulllegs' && mode === 'random') {
                         // 三分化隨機模式
-                        generatePushPullLegsRandom();
+                        await generatePushPullLegsRandom();
                     } else if (templateId === 'pushpulllegs' && mode === 'recommended') {
                         // 三分化推薦模式
                         generatePushPullLegsRecommendations();
@@ -10184,9 +10205,91 @@
             return null;
         }
 
-        // 依肌群取得隨機動作（避免當日/本週重複）
+        // 獲取用戶的我的最愛列表
+        async function loadUserFavorites() {
+            try {
+                const response = await fetch('api/favorites.php', {
+                    method: 'GET',
+                    credentials: 'include'
+                });
+                
+                if (!response.ok) {
+                    console.warn('無法載入我的最愛列表');
+                    return [];
+                }
+                
+                const result = await response.json();
+                if (result.success && result.data) {
+                    userFavorites = result.data;
+                    console.log('已載入我的最愛列表，共', userFavorites.length, '個項目');
+                } else {
+                    userFavorites = [];
+                }
+                return userFavorites;
+            } catch (error) {
+                console.error('載入我的最愛列表失敗:', error);
+                userFavorites = [];
+                return [];
+            }
+        }
+        
+        // 從我的最愛中尋找符合指定肌群的動作
+        function findFavoriteExerciseForMuscle(muscleGroup) {
+            if (!userFavorites || userFavorites.length === 0) return null;
+            
+            const keywordMap = {
+                '上胸': ['上胸', '胸'],
+                '中胸': ['中胸', '胸'],
+                '下胸': ['下胸', '胸'],
+                '上背': ['上背', '背'],
+                '中背': ['中背', '背'],
+                '下背': ['下背', '背'],
+                '肩膀前束': ['肩', '前束'],
+                '肩膀中束': ['肩', '中束', '側平舉'],
+                '肩膀後束': ['肩', '後束', '臉拉', '反向'],
+                '三頭肌': ['三頭', '下壓', '伸展'],
+                '二頭肌': ['二頭', '彎舉', '錘式'],
+                '股四頭肌': ['股四頭', '腿', '深蹲', '腿推', '腿舉'],
+                '股二頭肌': ['股二頭', '腿彎', '硬舉'],
+                '臀肌': ['臀', '弓箭步', '臀推'],
+                '小腿': ['小腿', '提踵'],
+                '核心': ['核心', '腹', '平板', '捲腹', '仰臥']
+            };
+
+            const keywords = keywordMap[muscleGroup] || [muscleGroup];
+            
+            // 從我的最愛中尋找符合的動作
+            for (const favorite of userFavorites) {
+                const favoriteName = (favorite.name || '').toLowerCase();
+                const muscleGroupMatch = keywords.some(k => favoriteName.includes(k.toLowerCase()));
+                
+                if (muscleGroupMatch) {
+                    // 從 exercises 中找到對應的完整資料
+                    const fullExercise = exercises.find(ex => ex.name === favorite.name);
+                    if (fullExercise) {
+                        // 檢查是否已在當日/當週使用
+                        const exerciseId = Number(fullExercise.id);
+                        if (typeof dailyUsedExercises !== 'undefined' && dailyUsedExercises.has(exerciseId)) continue;
+                        if (typeof weeklyUsedExercises !== 'undefined' && weeklyUsedExercises.has(exerciseId)) continue;
+                        
+                        console.log('從我的最愛中選擇:', fullExercise.name);
+                        return fullExercise;
+                    }
+                }
+            }
+            
+            return null;
+        }
+
+        // 依肌群取得隨機動作（避免當日/本週重複，優先使用我的最愛）
         function getRandomExerciseForMuscle(muscleGroup, mode = 'random') {
             if (!exercises || exercises.length === 0) return null;
+
+            // 優先從我的最愛中選擇
+            const favoriteExercise = findFavoriteExerciseForMuscle(muscleGroup);
+            if (favoriteExercise) {
+                return favoriteExercise;
+            }
 
             const keywordMap = {
                 '上胸': ['上胸', '胸'],
@@ -10270,8 +10373,11 @@
             return null;
         }
         // 二分化(上下分離)隨機菜單生成
-        function generateUpperLowerSplitRandom() {
+        async function generateUpperLowerSplitRandom() {
             console.log('生成二分化隨機菜單');
+            
+            // 載入用戶的我的最愛列表（優先推薦用戶收藏的動作）
+            await loadUserFavorites();
             
             // 清空現有計畫
             Object.keys(weeklyPlan).forEach(day => {
@@ -10484,8 +10590,11 @@
             console.log('二分化隨機菜單生成完成');
         }
         // 三分化（推/拉/腿）隨機菜單生成
-        function generatePushPullLegsRandom() {
+        async function generatePushPullLegsRandom() {
             console.log('生成三分化隨機菜單（推/拉/腿）');
+            
+            // 載入用戶的我的最愛列表（優先推薦用戶收藏的動作）
+            await loadUserFavorites();
 
             // 清空現有計畫
             Object.keys(weeklyPlan).forEach(day => {
@@ -11560,6 +11669,113 @@
             console.log('=== handleAddExerciseClick 執行完成 ===');
         }
     </script>
+
+    <!-- 使用說明 Modal -->
+    <div class="modal fade" id="usageGuideModal" tabindex="-1" aria-labelledby="usageGuideModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" style="max-width: 800px;">
+            <div class="modal-content" style="max-height: 75vh;">
+                <div class="modal-header" style="background-color: #dce0e8;">
+                    <h5 class="modal-title" id="usageGuideModalLabel">
+                        <i class="bi bi-info-circle me-2"></i>使用說明
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                </div>
+                <div class="modal-body" style="overflow-y: auto; max-height: calc(75vh - 120px);">
+                    <div class="usage-guide-content">
+                        <!-- 快速入門 -->
+                        <div class="mb-4">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-lightbulb-fill me-2" style="vertical-align: middle;"></i>快速入門
+                            </h6>
+                            <p class="text-muted">
+                                這個頁面讓您規劃每週的訓練課表，安排適合的訓練動作。只需三個簡單步驟：
+                            </p>
+                            <ol class="ps-3">
+                                <li class="mb-2">點選行事曆上的訓練日期</li>
+                                <li class="mb-2">選擇您想要加入的訓練動作</li>
+                                <li class="mb-2">設定組數、次數等參數，完成訓練計畫</li>
+                            </ol>
+                        </div>
+
+                        <hr>
+
+                        <!-- 功能說明 -->
+                        <div class="mb-4">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-grid-3x3-gap-fill me-2" style="vertical-align: middle;"></i>主要功能
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-calendar-date text-primary me-3 fs-5"></i>
+                                        <div>
+                                            <strong>行事曆選擇</strong>
+                                            <p class="text-muted mb-0 small">點擊行事曆上的日期來查看或編輯當天的訓練計畫</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-search text-primary me-3 fs-5"></i>
+                                        <div>
+                                            <strong>搜尋動作</strong>
+                                            <p class="text-muted mb-0 small">從動作庫中搜尋並新增訓練動作</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-sliders text-success me-3 fs-5"></i>
+                                        <div>
+                                            <strong>設定參數</strong>
+                                            <p class="text-muted mb-0 small">為每個動作設定組數、次數與重量</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="d-flex align-items-start">
+                                        <i class="bi bi-save text-info me-3 fs-5"></i>
+                                        <div>
+                                            <strong>自動儲存</strong>
+                                            <p class="text-muted mb-0 small">系統會自動儲存您的訓練計畫，下次登入可直接查看</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+
+                        <!-- 使用提示 -->
+                        <div class="mb-3">
+                            <h6 class="mb-3" style="color: #5A628C;">
+                                <i class="bi bi-graph-up-arrow me-2" style="vertical-align: middle;"></i>使用提示
+                            </h6>
+                            <div class="alert alert-light">
+                                <p class="mb-2"><strong>合理分配訓練</strong>：建議每日訓練不同肌群，讓肌肉有充分恢復時間</p>
+                                <p class="mb-2"><strong>循序漸進</strong>：初學者建議從較少的組數和次數開始</p>
+                                <p class="mb-0 small text-muted">
+                                    您的訓練計畫會自動同步到雲端，讓您隨時查看和管理。
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info d-flex align-items-start mb-0" style="background-color: #9ca2b3; border-color: #9ca2b3;">
+                            <i class="bi bi-lightbulb me-2 fs-6 text-white" style="margin-top: 2px;"></i>
+                            <div class="text-white">
+                                <strong>小提示：</strong>建議每週規劃3-5天的訓練日，並搭配適當的休息日，才能達到最佳訓練效果！
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary d-flex align-items-center justify-content-center" data-bs-dismiss="modal">
+                        <i class="bi bi-check-circle me-1" style="font-size: 0.9rem;"></i><span>我已了解</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 
