@@ -3482,7 +3482,7 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         // 智能推薦菜單 - 專注原型食物和健康選擇
-        function generateSmartMenu() {
+        /*function generateSmartMenu() {
             if (!currentNutritionResult) {
                 showToast('請先計算營養需求', 'error');
                 return;
@@ -3549,10 +3549,10 @@ $email = $_SESSION['email'] ?? 'No email';
                 console.error('生成智能菜單時發生錯誤:', error);
                 showToast('生成菜單時發生錯誤，請重試', 'error');
             }
-        }
-
+        }*/
+        
         // 生成健康早餐 - 專注原型食物
-        function generateHealthyBreakfast(targetCalories) {
+        /*function generateHealthyBreakfast(targetCalories) {
             const healthyFoods = getHealthyFoods();
             const breakfastFoods = [];
             let currentCalories = 0;
@@ -3696,10 +3696,10 @@ $email = $_SESSION['email'] ?? 'No email';
             }
 
             return breakfastFoods;
-        }
+        }*/
 
         // 生成健康餐食 - 午晚餐
-        function generateHealthyMeal(mealType, targetCalories) {
+        /*function generateHealthyMeal(mealType, targetCalories) {
             const healthyFoods = getHealthyFoods();
             const mealFoods = [];
             let currentCalories = 0;
@@ -3880,7 +3880,7 @@ $email = $_SESSION['email'] ?? 'No email';
             }
 
             return mealFoods;
-        }
+        }*/
 
         // 獲取健康食物列表 - 專注原型食物
         function getHealthyFoods() {
@@ -4718,6 +4718,12 @@ $email = $_SESSION['email'] ?? 'No email';
                     carbsPer100: food.carbs,
                     fatPer100: food.fat
                 });
+                console.log('食物:', food.name);
+                console.log('份量(g):', food.grams);
+                console.log('每100g 熱量(kcal):', food.calories);
+                console.log('每100g 蛋白質(g):', food.protein);
+                console.log('每100g 碳水(g):', food.carbs);
+                console.log('每100g 脂肪(g):', food.fat);
             });
 
             renderPlanner(currentNutritionResult);
