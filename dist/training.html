@@ -205,6 +205,19 @@
             font-size: 1.1rem;
         }
 
+        /* 二頭肌按鈕淺色莫蘭迪樣式 */
+        .btn-bicep {
+            background-color: #B8C4D6 !important;
+            border-color: #B8C4D6 !important;
+            color: #ffffff !important;
+        }
+
+        .btn-bicep:hover {
+            background-color: #A8B8CA !important;
+            border-color: #A8B8CA !important;
+            color: #ffffff !important;
+        }
+
         /* 器材顯示樣式 */
         .equipment-display {
             margin-top: 30px;
@@ -253,6 +266,14 @@
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
             border-left: 4px solid #95abc3;
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+        }
+
+        .equipment-card .button-container {
+            margin-top: auto;
+            padding-top: 15px;
         }
 
         .equipment-card h4 {
@@ -267,10 +288,18 @@
         }
 
         .training-details {
-            margin-bottom: 20px;
+            margin-bottom: 0;
             padding: 15px;
             background: #f8f9fa;
             border-radius: 8px;
+        }
+
+        .training-details:first-of-type {
+            margin-top: 15px;
+        }
+
+        .training-details + .training-details {
+            margin-top: 15px;
         }
 
         .training-details h5 {
@@ -808,7 +837,7 @@
                 <h4>選擇手臂訓練部位</h4>
                 <p>點擊下方按鈕選擇要訓練的肌群</p>
                 <div class="arm-selection-buttons">
-                    <button class="btn btn-primary w-100 mb-2" onclick="selectArmMuscle('二頭', ${evt.clientX}, ${evt.clientY})">
+                    <button class="btn btn-bicep w-100 mb-2" onclick="selectArmMuscle('二頭', ${evt.clientX}, ${evt.clientY})">
                         <i class="bi bi-target"></i> 二頭肌訓練
                     </button>
                     <button class="btn btn-success w-100" onclick="selectArmMuscle('三頭', ${evt.clientX}, ${evt.clientY})">
@@ -1326,7 +1355,7 @@
         </div>
 
         <!-- ⭐收藏 & ℹ️ 詳情：放在減脂訓練底下 -->
-        <div class="d-flex justify-content-between align-items-center mt-3">
+        <div class="button-container d-flex justify-content-between align-items-center">
             <!-- 收藏 -->
             <button type="button" 
                     class="btn btn-link p-0 m-0 favorite-btn" 

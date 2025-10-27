@@ -87,7 +87,7 @@
 
         /* 卡片頭部 */
         .card-header-section {
-            background: #e0d9e0;
+            background: #ebe8ef;
             padding: 20px;
             color: #2c3e50;
             position: relative;
@@ -255,7 +255,7 @@
 
         .btn-remove {
             background: var(--morandi-blue);
-            border: 1px solid var(--morandi-blue);
+            border: none;
             color: white;
             padding: 10px 20px;
             border-radius: 25px;
@@ -269,7 +269,6 @@
 
         .btn-remove:hover {
             background: var(--morandi-dark-blue);
-            border-color: var(--morandi-dark-blue);
             color: white;
             transform: translateY(-1px);
         }
@@ -512,7 +511,7 @@
         }
 
         .compact-item {
-            background: #e8ecee;
+            background: #f5f5f7;
             border: 1px solid var(--morandi-light-gray);
             border-radius: 16px;
             transition: all 0.3s ease;
@@ -575,9 +574,7 @@
             font-size: 0.9rem;
             color: var(--morandi-dark-gray);
             margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            text-align: left;
         }
 
 
@@ -606,7 +603,7 @@
 
         .compact-action-btn {
             padding: 8px 16px;
-            border: 1px solid var(--morandi-blue);
+            border: none;
             border-radius: 25px;
             background: var(--morandi-blue);
             color: white;
@@ -622,7 +619,6 @@
 
         .compact-action-btn:hover {
             background: var(--morandi-dark-blue);
-            border-color: var(--morandi-dark-blue);
             color: white;
             transform: translateY(-1px);
         }
@@ -880,6 +876,70 @@
         /* footer 與上方保持 60px 間距 */
         footer {
             margin-top: 60px;
+        }
+
+        /* 確認對話框樣式 */
+        #confirmRemoveModal .modal-dialog {
+            max-width: 400px;
+            margin-top: 10vh;
+        }
+
+        #confirmRemoveModal .modal-header {
+            padding: 0.75rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+        }
+
+        #confirmRemoveModal .modal-title {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        #confirmRemoveModal .modal-body {
+            padding: 1.5rem;
+            font-size: 0.95rem;
+            color: #495057;
+            line-height: 1.6;
+        }
+
+        #confirmRemoveModal .modal-footer {
+            padding: 0.75rem 1.5rem;
+            border-top: 1px solid #dee2e6;
+            gap: 0.5rem;
+        }
+
+        #confirmRemoveModal .btn-primary {
+            background-color: #5A628C;
+            border-color: #5A628C;
+            color: #fff;
+            border-radius: 6px;
+            font-weight: 500;
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+        }
+
+        #confirmRemoveModal .btn-primary:hover {
+            background-color: #4e567d;
+            border-color: #4e567d;
+        }
+
+        #confirmRemoveModal .btn-secondary {
+            padding: 0.375rem 0.75rem;
+            font-size: 1rem;
+            border-radius: 6px;
+            background-color: #6c757d;
+            border-color: #6c757d;
+            color: #fff;
+        }
+
+        #confirmRemoveModal .btn-secondary:hover {
+            background-color: #5a6268;
+            border-color: #5a6268;
+        }
+
+        /* Modal 遮罩層樣式 */
+        #confirmRemoveModal .modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
         }
     </style>
 </head>
@@ -1207,7 +1267,6 @@
       <div class="exercise-card">
         <div class="card-header-section">
           <div class="card-title">
-            <i class="bi bi-heart-fill"></i>
             <span>${ex.name || '未命名動作'}</span>
           </div>
           <div class="card-meta">
@@ -1317,11 +1376,9 @@
         <div class="compact-item-header">
           <div class="compact-main-info">
             <h6 class="compact-title">
-              <i class="bi bi-heart-fill"></i>
               ${ex.name || '未命名動作'}
             </h6>
             <p class="compact-subtitle">
-              <i class="bi bi-person-arms-up"></i>
               ${ex.target_muscle || '—'}
             </p>
           </div>
@@ -1540,10 +1597,62 @@
         }
 
 
+        // 顯示移除收藏確認對話框
+        function showRemoveConfirm(name) {
+            const html = `
+                <div class="modal fade" id="confirmRemoveModal" tabindex="-1" aria-labelledby="confirmRemoveLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="confirmRemoveLabel">提示！</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                確定要移除收藏：${name}嗎？此操作無法復原。
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" onclick="confirmRemoveFavorite('${name.replace(/'/g, "\\'")}')">確定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            const existing = document.getElementById('confirmRemoveModal');
+            if (existing) existing.remove();
+            document.body.insertAdjacentHTML('beforeend', html);
+            
+            const modal = new bootstrap.Modal(document.getElementById('confirmRemoveModal'));
+            modal.show();
+            
+            document.getElementById('confirmRemoveModal').addEventListener('hidden.bs.modal', function() {
+                try {
+                    if (this && document.body.contains(this)) {
+                        this.remove();
+                    }
+                } catch (e) {
+                    console.warn('移除 modal 失敗', e);
+                }
+            }, { once: true });
+        }
+
         // 移除收藏（改為呼叫 API）
         async function removeFavorite(name) {
-            if (!confirm(`確定要移除收藏：${name}嗎？`)) return;
+            showRemoveConfirm(name);
+        }
+
+        // 確認移除收藏
+        async function confirmRemoveFavorite(name) {
             try {
+                // 關閉 modal
+                const modalElement = document.getElementById('confirmRemoveModal');
+                if (modalElement) {
+                    const modal = bootstrap.Modal.getInstance(modalElement);
+                    if (modal) {
+                        modal.hide();
+                    }
+                }
+                
                 await fetch(API_FAVORITES + '?name=' + encodeURIComponent(name), {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
