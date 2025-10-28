@@ -1737,12 +1737,21 @@ $email = $_SESSION['email'] ?? 'No email';
                             <!-- 日期詳細資訊 -->
                             <div id="selectedDateInfo" class="mt-4" style="display: none;">
                                 <div class="card bg-light">
-                                    <div class="card-header">
-                                        <h6 class="mb-0">
+                                    <div class="card-header d-flex align-items-center justify-content-between" style="flex-wrap: nowrap;">
+                                        <div class="d-flex align-items-center flex-grow-1 overflow-hidden" style="min-width:0;">
                                             <i class="bi bi-calendar-event me-2"></i>
-                                            <span id="selectedDateText">選擇日期</span>
-                                        </h6>
+                                            <span id="selectedDateText" class="text-truncate">選擇日期</span>
+                                        </div>
+                                        <button class="btn btn-sm btn-secondary d-flex align-items-center flex-shrink-0 ms-2"
+                                            style="font-size: 12px; padding: 0.25rem 0.5rem; gap: 2px; display:none !important;" onclick="renderPlanner()">
+                                            <i class="bi bi-upload"></i>更新三餐
+                                        </button>
+                                        <button class="btn btn-sm btn-secondary d-flex align-items-center flex-shrink-0 ms-2"
+                                            style="font-size: 12px; padding: 0.25rem 0.5rem; gap: 2px;" onclick="saveMealPlan()">
+                                            <i class="bi bi-upload"></i>儲存今日三餐
+                                        </button>
                                     </div>
+
                                     <div class="card-body" id="selectedDateMeals">
                                         <!-- 選中日期的餐食內容 -->
                                         <p class="text-muted text-center">請選擇一個日期查看餐食內容</p>
@@ -2111,57 +2120,6 @@ $email = $_SESSION['email'] ?? 'No email';
         let allFoods = [];
         let currentNutritionResult = null;
 
-        // 載入已儲存的餐食計畫
-        async function loadSavedMealPlan() {
-            try {
-                const response = await fetch('get_meal_plan.php?date=' + currentMealDate);
-
-                if (!response.ok) {
-                    console.log('載入餐食計畫失敗: HTTP ' + response.status);
-                    return;
-                }
-
-                const result = await response.json();
-
-                if (result.success && result.data) {
-                    const plan = result.data;
-
-                    // 重建餐食計畫
-                    mealPlan = {
-                        breakfast: [],
-                        lunch: [],
-                        dinner: []
-                    };
-
-                    // 載入餐食項目
-                    if (plan.items) {
-                        plan.items.forEach(item => {
-                            if (mealPlan[item.meal_type]) {
-                                mealPlan[item.meal_type].push({
-                                    name: item.food_name,
-                                    grams: parseFloat(item.quantity_grams),
-                                    caloriesPer100: parseFloat(item.calories_per_100g),
-                                    proteinPer100: parseFloat(item.protein_per_100g),
-                                    carbsPer100: parseFloat(item.carbs_per_100g),
-                                    fatPer100: parseFloat(item.fat_per_100g)
-                                });
-                            }
-                        });
-                    }
-
-                    // 重新渲染
-                    if (currentNutritionResult) {
-                        renderPlanner(currentNutritionResult);
-                        showToast(`已載入 ${currentMealDate} 的餐食計畫`, 'success');
-                        markAsSaved(); // 載入的資料標記為已儲存
-                    }
-                } else {
-                    console.log('沒有找到餐食計畫:', result.message || '未知原因');
-                }
-            } catch (error) {
-                console.log('載入餐食計畫失敗:', error);
-            }
-        }
 
         // 頁面切換功能 - 使用Bootstrap自動處理
         function initializePageTabs() {
@@ -2340,31 +2298,56 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         // 頁面載入時初始化
+        // 本地時區轉 yyyy-mm-dd（避免 UTC 造成跑到前/隔一天）
+        function formatLocalDateYMD(d = new Date()) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+        }
+
         document.addEventListener('DOMContentLoaded', async function () {
-            // 初始化頁面切換功能
-            initializePageTabs();
+        // 1) 先跑你原本的初始化
+        initializePageTabs();
 
-            // 初始化日期選擇器
-            const dateInput = document.getElementById('mealDate');
-            if (dateInput) {
-                dateInput.value = currentMealDate;
-            }
+        // 2) 決定「今天」並同步到狀態/輸入框
+        const todayStr = formatLocalDateYMD();
+        // 若全域沒定義，保底建立
+        window.currentMealDate = window.currentMealDate || todayStr;
 
-            await loadFoods();
-            setupEventListeners();
-            loadUserData(); // 載入用戶資料
-            // 精簡：關閉其他載入
+        const dateInput = document.getElementById('mealDate');
+        if (dateInput) {
+            dateInput.value = todayStr;
+        }
 
-            // 監聽 modal 狀態
-            // loadMuscleBuildingFoods(); // 已改為食物數據一覽
-            loadRecipes(); // 載入食譜推薦
+        // 3) 若有行事曆初始化，先建好月份表格（保證日期格已在 DOM）
+        if (typeof initMealCalendar === 'function') {
+            initMealCalendar();
+        }
 
-            setupModalMonitoring();
+        // 4) 其他載入（保留你原本流程）
+        await loadFoods();
+        setupEventListeners();
+        loadUserData();      // 載入用戶資料
+        loadRecipes();       // 載入食譜推薦
+        setupModalMonitoring();
 
-            // 載入已儲存的餐食計畫
-            setTimeout(() => {
-                loadSavedMealPlan();
-            }, 1000);
+        // 5) ⚠️ 取代原本的 setTimeout + loadSavedMealPlan()
+        // 選擇 A：用 selectDate（你之前已改成會設定 currentMealDate 並呼叫 loadMealPlanForDate）
+        if (typeof selectDate === 'function') {
+            selectDate(todayStr);
+        }
+        // 如果沒有 selectDate，就用載入函式直上（保底邏輯）
+        else if (typeof loadMealPlanForDate === 'function') {
+            await loadMealPlanForDate(todayStr);
+            // 成功載入後，更新行事曆點點與右側面板（依你專案情況可保留/移除）
+            if (typeof updateCalendar === 'function') updateCalendar();
+            const mealData = (window.mealPlans && window.mealPlans[todayStr]) || { breakfast: [], lunch: [], dinner: [] };
+            if (typeof displaySelectedDateMeals === 'function') displaySelectedDateMeals(todayStr, mealData);
+        }
+
+        // 6) 把舊的 setTimeout 砍掉，避免重複打 API 或覆蓋狀態
+        // （已移除）
         });
 
         // 載入用戶資料
@@ -2730,7 +2713,7 @@ $email = $_SESSION['email'] ?? 'No email';
         function displayNutritionResults(result) {
             try {
                 currentNutritionResult = result;
-
+                console.log('currentNutritionResult是:',currentNutritionResult);
                 // 安全地更新數值（檢查元素是否存在）
                 const targetCaloriesEl = document.getElementById('targetCalories');
                 const proteinGramsEl = document.getElementById('proteinGrams');
@@ -2759,6 +2742,63 @@ $email = $_SESSION['email'] ?? 'No email';
             }
         }
 
+        // 載入已儲存的餐食計畫
+        async function loadSavedMealPlan() {
+            try {
+                const response = await fetch('get_meal_plan.php?date=' + currentMealDate);
+
+                if (!response.ok) {
+                    console.log('載入餐食計畫失敗: HTTP ' + response.status);
+                    return;
+                }else{
+                    console.log('獲取餐食計畫成功');
+                }
+                //setTimeout(() => {
+                //    renderPlanner();
+                //    console.log('載入餐食列表');
+                //}, 1500);
+                //console.log("目前點擊",currentMealDate,"日期")
+                const result = await response.json();
+                
+                if (result.success && result.data) {
+                    const plan = result.data;
+                    //console.log('餐食列表paln json',plan); 
+                    // 重建餐食計畫
+                    mealPlan = {
+                        breakfast: [],
+                        lunch: [],
+                        dinner: []
+                    };
+
+                    // 載入餐食項目
+                    if (plan.items) {
+                        plan.items.forEach(item => {
+                            if (mealPlan[item.meal_type]) {
+                                mealPlan[item.meal_type].push({
+                                    name: item.food_name,
+                                    grams: parseFloat(item.quantity_grams),
+                                    caloriesPer100: parseFloat(item.calories_per_100g),
+                                    proteinPer100: parseFloat(item.protein_per_100g),
+                                    carbsPer100: parseFloat(item.carbs_per_100g),
+                                    fatPer100: parseFloat(item.fat_per_100g)
+                                });
+                            }
+                        });
+                    }
+                    renderPlanner(currentNutritionResult);
+                    showToast(`已載入 ${currentMealDate} 的餐食計畫`, 'success');
+                    // 重新渲染
+                    //if (currentNutritionResult) {
+                        //markAsSaved(); // 載入的資料標記為已儲存
+                        //console.log("這啥", currentNutritionResult);
+                    //}
+                } else {
+                    console.log('沒有找到餐食計畫:', result.message || '未知原因');
+                }
+            } catch (error) {
+                console.log('載入餐食計畫失敗:', error);
+            }
+        }
 
         // 更新目標數值到餐食規劃區域
         function updateTargetValues(result) {
@@ -2992,11 +3032,11 @@ $email = $_SESSION['email'] ?? 'No email';
             // 載入該日期的餐食計畫
             await loadMealPlanForDate(selectedDate);
         }
-
+        //無用
         // 載入特定日期的餐食計畫
         async function loadMealPlanForDate(date) {
             try {
-                showToast(`正在載入 ${date} 的餐食計畫...`, 'info');
+                //showToast(`正在載入 ${date} 的餐食計畫...`, 'info');
 
                 const response = await fetch(`get_meal_plan.php?date=${date}`);
                 const result = await response.json();
@@ -3034,11 +3074,14 @@ $email = $_SESSION['email'] ?? 'No email';
                     // 標記為已儲存
                     hasUnsavedChanges = false;
                     checkForChanges();
+                    //一進頁就能看到當天日期格的「點點」亮起。
+                    mealPlans[date] = JSON.parse(JSON.stringify(mealPlan));
+                    if (typeof updateCalendar === 'function') updateCalendar();
                 } else {
                     // 該日期沒有餐食計畫，清空當前計畫
                     mealPlan = { breakfast: [], lunch: [], dinner: [] };
                     renderPlanner(currentNutritionResult);
-                    showToast(`${date} 沒有餐食計畫，已清空編輯器`, 'info');
+                    //FshowToast(`${date} 沒有餐食計畫，已清空編輯器`, 'info');
 
                     // 標記為已儲存
                     hasUnsavedChanges = false;
@@ -3055,7 +3098,7 @@ $email = $_SESSION['email'] ?? 'No email';
             const breakfastList = document.getElementById('breakfastList');
             const lunchList = document.getElementById('lunchList');
             const dinnerList = document.getElementById('dinnerList');
-
+            //console.log("早餐資料：",mealPlan.breakfast.length)
             if (breakfastList) {
                 if (mealPlan.breakfast.length > 0) {
                     breakfastList.innerHTML = '<div class="mt-3">' + mealPlan.breakfast.map((item, idx) => `
@@ -4314,6 +4357,7 @@ $email = $_SESSION['email'] ?? 'No email';
             modal.show();
         }
 
+        //無用
         // 載入特定日期的餐食紀錄
         async function loadMealRecord(date) {
             try {
@@ -4719,7 +4763,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
             const targetCalories = currentNutritionResult.meal_distribution[mealType];
             const smartMenu = getSmartMenuForMeal(mealType, targetCalories);
-
+            console.log(targetCalories);
             // 清空現有菜單
             mealPlan[mealType] = [];
 
@@ -4733,12 +4777,6 @@ $email = $_SESSION['email'] ?? 'No email';
                     carbsPer100: food.carbs,
                     fatPer100: food.fat
                 });
-                console.log('食物:', food.name);
-                console.log('份量(g):', food.grams);
-                console.log('每100g 熱量(kcal):', food.calories);
-                console.log('每100g 蛋白質(g):', food.protein);
-                console.log('每100g 碳水(g):', food.carbs);
-                console.log('每100g 脂肪(g):', food.fat);
             });
 
             renderPlanner(currentNutritionResult);
@@ -5494,19 +5532,27 @@ $email = $_SESSION['email'] ?? 'No email';
         
         function selectDate(dateStr) {
             const infoDiv = document.getElementById('selectedDateInfo');
-            
-            // 如果點選的是同一個日期，則收起資訊
+
             if (lastSelectedDate === dateStr && infoDiv.style.display !== 'none') {
                 infoDiv.style.display = 'none';
                 lastSelectedDate = null;
                 return;
             }
-            
-            // 選擇新日期
+
             lastSelectedDate = dateStr;
+
+            // ★ 新增：同步當前日期與日期輸入框
+            currentMealDate = dateStr;
+            const dateInput = document.getElementById('mealDate');
+            if (dateInput) dateInput.value = dateStr;
+
             const mealData = mealPlans[dateStr] || { breakfast: [], lunch: [], dinner: [] };
             displaySelectedDateMeals(dateStr, mealData);
+
+            // ★ 改成用「帶參數」的載入：一次指向 dateStr
+            loadMealPlanForDate(dateStr);
         }
+
 
         // 顯示選中日期的餐食內容
         function displaySelectedDateMeals(dateStr, mealData) {
