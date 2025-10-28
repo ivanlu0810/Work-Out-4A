@@ -393,38 +393,73 @@ function getPlanId($pdo) {
 // 獲取行事曆資料
 function getCalendarData($pdo) {
     try {
-        // 直接從 training_plan_completion 表獲取所有動作記錄
-        // 使用 training_plans 表的 week_start_date 和 day_of_week 來計算正確的訓練日期
+        // 從前端取得 user_id
+        $user_id = isset($_GET['user_id']) ? (int)$_GET['user_id'] : 0;
+        if ($user_id <= 0) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => '缺少或無效的 user_id']);
+            return;
+        }
+        
+        // 直接使用 training_plan_exercises + training_plans.user_id 過濾，以 exercise_date 為準
         $sql_exercises = "SELECT 
-            DATE_ADD(tp.week_start_date, INTERVAL 
-                CASE tpc.day_of_week 
-                    WHEN 'monday' THEN 0
-                    WHEN 'tuesday' THEN 1
-                    WHEN 'wednesday' THEN 2
-                    WHEN 'thursday' THEN 3
-                    WHEN 'friday' THEN 4
-                    WHEN 'saturday' THEN 5
-                    WHEN 'sunday' THEN 6
-                    ELSE 0
-                END DAY
-            ) as exercise_date,
-            tpc.exercise_id, 
-            tpc.exercise_name, 
-            tpc.muscle_group, 
-            tpc.sets, 
-            tpc.reps, 
-            tpc.weight, 
+            tpe.exercise_date,
+            tpe.exercise_id, 
+            tpe.exercise_name, 
+            tpe.muscle_group, 
+            tpe.sets, 
+            tpe.reps, 
+            tpe.weight,
+            tpe.order_index,
             tpc.individual_completed, 
-            tpc.individual_completed_at,
-            tpc.day_of_week
-        FROM training_plan_completion tpc
-        JOIN training_plans tp ON tpc.plan_id = tp.id
-        WHERE tpc.user_id = 9 AND tpc.exercise_id > 0 
-        ORDER BY exercise_date DESC";
+            tpc.individual_completed_at
+        FROM training_plan_exercises tpe
+        JOIN training_plans tp ON tpe.plan_id = tp.id AND tp.user_id = ?
+        LEFT JOIN training_plan_completion tpc 
+            ON tpe.plan_id = tpc.plan_id 
+            AND tpe.exercise_id = tpc.exercise_id 
+            AND tpe.day_of_week = tpc.day_of_week
+            AND tpc.user_id = tp.user_id
+        WHERE tpe.exercise_date IS NOT NULL 
+        AND tpe.exercise_id > 0
+        ORDER BY tpe.exercise_date DESC, tpe.order_index ASC";
         
         $stmt_exercises = $pdo->prepare($sql_exercises);
-        $stmt_exercises->execute();
+        $stmt_exercises->execute([$user_id]);
         $exercises = $stmt_exercises->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 若沒有查到，改用 completion 資料推算日期作為後援（避免新欄位/資料異常時整體為空）
+        if (!$exercises || count($exercises) === 0) {
+            $sql_fallback = "SELECT 
+                DATE_ADD(tp.week_start_date, INTERVAL 
+                    CASE tpc.day_of_week 
+                        WHEN 'monday' THEN 0
+                        WHEN 'tuesday' THEN 1
+                        WHEN 'wednesday' THEN 2
+                        WHEN 'thursday' THEN 3
+                        WHEN 'friday' THEN 4
+                        WHEN 'saturday' THEN 5
+                        WHEN 'sunday' THEN 6
+                        ELSE 0
+                    END DAY
+                ) AS exercise_date,
+                tpc.exercise_id,
+                tpc.exercise_name,
+                tpc.muscle_group,
+                tpc.sets,
+                tpc.reps,
+                tpc.weight,
+                0 as order_index,
+                tpc.individual_completed,
+                tpc.individual_completed_at
+            FROM training_plan_completion tpc
+            JOIN training_plans tp ON tp.id = tpc.plan_id AND tp.user_id = ?
+            WHERE tpc.exercise_id IS NOT NULL
+            ORDER BY exercise_date DESC";
+            $stmt_fb = $pdo->prepare($sql_fallback);
+            $stmt_fb->execute([$user_id]);
+            $exercises = $stmt_fb->fetchAll(PDO::FETCH_ASSOC);
+        }
         
         $calendar_data = [];
         
@@ -463,7 +498,8 @@ function getCalendarData($pdo) {
         echo json_encode([
             'success' => true,
             'data' => $calendar_data,
-            'message' => '行事曆資料載入成功'
+            'message' => '行事曆資料載入成功',
+            'count' => count($calendar_data)
         ]);
         
     } catch (Exception $e) {

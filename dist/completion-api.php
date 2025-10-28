@@ -532,16 +532,98 @@ try {
                 $startDate = $targetWeekStart->format('Y-m-d');
                 $endDate = $targetWeekEnd->format('Y-m-d');
                 
-                $sql = "SELECT day_of_week, 
-                               COUNT(*) as total_exercises,
-                               SUM(CASE WHEN individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
-                FROM training_plan_completion
-                        WHERE user_id = ? AND DATE(created_at) BETWEEN ? AND ?
-                        AND exercise_id IS NOT NULL
-                        GROUP BY day_of_week
-                        ORDER BY day_of_week";
-        $stmt = $pdo->prepare($sql);
-                $stmt->execute([$user_id, $startDate, $endDate]);
+                // 週統計：以實際訓練日期計算，並做「跨計畫重複去重」
+                // 總數：以 tpe 的 (exercise_date, exercise_id, exercise_name) 去重
+                // 完成：以 (實際日期, exercise_id, exercise_name) 去重（由 tp.week_start_date + day_of_week 推算）
+                $sql = "
+                    WITH e AS (
+                        SELECT 
+                            CASE DAYOFWEEK(tpe.exercise_date)
+                                WHEN 2 THEN 'monday'
+                                WHEN 3 THEN 'tuesday'
+                                WHEN 4 THEN 'wednesday'
+                                WHEN 5 THEN 'thursday'
+                                WHEN 6 THEN 'friday'
+                                WHEN 7 THEN 'saturday'
+                                WHEN 1 THEN 'sunday'
+                            END AS day_of_week,
+                            COUNT(DISTINCT CONCAT(DATE(tpe.exercise_date),'#',tpe.exercise_id,'#',tpe.exercise_name)) AS total_exercises
+                        FROM training_plan_exercises tpe
+                        JOIN training_plans tp ON tp.id = tpe.plan_id
+                        WHERE tp.user_id = ?
+                          AND tpe.exercise_id > 0
+                          AND tpe.exercise_date BETWEEN ? AND ?
+                        GROUP BY 1
+                    ),
+                    c AS (
+                        SELECT 
+                            CASE DAYOFWEEK(DATE_ADD(tp.week_start_date, INTERVAL 
+                                CASE tpc.day_of_week
+                                    WHEN 'monday' THEN 0
+                                    WHEN 'tuesday' THEN 1
+                                    WHEN 'wednesday' THEN 2
+                                    WHEN 'thursday' THEN 3
+                                    WHEN 'friday' THEN 4
+                                    WHEN 'saturday' THEN 5
+                                    WHEN 'sunday' THEN 6
+                                END DAY))
+                                WHEN 2 THEN 'monday'
+                                WHEN 3 THEN 'tuesday'
+                                WHEN 4 THEN 'wednesday'
+                                WHEN 5 THEN 'thursday'
+                                WHEN 6 THEN 'friday'
+                                WHEN 7 THEN 'saturday'
+                                WHEN 1 THEN 'sunday'
+                            END AS day_of_week,
+                            COUNT(DISTINCT CONCAT(
+                                DATE(DATE_ADD(tp.week_start_date, INTERVAL 
+                                    CASE tpc.day_of_week
+                                        WHEN 'monday' THEN 0
+                                        WHEN 'tuesday' THEN 1
+                                        WHEN 'wednesday' THEN 2
+                                        WHEN 'thursday' THEN 3
+                                        WHEN 'friday' THEN 4
+                                        WHEN 'saturday' THEN 5
+                                        WHEN 'sunday' THEN 6
+                                    END DAY
+                                )), '#', tpc.exercise_id, '#', tpc.exercise_name
+                            )) AS completed_exercises
+                        FROM training_plan_completion tpc
+                        JOIN training_plans tp ON tp.id = tpc.plan_id
+                        WHERE tpc.user_id = ?
+                          AND tpc.exercise_id IS NOT NULL
+                          AND tpc.individual_completed = 1
+                          AND DATE(DATE_ADD(tp.week_start_date, INTERVAL 
+                                CASE tpc.day_of_week
+                                    WHEN 'monday' THEN 0
+                                    WHEN 'tuesday' THEN 1
+                                    WHEN 'wednesday' THEN 2
+                                    WHEN 'thursday' THEN 3
+                                    WHEN 'friday' THEN 4
+                                    WHEN 'saturday' THEN 5
+                                    WHEN 'sunday' THEN 6
+                                END DAY)) BETWEEN ? AND ?
+                        GROUP BY 1
+                    )
+                    SELECT 
+                        d.day_of_week,
+                        COALESCE(e.total_exercises, 0) AS total_exercises,
+                        COALESCE(c.completed_exercises, 0) AS completed_exercises
+                    FROM (
+                        SELECT 'monday' AS day_of_week UNION ALL
+                        SELECT 'tuesday' UNION ALL
+                        SELECT 'wednesday' UNION ALL
+                        SELECT 'thursday' UNION ALL
+                        SELECT 'friday' UNION ALL
+                        SELECT 'saturday' UNION ALL
+                        SELECT 'sunday'
+                    ) d
+                    LEFT JOIN e ON e.day_of_week = d.day_of_week
+                    LEFT JOIN c ON c.day_of_week = d.day_of_week
+                    ORDER BY FIELD(d.day_of_week,'monday','tuesday','wednesday','thursday','friday','saturday','sunday')
+                ";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$user_id, $startDate, $endDate, $user_id, $startDate, $endDate]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];

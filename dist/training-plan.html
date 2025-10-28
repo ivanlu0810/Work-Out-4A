@@ -4254,7 +4254,6 @@
         // 初始化統計選擇器
         function initializeStatsSelectors() {
             initializeYearSelectors();
-            initializeWeekSelector();
             setCurrentPeriod();
             
             // 添加事件監聽器
@@ -4263,6 +4262,14 @@
                     changeStatsMode(this.value);
                 });
             });
+            
+            // 為年份選擇器添加事件監聽器，當年份改變時重新初始化週數
+            const weekYearSelect = document.getElementById('week-year-select');
+            if (weekYearSelect) {
+                weekYearSelect.addEventListener('change', function() {
+                    initializeWeekSelector();
+                });
+            }
             
             // 初始化為週模式
             setTimeout(() => {
@@ -4346,13 +4353,12 @@
             return Math.ceil((lastWeekStart - firstWeekStart) / (7 * 24 * 60 * 60 * 1000)) + 1;
         }
 
-        // 設定當前期間（移除自動設定，保持預設提示）
+        // 設定當前期間（維持原本流程）
         function setCurrentPeriod() {
-            // 不再自動設定年份和月份，讓用戶手動選擇
-            // 只初始化週數選擇器（當年份和月份都選擇後才會顯示週數選項）
+            // 不自動設定年份與月份，由使用者選擇
+            // 僅初始化週數選擇器（會根據已選的年/月動態生成）
             const weekSelect = document.getElementById('week-week-select');
             if (weekSelect) {
-                // 週數選擇器會在 initializeWeekSelector 中處理
                 initializeWeekSelector();
             }
         }
@@ -4515,7 +4521,8 @@
                     console.log(`日期 ${day}: 完成度 ${value}%`);
                     
                     if (value !== undefined && value !== null) { // 有資料的天數
-                        if (value > 0) { // 有訓練計畫的天數（>0%完成）
+                        // 只要不是 -1（代表該天有訓練，但可能 0% 完成），就算在總訓練天數內
+                        if (value >= 0) {
                             totalDays += 1;
                             if (value === 100) { // 只有100%完成才算已完成天數
                                 completedDays += 1;
@@ -5680,8 +5687,19 @@
             renderWeeklyPlan();
             updateWeekCompletion();
             
-            // 同步週計畫到行事曆
-            syncWeeklyPlanToCalendarForCurrentWeek();
+            // 同步週計畫到行事曆（僅在行事曆為空、且週計畫有實際動作時才同步，避免覆蓋資料庫資料）
+            try {
+                const hasExercises = Object.values(weeklyPlan || {}).some(dayList => Array.isArray(dayList) && dayList.some(ex => ex && ex.id && ex.id !== 0));
+                const hasCalendarData = calendarTrainingData && Object.keys(calendarTrainingData).length > 0;
+                if (hasExercises && !hasCalendarData) {
+                    console.log('行事曆為空，且週計畫有內容，執行一次同步到行事曆');
+                    syncWeeklyPlanToCalendarForCurrentWeek();
+                } else {
+                    console.log('略過從 weeklyPlan 同步到行事曆（避免覆蓋資料庫資料）', { hasExercises, hasCalendarData });
+                }
+            } catch (e) {
+                console.warn('判斷是否需要同步到行事曆時發生例外，安全略過同步', e);
+            }
         }
 
         // 從資料庫載入計畫（替代 localStorage 備用方案）
@@ -8338,7 +8356,8 @@
         async function loadCalendarData() {
             try {
                 console.log('開始載入行事曆資料...');
-                const response = await fetch('../exercise-completion-api.php?action=get_calendar_data');
+                console.log('📌 使用當前使用者 ID:', currentUserId);
+                const response = await fetch(`../exercise-completion-api.php?action=get_calendar_data&user_id=${currentUserId}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -8346,12 +8365,15 @@
                 
                 const result = await response.json();
                 
+                console.log('API 回應:', result);
+                
                 if (result.success && result.data && Object.keys(result.data).length > 0) {
                     // 直接使用原始資料，不要過濾（因為不同模板有不同訓練日）
                     calendarTrainingData = result.data;
                     
                     console.log('✅ 行事曆資料載入成功，共 ' + Object.keys(calendarTrainingData).length + ' 天的資料');
-                    console.log('有資料的日期:', Object.keys(calendarTrainingData).slice(0, 10).join(', '));
+                    console.log('📊 API 回傳 count:', result.count);
+                    console.log('📅 有資料的日期:', Object.keys(calendarTrainingData).slice(0, 10).join(', '));
                     
                     // 重新渲染行事曆
                     renderCalendar();
