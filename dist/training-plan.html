@@ -3830,6 +3830,29 @@
     <!-- ApexCharts JS -->
     <script src="assets/vendors/apexcharts/apexcharts.js"></script>
     <script>
+        // 透過 AJAX 取得當前登入者 ID
+        let currentUserId = 9; // 預設值
+        let userIdLoaded = false; // 標記 user_id 是否已載入
+        
+        // 頁面載入時立即取得 user_id
+        (async function() {
+            try {
+                const response = await fetch('get_current_user.php');
+                const result = await response.json();
+                if (result.success) {
+                    currentUserId = result.user_id;
+                    console.log('✅ 從 API 取得當前使用者 ID:', currentUserId);
+                    userIdLoaded = true;
+                } else {
+                    console.error('❌ 取得 user_id 失敗:', result.error);
+                    console.log('⚠️ 使用預設值 user_id=9');
+                }
+            } catch (error) {
+                console.error('❌ 呼叫 get_current_user.php 時發生錯誤:', error);
+                console.log('⚠️ 使用預設值 user_id=9');
+            }
+        })();
+        
         let currentWeek = 0;
         let selectedDay = '';
         let exercises = [];
@@ -5367,9 +5390,14 @@
 
         // 初始化日期顯示
         function updateWeekDates() {
+            // 使用 getWeekMonday 確保日期計算一致性
             const today = new Date();
-            const startOfWeek = new Date(today);
-            startOfWeek.setDate(today.getDate() - today.getDay() + 1 + (currentWeek * 7)); // 週一開始
+            const currentMonthFirstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const firstWeekStart = getWeekMonday(currentMonthFirstDay);
+            const startOfWeek = new Date(firstWeekStart);
+            startOfWeek.setDate(firstWeekStart.getDate() + (currentWeek * 7)); // 加上週數
+
+            console.log('updateWeekDates - currentWeek:', currentWeek, 'startOfWeek:', startOfWeek);
 
             const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
 
@@ -5498,9 +5526,10 @@
             try {
                 console.log('=== loadPlan 開始 ===');
                 console.log('載入週次:', currentWeek);
+                console.log('📌 使用當前使用者 ID:', currentUserId);
                 
                 // 先嘗試載入特定週次
-                response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=9`);
+                response = await fetch(`completion-api.php?action=load_training_plan&user_id=${currentUserId}`);
                 result = await response.json();
                 
                 console.log('特定週次 API 回應:', result);
@@ -5552,6 +5581,7 @@
                         loaded = true;
                         console.log('使用 plans[0].exercises 成功載入');
                         var planIdLoaded = plan.id || null;
+                        var planStartDateLoaded = plan.week_start_date || null;
                     }
                 }
 
@@ -5576,11 +5606,10 @@
                         if (planIdLoaded) planIds[currentWeek] = planIdLoaded;
                         allTrainingPlans[currentWeek].dirty = false;
                         
-                        // 清理多餘的週次資料，只保留當前週次
-                        clearCalendarDataExceptCurrentWeek();
-                        
-                        // 同步 weeklyPlan 到 calendarTrainingData
-                        syncWeeklyPlanToCalendarForCurrentWeek();
+                    // ⚠️ 不要從 weeklyPlan 同步到行事曆
+                    // 因為資料庫已經有準確的 exercise_date，透過 loadCalendarData() 直接載入即可
+                    // 避免不同週次的資料被錯誤同步到錯誤的日期
+                    
                     } catch (e) { console.warn('寫入記憶體失敗', e); }
                 }
             } catch (error) {
@@ -5590,7 +5619,7 @@
                 if (!result || !result.success || !result.plans || result.plans.length === 0) {
                     console.log('特定週次沒有資料，嘗試載入所有計畫');
                     try {
-                        response = await fetch(`completion-api.php?action=load_training_plan&user_id=9`);
+                        response = await fetch(`completion-api.php?action=load_training_plan&user_id=${currentUserId}`);
                         result = await response.json();
                         console.log('所有計畫 API 回應:', result);
                     } catch (e) {
@@ -5605,10 +5634,14 @@
                     console.log('找到計畫:', plan.id, '週次:', plan.week_number, '日期:', plan.week_start_date);
                     console.log('計畫的 exercises 結構:', plan.exercises);
                     
-                    // 檢查是否為正確的週次
-                    if (plan.week_number != currentWeek) {
-                        console.warn('警告：載入的計畫週次不符！期望:', currentWeek, '實際:', plan.week_number);
-                        console.log('但我們會使用這個計畫，因為它是唯一可用的');
+                    // 根據 plan.week_start_date 重新計算 currentWeek 以確保日期對齊
+                    const planStartDate = new Date(plan.week_start_date);
+                    const newCurrentWeek = getCurrentWeekInMonth(planStartDate) - 1;
+                    
+                    if (newCurrentWeek !== currentWeek) {
+                        console.warn('調整 currentWeek 以匹配資料庫:', currentWeek, '->', newCurrentWeek);
+                        console.log('計畫起始日期:', planStartDate);
+                        currentWeek = newCurrentWeek;
                     }
                     
                     // 轉換 exercises 結構為 weeklyPlan 格式
@@ -5655,8 +5688,9 @@
         async function loadFromDatabase() {
             try {
                 console.log('從資料庫載入計畫，週次:', currentWeek);
+                console.log('📌 使用當前使用者 ID:', currentUserId);
                 
-                const response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=9`);
+                const response = await fetch(`completion-api.php?action=load_training_plan&user_id=${currentUserId}`);
                 const result = await response.json();
                 
                 if (result && result.success && result.data) {
@@ -5764,8 +5798,10 @@
                 sunday: weekly_plan.sunday.length
             });
 
+            console.log('📌 同步到資料庫，使用使用者 ID:', currentUserId);
+            
             const payload = {
-                user_id: 9,
+                user_id: currentUserId,
                 week_start_date: weekStartDate,
                 week_number: weekNumber,
                 plan_name: `行事曆訓練計畫`,
@@ -5787,8 +5823,8 @@
                     // 儲存到記憶體中的 planIds 對象
                     planIds[currentWeek] = result.plan_id;
                     
-                    // 同步週計畫到個別動作表格
-                    await syncWeeklyPlanToExerciseTable(result.plan_id);
+                    // 同步週計畫到個別動作表格（已由 save_training_plan 完成寫入，避免重複寫入造成 deadlock）
+                    // await syncWeeklyPlanToExerciseTable(result.plan_id);
                     
                     // 重新渲染以更新完成按鈕狀態
                     renderWeeklyPlan();
@@ -5814,10 +5850,11 @@
                     sunday: weeklyPlan.sunday?.length || 0
                 };
                 console.log('每天的動作數量:', dayCounts);
+                console.log('📌 同步週計畫到資料庫，使用使用者 ID:', currentUserId);
                 
                 const payload = {
                     plan_id: planId,
-                    user_id: 9,
+                    user_id: currentUserId,
                     week_number: currentWeek,
                     weekly_plan: weeklyPlan
                 };
@@ -6192,7 +6229,8 @@
                     },
                     body: JSON.stringify({
                         action: 'delete_week',
-                        week_start: weekStartIso
+                        week_start: weekStartIso,
+                        user_id: currentUserId
                     })
                 });
                 
@@ -6315,8 +6353,21 @@
         function saveDailyTrainingData(date, exercises, forceOverwrite = false) {
             const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
             
-            // 如果強制覆蓋或該日期沒有現有資料，則更新
-            if (forceOverwrite || !calendarTrainingData[dateKey] || calendarTrainingData[dateKey].length === 0) {
+            // 如果強制覆蓋，則更新
+            if (forceOverwrite) {
+                // 只有在非空時才儲存（不是休息日或空資料）
+                const hasRealExercises = exercises && exercises.length > 0 && exercises.some(ex => ex.id !== 0);
+                if (hasRealExercises) {
+                    calendarTrainingData[dateKey] = exercises;
+                    console.log('已強制覆蓋每日訓練數據:', dateKey, exercises.length, '個動作');
+                } else {
+                    // 空資料或休息日：清空該日期的資料
+                    delete calendarTrainingData[dateKey];
+                    console.log('已清空每日訓練數據:', dateKey);
+                }
+            } 
+            // 如果該日期沒有現有資料，則更新
+            else if (!calendarTrainingData[dateKey] || calendarTrainingData[dateKey].length === 0) {
                 calendarTrainingData[dateKey] = exercises;
                 console.log('已儲存每日訓練數據到記憶體:', dateKey, exercises);
             } else {
@@ -8260,7 +8311,7 @@
         async function loadCalendarDataWithoutRendering() {
             try {
                 console.log('開始載入行事曆資料（不重新渲染）...');
-                const response = await fetch('../exercise-completion-api.php?action=get_calendar_data');
+                const response = await fetch(`../exercise-completion-api.php?action=get_calendar_data&user_id=${currentUserId}`);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -8295,34 +8346,26 @@
                 
                 const result = await response.json();
                 
-                if (result.success && result.data) {
+                if (result.success && result.data && Object.keys(result.data).length > 0) {
                     // 直接使用原始資料，不要過濾（因為不同模板有不同訓練日）
                     calendarTrainingData = result.data;
                     
-                    // 只輸出關鍵信息，不要輸出所有資料
-                    if (Object.keys(calendarTrainingData).length > 0) {
-                        console.log('✅ 行事曆資料載入成功，共 ' + Object.keys(calendarTrainingData).length + ' 天的資料');
-                        console.log('有資料的日期:', Object.keys(calendarTrainingData).slice(0, 10).join(', '));
-                    } else {
-                        console.warn('⚠️ 資料庫沒有找到任何訓練資料');
-                        calendarTrainingData = {};
-                    }
+                    console.log('✅ 行事曆資料載入成功，共 ' + Object.keys(calendarTrainingData).length + ' 天的資料');
+                    console.log('有資料的日期:', Object.keys(calendarTrainingData).slice(0, 10).join(', '));
                     
                     // 重新渲染行事曆
                     renderCalendar();
                     
                     return true;
                 } else {
-                    console.warn('載入行事曆資料失敗:', result.error);
-                    console.warn('API 回應:', result);
-                    calendarTrainingData = {};
-                    renderCalendar();
+                    // 如果沒有資料，不要清空現有的 calendarTrainingData
+                    console.warn('⚠️ 資料庫沒有找到任何訓練資料，保留現有行事曆資料');
+                    // 不呼叫 renderCalendar()，保留現有顯示
                     return false;
                 }
             } catch (error) {
                 console.error('載入行事曆資料時發生錯誤:', error);
-                calendarTrainingData = {};
-                renderCalendar();
+                // 不呼叫 renderCalendar()，保留現有顯示
                 return false;
             }
         }
@@ -8377,7 +8420,8 @@
                     },
                     body: JSON.stringify({
                         action: 'sync_calendar_exercise',
-                        data: syncData
+                        data: syncData,
+                        user_id: currentUserId
                     })
                 });
                 
@@ -9308,12 +9352,21 @@
                     const exercisesForDay = Array.isArray(weeklyPlan[dayName]) ? weeklyPlan[dayName] : [];
                     console.log(`同步 ${dayName} (${dayDate.toDateString()}): ${exercisesForDay.length} 個動作`);
                     
-                    // 只有在該日期沒有現有資料時才同步，避免覆蓋從資料庫載入的資料
+                    // 儲存該日期的訓練數據（強制覆蓋，確保資料一致）
                     const dateKey = `${dayDate.getFullYear()}-${String(dayDate.getMonth() + 1).padStart(2, '0')}-${String(dayDate.getDate()).padStart(2, '0')}`;
-                    if (!calendarTrainingData[dateKey] || calendarTrainingData[dateKey].length === 0) {
-                        saveDailyTrainingData(dayDate, exercisesForDay);
+                    
+                    // 檢查是否為休息日（id=0且只有一個動作，且名稱為"休息日"）
+                    const isRestDay = exercisesForDay.length === 1 && exercisesForDay[0].id === 0 && exercisesForDay[0].name === '休息日';
+                    
+                    // 強制同步所有資料（包括空資料）
+                    if (exercisesForDay.length === 0 || isRestDay) {
+                        // 空資料或休息日：清空該日期的資料
+                        delete calendarTrainingData[dateKey];
+                        console.log(`${dayName} (${dayDate.toDateString()}) ${isRestDay ? '休息日' : '無資料'}，已清空行事曆資料`);
                     } else {
-                        console.log(`跳過同步 ${dayName} (${dayDate.toDateString()})，該日期已有資料:`, calendarTrainingData[dateKey].length, '個動作');
+                        // 有實際動作：儲存到行事曆
+                        saveDailyTrainingData(dayDate, exercisesForDay, true); // 強制覆蓋
+                        console.log(`已同步 ${dayName} (${dayDate.toDateString()}): ${exercisesForDay.length} 個動作`);
                     }
                 });
                 
@@ -11469,7 +11522,7 @@
                         notes: exercise.notes || '',
                         orderIndex: exercise.orderIndex || exercise.order_index || 0,
                         completed: exercise.completed || false // 確保 completed 屬性存在
-                    }));
+                    })).sort((a, b) => (a.orderIndex || 0) - (b.orderIndex || 0)); // 按照 orderIndex 排序
                 } else {
                     normalized[day] = [];
                 }

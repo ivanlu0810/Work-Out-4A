@@ -149,10 +149,35 @@ try {
             $plan_id = $pdo->lastInsertId();
         }
         
-        // 插入運動記錄
+        // 計算該週每天的具體日期
+        // 先將 week_start_date 調整為該週的週一
+        $weekStart = new DateTime($input['week_start_date']);
+        $dayOfWeek = (int)$weekStart->format('w'); // 0=Sunday, 1=Monday, ..., 6=Saturday
+        if ($dayOfWeek == 0) {
+            // 如果是週日，往後加 1 天到週一（避免回推到上一週）
+            $weekStart->modify('+1 day');
+        } elseif ($dayOfWeek > 1) {
+            // 如果不是週一，調整到週一
+            $weekStart->modify('-' . ($dayOfWeek - 1) . ' days');
+        }
+        
+        // 現在 weekStart 是該週的週一
+        $dayToDateMapping = [];
+        $dayOffsets = ['monday' => 0, 'tuesday' => 1, 'wednesday' => 2, 'thursday' => 3, 
+                      'friday' => 4, 'saturday' => 5, 'sunday' => 6];
+        
+        foreach ($dayOffsets as $dayName => $offset) {
+            $date = clone $weekStart;
+            if ($offset > 0) {
+                $date->modify("+$offset days");
+            }
+            $dayToDateMapping[$dayName] = $date->format('Y-m-d');
+        }
+        
+        // 插入運動記錄（包含具體日期）
         $exercise_sql = "INSERT INTO training_plan_exercises 
-                        (plan_id, day_of_week, exercise_id, exercise_name, muscle_group, sets, reps, weight, rest_time, notes, order_index) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+                        (plan_id, day_of_week, exercise_date, exercise_id, exercise_name, muscle_group, sets, reps, weight, rest_time, notes, order_index) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $exercise_stmt = $pdo->prepare($exercise_sql);
         
         $day_mapping = [
@@ -167,6 +192,9 @@ try {
         
         foreach ($input['weekly_plan'] as $day => $exercises) {
             $dayOfWeek = isset($day_mapping[$day]) ? $day_mapping[$day] : 'monday';
+            
+            // 獲取該天的具體日期
+            $exercise_date = $dayToDateMapping[$day] ?? null;
 
             foreach ($exercises as $index => $exercise) {
                 $exerciseId = isset($exercise['id']) ? (int)$exercise['id'] : 0;
@@ -185,6 +213,7 @@ try {
                 $exercise_stmt->execute([
                     $plan_id,
                     $dayOfWeek,
+                    $exercise_date,
                     $exerciseId,
                     $exerciseName,
                     $muscleGroup,
@@ -198,16 +227,9 @@ try {
             }
         }
         
-        // 確保本週7天都建立完成記錄（預設未完成）
-        $days = ['monday','tuesday','wednesday','thursday','friday','saturday','sunday'];
-        foreach ($days as $d) {
-            $check = $pdo->prepare("SELECT id FROM training_plan_completion WHERE plan_id=? AND user_id=? AND week_number=? AND day_of_week=?");
-            $check->execute([$plan_id, $input['user_id'], $input['week_number'], $d]);
-            if ($check->rowCount() === 0) {
-                $ins = $pdo->prepare("INSERT INTO training_plan_completion (plan_id,user_id,week_number,day_of_week,is_completed,completion_percentage,total_exercises,completed_exercises,skipped_exercises,session_duration,notes,created_at,updated_at) VALUES (?,?,?,?,0,0,0,0,0,NULL,NULL,NOW(),NOW())");
-                $ins->execute([$plan_id, $input['user_id'], $input['week_number'], $d]);
-            }
-        }
+        // ⚠️ 已移除自動建立空的 training_plan_completion 記錄
+        // 改為只在使用者完成訓練時才寫入完成資料
+        // 這樣可以避免產生大量空的 placeholder 記錄
 
         $pdo->commit();
         
@@ -265,29 +287,45 @@ try {
     // 4.1) 載入訓練計畫（別名，相容性）
     if ($action === 'load_training_plan' && $_SERVER['REQUEST_METHOD'] === 'GET') {
         $user_id = $_GET['user_id'] ?? 0;
-        $week_number = $_GET['week_number'] ?? 0;
+        $week_number = isset($_GET['week_number']) ? (int)$_GET['week_number'] : null;
         
-        if (!$user_id || $week_number === '' || $week_number === null) {
+        if (!$user_id) {
             http_response_code(400);
-            echo json_encode(['error' => '缺少必要參數: user_id, week_number']);
+            echo json_encode(['error' => '缺少必要參數: user_id']);
             exit;
         }
         
         try {
-            // 載入計畫基本資料
-            $sql = "SELECT * FROM training_plans WHERE user_id = ? AND week_number = ? ORDER BY week_start_date DESC";
-            $stmt = $pdo->prepare($sql);
-            $stmt->execute([$user_id, $week_number]);
-            $plans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            // 載入計畫基本資料（若指定 week_number 則使用，否則載入最新一筆）
+            if ($week_number !== null) {
+                $sql = "SELECT * FROM training_plans WHERE user_id = ? AND week_number = ? ORDER BY week_start_date DESC";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute([$user_id, $week_number]);
+                $plans = $stmt->fetchAll(PDO::FETCH_ASSOC);
+            } else {
+                $plans = [];
+            }
+            
+            // 如果指定週次沒有資料，改為載入最新的計畫
+            if (empty($plans)) {
+                $fallbackSql = "SELECT * FROM training_plans WHERE user_id = ? ORDER BY week_start_date DESC LIMIT 1";
+                $fallbackStmt = $pdo->prepare($fallbackSql);
+                $fallbackStmt->execute([$user_id]);
+                $plans = $fallbackStmt->fetchAll(PDO::FETCH_ASSOC);
+                
+                if (!empty($plans)) {
+                    error_log("week_number $week_number 沒有資料，改用最新計畫 week_number {$plans[0]['week_number']}");
+                }
+            }
             
             if (empty($plans)) {
                 echo json_encode(['success' => true, 'plans' => []]);
                 exit;
             }
             
-            // 載入每個計畫的運動資料
+            // 載入每個計畫的運動資料（優先使用 exercise_date 排序，如果沒有則用 day_of_week）
             foreach ($plans as &$plan) {
-                $exercise_sql = "SELECT * FROM training_plan_exercises WHERE plan_id = ? ORDER BY day_of_week, order_index";
+                $exercise_sql = "SELECT * FROM training_plan_exercises WHERE plan_id = ? ORDER BY COALESCE(exercise_date, '2000-01-01'), day_of_week, order_index";
                 $exercise_stmt = $pdo->prepare($exercise_sql);
                 $exercise_stmt->execute([$plan['id']]);
                 $exercises = $exercise_stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -303,8 +341,20 @@ try {
                     'sunday' => []
                 ];
                 
+                // 如果 exercise_date 存在，按日期分組；否則按 day_of_week 分組
                 foreach ($exercises as $exercise) {
-                    $day = $exercise['day_of_week'];
+                    // 優先使用 exercise_date 判斷星期幾
+                    if (!empty($exercise['exercise_date'])) {
+                        // 根據具體日期判斷是星期幾
+                        $dateObj = new DateTime($exercise['exercise_date']);
+                        $dayNum = (int)$dateObj->format('w'); // 0=Sunday, 1=Monday, ...
+                        $dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                        $day = $dayNames[$dayNum];
+                    } else {
+                        // 回退到使用 day_of_week
+                        $day = $exercise['day_of_week'];
+                    }
+                    
                     if (isset($plan['exercises'][$day])) {
                         // 查詢該動作的完成狀態
                         $completion_sql = "SELECT individual_completed, individual_completed_at, individual_notes 
@@ -324,6 +374,7 @@ try {
                             'weight' => $exercise['weight'],
                             'restTime' => $exercise['rest_time'],
                             'notes' => $exercise['notes'],
+                            'orderIndex' => $exercise['order_index'],
                             'completed' => $completion_data ? (bool)$completion_data['individual_completed'] : false,
                             'completedAt' => $completion_data['individual_completed_at'] ?? null,
                             'completionNotes' => $completion_data['individual_notes'] ?? null

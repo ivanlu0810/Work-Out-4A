@@ -83,23 +83,53 @@ try {
                 $plan_id = $conn->insert_id;
             }
 
-            // 2. 插入動作記錄
+            // 2. 插入動作記錄（包含具體日期）
             $insertExerciseStmt = $conn->prepare("
                 INSERT INTO training_plan_exercises 
-                (plan_id, day_of_week, exercise_id, exercise_name, muscle_group, sets, reps, weight, rest_time, notes) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                (plan_id, day_of_week, exercise_date, exercise_id, exercise_name, muscle_group, sets, reps, weight, rest_time, notes, order_index) 
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ");
+
+            // 計算該週每天的具體日期
+            $dayToDateMapping = [];
+            $dayMapping = ['monday' => 0, 'tuesday' => 1, 'wednesday' => 2, 'thursday' => 3, 
+                          'friday' => 4, 'saturday' => 5, 'sunday' => 6];
+            
+            foreach ($dayMapping as $dayName => $offset) {
+                $date = new DateTime($week_start_date);
+                $date->modify("+$offset days");
+                $dayToDateMapping[$dayName] = $date->format('Y-m-d');
+            }
 
             $insertedCount = 0;
             foreach ($exercises as $day => $dayExercises) {
+                $orderIndex = 0; // 每重新開始一個新的天數，重置順序
+                
+                // 計算該天的具體日期
+                $exercise_date = $dayToDateMapping[$day] ?? null;
+                
+                // 調試：輸出日期配對
+                error_log("Day: $day, exercise_date: " . ($exercise_date ?? 'NULL'));
+                
                 foreach ($dayExercises as $exercise) {
                     $weight = $exercise['weight'] ?? null;
                     $restTime = $exercise['restTime'] ?? null;
                     $notes = $exercise['notes'] ?? null;
                     
-                    $insertExerciseStmt->bind_param("isisssssss", 
+                    // 使用 orderIndex 或 order_index（如果有的話），否則使用遞增索引
+                    $order_index = $exercise['orderIndex'] ?? $exercise['order_index'] ?? $orderIndex;
+                    
+                    // 調試輸出
+                    error_log("=== Inserting exercise ===");
+                    error_log("day: $day");
+                    error_log("exercise_date: " . ($exercise_date ?? 'NULL'));
+                    error_log("exercise name: {$exercise['name']}");
+                    error_log("plan_id: $plan_id");
+                    
+                    $insertExerciseStmt->bind_param("ississiisisi", 
                         $plan_id,
                         $day,
+                        $exercise_date,
                         $exercise['id'],
                         $exercise['name'],
                         $exercise['muscleGroup'],
@@ -107,10 +137,12 @@ try {
                         $exercise['reps'],
                         $weight,
                         $restTime,
-                        $notes
+                        $notes,
+                        $order_index
                     );
                     $insertExerciseStmt->execute();
                     $insertedCount++;
+                    $orderIndex++; // 遞增索引以確保順序
                 }
             }
 
@@ -150,10 +182,12 @@ try {
             exit;
         }
 
+        // 優先使用 exercise_date，如果為空則回退到 day_of_week 的計算方式
         $exercisesStmt = $conn->prepare("
             SELECT * FROM training_plan_exercises 
             WHERE plan_id = ? 
             ORDER BY 
+                COALESCE(exercise_date, '2000-01-01'),
                 CASE day_of_week 
                     WHEN 'monday' THEN 1
                     WHEN 'tuesday' THEN 2
@@ -162,14 +196,15 @@ try {
                     WHEN 'friday' THEN 5
                     WHEN 'saturday' THEN 6
                     WHEN 'sunday' THEN 7
-                END
+                END,
+                order_index
         ");
         $exercisesStmt->bind_param("i", $plan['id']);
         $exercisesStmt->execute();
         $result = $exercisesStmt->get_result();
         $exercises = $result->fetch_all(MYSQLI_ASSOC);
 
-        // 重新組織資料結構
+        // 重新組織資料結構（按日期分組，如果沒有日期則按 day_of_week）
         $weeklyPlan = [
             'monday' => [],
             'tuesday' => [],
@@ -179,18 +214,46 @@ try {
             'saturday' => [],
             'sunday' => []
         ];
+        
+        $exerciseDates = [];
 
         foreach ($exercises as $exercise) {
-            $weeklyPlan[$exercise['day_of_week']][] = [
-                'id' => $exercise['exercise_id'],
-                'name' => $exercise['exercise_name'],
-                'muscleGroup' => $exercise['muscle_group'],
-                'sets' => $exercise['sets'],
-                'reps' => $exercise['reps'],
-                'weight' => $exercise['weight'],
-                'restTime' => $exercise['rest_time'],
-                'notes' => $exercise['notes']
-            ];
+            // 如果有具體日期，按日期分組
+            if (!empty($exercise['exercise_date'])) {
+                // 將日期轉換為 day_of_week
+                $dateObj = new DateTime($exercise['exercise_date']);
+                $dayNum = (int)$dateObj->format('w'); // 0=Sunday, 1=Monday, ...
+                $dayNames = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
+                $dayName = $dayNames[$dayNum];
+                
+                if (isset($weeklyPlan[$dayName])) {
+                    $weeklyPlan[$dayName][] = [
+                        'id' => $exercise['exercise_id'],
+                        'name' => $exercise['exercise_name'],
+                        'muscleGroup' => $exercise['muscle_group'],
+                        'sets' => $exercise['sets'],
+                        'reps' => $exercise['reps'],
+                        'weight' => $exercise['weight'],
+                        'restTime' => $exercise['rest_time'],
+                        'notes' => $exercise['notes']
+                    ];
+                    
+                    // 記錄該日期的具體日期
+                    $exerciseDates[$dayName] = $exercise['exercise_date'];
+                }
+            } else {
+                // 回退到舊的按 day_of_week 分組
+                $weeklyPlan[$exercise['day_of_week']][] = [
+                    'id' => $exercise['exercise_id'],
+                    'name' => $exercise['exercise_name'],
+                    'muscleGroup' => $exercise['muscle_group'],
+                    'sets' => $exercise['sets'],
+                    'reps' => $exercise['reps'],
+                    'weight' => $exercise['weight'],
+                    'restTime' => $exercise['rest_time'],
+                    'notes' => $exercise['notes']
+                ];
+            }
         }
 
         echo json_encode([
