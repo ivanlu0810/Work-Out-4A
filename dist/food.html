@@ -3075,8 +3075,8 @@ $email = $_SESSION['email'] ?? 'No email';
                     hasUnsavedChanges = false;
                     checkForChanges();
                     //一進頁就能看到當天日期格的「點點」亮起。
-                    mealPlans[date] = JSON.parse(JSON.stringify(mealPlan));
-                    if (typeof updateCalendar === 'function') updateCalendar();
+                    //mealPlans[date] = JSON.parse(JSON.stringify(mealPlan));
+                    //if (typeof updateCalendar === 'function') updateCalendar();
                 } else {
                     // 該日期沒有餐食計畫，清空當前計畫
                     mealPlan = { breakfast: [], lunch: [], dinner: [] };
