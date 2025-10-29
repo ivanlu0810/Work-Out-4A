@@ -3192,9 +3192,110 @@ $email = $_SESSION['email'] ?? 'No email';
             return { calories, protein, carbs, fat };
         }
 
+        // 嘗試自動把每日總量補到 ≥ 目標（面向健身族群）
+        function enforceDailyTargets() {
+            if (!currentNutritionResult) return false;
+            const targets = {
+                calories: Number(currentNutritionResult.target_calories) || 0,
+                protein: Number(currentNutritionResult.macros?.protein?.grams) || 0,
+                carbs: Number(currentNutritionResult.macros?.carbs?.grams) || 0,
+                fat: Number(currentNutritionResult.macros?.fat?.grams) || 0,
+            };
+            const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+            function classifyItem(it) {
+                const p = it.proteinPer100 || 0;
+                const c = it.carbsPer100 || 0;
+                const f = it.fatPer100 || 0;
+                if (p >= 12 && f <= 18) return 'protein';
+                if (c >= 20 && f <= 12 && p <= 12) return 'carb';
+                if (f >= 20 && p <= 15) return 'fat';
+                return 'other';
+            }
+
+            function totals() { return computeTotals(); }
+
+            function boost(predicate, stepRatio = 0.1, maxTimes = 5) {
+                for (let t = 0; t < maxTimes; t++) {
+                    let changed = false;
+                    ['lunch', 'dinner', 'breakfast'].forEach(meal => {
+                        mealPlan[meal].forEach(it => {
+                            if (!predicate(it)) return;
+                            // 依餐別與營養屬性限制最大份量，避免誇張份量
+                            const cls = classifyItem(it);
+                            let maxG;
+                            if (cls === 'fat') {
+                                maxG = meal === 'breakfast' ? 25 : 35;
+                            } else if (cls === 'protein') {
+                                maxG = meal === 'breakfast' ? 140 : 200;
+                            } else if (cls === 'carb') {
+                                maxG = meal === 'breakfast' ? 220 : (meal === 'dinner' ? 180 : 200);
+                            } else {
+                                maxG = 200;
+                            }
+                            const newG = clamp(Math.round((it.grams || 0) * (1 + stepRatio)), it.grams || 0, maxG);
+                            if (newG > it.grams) {
+                                it.grams = newG;
+                                changed = true;
+                            }
+                        });
+                    });
+                    if (!changed) break;
+                }
+            }
+
+            let changedAny = false;
+
+            // 逐一補齊三大營養素不足（優先順序：蛋白 -> 碳水 -> 脂肪）
+            const current1 = totals();
+            if (current1.protein < targets.protein) {
+                boost(it => classifyItem(it) === 'protein', 0.12, 6);
+                changedAny = true;
+            }
+            const current2 = totals();
+            if (current2.carbs < targets.carbs) {
+                boost(it => classifyItem(it) === 'carb', 0.12, 6);
+                changedAny = true;
+            }
+            const current3 = totals();
+            if (current3.fat < targets.fat) {
+                boost(it => classifyItem(it) === 'fat', 0.10, 3);
+                changedAny = true;
+            }
+
+            // 最後確保總熱量 ≥ 目標，優先從碳水小幅提升
+            const current4 = totals();
+            if (current4.calories < targets.calories) {
+                boost(it => classifyItem(it) === 'carb', 0.08, 4);
+                // 若仍不足，再微幅提升蛋白
+                const current5 = totals();
+                if (current5.calories < targets.calories) {
+                    boost(it => classifyItem(it) === 'protein', 0.06, 3);
+                }
+                changedAny = true;
+            }
+
+            // 若超標過多，進行溫和下修（不動脂肪項目）
+            const current6 = totals();
+            if (current6.calories > targets.calories * 1.1) {
+                ['lunch', 'dinner', 'breakfast'].forEach(meal => {
+                    mealPlan[meal].forEach(it => {
+                        const cls = classifyItem(it);
+                        if (cls === 'fat') return; // 不動純脂肪，避免失衡
+                        const minG = 50;
+                        const newG = Math.max(minG, Math.round(it.grams * 0.9));
+                        if (newG < it.grams) it.grams = newG;
+                    });
+                });
+                changedAny = true;
+            }
+
+            return changedAny;
+        }
+
         // 檢查是否有變更
         function checkForChanges() {
-            console.log("已變更");
+            //console.log("已變更");
             saveMealPlan()
             if (!lastSavedMealPlan) {
                 hasUnsavedChanges = true;
@@ -3500,6 +3601,22 @@ $email = $_SESSION['email'] ?? 'No email';
                 return;
             }
 
+            // 儲存前檢查是否達到每日目標；若不足則自動補足至 ≥ 目標
+            const beforeTotals = computeTotals();
+            const didEnforce = enforceDailyTargets();
+            if (didEnforce) {
+                renderPlanner(currentNutritionResult);
+                const afterTotals = computeTotals();
+                if (afterTotals.calories < currentNutritionResult.target_calories ||
+                    afterTotals.protein < currentNutritionResult.macros.protein.grams ||
+                    afterTotals.carbs < currentNutritionResult.macros.carbs.grams ||
+                    afterTotals.fat < currentNutritionResult.macros.fat.grams) {
+                    showToast('已嘗試自動補足，但仍低於目標，請再調整份量或加一樣食物。', 'warning');
+                } else {
+                    showToast('已自動補足至每日目標以上。', 'success');
+                }
+            }
+
             const totals = computeTotals();
             const mealPlanData = {
                 user_id: '<?php echo $_SESSION["user_id"] ?? "guest"; ?>',
@@ -3532,7 +3649,7 @@ $email = $_SESSION['email'] ?? 'No email';
                 if (result.success) {
                     showToast(`餐食計畫儲存成功！已儲存到 ${currentMealDate} (ID: ${result.plan_id})`, 'success');
                     markAsSaved(); // 標記為已儲存
-                    console.log('儲存成功:', result);
+                    //console.log('儲存成功:', result);
                 } else {
                     showToast(`儲存失敗：${result.error || '未知錯誤'}`, 'error');
                     console.error('儲存失敗:', result);
@@ -4807,27 +4924,345 @@ function renderPickerTable(foods) {
             showToast(`已為${mealTypeName[mealType]}生成智能菜單！`, 'success');
         }
 
-        // 獲取各餐的智能菜單
+        // 獲取各餐的智能菜單（使用 allFoods，帶約束的隨機生成，回傳每 100g 的營養值）
         function getSmartMenuForMeal(mealType, targetCalories) {
-            const menus = {
-                'breakfast': [
-                    { name: '燕麥片', grams: 50, calories: 379, protein: 13.0, carbs: 67.0, fat: 6.5 },
-                    { name: '雞蛋', grams: 100, calories: 155, protein: 13.0, carbs: 1.1, fat: 11.0 },
-                    { name: '香蕉', grams: 100, calories: 89, protein: 1.1, carbs: 23.0, fat: 0.3 }
-                ],
-                'lunch': [
-                    { name: '雞胸肉', grams: 150, calories: 165, protein: 31.0, carbs: 0.0, fat: 3.6 },
-                    { name: '糙米飯', grams: 100, calories: 111, protein: 2.6, carbs: 23.0, fat: 0.9 },
-                    { name: '花椰菜', grams: 100, calories: 25, protein: 3.0, carbs: 5.0, fat: 0.3 }
-                ],
-                'dinner': [
-                    { name: '鮭魚', grams: 120, calories: 208, protein: 25.0, carbs: 0.0, fat: 12.0 },
-                    { name: '地瓜', grams: 150, calories: 86, protein: 1.6, carbs: 20.0, fat: 0.1 },
-                    { name: '酪梨', grams: 50, calories: 160, protein: 2.0, carbs: 9.0, fat: 15.0 }
-                ]
+            const mealTarget = Math.max(250, Number(targetCalories) || 450);
+            // 可用的三大營養素目標（單位：g）；若頁面未提供則為 null
+            const targetProteinG = (typeof window !== 'undefined' && window.proteinGrams && window.proteinGrams.textContent)
+                ? Number(String(window.proteinGrams.textContent).trim()) : null;
+            const targetCarbG = (typeof window !== 'undefined' && window.carbGrams && window.carbGrams.textContent)
+                ? Number(String(window.carbGrams.textContent).trim()) : null;
+            const targetFatG = (typeof window !== 'undefined' && window.fatGrams && window.fatGrams.textContent)
+                ? Number(String(window.fatGrams.textContent).trim()) : null;
+            //console.log('targetCalories:', targetCalories);
+            //console.log('proteinGrams:', proteinGrams);
+            //console.log('carbGrams:', carbGrams);
+            //console.log('fatGrams:', fatGrams);
+            // 排除的 Category（點心、飲品、調味料、複合食品等）
+            const excludedCategories = ['點心', '飲品', '調味料', '手搖飲', '咖啡', '速食', '台式/便當', '中式/點心', '中式/麵食', '中式/粥', '中式/餅', '日式/湯物', '日式/壽司', '日式/丼飯', '日式/咖哩', '日式/炸物', '日式/麵食', '韓式/拌飯', '韓式/點心', '韓式/炸物', '韓式/煎餅', '韓式/配菜', '港式/飯類', '港式/飲品', '港式/點心', '港式/甜品', '西式/義式', '西式/披薩', '西式/漢堡', '西式/堡類', '西式/配菜', '西式/沙拉', '速食/漢堡', '速食/炸物', '速食/早餐', '速食/麵', '便利商店', '烘焙/甜點', '早餐/餅類', '早餐/麵食', '早餐/三明治', '早餐/點心', '早餐/蛋類', '早餐/飲品', '火鍋/肉類', '火鍋/海鮮', '火鍋/豆製', '火鍋/火鍋料', '火鍋/蔬菜', '火鍋/主食', '健康餐', '甜點/糕點', '甜點/冰品', '零食/餅乾', '零食/甜食', '零食/堅果', '小吃/甜點', '家常菜', '素食/豆麩', '素食/加工', '素食/豆製', '素食/點心', '調味/醬料', '主食/米飯', '主食/穀物', '主食/根莖'];
+
+            // 先過濾掉不合適的分類
+            const validFoods = allFoods.filter(f => 
+                f && f.Food_Name && f.Category && 
+                !excludedCategories.some(cat => f.Category.includes(cat))
+            );
+
+            // 根據資料庫實際分類建立各類別的食材池
+            // 蛋白質：Category === '蛋白質' 或 '脂肪/蛋白質'
+            let proteinPool = validFoods.filter(f => 
+                f.Category === '蛋白質' || f.Category === '脂肪/蛋白質'
+            );
+            // 碳水化合物：Category === '碳水化合物' 且排除麵類（早餐特別處理）
+            let carbPool = validFoods.filter(f => f.Category === '碳水化合物');
+            // 蔬菜：Category === '蔬菜' 或 '高纖碳水'
+            let vegPool = validFoods.filter(f => 
+                f.Category === '蔬菜' || f.Category === '高纖碳水'
+            );
+            // 健康脂肪：Category === '脂肪' 或 名稱包含健康脂肪關鍵字
+            let fatPool = validFoods.filter(f => {
+                if (f.Category === '脂肪') return true;
+                // 脂肪/蛋白質類別中，若名稱包含堅果、酪梨等，也視為健康脂肪來源
+                const healthyFatNames = ['堅果', '核桃', '杏仁', '腰果', '花生', '芝麻', '南瓜籽', '酪梨', '橄欖油'];
+                return (f.Category === '脂肪/蛋白質' || f.Category === '脂肪/碳水化合物') && 
+                       healthyFatNames.some(n => f.Food_Name.includes(n));
+            });
+            // 乳製品：名稱包含牛奶、優格、起司、豆漿
+            let dairyPool = validFoods.filter(f => 
+                /牛奶|優格|起司|豆漿|酸奶/i.test(f.Food_Name) || 
+                f.Food_Name.includes('乳清蛋白') || f.Food_Name.includes('希臘優格')
+            );
+            // 水果：Category === '水果' 或 '碳水化合物（含纖維）'
+            let fruitPool = validFoods.filter(f => 
+                f.Category === '水果' || f.Category === '碳水化合物（含纖維）'
+            );
+
+            // 全餐別通用：健康飲食過濾（排除甜食、含糖飲、加工肉、油炸等）
+            const excludeKeywordsCommon = ['巧克力', '蛋糕', '餅乾', '糖果', '奶茶', '可樂', '汽水', '炸', '油炸', '泡麵', '速食', '香腸', '熱狗', '培根', '火腿', '手搖', '飲料', '果汁', '啤酒', '酒', '調味', '醬', '雞塊', '雞排'];
+            
+            function notExcluded(food) {
+                return !excludeKeywordsCommon.some(k => food.Food_Name.includes(k)) &&
+                       !excludedCategories.some(cat => food.Category.includes(cat));
+            }
+
+            // 早餐適用碳水關鍵字（排除義大利麵、烏龍麵等麵類）
+            const breakfastCarbKeywords = ['燕麥', '吐司', '飯糰', '麵包', '白飯', '糙米', '白米飯', '雜糧飯', '粥', '麥片', '玉米', '地瓜', '馬鈴薯', '藜麥', '小米', '薏仁'];
+            const excludeBreakfastCarbs = ['義大利麵', '白麵條', '拉麵', '烏龍麵', '麵條', '粉絲', '年糕', '餃子皮', '義式', '蛋餅'];
+            
+            proteinPool = proteinPool.filter(f => notExcluded(f) && !/肝|內臟/i.test(f.Food_Name));
+            vegPool = vegPool.filter(f => notExcluded(f));
+            fatPool = fatPool.filter(f => notExcluded(f));
+            dairyPool = dairyPool.filter(f => notExcluded(f) && !/調味|可可|巧克力/i.test(f.Food_Name));
+            fruitPool = fruitPool.filter(f => notExcluded(f));
+
+            // 針對早餐調整更日常的選項：避免義大利麵/油麵、內臟、甜食、海鮮
+            if (mealType === 'breakfast') {
+                // 早餐碳水：只選合適的（燕麥、吐司、飯糰、米飯等），排除麵類
+                carbPool = carbPool.filter(f =>
+                    breakfastCarbKeywords.some(k => f.Food_Name.includes(k)) &&
+                    !excludeBreakfastCarbs.some(k => f.Food_Name.includes(k))
+                );
+                // 早餐蛋白：排除內臟、高油脂肉類
+                //         並排除海鮮（鮭/鯖/鱈/魚/蝦/蟹/蚵/牡蠣/花枝/章魚/魷魚/貝/蛤/海鮮）
+                proteinPool = proteinPool.filter(f =>
+                    !/肝|內臟|五花|肥/i.test(f.Food_Name) &&
+                    !/鮭|鯖|鱈|魚|蝦|蟹|蚵|牡蠣|花枝|章魚|魷魚|貝|蛤|海鮮/i.test(f.Food_Name)
+                );
+                // 早餐更偏好乳製與水果作為第三項
+                dairyPool = dairyPool.filter(f => 
+                    !/巧克力|可可|調味|含糖/i.test(f.Food_Name)
+                );
+                fruitPool = fruitPool.filter(f => notExcluded(f));
+                // 早餐蔬菜可有可無，保留但不強制
+            } else {
+                // 午晚餐碳水：可用全穀類，但排除過於精緻的
+                carbPool = carbPool.filter(f => 
+                    !/年糕|粉絲|餃子皮/i.test(f.Food_Name) ||
+                    breakfastCarbKeywords.some(k => f.Food_Name.includes(k))
+                );
+            }
+
+            // 初學者友善：優先常見、易取得、易準備的食材
+            function isBeginnerFriendly(food) {
+                const name = food.Food_Name || '';
+                if (proteinPool.includes(food)) {
+                    return /雞胸|雞蛋|豆腐|豆干|嫩豆腐|雞腿\(去皮\)|舒肥雞胸|水煮雞胸/i.test(name);
+                }
+                if (carbPool.includes(food)) {
+                    return /白米飯|糙米飯|白米|糙米|地瓜|馬鈴薯|燕麥片|全麥吐司|雜糧飯|粥/i.test(name);
+                }
+                if (vegPool.includes(food)) {
+                    return /花椰菜|高麗菜|菠菜|青椒|番茄|小黃瓜|胡蘿蔔|白蘿蔔|黃椒|紅椒/i.test(name);
+                }
+                if (dairyPool.includes(food)) {
+                    return /牛奶|優格|希臘優格|原味優格/i.test(name);
+                }
+                if (fatPool.includes(food)) {
+                    return /堅果|酪梨|橄欖油|杏仁|核桃|腰果/i.test(name);
+                }
+                if (fruitPool.includes(food)) {
+                    return /香蕉|蘋果|柳丁|芭樂|藍莓|草莓|奇異果/i.test(name);
+                }
+                return false;
+            }
+
+            // 若資料不足則回退到現有演算法
+            if (proteinPool.length + carbPool.length + vegPool.length + fatPool.length + dairyPool.length + fruitPool.length === 0) {
+                return generateMealRecommendation(mealType, mealTarget, currentNutritionResult).map(x => ({
+                    name: x.name,
+                    grams: x.grams,
+                    calories: x.caloriesPer100,
+                    protein: x.proteinPer100,
+                    carbs: x.carbsPer100,
+                    fat: x.fatPer100
+                }));
+            }
+
+            const combos = {
+                breakfast: [ ['carb'], ['protein'], ['fruit','dairy'] ],
+                lunch: [ ['protein'], ['carb'], ['veg'] ],
+                dinner: [ ['protein'], ['carb'], ['veg'] ]
             };
 
-            return menus[mealType] || [];
+            function pickOne(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+            function round5(x) { return Math.round(x / 5) * 5; }
+            function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+            // 份量限制（克）
+            const limits = {
+                protein: { min: 90, max: mealType === 'breakfast' ? 140 : 220, def: mealType === 'breakfast' ? 100 : 150 },
+                carb: { min: mealType === 'breakfast' ? 60 : 80, max: mealType === 'breakfast' ? 220 : 200, def: mealType === 'breakfast' ? 100 : 120 },
+                veg: { min: 80, max: 200, def: 120 },
+                fruit: { min: 80, max: 150, def: 100 },
+                fat: { min: 10, max: mealType === 'breakfast' ? 25 : 35, def: mealType === 'breakfast' ? 12 : 18 },
+                dairy: { min: 150, max: 300, def: 200 }
+            };
+
+            function poolOf(group) {
+                switch (group) {
+                    case 'protein': return proteinPool;
+                    case 'carb': return carbPool;
+                    case 'veg': return vegPool;
+                    case 'fat': return fatPool;
+                    case 'dairy': return dairyPool;
+                    case 'fruit': return fruitPool;
+                    default: return [];
+                }
+            }
+
+            // 依規則建立餐次的最低組合
+            let structure = combos[mealType] || combos.lunch;
+            if (mealType === 'dinner') {
+                // 晚餐：蛋白+蔬菜為基礎，碳水視情況加入
+                structure = [ ['protein'], ['veg'] ];
+                if (mealTarget >= 500 || Math.random() < 0.5) {
+                    structure.push(['carb']);
+                }
+            }
+            const picked = [];
+            const used = new Set();
+
+            structure.forEach(group => {
+                const pool = group.flatMap(g => poolOf(g)).filter(f => !used.has(f.Food_Name));
+                if (pool.length === 0) return;
+                // 初學者友善偏好：若有，優先從友善集合中挑選
+                const preferred = pool.filter(isBeginnerFriendly);
+                const base = preferred.length ? pickOne(preferred) : pickOne(pool);
+                // 避免重複
+                used.add(base.Food_Name);
+                // 選擇該組的預設克數
+                const key = group[0];
+                const lim = limits[key] || { def: 100, min: 50, max: 200 };
+                picked.push({ base, grams: lim.def, key });
+            });
+
+            // 可能追加一項健康脂肪/蔬果，增加多樣性
+            if (mealType !== 'breakfast' && Math.random() < 0.35) {
+                const addPool = Math.random() < 0.6 ? vegPool : fatPool;
+                const candidates = addPool.filter(f => !used.has(f.Food_Name));
+                if (candidates.length) {
+                    const base = pickOne(candidates);
+                    used.add(base.Food_Name);
+                    picked.push({ base, grams: (addPool === vegPool ? limits.veg.def : limits.fat.def), key: addPool === vegPool ? 'veg' : 'fat' });
+                }
+            } else if (mealType === 'breakfast' && Math.random() < 0.35) {
+                // 早餐不再額外加入水果，僅可能補少量健康脂肪
+                const addPool = fatPool;
+                const candidates = addPool.filter(f => !used.has(f.Food_Name));
+                if (candidates.length) {
+                    const base = pickOne(candidates);
+                    used.add(base.Food_Name);
+                    picked.push({ base, grams: limits.fat.def, key: 'fat' });
+                }
+            }
+
+            // 確保每餐至少 N 樣：早餐/午餐≥3；晚餐≥2
+            const minItems = mealType === 'dinner' ? 2 : 3;
+            if (picked.length < minItems) {
+                // 早餐：最多 1 份水果/乳製
+                const hasFruitOrDairy = picked.some(it => it.key === 'fruit' || it.key === 'dairy');
+                const candidates = (mealType === 'breakfast'
+                    ? [
+                        ...(!hasFruitOrDairy ? [...fruitPool, ...dairyPool] : []),
+                        ...carbPool
+                    ]
+                    : mealType === 'lunch'
+                        ? [...vegPool, ...fruitPool, ...fatPool]
+                        : [...vegPool, ...fatPool, ...fruitPool, ...carbPool]
+                ).filter(f => !used.has(f.Food_Name));
+                while (picked.length < minItems && candidates.length > 0) {
+                    const idx = Math.floor(Math.random() * candidates.length);
+                    const base = candidates.splice(idx, 1)[0];
+                    used.add(base.Food_Name);
+                    const key = mealType === 'breakfast' && fruitPool.includes(base) ? (hasFruitOrDairy ? 'carb' : 'fruit')
+                        : mealType === 'breakfast' && dairyPool.includes(base) ? (hasFruitOrDairy ? 'carb' : 'dairy')
+                        : vegPool.includes(base) ? 'veg'
+                        : fatPool.includes(base) ? 'fat'
+                        : carbPool.includes(base) ? 'carb' : 'carb';
+                    const lim = limits[key] || { def: 100 };
+                    picked.push({ base, grams: lim.def, key });
+                }
+            }
+
+            // 取得營養值的輔助函數（處理不同的欄位名稱格式）
+            function getCalories(food) {
+                return food.Calories || food['Calories_(kcal/100g)'] || 0;
+            }
+            function getProtein(food) {
+                return food.Protein || food['Protein_(g)'] || 0;
+            }
+            function getCarbs(food) {
+                return food.Carbs || food['Carbohydrates_(g)'] || 0;
+            }
+            function getFat(food) {
+                return food.Fat || food['Fat_(g)'] || 0;
+            }
+
+            function sumCalories(items) {
+                return items.reduce((acc, it) => acc + (getCalories(it.base) * (it.grams / 100)), 0);
+            }
+
+            // 按目標熱量縮放
+            const current = sumCalories(picked);
+            const target = clamp(mealTarget, 200, 900);
+            let scale = clamp(target / (current || 1), 0.75, 1.35);
+
+            let scaled = picked.map(({ base, grams, key }) => {
+                const lim = limits[key] || { min: 50, max: 200 };
+                const g = clamp(grams * scale, lim.min, lim.max);
+                return { base, grams: round5(g), key };
+            });
+
+            // 若偏離過多，微調主蛋白或主食
+            let totalAfter = sumCalories(scaled);
+            if (totalAfter < target * 0.85 || totalAfter > target * 1.15) {
+                const adjustables = scaled
+                    .map((p, i) => ({ i, p }))
+                    .filter(x => x.p.key === 'protein' || x.p.key === 'carb');
+                if (adjustables.length > 0) {
+                    const pick = adjustables[Math.floor(Math.random() * adjustables.length)];
+                    const lim = limits[pick.p.key];
+                    const needUp = totalAfter < target;
+                    const delta = pick.p.grams * (needUp ? 0.1 : -0.1);
+                    const newG = clamp(pick.p.grams + delta, lim.min, lim.max);
+                    scaled[pick.i] = { ...pick.p, grams: round5(newG) };
+                }
+            }
+
+            // 依三大營養素目標進行一次微調（各自對應類別項目）
+            function sumProtein(items) { return items.reduce((acc, it) => acc + (getProtein(it.base) * it.grams / 100), 0); }
+            function sumCarbs(items) { return items.reduce((acc, it) => acc + (getCarbs(it.base) * it.grams / 100), 0); }
+            function sumFat(items) { return items.reduce((acc, it) => acc + (getFat(it.base) * it.grams / 100), 0); }
+
+            // 調整單一項目份量以逼近目標
+            function adjustTowards(items, key, targetG) {
+                if (!Number.isFinite(targetG)) return items;
+                const idx = items.findIndex(it => it.key === key);
+                if (idx === -1) return items;
+                const item = items[idx];
+                const per100 = key === 'protein' ? getProtein(item.base)
+                              : key === 'carb' ? getCarbs(item.base)
+                              : getFat(item.base);
+                if (per100 <= 0) return items;
+                const currentTotal = key === 'protein' ? sumProtein(items)
+                                    : key === 'carb' ? sumCarbs(items)
+                                    : sumFat(items);
+                const diff = targetG - currentTotal; // g
+                // 需要增加/減少多少克的該食材
+                const needGramsDelta = (diff / per100) * 100; // 目標差值換算成該食材克數
+                if (!Number.isFinite(needGramsDelta) || needGramsDelta === 0) return items;
+                const lim = limits[key] || { min: 50, max: 200 };
+                const newG = clamp(item.grams + needGramsDelta, lim.min, lim.max);
+                const rounded = round5(newG);
+                const next = items.slice();
+                next[idx] = { ...item, grams: rounded };
+                return next;
+            }
+
+            // 順序：蛋白 -> 碳水 -> 脂肪，避免相互抵銷
+            scaled = adjustTowards(scaled, 'protein', targetProteinG);
+            scaled = adjustTowards(scaled, 'carb', targetCarbG);
+            scaled = adjustTowards(scaled, 'fat', targetFatG);
+
+            // 最後再校正一次總熱量到合理區間（允許更大的向下修正幅度避免嚴重超標）
+            totalAfter = sumCalories(scaled);
+            if (totalAfter < target * 0.95 || totalAfter > target * 1.05) {
+                const factor = clamp(target / (totalAfter || 1), 0.6, 1.15);
+                scaled = scaled.map(it => {
+                    const lim = limits[it.key] || { min: 50, max: 200 };
+                    const g = clamp(it.grams * factor, lim.min, lim.max);
+                    return { ...it, grams: round5(g) };
+                });
+            }
+
+            // 以每 100g 的營養值回傳（下游會搭配 grams 計算）
+            return scaled.map(({ base, grams }) => ({
+                name: base.Food_Name,
+                grams: grams,
+                calories: getCalories(base),
+                protein: getProtein(base),
+                carbs: getCarbs(base),
+                fat: getFat(base)
+            }));
         }
 
         // 建立健身小提醒卡片
