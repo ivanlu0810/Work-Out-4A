@@ -1747,7 +1747,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                             <i class="bi bi-upload"></i>更新三餐
                                         </button>
                                         <button class="btn btn-sm btn-secondary d-flex align-items-center flex-shrink-0 ms-2"
-                                            style="font-size: 12px; padding: 0.25rem 0.5rem; gap: 2px;" onclick="saveMealPlan()">
+                                            style="font-size: 12px; padding: 0.25rem 0.5rem; gap: 2px; display:none !important;" onclick="saveMealPlan()">
                                             <i class="bi bi-upload"></i>儲存今日三餐
                                         </button>
                                     </div>
@@ -2330,6 +2330,8 @@ $email = $_SESSION['email'] ?? 'No email';
         setupEventListeners();
         loadUserData();      // 載入用戶資料
         loadRecipes();       // 載入食譜推薦
+        bindPickerFilters();       // 綁定搜尋/篩選事件
+        filterPicker();            // 初次渲染（空搜尋＋所有類別）
         setupModalMonitoring();
 
         // 5) ⚠️ 取代原本的 setTimeout + loadSavedMealPlan()
@@ -3073,7 +3075,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
                     // 標記為已儲存
                     hasUnsavedChanges = false;
-                    checkForChanges();
+                    //checkForChanges();
                     //一進頁就能看到當天日期格的「點點」亮起。
                     //mealPlans[date] = JSON.parse(JSON.stringify(mealPlan));
                     //if (typeof updateCalendar === 'function') updateCalendar();
@@ -3085,7 +3087,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
                     // 標記為已儲存
                     hasUnsavedChanges = false;
-                    checkForChanges();
+                    //checkForChanges();
                 }
             } catch (error) {
                 console.error('載入餐食計畫失敗:', error);
@@ -3169,7 +3171,7 @@ $email = $_SESSION['email'] ?? 'No email';
             updateProgressBars();
 
             // 檢查是否有變更
-            checkForChanges();
+            //checkForChanges();
             
             // 更新營養追蹤進度條
             if (nutritionResult) {
@@ -3192,6 +3194,8 @@ $email = $_SESSION['email'] ?? 'No email';
 
         // 檢查是否有變更
         function checkForChanges() {
+            console.log("已變更");
+            saveMealPlan()
             if (!lastSavedMealPlan) {
                 hasUnsavedChanges = true;
             } else {
@@ -4463,62 +4467,76 @@ $email = $_SESSION['email'] ?? 'No email';
             }
         }
 
-        function bindPickerFilters() {
-            const pickerSearch = document.getElementById('pickerSearch');
-            const pickerCategory = document.getElementById('pickerCategory');
+        // ⑤ 綁定事件
+function bindPickerFilters() {
+  const pickerSearch = document.getElementById('pickerSearch');
+  const pickerCategory = document.getElementById('pickerCategory');
+  const modalEl = document.getElementById('foodPickerModal');
 
-            if (pickerSearch) {
-                pickerSearch.addEventListener('input', () => {
-                    filterPicker();
-                });
-            }
+  // 簡易 debounce，避免一直觸發
+  const debounce = (fn, delay = 150) => {
+    let t; 
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), delay); };
+  };
 
-            if (pickerCategory) {
-                pickerCategory.addEventListener('change', () => {
-                    filterPicker();
-                });
-            }
-        }
+  pickerSearch?.addEventListener('input', debounce(filterPicker, 150));
+  pickerCategory?.addEventListener('change', filterPicker);
 
-        function filterPicker() {
-            const pickerSearch = document.getElementById('pickerSearch');
-            const pickerCategory = document.getElementById('pickerCategory');
+  // Modal 開啟後再做一次篩選，確保 UI 新鮮
+  modalEl?.addEventListener('shown.bs.modal', filterPicker);
+}
 
-            if (!pickerSearch || !pickerCategory) {
-                console.log('pickerSearch 或 pickerCategory 元素不存在，跳過篩選');
-                return;
-            }
+        // ④ 搜尋 + 篩選
+function filterPicker() {
+  const term = (document.getElementById('pickerSearch')?.value || '').trim().toLowerCase();
+  const cate = (document.getElementById('pickerCategory')?.value || '').trim();
 
-            const term = pickerSearch.value.toLowerCase();
-            const cat = pickerCategory.value;
-            const filtered = allFoods.filter(f => {
-                const nameOk = f.Food_Name.toLowerCase().includes(term);
-                const catOk = !cat || f.Category === cat;
-                return nameOk && catOk;
-            });
-            renderPickerTable(filtered);
-        }
+  const filtered = allFoods.filter(f => {
+    const nameOk = (f.Food_Name || '').toLowerCase().includes(term);
+    // 類別比對請確保「下拉選單 value」與「資料裡 Category」一致（例如：蛋白質/碳水化合物/脂肪/蔬菜/水果）
+    const cateOk = !cate || f.Category === cate;
+    return nameOk && cateOk;
+  });
 
-        function renderPickerTable(foods) {
-            const tbody = document.getElementById('pickerTable');
-            if (!tbody) {
-                console.log('pickerTable 元素不存在，跳過渲染表格');
-                return;
-            }
+  renderPickerTable(filtered);
+}
 
-            tbody.innerHTML = foods.map(f => `
-                <tr>
-                    <td>${f.Food_Name}</td>
-                    <td>${f.Category}</td>
-                    <td class="text-end">${f.Calories}</td>
-                    <td class="text-end">${f.Protein}</td>
-                    <td class="text-end">${f.Carbs}</td>
-                    <td class="text-end">${f.Fat}</td>
-                    <td class="text-center">${f.Notes || '無備註'}</td>
-                    <td class="text-center"><button class="btn btn-sm btn-secondary rounded-pill" onclick="addFoodToMeal(${f.food_id})">加入</button></td>
-                </tr>
-            `).join('');
-        }
+        // ③ 渲染表格（保留你原本的結構）
+function renderPickerTable(foods) {
+  const tbody = document.getElementById('pickerTable');
+  if (!tbody) {
+    console.warn('找不到 #pickerTable，跳過渲染');
+    return;
+  }
+
+  if (!foods?.length) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center text-muted py-4">沒有符合的食材</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = foods.map(f => `
+    <tr>
+      <td>${f.Food_Name}</td>
+      <td>${f.Category}</td>
+      <td class="text-end">${f.Calories}</td>
+      <td class="text-end">${f.Protein}</td>
+      <td class="text-end">${f.Carbs}</td>
+      <td class="text-end">${f.Fat}</td>
+      <td class="text-center">${f.Notes || '無備註'}</td>
+      <td class="text-center">
+        <button class="btn btn-sm btn-secondary rounded-pill" data-id="${f.food_id}">加入</button>
+      </td>
+    </tr>
+  `).join('');
+
+  // 事件委派：避免 inline onclick 依賴全域
+  tbody.querySelectorAll('button[data-id]').forEach(btn => {
+    btn.addEventListener('click', e => {
+      const id = Number(e.currentTarget.dataset.id);
+      addFoodToMeal(id);
+    });
+  });
+}
 
         // 自動補強：依據宏量缺口添加不重複食材，並微調份量把總量壓到 ±5%
         function autoAdjustToTargets(targets) {
@@ -4618,7 +4636,7 @@ $email = $_SESSION['email'] ?? 'No email';
             mealPlan[mealType].splice(index, 1);
             renderPlanner(currentNutritionResult);
             showToast('已移除食材', 'info');
-            
+            checkForChanges()
             // 更新營養追蹤進度條
             if (currentNutritionResult) {
                 updateNutritionProgress(currentNutritionResult);
