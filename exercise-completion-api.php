@@ -404,36 +404,8 @@ function getCalendarData($pdo) {
             return;
         }
         
-        // 直接使用 training_plan_exercises + training_plans.user_id 過濾，以 exercise_date 為準
-        $sql_exercises = "SELECT 
-            tpe.exercise_date,
-            tpe.exercise_id, 
-            tpe.exercise_name, 
-            tpe.muscle_group, 
-            tpe.sets, 
-            tpe.reps, 
-            tpe.weight,
-            tpe.order_index,
-            tpc.individual_completed, 
-            tpc.individual_completed_at
-        FROM training_plan_exercises tpe
-        JOIN training_plans tp ON tpe.plan_id = tp.id AND tp.user_id = ?
-        LEFT JOIN training_plan_completion tpc 
-            ON tpe.plan_id = tpc.plan_id 
-            AND tpe.exercise_id = tpc.exercise_id 
-            AND tpe.day_of_week = tpc.day_of_week
-            AND tpc.user_id = tp.user_id
-        WHERE tpe.exercise_date IS NOT NULL 
-        AND tpe.exercise_id > 0
-        ORDER BY tpe.exercise_date DESC, tpe.order_index ASC";
-        
-        $stmt_exercises = $pdo->prepare($sql_exercises);
-        $stmt_exercises->execute([$user_id]);
-        $exercises = $stmt_exercises->fetchAll(PDO::FETCH_ASSOC);
-        
-        // 若沒有查到，改用 completion 資料推算日期作為後援（避免新欄位/資料異常時整體為空）
-        if (!$exercises || count($exercises) === 0) {
-            $sql_fallback = "SELECT 
+        // 以 training_plan_completion 為主，保證畫面依據資料庫真實紀錄
+        $sql_from_completion = "SELECT 
                 DATE_ADD(tp.week_start_date, INTERVAL 
                     CASE tpc.day_of_week 
                         WHEN 'monday' THEN 0
@@ -459,10 +431,10 @@ function getCalendarData($pdo) {
             JOIN training_plans tp ON tp.id = tpc.plan_id AND tp.user_id = ?
             WHERE tpc.exercise_id IS NOT NULL
             ORDER BY exercise_date DESC";
-            $stmt_fb = $pdo->prepare($sql_fallback);
-            $stmt_fb->execute([$user_id]);
-            $exercises = $stmt_fb->fetchAll(PDO::FETCH_ASSOC);
-        }
+
+        $stmt_c = $pdo->prepare($sql_from_completion);
+        $stmt_c->execute([$user_id]);
+        $exercises = $stmt_c->fetchAll(PDO::FETCH_ASSOC);
         
         $calendar_data = [];
         
@@ -549,66 +521,79 @@ function syncCalendarExercise($pdo) {
         // 取本週週一（與前端顯示一致）
         $week_monday = (clone $date_obj)->modify('monday this week')->format('Y-m-d');
         
-        // 開始事務
+        // 開始事務（僅用於 completion 表寫入）
         $pdo->beginTransaction();
         
         // 1. 以『當週週一』為 key 檢查/取得訓練計畫
-        $sql_get_plan = "SELECT id, week_number FROM training_plans WHERE user_id = ? AND week_start_date = ? LIMIT 1";
+        $sql_get_plan = "SELECT id, week_number, week_start_date FROM training_plans WHERE user_id = ? AND week_start_date = ? LIMIT 1";
         $stmt_get_plan = $pdo->prepare($sql_get_plan);
         $stmt_get_plan->execute([$user_id, $week_monday]);
         $plan_result = $stmt_get_plan->fetch(PDO::FETCH_ASSOC);
-        
+
+        // 計算該日期所在年的週數（作為第二優先檢索條件，避免週起始日定義不同而重建）
+        $year_start = new DateTime($date_obj->format('Y') . '-01-01');
+        $week_number = ceil(($date_obj->getTimestamp() - $year_start->getTimestamp()) / (7 * 24 * 60 * 60)) + 1;
+
         if (!$plan_result) {
-            // 計算週數（從年初開始的週數）
-            $year_start = new DateTime($date_obj->format('Y') . '-01-01');
-            $week_number = ceil(($date_obj->getTimestamp() - $year_start->getTimestamp()) / (7 * 24 * 60 * 60)) + 1;
-            
-            // 創建新的 training_plans 記錄
-            $sql_create_plan = "INSERT INTO training_plans (user_id, week_start_date, week_number, plan_name, is_active) VALUES (?, ?, ?, ?, ?)";
-            $stmt_create_plan = $pdo->prepare($sql_create_plan);
-            $stmt_create_plan->execute([$user_id, $week_monday, $week_number, '行事曆訓練計畫', 1]);
-            $plan_id = $pdo->lastInsertId();
+            // 二次嘗試：以 (user_id, week_number) 尋找既有計畫
+            $sql_get_by_weeknum = "SELECT id, week_number, week_start_date FROM training_plans WHERE user_id = ? AND week_number = ? ORDER BY id DESC LIMIT 1";
+            $stmt_get_by_weeknum = $pdo->prepare($sql_get_by_weeknum);
+            $stmt_get_by_weeknum->execute([$user_id, $week_number]);
+            $plan_by_week = $stmt_get_by_weeknum->fetch(PDO::FETCH_ASSOC);
+
+            if ($plan_by_week) {
+                $plan_id = $plan_by_week['id'];
+                $week_number = $plan_by_week['week_number'];
+            } else {
+                // 不建立新計畫：僅回傳成功訊息，不做任何寫入
+                $pdo->commit();
+                echo json_encode([
+                    'success' => true,
+                    'message' => '本週沒有既有訓練計畫，已略過同步（不新增 training_plans）',
+                    'plan_id' => null,
+                    'exercises_count' => 0,
+                    'completed_count' => 0
+                ]);
+                return;
+            }
         } else {
             $plan_id = $plan_result['id'];
-            $week_number = $plan_result['week_number'];
-            
-            // 如果 week_number 是 0，重新計算
+            $week_number = (int)$plan_result['week_number'];
+            // 如果 week_number 是 0，補齊
             if ($week_number == 0) {
-                $year_start = new DateTime($date_obj->format('Y') . '-01-01');
-                $week_number = ceil(($date_obj->getTimestamp() - $year_start->getTimestamp()) / (7 * 24 * 60 * 60)) + 1;
-                
-                // 更新 training_plans 表中的 week_number
                 $sql_update_week = "UPDATE training_plans SET week_number = ? WHERE id = ?";
                 $stmt_update_week = $pdo->prepare($sql_update_week);
                 $stmt_update_week->execute([$week_number, $plan_id]);
             }
         }
         
-        // 2. 刪除現有的 training_plan_exercises 記錄
-        $sql_delete_exercises = "DELETE FROM training_plan_exercises WHERE plan_id = ? AND day_of_week = ?";
-        $stmt_delete_exercises = $pdo->prepare($sql_delete_exercises);
-        $stmt_delete_exercises->execute([$plan_id, $day_of_week]);
-        
-        // 3. 插入新的 training_plan_exercises 記錄（含 exercise_date）
-        $sql_insert_exercise = "INSERT INTO training_plan_exercises (plan_id, day_of_week, exercise_date, exercise_id, exercise_name, muscle_group, sets, reps, weight) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt_insert_exercise = $pdo->prepare($sql_insert_exercise);
-        
-        foreach ($exercises as $index => $exercise) {
-            // 調試：檢查每個 exercise 的資料
-            error_log("syncCalendarExercise - exercise $index: " . json_encode($exercise));
-            
-            $stmt_insert_exercise->execute([
-                $plan_id,
-                $day_of_week,
-                $date, // 當天日期
-                isset($exercise['id']) ? $exercise['id'] : null,
-                $exercise['name'],
-                $exercise['muscleGroup'],
-                $exercise['sets'],
-                $exercise['reps'],
-                isset($exercise['weight']) ? $exercise['weight'] : null
-            ]);
+        // 2. 若前端未帶有效動作，嘗試以當天 tpe 做為後援，避免前端過濾造成 0 筆
+        $valid_count = 0;
+        foreach ($exercises as $e) {
+            $eid = isset($e['exercise_id']) && $e['exercise_id'] !== '' ? (int)$e['exercise_id'] : (isset($e['id']) ? (int)$e['id'] : 0);
+            if ($eid > 0) { $valid_count++; }
         }
+        if ($valid_count === 0) {
+            $sql_tpe_day = "SELECT exercise_id AS id, exercise_name AS name, muscle_group AS muscleGroup, sets, reps, weight
+                FROM training_plan_exercises WHERE plan_id = ? AND day_of_week = ? AND exercise_date = ? AND exercise_id > 0 ORDER BY order_index ASC";
+            $stmt_tpe_day = $pdo->prepare($sql_tpe_day);
+            $stmt_tpe_day->execute([$plan_id, $day_of_week, $date]);
+            $fallback = $stmt_tpe_day->fetchAll(PDO::FETCH_ASSOC);
+            $exercises = array_map(function($r){
+                return [
+                    'id' => (int)$r['id'],
+                    'exercise_id' => (int)$r['id'],
+                    'name' => $r['name'],
+                    'muscleGroup' => $r['muscleGroup'],
+                    'sets' => (int)$r['sets'],
+                    'reps' => (int)$r['reps'],
+                    'weight' => $r['weight'],
+                    'completed' => false
+                ];
+            }, $fallback);
+        }
+
+        // 3. 僅處理 completion 表（符合你的需求）
         
         // 4. 插入個別動作的完成記錄（避免重複）
         $sql_check_existing = "SELECT id FROM training_plan_completion WHERE plan_id = ? AND user_id = ? AND exercise_id = ? AND day_of_week = ?";
@@ -621,11 +606,14 @@ function syncCalendarExercise($pdo) {
         $stmt_update_completion = $pdo->prepare($sql_update_completion);
         
         foreach ($exercises as $exercise) {
+            $exercise_id_val = isset($exercise['exercise_id']) && $exercise['exercise_id'] !== ''
+                ? (int)$exercise['exercise_id']
+                : (isset($exercise['id']) ? (int)$exercise['id'] : null);
             // 檢查是否已存在相同的動作記錄
-            $stmt_check_existing->execute([$plan_id, $user_id, $exercise['id'], $day_of_week]);
+            $stmt_check_existing->execute([$plan_id, $user_id, $exercise_id_val, $day_of_week]);
             $existing_record = $stmt_check_existing->fetch(PDO::FETCH_ASSOC);
             
-            if ($existing_record) {
+            if ($existing_record && $exercise_id_val) {
                 // 更新現有記錄
                 $stmt_update_completion->execute([
                     $exercise['name'],
@@ -637,15 +625,15 @@ function syncCalendarExercise($pdo) {
                     isset($exercise['completed']) && $exercise['completed'] ? date('Y-m-d H:i:s') : null,
                     $plan_id,
                     $user_id,
-                    $exercise['id'],
+                    $exercise_id_val,
                     $day_of_week
                 ]);
-            } else {
+            } else if ($exercise_id_val) {
                 // 插入新記錄
                 $stmt_insert_completion->execute([
                     $plan_id,
                     $user_id,
-                    isset($exercise['id']) ? $exercise['id'] : null,
+                    $exercise_id_val,
                     $exercise['name'],
                     $exercise['muscleGroup'],
                     $exercise['sets'],
@@ -659,7 +647,7 @@ function syncCalendarExercise($pdo) {
             }
         }
         
-        // 5. 更新整體完成統計
+        // 4. 更新整體完成統計
         $total_exercises = count($exercises);
         $completed_exercises = count(array_filter($exercises, function($ex) { return isset($ex['completed']) && $ex['completed']; }));
         $completion_percentage = $total_exercises > 0 ? ($completed_exercises / $total_exercises) * 100 : 0;
@@ -671,7 +659,7 @@ function syncCalendarExercise($pdo) {
         // 插入一個特殊的整體完成記錄（exercise_id = 0 表示整體記錄）
         $stmt_upsert_overall->execute([
             $plan_id,
-            9,
+            $user_id,
             0, // exercise_id = 0 表示整體記錄
             '整體完成記錄',
             '整體',

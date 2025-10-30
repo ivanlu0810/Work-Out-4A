@@ -7523,6 +7523,10 @@
             // 儲存到記憶體
             // 將切換後的資料寫回正確索引
             dayTrainingData[rawIndex] = targetExercise;
+            
+            // 確保 calendarTrainingData 已更新（dateKey 已在函數開頭定義）
+            calendarTrainingData[dateKey] = dayTrainingData;
+            
             saveDailyTrainingData(date, dayTrainingData, true);
             
             // 更新行事曆
@@ -7531,6 +7535,11 @@
             // 同步到資料庫（個別動作完成狀態）
             try {
                 await syncCalendarExerciseToDatabase(date, targetExercise);
+                // 以資料庫為準，重新抓行事曆資料後重繪，避免本地快取造成幽靈資料
+                try {
+                    await loadCalendarData();
+                    renderCalendar();
+                } catch (e) { console.warn('重抓行事曆資料失敗', e); }
                 
                 // 顯示成功訊息
                 const status = targetExercise.completed ? '已完成' : '未完成';
@@ -8519,35 +8528,7 @@
             console.log('帶詳細信息的動作列表HTML生成完成');
         }
 
-        // 渲染動作列表（簡化版，用於篩選）
-        function renderExerciseList(exerciseArray) {
-            const exerciseList = document.getElementById('dateExerciseList');
-            if (!exerciseList) {
-                console.error('找不到 dateExerciseList 元素');
-                return;
-            }
-            
-            console.log('renderExerciseList 被調用，動作數量:', exerciseArray ? exerciseArray.length : 'undefined');
-            
-            if (!exerciseArray || exerciseArray.length === 0) {
-                console.log('動作數組為空，顯示無動作訊息');
-                exerciseList.innerHTML = '<div class="text-center text-muted">沒有找到符合條件的動作</div>';
-                return;
-            }
-            
-            console.log('開始生成HTML，第一個動作:', exerciseArray[0]);
-            exerciseList.innerHTML = exerciseArray.map(exercise => `
-                <button type="button" class="list-group-item list-group-item-action" 
-                        onclick="selectExerciseForDate(${exercise.id}, '${exercise.name}', '${exercise.muscle_group}')">
-                    <div class="d-flex w-100 justify-content-between">
-                        <h6 class="mb-1">${exercise.name}</h6>
-                        <small class="text-muted">${exercise.muscle_group}</small>
-                    </div>
-                </button>
-            `).join('');
-            
-            console.log('動作列表HTML生成完成');
-        }
+        
 
         // 依名稱/描述/欄位，先判斷這筆到底屬於二頭或三頭（或都不是）
         function classifyArmGroup(ex) {
@@ -8719,10 +8700,42 @@
 
         // 同步行事曆動作到資料庫
         // 同步行事曆動作到資料庫（修正版，會過濾掉沒 id 的）
-        async function syncCalendarExerciseToDatabase(date) {
+        async function syncCalendarExerciseToDatabase(date, exercise) {
             try {
                 const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
-                const dayTrainingData = calendarTrainingData[dateKey] || [];
+                let dayTrainingData = calendarTrainingData[dateKey] || [];
+                
+                // 如果提供了單個 exercise 參數，確保它在 dayTrainingData 中並且狀態是最新的
+                if (exercise) {
+                    // 先嘗試從 getDayTrainingData 獲取最新數據
+                    const latestDayData = getDayTrainingData(date);
+                    if (latestDayData && Array.isArray(latestDayData) && latestDayData.length > 0) {
+                        dayTrainingData = latestDayData;
+                        // 更新 calendarTrainingData 以確保一致性
+                        calendarTrainingData[dateKey] = dayTrainingData;
+                    }
+                    
+                    // 查找並更新對應的 exercise
+                    const exerciseId = exercise.exercise_id ?? exercise.id ?? exercise.exerciseId ?? 0;
+                    const exerciseName = exercise.exercise_name ?? exercise.name ?? exercise.exerciseName ?? '';
+                    const foundIndex = dayTrainingData.findIndex(ex => {
+                        if (!ex) return false;
+                        const exId = ex.exercise_id ?? ex.id ?? ex.exerciseId ?? 0;
+                        const exName = ex.exercise_name ?? ex.name ?? ex.exerciseName ?? '';
+                        return (exId && exId === exerciseId) || (exName && exName === exerciseName);
+                    });
+                    
+                    if (foundIndex >= 0) {
+                        // 更新現有動作的狀態
+                        dayTrainingData[foundIndex] = { ...dayTrainingData[foundIndex], ...exercise };
+                    } else if (exerciseId && exerciseId !== 0) {
+                        // 如果找不到，添加新動作
+                        dayTrainingData.push(exercise);
+                    }
+                    
+                    // 再次更新 calendarTrainingData
+                    calendarTrainingData[dateKey] = dayTrainingData;
+                }
                 
                 // 把行事曆裡這一天的資料「統一成後端要的格式」
                 const masterExercises = Array.isArray(window.exercises) ? window.exercises : [];
@@ -8751,6 +8764,7 @@
                             sets,
                             reps,
                             weight,
+                            completed: ex.completed === true,
                             order_index: idx,
 
                             // 舊版保險欄位（避免後端還在讀 name / muscleGroup）
@@ -8760,9 +8774,17 @@
                     });
 
                 // 3. 最後再保底一次：只送有 id 的，徹底擋掉 1048
-                const filteredExercises = normalized.filter(e => Number.isInteger(e.exercise_id) && e.exercise_id > 0);
+                const filteredExercises = normalized
+                    .filter(e => {
+                        const idNum = parseInt(e.exercise_id, 10);
+                        return Number.isFinite(idNum) && idNum > 0;
+                    })
+                    .map(e => ({ ...e, exercise_id: parseInt(e.exercise_id, 10) }));
                 const dropped = normalized
-                    .filter(e => !(Number.isInteger(e.exercise_id) && e.exercise_id > 0))
+                    .filter(e => {
+                        const idNum = parseInt(e.exercise_id, 10);
+                        return !(Number.isFinite(idNum) && idNum > 0);
+                    })
                     .map(e => e.exercise_name || e.name || '(未命名)');
                 if (dropped.length) {
                     console.warn('已略過沒有有效 exercise_id 的動作：', dropped);
@@ -8805,12 +8827,14 @@
                 }
 
                 if (!result.success) {
-                    console.error('同步失敗:', result.error);
-                    alert('同步失敗：' + (result.error || '未知錯誤'));
+                    console.error('同步失敗:', result.error || result.message);
+                    throw new Error(result.error || result.message || '未知錯誤');
                 }
+                
+                return result;
             } catch (err) {
                 console.error('同步行事曆動作到資料庫失敗：', err);
-                alert('同步到資料庫失敗：' + err.message);
+                throw err;
             }
         }
         
@@ -8829,15 +8853,19 @@
                 return;
             }
             
-            // 創建動作對象
+            // 創建動作對象（確保包含所有必要欄位以便同步）
             const exercise = {
                 id: parseInt(exerciseId),
+                exercise_id: parseInt(exerciseId),
                 name: exerciseName,
+                exercise_name: exerciseName,
                 muscleGroup: muscleGroup,
+                muscle_group: muscleGroup,
                 sets: sets,
                 reps: reps,
                 weight: weight || null,
-                restTime: null
+                restTime: null,
+                completed: false
             };
             
             // 獲取該日期的現有訓練數據
@@ -9375,19 +9403,7 @@
             console.log('=== toggleDayCompletion 結束 ===');
         }
 
-        // 獲取星期名稱
-        function getDayName(day) {
-            const dayNames = {
-                'monday': '週一',
-                'tuesday': '週二', 
-                'wednesday': '週三',
-                'thursday': '週四',
-                'friday': '週五',
-                'saturday': '週六',
-                'sunday': '週日'
-            };
-            return dayNames[day] || day;
-        }
+        
 
 
         // 開啟動作選擇視窗
