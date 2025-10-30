@@ -694,7 +694,7 @@ if ($intent === "plan" && !empty($targetMuscles)) {
 
     if ($rows) {
         $targetCount = count($targetMuscles);
-        $minMaxMap = [ 1 => [5,6], 2 => [3,4], 'default' => [2,3] ];
+        $minMaxMap = [ 1 => [4,5], 2 => [2,3], 'default' => [2,2] ];
         list($minEach, $maxEach) = $minMaxMap[$targetCount] ?? $minMaxMap['default'];
         $seed = crc32(date('Y-m-d') . '|' . $userId . '|' . implode('|', $targetMuscles));
         $eachCount = $minEach + ($seed % ($maxEach - $minEach + 1));
