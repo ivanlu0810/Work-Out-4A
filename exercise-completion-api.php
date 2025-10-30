@@ -70,6 +70,9 @@ switch ($action) {
     case 'sync_calendar_exercise':
         syncCalendarExercise($pdo);
         break;
+    case 'delete_calendar_exercise':
+        deleteCalendarExercise($pdo);
+        break;
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => '無效的操作']);
@@ -705,6 +708,92 @@ function syncCalendarExercise($pdo) {
         
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => '同步失敗: ' . $e->getMessage()]);
+    }
+}
+
+// 刪除指定日期的單一動作（行事曆）
+function deleteCalendarExercise($pdo) {
+    $input = json_decode(file_get_contents('php://input'), true);
+
+    if (!isset($input['date']) || (!isset($input['exercise_id']) && empty($input['exercise_name'])) || !isset($input['user_id'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => '缺少必要參數: date, exercise_id/exercise_name, user_id']);
+        return;
+    }
+
+    try {
+        $date = $input['date'];
+        $exercise_id = isset($input['exercise_id']) && $input['exercise_id'] !== '' ? (int)$input['exercise_id'] : null;
+        $exercise_name = isset($input['exercise_name']) ? trim($input['exercise_name']) : '';
+        $user_id = (int)$input['user_id'];
+
+        if ($user_id <= 0) {
+            throw new Exception('無效的 user_id');
+        }
+
+        // 決定 day_of_week 與該週週一以定位 plan
+        $date_obj = new DateTime($date);
+        $dow_map = [0=>'sunday',1=>'monday',2=>'tuesday',3=>'wednesday',4=>'thursday',5=>'friday',6=>'saturday'];
+        $day_of_week = $dow_map[(int)$date_obj->format('w')];
+        $week_monday = (clone $date_obj)->modify('monday this week')->format('Y-m-d');
+
+        // 取得/確認 plan_id
+        $sql_plan = "SELECT id FROM training_plans WHERE user_id = ? AND week_start_date = ? LIMIT 1";
+        $stmt_plan = $pdo->prepare($sql_plan);
+        $stmt_plan->execute([$user_id, $week_monday]);
+        $plan = $stmt_plan->fetch(PDO::FETCH_ASSOC);
+
+        if (!$plan) {
+            // 沒有對應計畫，代表無需刪除
+            echo json_encode(['success' => true, 'message' => '無對應訓練計畫，不需刪除', 'deleted' => 0]);
+            return;
+        }
+
+        $plan_id = (int)$plan['id'];
+
+        $pdo->beginTransaction();
+
+        // 刪除 training_plan_exercises 中該日期該動作
+        if ($exercise_id) {
+            $sql_del_ex = "DELETE FROM training_plan_exercises WHERE plan_id = ? AND day_of_week = ? AND exercise_date = ? AND exercise_id = ?";
+            $stmt_del_ex = $pdo->prepare($sql_del_ex);
+            $stmt_del_ex->execute([$plan_id, $day_of_week, $date, $exercise_id]);
+        } else {
+            $sql_del_ex = "DELETE FROM training_plan_exercises WHERE plan_id = ? AND day_of_week = ? AND exercise_date = ? AND exercise_name = ?";
+            $stmt_del_ex = $pdo->prepare($sql_del_ex);
+            $stmt_del_ex->execute([$plan_id, $day_of_week, $date, $exercise_name]);
+        }
+        $deleted_exercises = $stmt_del_ex->rowCount();
+
+        // 刪除 training_plan_completion 中對應的單筆記錄
+        if ($exercise_id) {
+            $sql_del_comp = "DELETE FROM training_plan_completion WHERE plan_id = ? AND user_id = ? AND day_of_week = ? AND exercise_id = ?";
+            $stmt_del_comp = $pdo->prepare($sql_del_comp);
+            $stmt_del_comp->execute([$plan_id, $user_id, $day_of_week, $exercise_id]);
+        } else {
+            $sql_del_comp = "DELETE FROM training_plan_completion WHERE plan_id = ? AND user_id = ? AND day_of_week = ? AND exercise_name = ?";
+            $stmt_del_comp = $pdo->prepare($sql_del_comp);
+            $stmt_del_comp->execute([$plan_id, $user_id, $day_of_week, $exercise_name]);
+        }
+        $deleted_logs = $stmt_del_comp->rowCount();
+
+        $pdo->commit();
+
+        echo json_encode([
+            'success' => true,
+            'message' => '單一動作刪除完成',
+            'deleted_counts' => [
+                'exercises' => $deleted_exercises,
+                'logs' => $deleted_logs
+            ]
+        ]);
+
+    } catch (Exception $e) {
+        if ($pdo->inTransaction()) {
+            $pdo->rollBack();
+        }
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => '刪除失敗: ' . $e->getMessage()]);
     }
 }
 

@@ -2,8 +2,58 @@
     "user_id": "phpecho_SESSIONuser_idguest",
     "date": "2025-10-30",
     "meals": {
-        "breakfast": [],
-        "lunch": [],
+        "breakfast": [
+            {
+                "name": "雜糧飯",
+                "grams": 220,
+                "caloriesPer100": 120,
+                "proteinPer100": 4,
+                "carbsPer100": 23,
+                "fatPer100": 1
+            },
+            {
+                "name": "雞蛋",
+                "grams": 140,
+                "caloriesPer100": 155,
+                "proteinPer100": 13,
+                "carbsPer100": 1.1,
+                "fatPer100": 11
+            },
+            {
+                "name": "草莓",
+                "grams": 135,
+                "caloriesPer100": 33,
+                "proteinPer100": 0.8,
+                "carbsPer100": 7.7,
+                "fatPer100": 0.3
+            }
+        ],
+        "lunch": [
+            {
+                "name": "豆干",
+                "grams": 220,
+                "caloriesPer100": 172,
+                "proteinPer100": 20,
+                "carbsPer100": 3,
+                "fatPer100": 9
+            },
+            {
+                "name": "雜糧飯",
+                "grams": 200,
+                "caloriesPer100": 120,
+                "proteinPer100": 4,
+                "carbsPer100": 23,
+                "fatPer100": 1
+            },
+            {
+                "name": "黃椒",
+                "grams": 185,
+                "caloriesPer100": 27,
+                "proteinPer100": 1,
+                "carbsPer100": 6.3,
+                "fatPer100": 0.2
+            }
+        ],
         "dinner": [
             {
                 "name": "豆干",
@@ -35,9 +85,9 @@
     "target_protein": 167,
     "target_carbs": 334,
     "target_fat": 74,
-    "actual_calories": 571,
-    "actual_protein": 47,
-    "actual_carbs": 56,
-    "actual_fat": 19,
-    "updated_at": "2025-10-30T14:52:34+01:00"
+    "actual_calories": 1765,
+    "actual_protein": 129,
+    "actual_carbs": 182,
+    "actual_fat": 59,
+    "updated_at": "2025-10-30T15:15:57+01:00"
 }

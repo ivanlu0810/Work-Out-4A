@@ -1917,31 +1917,28 @@
                 let fatProgress = 0;
                 let muscleProgress = 0;
 
-                // 體重達成率：基於目前體重與目標體重的差距計算
+                // 體重達成率（增重目標）：目前體重若低於目標，依 80% 目標為起點計算進度
                 if (currentWeight > 0 && goalWeight > 0) {
-                    if (currentWeight > goalWeight) {
-                        // 減重情況：目前體重 > 目標體重
-                        // 假設起始體重是目標體重的 1.2 倍（20% 超重）
-                        const startWeight = goalWeight * 1.2;
-                        const totalToLose = startWeight - goalWeight;
-                        const alreadyLost = startWeight - currentWeight;
-                        weightProgress = Math.min(100, Math.max(0, (alreadyLost / totalToLose) * 100));
-                    } else if (currentWeight <= goalWeight) {
+                    if (currentWeight < goalWeight) {
+                        // 增重情況：目前體重 < 目標體重
+                        const startWeight = goalWeight * 0.8; // 目標的 80% 當作起點
+                        const totalToGain = goalWeight - startWeight;
+                        const alreadyGained = currentWeight - startWeight;
+                        weightProgress = Math.min(100, Math.max(0, (alreadyGained / totalToGain) * 100));
+                    } else if (currentWeight >= goalWeight) {
                         // 已達到或超過目標體重
                         weightProgress = 100;
                     }
                 }
 
-                // 體脂率達成率：基於目前體脂率與目標體脂率的差距計算
+                // 體脂率達成率（提高到目標）：目前體脂率若低於目標，依 80% 目標為起點計算進度
                 if (currentFatPercentage > 0 && goalFatPercentage > 0) {
-                    if (currentFatPercentage > goalFatPercentage) {
-                        // 降低體脂率情況
-                        // 假設起始體脂率是目標體脂率的 1.5 倍（50% 超標）
-                        const startFatPercentage = goalFatPercentage * 1.5;
-                        const totalToReduce = startFatPercentage - goalFatPercentage;
-                        const alreadyReduced = startFatPercentage - currentFatPercentage;
-                        fatProgress = Math.min(100, Math.max(0, (alreadyReduced / totalToReduce) * 100));
-                    } else if (currentFatPercentage <= goalFatPercentage) {
+                    if (currentFatPercentage < goalFatPercentage) {
+                        const startFatPercentage = goalFatPercentage * 0.8; // 目標的 80% 當作起點
+                        const totalToGain = goalFatPercentage - startFatPercentage;
+                        const alreadyGained = currentFatPercentage - startFatPercentage;
+                        fatProgress = Math.min(100, Math.max(0, (alreadyGained / totalToGain) * 100));
+                    } else if (currentFatPercentage >= goalFatPercentage) {
                         // 已達到或超過目標體脂率
                         fatProgress = 100;
                     }
@@ -2095,27 +2092,26 @@
                 let fatProgress = 0;
                 let muscleProgress = 0;
 
-                // 體重達成率：基於目前體重與目標體重的差距計算
+                // 體重達成率（增重目標）：目前體重若低於目標，依 80% 目標為起點計算進度
                 if (currentWeight > 0 && goalWeight > 0) {
-                    if (currentWeight > goalWeight) {
-                        // 減重情況：目前體重 > 目標體重
-                        const startWeight = goalWeight * 1.2;
-                        const totalToLose = startWeight - goalWeight;
-                        const alreadyLost = startWeight - currentWeight;
-                        weightProgress = Math.min(100, Math.max(0, (alreadyLost / totalToLose) * 100));
-                    } else if (currentWeight <= goalWeight) {
+                    if (currentWeight < goalWeight) {
+                        const startWeight = goalWeight * 0.8;
+                        const totalToGain = goalWeight - startWeight;
+                        const alreadyGained = currentWeight - startWeight;
+                        weightProgress = Math.min(100, Math.max(0, (alreadyGained / totalToGain) * 100));
+                    } else if (currentWeight >= goalWeight) {
                         weightProgress = 100;
                     }
                 }
 
-                // 體脂率達成率：基於目前體脂率與目標體脂率的差距計算
+                // 體脂率達成率（提高到目標）：目前體脂率若低於目標，依 80% 目標為起點計算進度
                 if (currentFatPercentage > 0 && goalFatPercentage > 0) {
-                    if (currentFatPercentage > goalFatPercentage) {
-                        const startFatPercentage = goalFatPercentage * 1.5;
-                        const totalToReduce = startFatPercentage - goalFatPercentage;
-                        const alreadyReduced = startFatPercentage - currentFatPercentage;
-                        fatProgress = Math.min(100, Math.max(0, (alreadyReduced / totalToReduce) * 100));
-                    } else if (currentFatPercentage <= goalFatPercentage) {
+                    if (currentFatPercentage < goalFatPercentage) {
+                        const startFatPercentage = goalFatPercentage * 0.8;
+                        const totalToGain = goalFatPercentage - startFatPercentage;
+                        const alreadyGained = currentFatPercentage - startFatPercentage;
+                        fatProgress = Math.min(100, Math.max(0, (alreadyGained / totalToGain) * 100));
+                    } else if (currentFatPercentage >= goalFatPercentage) {
                         fatProgress = 100;
                     }
                 }

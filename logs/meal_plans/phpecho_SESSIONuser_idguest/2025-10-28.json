@@ -1,0 +1,93 @@
+{
+    "user_id": "phpecho_SESSIONuser_idguest",
+    "date": "2025-10-28",
+    "meals": {
+        "breakfast": [
+            {
+                "name": "雜糧飯",
+                "grams": 220,
+                "caloriesPer100": 120,
+                "proteinPer100": 4,
+                "carbsPer100": 23,
+                "fatPer100": 1
+            },
+            {
+                "name": "豆腐",
+                "grams": 140,
+                "caloriesPer100": 76,
+                "proteinPer100": 8,
+                "carbsPer100": 1.9,
+                "fatPer100": 4.8
+            },
+            {
+                "name": "藍莓",
+                "grams": 150,
+                "caloriesPer100": 57,
+                "proteinPer100": 0.7,
+                "carbsPer100": 14.5,
+                "fatPer100": 0.3
+            }
+        ],
+        "lunch": [
+            {
+                "name": "板豆腐",
+                "grams": 200,
+                "caloriesPer100": 144,
+                "proteinPer100": 15,
+                "carbsPer100": 3.9,
+                "fatPer100": 8
+            },
+            {
+                "name": "燕麥片",
+                "grams": 200,
+                "caloriesPer100": 379,
+                "proteinPer100": 13,
+                "carbsPer100": 67,
+                "fatPer100": 6.5
+            },
+            {
+                "name": "小黃瓜",
+                "grams": 110,
+                "caloriesPer100": 16,
+                "proteinPer100": 0.7,
+                "carbsPer100": 4,
+                "fatPer100": 0.1
+            }
+        ],
+        "dinner": [
+            {
+                "name": "豆腐",
+                "grams": 220,
+                "caloriesPer100": 76,
+                "proteinPer100": 8,
+                "carbsPer100": 1.9,
+                "fatPer100": 4.8
+            },
+            {
+                "name": "白蘿蔔",
+                "grams": 185,
+                "caloriesPer100": 18,
+                "proteinPer100": 0.6,
+                "carbsPer100": 4.1,
+                "fatPer100": 0.1
+            },
+            {
+                "name": "糙米飯",
+                "grams": 200,
+                "caloriesPer100": 111,
+                "proteinPer100": 2.6,
+                "carbsPer100": 23,
+                "fatPer100": 0.9
+            }
+        ]
+    },
+    "target_calories": 2407,
+    "target_protein": 150,
+    "target_carbs": 301,
+    "target_fat": 67,
+    "actual_calories": 1942,
+    "actual_protein": 102,
+    "actual_carbs": 279,
+    "actual_fat": 51,
+    "updated_at": "2025-10-30T14:56:02+01:00"
+}
