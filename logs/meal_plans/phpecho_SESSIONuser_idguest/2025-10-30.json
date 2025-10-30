@@ -1,0 +1,43 @@
+{
+    "user_id": "phpecho_SESSIONuser_idguest",
+    "date": "2025-10-30",
+    "meals": {
+        "breakfast": [],
+        "lunch": [],
+        "dinner": [
+            {
+                "name": "豆干",
+                "grams": 200,
+                "caloriesPer100": 172,
+                "proteinPer100": 20,
+                "carbsPer100": 3,
+                "fatPer100": 9
+            },
+            {
+                "name": "菠菜",
+                "grams": 80,
+                "caloriesPer100": 23,
+                "proteinPer100": 2.9,
+                "carbsPer100": 3.6,
+                "fatPer100": 0.4
+            },
+            {
+                "name": "白米飯",
+                "grams": 180,
+                "caloriesPer100": 116,
+                "proteinPer100": 2.6,
+                "carbsPer100": 25.9,
+                "fatPer100": 0.3
+            }
+        ]
+    },
+    "target_calories": 2675,
+    "target_protein": 167,
+    "target_carbs": 334,
+    "target_fat": 74,
+    "actual_calories": 571,
+    "actual_protein": 47,
+    "actual_carbs": 56,
+    "actual_fat": 19,
+    "updated_at": "2025-10-30T14:52:34+01:00"
+}

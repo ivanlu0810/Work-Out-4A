@@ -4524,8 +4524,11 @@
                         // 只要不是 -1（代表該天有訓練，但可能 0% 完成），就算在總訓練天數內
                         if (value >= 0) {
                             totalDays += 1;
-                            if (value === 100) { // 只有100%完成才算已完成天數
+                            // 確保完成度是數字，然後檢查是否為 100
+                            const completionValue = Number(value);
+                            if (completionValue >= 100) { // 100%以上算完成
                                 completedDays += 1;
+                                console.log(`✅ 日期 ${day} 已完成 (${completionValue}%)`);
                             }
                         }
                     }
@@ -4534,25 +4537,41 @@
                 console.log('統計結果:', { totalDays, completedDays });
                 console.log('=== 週統計計算結束 ===');
             } else if (timeUnit === 'month') {
-                // 月模式：使用傳入的週數據計算月統計
+                // 月模式：根據週數據計算已完成的動作數量
                 console.log('=== 月統計計算開始 ===');
                 console.log('傳入的 data:', data);
                 
-                // 使用週數據計算月統計
+                let totalExercises = 0;  // 總動作數
+                let completedExercises = 0;  // 已完成動作數
+                
+                // 遍歷4週，累加每週的動作數
                 for (let weekIndex = 1; weekIndex <= 4; weekIndex++) {
                     const weekKey = `week${weekIndex}`;
-                    const value = data[weekKey];
-                    console.log(`第${weekIndex}週: 完成度 ${value}%`);
+                    const weekData = data[weekKey];
+                    console.log(`第${weekIndex}週數據:`, weekData);
                     
-                    if (value >= 0) { // 有訓練計畫的週（包括0%完成）
-                        totalDays += 1; // 計算有訓練的週數
-                        if (value === 100) { // 只有100%完成才算已完成週
-                            completedDays += 1;
+                    // 檢查 weekData 是否存在且不為 -1（-1 代表沒有資料）
+                    if (weekData !== undefined && weekData !== null && weekData !== -1) {
+                        console.log(`第${weekIndex}週有資料:`, weekData);
+                        
+                        // 如果 weekData 是物件格式（新格式）
+                        if (weekData && typeof weekData === 'object' && weekData.total_exercises !== undefined) {
+                            const weekTotal = weekData.total_exercises || 0;
+                            const weekCompleted = weekData.completed_exercises || 0;
+                            
+                            console.log(`第${weekIndex}週動作數: ${weekCompleted}/${weekTotal}`);
+                            totalExercises += weekTotal;
+                            completedExercises += weekCompleted;
                         }
                     }
                 }
                 
-                console.log('統計結果:', { totalDays, completedDays });
+                // 將動作數轉換為天數概念（根據完成的動作比例計算）
+                // 假設每天 6 個動作，完成 6 個動作 = 完成 1 天
+                totalDays = Math.ceil(totalExercises / 6);  // 總天數 = 總動作數 ÷ 每天6個動作
+                completedDays = Math.ceil(completedExercises / 6);  // 已完成天數 = 已完成動作數 ÷ 每天6個動作
+                
+                console.log('統計結果:', { totalExercises, completedExercises, totalDays, completedDays });
                 console.log('=== 月統計計算結束 ===');
             } else if (timeUnit === 'year') {
                 // 年模式：使用傳入的 data 參數計算統計
@@ -4833,7 +4852,7 @@
                 weekEnd.setDate(weekStart.getDate() + 6);
                 
                 // 從資料庫讀取完成狀態數據
-                const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&month=${month}&week=${week}&user_id=9`);
+                const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&month=${month}&week=${week}&user_id=${currentUserId || 9}`);
                 const result = await response.json();
                 
                 const completionData = {};
@@ -4890,7 +4909,7 @@
                 console.log('查詢參數:', { year, month });
                 
                 // 從資料庫讀取完成狀態數據
-                const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&month=${month}&user_id=9`);
+                const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&month=${month}&user_id=${currentUserId || 9}`);
                 const result = await response.json();
                 
                 console.log('API 回應:', result);
@@ -4910,8 +4929,11 @@
                         console.log(`第${weekIndex + 1}週數據:`, { weekKey, totalExercises, completedExercises });
                         
                         if (totalExercises > 0) {
-                            const weekCompletionPercentage = Math.round((completedExercises / totalExercises) * 100);
-                            completionData[weekKey] = weekCompletionPercentage;
+                            // 保留物件格式，而不是轉換為百分比
+                            completionData[weekKey] = {
+                                total_exercises: totalExercises,
+                                completed_exercises: completedExercises
+                            };
                         } else {
                             completionData[weekKey] = -1; // 表示沒有訓練數據
                         }
@@ -4920,7 +4942,7 @@
                     console.log('API 沒有返回數據，嘗試查詢所有月份');
                     
                     // 如果指定月份沒有數據，嘗試查詢所有月份
-                    const allMonthsResponse = await fetch(`completion-api.php?action=get_completion_data&year=${year}&user_id=9`);
+                    const allMonthsResponse = await fetch(`completion-api.php?action=get_completion_data&year=${year}&user_id=${currentUserId || 9}`);
                     const allMonthsResult = await allMonthsResponse.json();
                     
                     console.log('所有月份 API 回應:', allMonthsResult);
@@ -4981,7 +5003,7 @@
         async function loadYearCompletionData(year) {
             try {
                 // 從資料庫讀取完成狀態數據
-                const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&user_id=9`);
+                const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&user_id=${currentUserId || 9}`);
                 const result = await response.json();
                 
                 const completionData = {};
@@ -5057,7 +5079,29 @@
                 categories = ['第1週', '第2週', '第3週', '第4週'];
                 chartData = categories.map((week, index) => {
                     const weekKey = `week${index + 1}`;
-                    return data[weekKey] || 0;
+                    const value = data[weekKey];
+                    
+                    // 檢查值是否為物件格式（後端返回的格式）
+                    if (value && typeof value === 'object' && value.total_exercises !== undefined) {
+                        const { total_exercises, completed_exercises } = value;
+                        if (total_exercises > 0) {
+                            const percentage = Math.round((completed_exercises / total_exercises) * 100);
+                            console.log(`第${index + 1}週: ${completed_exercises}/${total_exercises} = ${percentage}%`);
+                            return percentage;
+                        }
+                        return 0;
+                    }
+                    // 如果是數字格式（百分比或-1），直接返回
+                    if (typeof value === 'number') {
+                        return value;
+                    }
+                    
+                    // 如果沒有資料
+                    if (value === -1 || value === null || value === undefined) {
+                        return 0;
+                    }
+                    
+                    return 0;
                 });
                 colors = [morandiColors.secondary];
             } else if (timeUnit === 'year') {
@@ -5083,8 +5127,8 @@
 
             if (targetChart) {
                 console.log('目標圖表存在:', targetChart);
-                // 檢查是否有有效數據
-                const hasValidData = chartData.some(value => value !== null && value > 0);
+                // 檢查是否有有效數據（允許 0，但不允許 -1）
+                const hasValidData = chartData.some(value => value !== null && value >= 0);
                 console.log('=== 圖表數據檢查 ===');
                 console.log('chartData:', chartData);
                 console.log('chartData 詳細:', chartData.map((val, index) => `${categories[index]}: ${val}`));
@@ -5909,16 +5953,16 @@
                 
                 if (result.success && result.data) {
                     // 從動作資料中提取所有不重複的肌群
-                    const databaseMuscleGroups = [...new Set(result.data.map(exercise => exercise.muscle_group))];
+                    const databaseMuscleGroups = [...new Set(result.data.map(exercise => (exercise.target_muscle || exercise.muscle_group || exercise.muscleGroup || '').trim()))];
                     
                     // 添加訓練模板中使用的細緻肌群分類
                     const templateMuscleGroups = [
                         '上胸', '中胸', '下胸', '胸',
-                        '上背', '中背', '下背', '背',
-                        '股四頭肌', '股二頭肌', '臀肌', '小腿', '腿',
+                        '上背', '中背', '下背', '背', '背部',
+                        '股四頭肌', '股二頭肌', '臀肌', '小腿', '腿', '腿部',
                         '三頭肌', '二頭肌', '手臂',
                         '肩膀前束', '肩膀中束', '肩膀後束', '肩膀',
-                        '上腹', '下腹', '核心', '腹部'
+                        '上腹', '下腹', '側腹', '核心', '腹部'
                     ];
                     
                     // 合併並去重
@@ -5955,6 +5999,74 @@
             } catch (error) {
                 console.error('載入肌群選項失敗:', error);
             }
+        }
+
+        // 標準化肌群名稱
+        function normalizeMuscleGroup(name) {
+            if (!name) return '';
+            let s = String(name).trim();
+            s = s.replace(/（.*?）|\(.*?\)/g, ''); // 去括號
+            s = s.replace(/\s+/g, ''); // 去空白
+            if (s.startsWith('肱二頭')) s = '二頭肌';
+            if (s.startsWith('肱三頭')) s = '三頭肌';
+            if (s === '背') s = '背部';
+            if (s === '腿') s = '腿部';
+            return s;
+        }
+
+        // 肌群匹配規則（父分類包含子分類與同義詞）
+        function isMuscleGroupMatch(selectedFilter, exerciseGroup) {
+            if (!selectedFilter) return true;
+            if (!exerciseGroup) return false;
+
+            // 標準化字串
+            const selected = normalizeMuscleGroup(selectedFilter);
+            const group = normalizeMuscleGroup(exerciseGroup);
+
+            // 父子關係與同義詞映射
+            const mapping = {
+                // 大分類
+                '胸': ['胸', '上胸', '中胸', '下胸'],
+                '背': ['背', '上背', '中背', '下背', '背部'],
+                // 背部包含上背/中背/下背，並兼容備用資料的「背」
+                '背部': ['背部', '上背', '中背', '下背', '背'],
+                '腿': ['腿', '腿部', '股四頭肌', '股二頭肌', '臀肌', '小腿'],
+                // 腿部包含四大腿部肌群，並兼容備用資料的「腿」
+                '腿部': ['腿部', '股四頭肌', '股二頭肌', '臀肌', '小腿', '腿'],
+                '手臂': ['手臂', '二頭肌', '三頭肌'],
+                '肩膀': ['肩膀', '肩膀前束', '肩膀中束', '肩膀後束'],
+                '腹部': ['腹部', '上腹', '下腹', '側腹', '核心'],
+                '核心': ['核心', '上腹', '下腹', '側腹', '腹部'],
+                // 同義/特例：允許常見命名差異
+                '二頭肌': ['二頭肌', '肱二頭肌', '第二頭肌'],
+                '三頭肌': ['三頭肌', '肱三頭肌', '第三頭肌']
+            };
+
+            // 若剛好相等，直接匹配
+            if (selected === group) return true;
+
+            // 針對「二頭肌/三頭肌」做子字串容錯（資料可能寫成第二頭肌/第三頭肌等）
+            if (selected === '二頭肌' && group.includes('二頭')) return true;
+            if (selected === '三頭肌' && group.includes('三頭')) return true;
+
+            // 父分類包含子分類
+            if (mapping[selected] && mapping[selected].includes(group)) return true;
+
+            // 注意：不允許兄弟分類互相匹配（例如選上胸不應匹配中胸）
+            // 僅允許：父→子、同義詞集合、完全相等
+            return false;
+        }
+
+        // 取得動作的肌群欄位（兼容不同資料來源欄位名稱）
+        function getExerciseMuscleGroup(exercise) {
+            return (
+                exercise.muscle_group ||
+                exercise.target_muscle ||
+                exercise.muscleGroup ||
+                exercise.group ||
+                exercise.muscle ||
+                ''
+            );
         }
 
         // 切換動作數量標籤樣式
@@ -7077,7 +7189,7 @@
                     // 清理多餘的 backdrop
                     cleanupExtraBackdrops();
                     
-                    const date = new Date(dateString);
+                    const date = getLocalDateFromString(dateString);
                     const dayTrainingData = getDayTrainingData(date);
                     if (dayTrainingData && dayTrainingData.length > 0) {
                         showDayTrainingDetails(date, dayTrainingData);
@@ -7106,8 +7218,8 @@
             dayTrainingData[exerciseIndex].reps = reps;
             dayTrainingData[exerciseIndex].weight = weight;
             
-            // 儲存到localStorage
-            saveDailyTrainingData(date, dayTrainingData);
+            // 儲存到記憶體（強制覆蓋，確保刪除後生效）
+            saveDailyTrainingData(date, dayTrainingData, true);
             
             // 更新行事曆
             updateCalendarTrainingData();
@@ -7195,71 +7307,130 @@
 
          // 確認移除訓練動作
          async function confirmRemoveExercise(dateString, exerciseIndex) {
-             const date = new Date(dateString);
-             const dayTrainingData = getDayTrainingData(date);
-             
-             if (!dayTrainingData || !dayTrainingData[exerciseIndex]) {
-                 alert('找不到要移除的訓練動作');
-                 return;
-             }
-             
-             // 移除指定索引的訓練動作
-             dayTrainingData.splice(exerciseIndex, 1);
-             
-             // 儲存到localStorage
-             saveDailyTrainingData(date, dayTrainingData);
-             
-            // 關閉確認模態框並重新顯示
-            const confirmModal = bootstrap.Modal.getInstance(document.getElementById('confirmRemoveModal'));
-            if (confirmModal) {
-                confirmModal.hide();
-                
-                // 等待模態框關閉後重新顯示
-                setTimeout(() => {
-                    cleanupExtraBackdrops();
-                    if (dayTrainingData.length > 0) {
-                        showDayTrainingDetails(date, dayTrainingData);
-                    } else {
-                        // 如果沒有訓練動作了，關閉模態框並清除backdrop
-                        const detailsModal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
-                        if (detailsModal) {
-                            detailsModal.hide();
-                        }
-                    }
-                }, 300);
-            } else {
-                // 如果沒有找到模態框實例，直接重新顯示
-                cleanupExtraBackdrops();
-                if (dayTrainingData.length > 0) {
-                    showDayTrainingDetails(date, dayTrainingData);
+            console.log('=== confirmRemoveExercise start ===');
+            console.log('dateString:', dateString, 'exerciseIndex:', exerciseIndex);
+
+            const dateKey = getDateKeyFromDateString(dateString);
+            const rawList = calendarTrainingData[dateKey] || [];
+            console.log('dateKey:', dateKey, 'rawList(length):', rawList.length);
+
+            // ① 跟畫面一樣，先做出「可見的清單」
+            const visibleList = [];
+            const visibleToRawIndex = [];
+
+            rawList.forEach((item, idx) => {
+                if (!item) return;
+                if (
+                    (item.exercise_id && item.exercise_id !== 0) ||
+                    (item.exercise_name && item.exercise_name.trim() !== '') ||
+                    (item.name && item.name.trim() !== '')
+                ) {
+                    visibleList.push(item);
+                    visibleToRawIndex.push(idx);
+                }
+            });
+
+            console.log('visibleList length:', visibleList.length);
+            console.log('visibleToRawIndex:', visibleToRawIndex);
+
+            if (exerciseIndex < 0 || exerciseIndex >= visibleList.length) {
+                alert(
+                    '找不到要移除的訓練動作（畫面索引不在範圍內）。\n' +
+                    'dateKey=' + dateKey +
+                    '，畫面可見筆數=' + visibleList.length +
+                    '，你點的索引=' + exerciseIndex
+                );
+                return;
+            }
+
+            // ② 這就是你在畫面上按到的那一筆
+            const targetDisplayItem = visibleList[exerciseIndex];
+            const rawIndex = visibleToRawIndex[exerciseIndex];
+            console.log('targetDisplayItem:', targetDisplayItem, 'rawIndex:', rawIndex);
+
+            if (rawIndex === undefined) {
+                alert('找不到要移除的訓練動作（無對應原始索引）。');
+                return;
+            }
+
+            // ③ 真正刪掉（呼叫內部刪除實作）
+            performRemoveExercise(dateKey, rawIndex, targetDisplayItem);
+        }
+
+        // 真正移除陣列 + 存檔 + 重繪
+        function performRemoveExercise(dateKey, rawIndex, targetItem) {
+            console.log('=== performRemoveExercise start ===');
+            console.log('dateKey:', dateKey, 'rawIndex:', rawIndex, 'targetItem:', targetItem);
+
+            if (!calendarTrainingData[dateKey]) {
+                alert('這一天目前沒有訓練資料可以刪除。');
+                return;
+            }
+
+            const list = calendarTrainingData[dateKey];
+
+            // 保險：有時候畫面和原始陣列不同步，就再用「同一筆資料」再找一次
+            let finalIndex = rawIndex;
+            if (finalIndex < 0 || finalIndex >= list.length) {
+                finalIndex = list.findIndex(item => {
+                    if (!item || !targetItem) return false;
+                    if (item.id && targetItem.id && item.id == targetItem.id) return true;
+                    if (item.exercise_id && targetItem.exercise_id && item.exercise_id == targetItem.exercise_id) return true;
+                    if (item.exercise_name && targetItem.exercise_name && item.exercise_name === targetItem.exercise_name) return true;
+                    return false;
+                });
+            }
+
+            console.log('finalIndex to delete:', finalIndex);
+
+            if (finalIndex === -1) {
+                alert('找不到要移除的訓練動作（原始清單內也對不到）。');
+                return;
+            }
+
+            // 刪掉
+            const removed = list.splice(finalIndex, 1);
+            console.log('removed:', removed);
+
+            // 存回記憶體
+            calendarTrainingData[dateKey] = list;
+
+            // 轉回 Date，讓既有流程沿用
+            const dateObj = new Date(dateKey + 'T00:00:00');
+            if (typeof saveDailyTrainingData === 'function') {
+                saveDailyTrainingData(dateObj, list, true);
+            }
+
+            if (typeof updateCalendarTrainingData === 'function') {
+             updateCalendarTrainingData();
+            }
+
+            if (typeof showDayTrainingDetails === 'function') {
+                const dayData = getDayTrainingData(dateObj);
+                if (dayData && dayData.length > 0) {
+                    showDayTrainingDetails(dateObj, dayData);
                 } else {
-                    // 如果沒有訓練動作了，關閉模態框並清除backdrop
                     const detailsModal = bootstrap.Modal.getInstance(document.getElementById('trainingDetailsModal'));
-                    if (detailsModal) {
-                        detailsModal.hide();
-                    }
+                    if (detailsModal) detailsModal.hide();
                 }
             }
-             
-             // 更新行事曆
-             updateCalendarTrainingData();
-             
-             // 同步到資料庫
-             try {
-                 await syncCalendarExerciseToDatabase(date, null); // 傳入 null 表示移除動作
-                 showSuccessMessage('訓練動作已移除並同步到資料庫！');
-             } catch (error) {
-                 console.error('同步到資料庫失敗:', error);
-                 showSuccessMessage('訓練動作已移除，但同步到資料庫失敗', 'warning');
-             }
-         }
+
+            // 以覆寫方式同步此日資料（單筆刪除 API 會造成 400，改為完全依賴覆寫式同步）
+            if (typeof syncCalendarExerciseToDatabase === 'function') {
+                syncCalendarExerciseToDatabase(dateObj).catch(err => console.error('同步刪除到資料庫失敗：', err));
+            }
+
+            alert('已刪除。');
+        }
+
+        //（已停用）單筆刪除 API：為避免 400 Bad Request 干擾，改為純覆寫式同步
 
         // 切換訓練動作完成狀態（個別動作完成）
         async function toggleExerciseCompletion(dateString, exerciseIndex) {
             console.log('=== toggleExerciseCompletion 開始 ===');
             console.log('dateString:', dateString, 'exerciseIndex:', exerciseIndex);
             
-            const date = new Date(dateString);
+            const date = getLocalDateFromString(dateString);
             const dayTrainingData = getDayTrainingData(date);
             
             console.log('獲取的 dayTrainingData:', dayTrainingData);
@@ -7342,6 +7513,28 @@
             }
         }
 
+        // 解析 ISO 日期字串為本地日期（避免時區造成的日期偏移）
+        function getLocalDateFromString(dateString) {
+            if (typeof dateString !== 'string') return dateString;
+            const m = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+            if (m) {
+                const y = parseInt(m[1], 10);
+                const mo = parseInt(m[2], 10) - 1;
+                const d = parseInt(m[3], 10);
+                return new Date(y, mo, d);
+            }
+            return new Date(dateString);
+        }
+
+        // 由任意日期字串取得 yyyy-mm-dd 的 dateKey（保留你原有邏輯，這裡提供更寬鬆的解析）
+        function getDateKeyFromDateString(dateString) {
+            const d = new Date(dateString);
+            const y = d.getFullYear();
+            const m = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            return `${y}-${m}-${day}`;
+        }
+
         // 更新當前模態框的內容（如果正在顯示）
         function updateCurrentModalContent(date, dayTrainingData) {
             try {
@@ -7409,7 +7602,7 @@
                                             <button class="btn btn-sm btn-edit-exercise" onclick="editSingleExercise('${date.toISOString()}', ${index})">
                                                 <i class="bi bi-pencil"></i> 編輯
                                             </button>
-                                            <button class="btn btn-sm btn-remove-exercise" onclick="confirmRemoveSingleExercise('${date.toISOString()}', ${index})">
+                                            <button class="btn btn-sm btn-remove-exercise" onclick="removeSingleExercise('${date.toISOString()}', ${index})">
                                                 <i class="bi bi-trash"></i> 移除
                                             </button>
                                         </div>
@@ -7453,7 +7646,7 @@
             console.log('=== syncExerciseCompletionToDatabase 開始 ===');
             
             // 獲取 planId
-            const response = await fetch(`../exercise-completion-api.php?action=get_plan_id&week_number=${currentWeek}&user_id=9`);
+            const response = await fetch(`../exercise-completion-api.php?action=get_plan_id&week_number=${currentWeek}&user_id=${currentUserId || 9}`);
             const result = await response.json();
             
             console.log('get_plan_id API 回應:', result);
@@ -7740,9 +7933,9 @@
                                                        placeholder="搜尋動作名稱..." onkeyup="filterExercises()">
                                             </div>
                                             
-                                            <!-- 肌群篩選 -->
+                                           <!-- 肌群篩選（日期側面板用，避免與新增動作視窗重複 ID） -->
                                             <div class="mb-3">
-                                                <select class="form-select" id="muscleGroupFilter" onchange="filterExercises()">
+                                               <select class="form-select" id="dateMuscleGroupFilter" onchange="filterExercises()">
                                                     <option value="">選擇肌群...</option>
                                                     <option value="上胸">上胸</option>
                                                     <option value="中胸">中胸</option>
@@ -8288,28 +8481,65 @@
             console.log('動作列表HTML生成完成');
         }
 
-        // 篩選動作
+        // 依名稱/描述/欄位，先判斷這筆到底屬於二頭或三頭（或都不是）
+        function classifyArmGroup(ex) {
+            const name = (ex.name || '').toLowerCase();
+            const desc = (ex.description || ex.instruction_full || '').toLowerCase();
+            const graw = (ex.target_muscle || ex.muscle_group || ex.muscleGroup || '').toLowerCase();
+
+            const hit = (s) => name.includes(s) || desc.includes(s) || graw.includes(s);
+
+            // 二頭常見關鍵字
+            const isBiceps =
+                hit('二頭') || hit('肱二頭') ||
+                hit('彎舉') || hit('curl') || hit('hammer') ||
+                hit('錘式') || hit('牧師') || hit('preacher') ||
+                hit('集中') || hit('concentration');
+
+            // 三頭常見關鍵字
+            const isTriceps =
+                hit('三頭') || hit('肱三頭') ||
+                hit('下壓') || hit('pushdown') || hit('過頭') ||
+                hit('臂伸') || hit('臂屈伸') || hit('extension') ||
+                hit('法式') || hit('skull') || hit('crusher') ||
+                hit('kickback') || hit('臂後伸') || hit('dip');
+
+            if (isBiceps && !isTriceps) return '二頭肌';
+            if (isTriceps && !isBiceps) return '三頭肌';
+            return null; // 其他或不明確
+        }
+
+        // 篩選動作（日期彈窗專用）
         function filterExercises() {
-            console.log('filterExercises 被調用');
-            
-            const searchTerm = document.getElementById('exerciseSearchInput').value.toLowerCase();
-            const muscleGroupFilter = document.getElementById('muscleGroupFilter').value;
-            
-            console.log('搜尋條件:', searchTerm);
-            console.log('肌群篩選:', muscleGroupFilter);
-            
-            // 使用完整的備用動作數據進行篩選
-            const fullExercises = getBackupExercises();
-            
-            let filteredExercises = fullExercises.filter(exercise => {
-                const matchesSearch = !searchTerm || exercise.name.toLowerCase().includes(searchTerm);
-                const matchesMuscleGroup = !muscleGroupFilter || exercise.muscle_group === muscleGroupFilter;
-                
-                return matchesSearch && matchesMuscleGroup;
+            const searchTerm = document.getElementById('exerciseSearchInput').value.trim().toLowerCase();
+            const selected = document.getElementById('dateMuscleGroupFilter').value; // "", "二頭肌", "三頭肌", "背部"...
+
+            const full = (Array.isArray(window.exercises) && window.exercises.length > 0)
+                ? window.exercises
+                : getBackupExercises();
+
+            // 先用關鍵字搜尋；肌群選擇留到後面再判斷
+            let filtered = full.filter(ex => {
+                const name = (ex.name || '').toLowerCase();
+                const desc = (ex.description || ex.instruction_full || '').toLowerCase();
+                return !searchTerm || name.includes(searchTerm) || desc.includes(searchTerm);
             });
-            
-            console.log('篩選後動作數量:', filteredExercises.length);
-            renderExerciseListWithDetails(filteredExercises);
+
+            // 二/三頭 → 用 classifyArmGroup 嚴格分流
+            if (selected === '二頭肌' || selected === '三頭肌') {
+                filtered = filtered.filter(ex => classifyArmGroup(ex) === selected);
+            } else if (selected) {
+                // 其他肌群 → 走原本的寬鬆比對（避免誤殺）
+                const s = selected;
+                filtered = filtered.filter(ex => {
+                    const graw = ex.target_muscle || ex.muscle_group || ex.muscleGroup || '';
+                    const g = (graw || '').replace(/\s+/g, '');
+                    return g.includes(s) || s.includes(g) || (g.includes('手臂') && (s === '手臂'));
+                });
+            }
+
+            console.log(`[彈窗] 肌群:${selected || '全部'} → 篩後 ${filtered.length} 筆`);
+            renderExerciseListWithDetails(filtered);
         }
 
         // 選擇動作（用於特定日期）
@@ -8420,20 +8650,67 @@
         }
 
         // 同步行事曆動作到資料庫
-        async function syncCalendarExerciseToDatabase(date, exercise) {
+        // 同步行事曆動作到資料庫（修正版，會過濾掉沒 id 的）
+        async function syncCalendarExerciseToDatabase(date) {
             try {
                 const dateKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
                 const dayTrainingData = calendarTrainingData[dateKey] || [];
                 
-                // 構建要同步的資料
+                // 把行事曆裡這一天的資料「統一成後端要的格式」
+                const masterExercises = Array.isArray(window.exercises) ? window.exercises : [];
+                const getExerciseIdByName = (n) => {
+                    if (!n) return null;
+                    const hit = masterExercises.find(e => (e.name || '').trim() === (n || '').trim());
+                    return hit ? (hit.id ?? hit.exercise_id ?? null) : null;
+                };
+                const normalized = dayTrainingData
+                    // 1. 先排除休息日 / 空物件 / 沒有任何 id 的
+                    .filter(ex => ex && ((ex.exercise_id ?? ex.id ?? ex.exerciseId ?? 0) !== 0))
+                    // 2. 再把欄位轉成後端吃得下去的名稱
+                    .map((ex, idx) => {
+                        const name = ex.exercise_name ?? ex.name ?? ex.exerciseName ?? '';
+                        const exercise_id = ex.exercise_id ?? ex.id ?? ex.exerciseId ?? getExerciseIdByName(name);
+                        const muscleGroup = ex.muscle_group ?? ex.muscleGroup ?? '';
+                        const sets = (typeof ex.sets !== 'undefined') ? ex.sets : (ex.setsMin ?? 0);
+                        const reps = (typeof ex.reps !== 'undefined') ? ex.reps : (ex.repsMin ?? 0);
+                        const weight = (typeof ex.weight !== 'undefined') ? ex.weight : null;
+
+                        return {
+                            // 新版欄位（exercise-completion-api.php 真正在用的）
+                            exercise_id,
+                            exercise_name: name,
+                            muscle_group: muscleGroup,
+                            sets,
+                            reps,
+                            weight,
+                            order_index: idx,
+
+                            // 舊版保險欄位（避免後端還在讀 name / muscleGroup）
+                            name,
+                            muscleGroup
+                        };
+                    });
+
+                // 3. 最後再保底一次：只送有 id 的，徹底擋掉 1048
+                const filteredExercises = normalized.filter(e => Number.isInteger(e.exercise_id) && e.exercise_id > 0);
+                const dropped = normalized
+                    .filter(e => !(Number.isInteger(e.exercise_id) && e.exercise_id > 0))
+                    .map(e => e.exercise_name || e.name || '(未命名)');
+                if (dropped.length) {
+                    console.warn('已略過沒有有效 exercise_id 的動作：', dropped);
+                }
                 const syncData = {
                     date: dateKey,
-                    exercises: dayTrainingData.filter(ex => ex.id !== 0) // 排除休息日
+                    exercises: filteredExercises
                 };
                 
                 console.log('同步行事曆動作到資料庫:', syncData);
                 console.log('exercises 陣列內容:', syncData.exercises);
                 console.log('exercises 陣列長度:', syncData.exercises.length);
+                const filteredOut = normalized.filter(e => e.exercise_id === null).map(e => e.exercise_name || e.name);
+                if (filteredOut.length) {
+                    console.warn('以下動作找不到對應的 exercise_id，已略過：', filteredOut);
+                }
                 
                 const response = await fetch('../exercise-completion-api.php', {
                     method: 'POST',
@@ -8448,22 +8725,24 @@
                 });
                 
                 console.log('API 回應狀態:', response.status);
-                console.log('API 回應 headers:', response.headers);
-                
-                const responseText = await response.text();
-                console.log('API 回應內容:', responseText);
-                
-                const result = JSON.parse(responseText);
-                
-                if (result.success) {
-                    console.log('行事曆動作同步成功');
-                    return result;
-                } else {
-                    throw new Error(result.message || '同步失敗');
+                const text = await response.text();
+                console.log('API 回應內容:', text);
+
+                let result;
+                try {
+                    result = JSON.parse(text);
+                } catch (e) {
+                    console.error('API 回應不是 JSON:', text);
+                    throw new Error('後端回傳格式不正確');
                 }
-            } catch (error) {
-                console.error('同步行事曆動作到資料庫失敗:', error);
-                throw error;
+
+                if (!result.success) {
+                    console.error('同步失敗:', result.error);
+                    alert('同步失敗：' + (result.error || '未知錯誤'));
+                }
+            } catch (err) {
+                console.error('同步行事曆動作到資料庫失敗：', err);
+                alert('同步到資料庫失敗：' + err.message);
             }
         }
         
@@ -8662,6 +8941,20 @@
                 
                 // 載入肌群選項
                 await loadMuscleGroupOptions();
+
+                // 綁定「新增訓練動作」視窗的搜尋與肌群變更事件
+                const exerciseSearchInput = document.getElementById('exerciseSearch');
+                if (exerciseSearchInput) {
+                    exerciseSearchInput.addEventListener('input', () => {
+                        renderExerciseList();
+                    });
+                }
+                const muscleGroupSelect = document.getElementById('muscleGroupFilter');
+                if (muscleGroupSelect) {
+                    muscleGroupSelect.addEventListener('change', () => {
+                        renderExerciseList();
+                    });
+                }
                 
                 // 載入當前週次的計畫
                 await loadPlan();
@@ -8772,8 +9065,7 @@
                 if (data.success && data.data && data.data.length > 0) {
                     exercises = data.data;
                     console.log('載入動作資料成功，總數:', exercises.length);
-                    console.log('胸部動作數量:', exercises.filter(ex => ex.muscle_group === '胸').length);
-                    console.log('所有肌群:', [...new Set(exercises.map(ex => ex.muscle_group))]);
+                    console.log('所有肌群(標準化):', [...new Set(exercises.map(ex => normalizeMuscleGroup(getExerciseMuscleGroup(ex))))]);
                 } else {
                     console.warn('API 回應無效或無資料，使用備用動作資料');
                     exercises = getBackupExercises();
@@ -8943,7 +9235,7 @@
             
             // 從資料庫獲取 planId
             try {
-                const response = await fetch(`completion-api.php?action=get_plan_id&week_number=${currentWeek}&user_id=9`);
+                const response = await fetch(`completion-api.php?action=get_plan_id&week_number=${currentWeek}&user_id=${currentUserId || 9}`);
                 const result = await response.json();
                 if (result && result.success && result.plan_id) {
                     planId = result.plan_id;
@@ -9050,15 +9342,32 @@
             const searchTerm = document.getElementById('exerciseSearch').value.toLowerCase();
             const muscleFilter = document.getElementById('muscleGroupFilter').value;
 
+            // 調試：輸出群組統計
+            try {
+                const allGroups = exercises.map(e => normalizeMuscleGroup(e.target_muscle || e.muscle_group || e.muscleGroup || ''));
+                const groupCount = allGroups.reduce((m, g) => { if (!g) return m; m[g] = (m[g]||0)+1; return m; }, {});
+                console.log('所有肌群統計(標準化):', groupCount, '當前選擇=', muscleFilter);
+            } catch (e) { /* ignore */ }
+
             let filteredExercises = exercises.filter(exercise => {
-                const matchesSearch = exercise.name.toLowerCase().includes(searchTerm);
-                const matchesMuscle = !muscleFilter || exercise.muscle_group === muscleFilter;
+                const matchesSearch = (exercise.name || '').toLowerCase().includes(searchTerm);
+                const groupVal = exercise.target_muscle || exercise.muscle_group || exercise.muscleGroup || '';
+                const s = normalizeMuscleGroup(muscleFilter);
+                const g = normalizeMuscleGroup(groupVal);
+                const matchesMuscle = !muscleFilter || g === s || g.includes(s) || s.includes(g) || isMuscleGroupMatch(muscleFilter, groupVal);
                 return matchesSearch && matchesMuscle;
             });
 
             container.innerHTML = '';
 
             if (filteredExercises.length === 0) {
+                console.warn('當前肌群無結果，嘗試列出可能相近的群組，選擇=', muscleFilter);
+                try {
+                    const like = exercises.filter(e => (e.target_muscle||e.muscle_group||'').includes('頭'))
+                        .slice(0, 10)
+                        .map(e => ({ id:e.id, name:e.name, g:e.target_muscle||e.muscle_group||'' }));
+                    console.log('包含「頭」的樣本', like);
+                } catch(e) {}
                 container.innerHTML = '<div class="col-12 text-center empty-state">沒有找到符合條件的動作</div>';
                 return;
             }
@@ -9080,10 +9389,10 @@
                             <h6 class="card-title">${exercise.name}</h6>
                             <p class="card-text">${exercise.description || '無描述'}</p>
                             <div class="mb-3">
-                                <span class="${tagClass}">${exercise.muscle_group}</span>
+                                <span class="${tagClass}">${getExerciseMuscleGroup(exercise)}</span>
                                 <span class="${badgeClass}">${exercise.difficulty_level || '初級'}</span>
                             </div>
-                            <button class="${buttonClass}" onclick="selectExercise(${exercise.id}, '${exercise.name}', '${exercise.muscle_group}')">
+                            <button class="${buttonClass}" onclick="selectExercise(${exercise.id}, '${exercise.name}', '${getExerciseMuscleGroup(exercise)}')">
                                 <i class="${buttonIcon} me-2"></i>${buttonText}
                             </button>
                         </div>
@@ -9417,7 +9726,7 @@
         // 從資料庫載入已儲存的統計數據
         async function loadStatsFromDatabase() {
             try {
-                const response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=9`);
+                const response = await fetch(`completion-api.php?action=load_training_plan&week_number=${currentWeek}&user_id=${currentUserId || 9}`);
                 const result = await response.json();
 
                 if (result.success && result.plans && result.plans.length > 0) {
@@ -11299,7 +11608,7 @@
         // 檢查當前週是否有儲存到資料庫
         async function isCurrentWeekSaved() {
             try {
-                const response = await fetch(`completion-api.php?action=check_plan_exists&week_number=${currentWeek}&user_id=9`);
+                const response = await fetch(`completion-api.php?action=check_plan_exists&week_number=${currentWeek}&user_id=${currentUserId || 9}`);
                 const result = await response.json();
                 return result && result.success && result.exists;
             } catch (error) {

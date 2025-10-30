@@ -1,0 +1,139 @@
+{
+    "user_id": "phpecho_SESSIONuser_idguest",
+    "date": "2025-10-29",
+    "meals": {
+        "breakfast": [
+            {
+                "name": "燕麥片",
+                "grams": 126,
+                "caloriesPer100": 379,
+                "proteinPer100": 13,
+                "carbsPer100": 67,
+                "fatPer100": 6.5
+            },
+            {
+                "name": "豆腐",
+                "grams": 59,
+                "caloriesPer100": 76,
+                "proteinPer100": 8,
+                "carbsPer100": 1.9,
+                "fatPer100": 4.8
+            },
+            {
+                "name": "皮蛋瘦肉粥",
+                "grams": 66,
+                "caloriesPer100": 90,
+                "proteinPer100": 5,
+                "carbsPer100": 14,
+                "fatPer100": 2
+            },
+            {
+                "name": "粥(皮蛋瘦肉)",
+                "grams": 66,
+                "caloriesPer100": 90,
+                "proteinPer100": 5,
+                "carbsPer100": 14,
+                "fatPer100": 2
+            },
+            {
+                "name": "蔥油餅",
+                "grams": 66,
+                "caloriesPer100": 320,
+                "proteinPer100": 7,
+                "carbsPer100": 40,
+                "fatPer100": 14
+            },
+            {
+                "name": "炸醬麵",
+                "grams": 144,
+                "caloriesPer100": 210,
+                "proteinPer100": 8,
+                "carbsPer100": 30,
+                "fatPer100": 6.5
+            },
+            {
+                "name": "牛肉麵(湯麵,含肉)",
+                "grams": 66,
+                "caloriesPer100": 120,
+                "proteinPer100": 8,
+                "carbsPer100": 16,
+                "fatPer100": 3
+            },
+            {
+                "name": "牛肉麵(湯麵)",
+                "grams": 66,
+                "caloriesPer100": 120,
+                "proteinPer100": 8,
+                "carbsPer100": 16,
+                "fatPer100": 3
+            },
+            {
+                "name": "陽春麵(湯)",
+                "grams": 66,
+                "caloriesPer100": 105,
+                "proteinPer100": 4,
+                "carbsPer100": 17,
+                "fatPer100": 2
+            },
+            {
+                "name": "小籠湯包",
+                "grams": 210,
+                "caloriesPer100": 210,
+                "proteinPer100": 9,
+                "carbsPer100": 25,
+                "fatPer100": 8
+            },
+            {
+                "name": "水餃(豬肉高麗菜,熟)",
+                "grams": 66,
+                "caloriesPer100": 190,
+                "proteinPer100": 8,
+                "carbsPer100": 26,
+                "fatPer100": 6
+            },
+            {
+                "name": "鍋貼(豬肉韭菜,熟)",
+                "grams": 139,
+                "caloriesPer100": 230,
+                "proteinPer100": 9,
+                "carbsPer100": 27,
+                "fatPer100": 9
+            },
+            {
+                "name": "鮮食-炒米粉",
+                "grams": 81,
+                "caloriesPer100": 180,
+                "proteinPer100": 5,
+                "carbsPer100": 30,
+                "fatPer100": 5
+            },
+            {
+                "name": "鮮食-烤雞胸",
+                "grams": 126,
+                "caloriesPer100": 140,
+                "proteinPer100": 31,
+                "carbsPer100": 0,
+                "fatPer100": 3
+            },
+            {
+                "name": "鮮食-義大利麵(茄汁肉醬)",
+                "grams": 90,
+                "caloriesPer100": 155,
+                "proteinPer100": 7,
+                "carbsPer100": 26,
+                "fatPer100": 3
+            }
+        ],
+        "lunch": [],
+        "dinner": []
+    },
+    "target_calories": 2675,
+    "target_protein": 167,
+    "target_carbs": 334,
+    "target_fat": 74,
+    "actual_calories": 2730,
+    "actual_protein": 143,
+    "actual_carbs": 361,
+    "actual_fat": 81,
+    "updated_at": "2025-10-30T14:51:02+01:00"
+}

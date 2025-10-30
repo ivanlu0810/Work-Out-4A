@@ -77,20 +77,48 @@ function createExerciseCard(exercise, index) {
 }
 
 // 收藏 / 移除收藏
-function toggleFavorite(exercise, btn) {
-    let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+async function toggleFavorite(exercise, btn) {
+    try {
+        // 定義 API 端點
+        const API_FAVORITES = 'api/favorites.php';
+        
+        // 先更新 localStorage（保持向後兼容）
+        let favorites = JSON.parse(localStorage.getItem("favorites")) || [];
+        const exists = favorites.some(item => item.name === exercise.name);
 
-    const exists = favorites.some(item => item.name === exercise.name);
+        if (exists) {
+            // 刪除收藏 - 同步到伺服器
+            await fetch(API_FAVORITES + '?name=' + encodeURIComponent(exercise.name), {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                credentials: 'include',
+                body: 'name=' + encodeURIComponent(exercise.name)
+            });
+            
+            favorites = favorites.filter(item => item.name !== exercise.name);
+            alert(`已取消收藏：${exercise.name}`);
+            if (btn) btn.querySelector("i").classList.replace("bi-star-fill", "bi-star");
+        } else {
+            // 新增收藏 - 同步到伺服器
+            const res = await fetch(API_FAVORITES, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                credentials: 'include',
+                body: JSON.stringify({ name: exercise.name, exercise })
+            });
+            
+            if (!res.ok) {
+                throw new Error('儲存失敗');
+            }
+            
+            favorites.push(exercise);
+            alert(`已加入收藏：${exercise.name}`);
+            if (btn) btn.querySelector("i").classList.replace("bi-star", "bi-star-fill");
+        }
 
-    if (exists) {
-        favorites = favorites.filter(item => item.name !== exercise.name);
-        alert(`已取消收藏：${exercise.name}`);
-        if (btn) btn.querySelector("i").classList.replace("bi-star-fill", "bi-star");
-    } else {
-        favorites.push(exercise);
-        alert(`已加入收藏：${exercise.name}`);
-        if (btn) btn.querySelector("i").classList.replace("bi-star", "bi-star-fill");
+        localStorage.setItem("favorites", JSON.stringify(favorites));
+    } catch (e) {
+        console.error('收藏操作失敗:', e);
+        alert('操作失敗，請確認已登入或稍後再試');
     }
-
-    localStorage.setItem("favorites", JSON.stringify(favorites));
 }

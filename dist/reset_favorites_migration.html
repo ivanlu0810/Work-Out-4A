@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>重置收藏遷移</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        .info-box {
+            padding: 15px;
+            margin: 20px 0;
+            background-color: #e7f3ff;
+            border-left: 4px solid #007bff;
+            border-radius: 5px;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 5px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button.danger {
+            background-color: #dc3545;
+        }
+        button.danger:hover {
+            background-color: #c82333;
+        }
+        .success {
+            color: #28a745;
+            font-weight: bold;
+        }
+        pre {
+            background-color: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔄 重置收藏遷移工具</h1>
+        
+        <div class="info-box">
+            <h3>說明：</h3>
+            <p>如果您在「我的最愛」頁面看不到收藏的訓練動作，可能是因為遷移標記已經被設置。</p>
+            <p>點擊下方按鈕可以重置遷移標記，讓「我的最愛」頁面重新嘗試從 localStorage 遷移資料到資料庫。</p>
+        </div>
+        
+        <h3>目前狀態：</h3>
+        <div id="current-state"></div>
+        
+        <div style="margin-top: 20px;">
+            <button onclick="checkState()">檢查狀態</button>
+            <button class="danger" onclick="resetMigration()">重置遷移標記</button>
+            <button onclick="window.location.href='favorite.html'">前往我的最愛</button>
+        </div>
+        
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+
+    <script>
+        function checkState() {
+            const stateDiv = document.getElementById('current-state');
+            const resultDiv = document.getElementById('result');
+            
+            const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+            const migrated = localStorage.getItem('favorites_migrated');
+            
+            let html = '<pre>';
+            html += 'localStorage 收藏數量：' + favorites.length + '\n';
+            html += '遷移標記 (favorites_migrated)：' + (migrated || '未設置') + '\n';
+            html += '\n';
+            html += '收藏項目：\n';
+            favorites.forEach((item, index) => {
+                html += `${index + 1}. ${item.name}\n`;
+            });
+            html += '</pre>';
+            
+            stateDiv.innerHTML = html;
+            
+            if (favorites.length > 0 && migrated === '1') {
+                resultDiv.innerHTML = '<p class="success">✓ 發現收藏資料但已標記為已遷移。請點擊「重置遷移標記」後，前往「我的最愛」頁面。</p>';
+            } else if (favorites.length === 0) {
+                resultDiv.innerHTML = '<p>⚠ localStorage 中沒有收藏資料。</p>';
+            } else {
+                resultDiv.innerHTML = '<p>✓ 收藏資料尚未遷移，請前往「我的最愛」頁面。</p>';
+            }
+        }
+        
+        function resetMigration() {
+            localStorage.removeItem('favorites_migrated');
+            document.getElementById('result').innerHTML = '<p class="success">✓ 遷移標記已清除！請前往「我的最愛」頁面，系統會自動重新遷移收藏資料。</p>';
+            checkState();
+        }
+        
+        // 自動檢查狀態
+        window.addEventListener('load', checkState);
+    </script>
+</body>
+</html>
+

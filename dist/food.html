@@ -799,6 +799,10 @@ $email = $_SESSION['email'] ?? 'No email';
             top: 20px;
             right: 20px;
             z-index: 1060;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem; /* 讓多個 toast 垂直排列且不重疊 */
+            align-items: flex-end; /* 使寬度較小的 toast 右對齊 */
         }
 
 
@@ -1237,6 +1241,20 @@ $email = $_SESSION['email'] ?? 'No email';
             display: flex;
             align-items: center;
             justify-content: center;
+            line-height: 1; /* 避免行高造成垂直偏移 */
+        }
+
+        /* icon-only 小按鈕統一尺寸並置中 */
+        .btn-morandi-red.btn-sm {
+            width: 32px;
+            height: 32px;
+            padding: 0; /* 讓圖示真正置中 */
+        }
+
+        .btn-morandi-red i { 
+            color: white !important; 
+            font-size: 1rem; 
+            line-height: 1; 
         }
 
         .btn-morandi-red:hover {
@@ -1245,14 +1263,28 @@ $email = $_SESSION['email'] ?? 'No email';
             color: white !important;
         }
 
-        .btn-morandi-red i {
-            color: white !important;
+        
+
+        /* 實心莫蘭迪色按鈕（用於清空菜單） */
+        .btn-morandi-solid {
+            background-color: #E3E7EA;
+            border-color: #E3E7EA;
+            color: #2c3e50 !important;
+        }
+
+        .btn-morandi-solid:hover {
+            background-color: #d3d9df;
+            border-color: #d3d9df;
+            color: #2c3e50 !important;
         }
 
         /* Modal backdrop 統一透明度 */
         .modal-backdrop {
             background-color: rgba(0, 0, 0, 0.5) !important;
         }
+        /* 與 training-plan 一致的提示模態樣式 */
+        .modal-header { background-color: #f8f9fa !important; }
+        .modal-footer .btn { border-radius: 6px !important; padding: 0.375rem 0.75rem !important; }
     </style>
 </head>
 
@@ -1416,7 +1448,7 @@ $email = $_SESSION['email'] ?? 'No email';
                         </section>
 
                         <!-- Toast 通知容器 -->
-                        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
+                        <div id="toastContainer" class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1055;">
                             <div id="dataSuccessToast" class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-bs-autohide="false">
                                 <div class="toast-header" style="background-color: #e6edf3 !important; color: #495057 !important;">
                                     <i class="bi bi-check-circle-fill me-2"></i>
@@ -1676,7 +1708,7 @@ $email = $_SESSION['email'] ?? 'No email';
                                     <!-- 提示訊息 -->
                                     <div class="alert mt-3 morandi-alert" id="nutritionTrackerAlert">
                                         <i class="bi bi-info-circle me-2"></i>
-                                        <strong>開始使用：</strong>請先前往「營養計算」頁面計算您的營養需求，即可開始追蹤每日營養攝取。
+                                        <strong>開始使用：</strong>請先前往「營養計算」頁面計算您的營養需求，即可開始使用菜單並追蹤每日營養攝取。
                                     </div>
                                 </div>
                             </div>
@@ -3020,12 +3052,20 @@ $email = $_SESSION['email'] ?? 'No email';
 
             // 檢查是否有未儲存的變更
             if (hasUnsavedChanges) {
-                if (!confirm('您有未儲存的變更，是否要儲存後再切換日期？')) {
-                    dateInput.value = currentMealDate; // 恢復原日期
-                    return;
-                } else {
-                    await saveMealPlan();
-                }
+                let didConfirm = false;
+                showConfirmModal('您有未儲存的變更，是否要儲存後再切換日期？', async () => {
+                    didConfirm = true;
+                    await saveMealPlanSimple();
+                    currentMealDate = selectedDate;
+                    showToast(`已切換到 ${selectedDate} 的餐食計畫`, 'info');
+                    await loadMealPlanForDate(selectedDate);
+                });
+                // 取消時還原輸入框
+                const modalEl = document.getElementById('foodConfirmModal');
+                modalEl.addEventListener('hidden.bs.modal', function () {
+                    if (!didConfirm && dateInput) dateInput.value = currentMealDate;
+                }, { once: true });
+                return;
             }
 
             currentMealDate = selectedDate;
@@ -3040,7 +3080,8 @@ $email = $_SESSION['email'] ?? 'No email';
             try {
                 //showToast(`正在載入 ${date} 的餐食計畫...`, 'info');
 
-                const response = await fetch(`get_meal_plan.php?date=${date}`);
+                const uid = '<?php echo $_SESSION["user_id"] ?? "guest"; ?>';
+                const response = await fetch(`get_meal_plan.php?date=${date}&user_id=${encodeURIComponent(uid)}`);
                 const result = await response.json();
 
                 if (result.success && result.data) {
@@ -3053,7 +3094,7 @@ $email = $_SESSION['email'] ?? 'No email';
                         dinner: []
                     };
 
-                    // 載入餐食項目
+                    // 兼容兩種資料格式：資料庫版 items[] 或 檔案版 meals{}
                     if (plan.items) {
                         plan.items.forEach(item => {
                             if (mealPlan[item.meal_type]) {
@@ -3066,6 +3107,19 @@ $email = $_SESSION['email'] ?? 'No email';
                                     fatPer100: item.fat_per_100g
                                 });
                             }
+                        });
+                    } else if (plan.meals) {
+                        ['breakfast','lunch','dinner'].forEach(mt => {
+                            (plan.meals[mt] || []).forEach(it => {
+                                mealPlan[mt].push({
+                                    name: it.name,
+                                    grams: it.grams,
+                                    caloriesPer100: it.caloriesPer100,
+                                    proteinPer100: it.proteinPer100,
+                                    carbsPer100: it.carbsPer100,
+                                    fatPer100: it.fatPer100
+                                });
+                            });
                         });
                     }
 
@@ -3461,6 +3515,21 @@ $email = $_SESSION['email'] ?? 'No email';
         }
 
         function openFoodPicker(mealType) {
+            // 若尚未完成營養計算，提示並引導
+            if (!currentNutritionResult || !currentNutritionResult.macros || !currentNutritionResult.meal_distribution) {
+                showInfoModal('請先前往「營養計算」頁面計算您的營養需求');
+                try {
+                    const nutritionTabBtn = document.getElementById('nutrition-tab');
+                    if (nutritionTabBtn && window.bootstrap && bootstrap.Tab) {
+                        bootstrap.Tab.getOrCreateInstance(nutritionTabBtn).show();
+                    } else if (nutritionTabBtn) {
+                        nutritionTabBtn.click();
+                    }
+                    const form = document.getElementById('nutritionForm');
+                    if (form && form.scrollIntoView) form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                } catch (_) {}
+                return;
+            }
             currentPickMeal = mealType;
             document.getElementById('pickerSearch').value = '';
             document.getElementById('pickerCategory').value = '';
@@ -3657,6 +3726,47 @@ $email = $_SESSION['email'] ?? 'No email';
             } catch (error) {
                 console.error('儲存餐食計畫失敗:', error);
                 showToast(`儲存失敗：${error.message}，請檢查網路連線`, 'error');
+            }
+        }
+
+        // 簡易儲存（不自動補足目標），用於清空餐別後直接落盤
+        async function saveMealPlanSimple() {
+            if (!currentNutritionResult) {
+                showToast('請先計算營養需求', 'error');
+                return;
+            }
+
+            const totals = computeTotals();
+            const mealPlanData = {
+                user_id: '<?php echo $_SESSION["user_id"] ?? "guest"; ?>',
+                date: currentMealDate,
+                target_calories: currentNutritionResult.target_calories,
+                target_protein: currentNutritionResult.macros.protein.grams,
+                target_carbs: currentNutritionResult.macros.carbs.grams,
+                target_fat: currentNutritionResult.macros.fat.grams,
+                actual_calories: Math.round(totals.calories),
+                actual_protein: Math.round(totals.protein),
+                actual_carbs: Math.round(totals.carbs),
+                actual_fat: Math.round(totals.fat),
+                meals: mealPlan,
+                created_at: new Date().toISOString()
+            };
+
+            try {
+                const response = await fetch('save_meal_plan.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(mealPlanData)
+                });
+                const result = await response.json();
+                if (result.success) {
+                    showToast(`已儲存 ${currentMealDate} 的餐食計畫`, 'success');
+                    markAsSaved();
+                } else {
+                    showToast(`儲存失敗：${result.error || '未知錯誤'}`, 'error');
+                }
+            } catch (error) {
+                showToast(`儲存失敗：${error.message}`, 'error');
             }
         }
 
@@ -4345,7 +4455,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
         // 清空所有餐食
         function clearAllMeals() {
-            if (confirm('確定要清空所有餐食嗎？')) {
+            showConfirmModal('確定要清空所有餐食嗎？', () => {
                 mealPlan = { breakfast: [], lunch: [], dinner: [] };
                 renderPlanner(currentNutritionResult);
                 showToast('已清空所有餐食', 'info');
@@ -4358,7 +4468,7 @@ $email = $_SESSION['email'] ?? 'No email';
                 // 標記為有變更
                 hasUnsavedChanges = true;
                 checkForChanges();
-            }
+            });
         }
 
         // 查詢餐食紀錄
@@ -4760,6 +4870,91 @@ function renderPickerTable(foods) {
             }
         }
 
+        // 清空單一餐別所有食材
+        function clearMeal(mealType) {
+            const items = mealPlan[mealType] || [];
+            if (items.length === 0) {
+                showToast(`目前${mealTypeName[mealType]}沒有食材`, 'info');
+                return;
+            }
+            showConfirmModal(`確定要清空${mealTypeName[mealType]}的所有食材嗎？`, () => {
+                mealPlan[mealType] = [];
+                renderPlanner(currentNutritionResult);
+                showToast(`已清空${mealTypeName[mealType]}`, 'success');
+
+                // 標記有變更並更新進度
+                hasUnsavedChanges = true;
+                if (typeof checkForChanges === 'function') checkForChanges();
+                if (currentNutritionResult) {
+                    updateNutritionProgress(currentNutritionResult);
+                }
+
+                // 立刻儲存（不自動補足），避免刷新後回復
+                saveMealPlanSimple();
+            });
+        }
+
+        // 與 training-plan 一致的確認模態
+        function showConfirmModal(message, onConfirm) {
+            const html = `
+                <div class="modal fade" id="foodConfirmModal" tabindex="-1" aria-labelledby="foodConfirmModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="foodConfirmModalLabel">提示！</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                            </div>
+                            <div class="modal-body">${message}</div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" id="foodConfirmBtn">確定</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+
+            const existing = document.getElementById('foodConfirmModal');
+            if (existing) existing.remove();
+            document.body.insertAdjacentHTML('beforeend', html);
+            const modalEl = document.getElementById('foodConfirmModal');
+            const modal = new bootstrap.Modal(modalEl);
+            modal.show();
+            document.getElementById('foodConfirmBtn').onclick = () => {
+                modal.hide();
+                if (typeof onConfirm === 'function') onConfirm();
+            };
+            modalEl.addEventListener('hidden.bs.modal', function () {
+                try { modalEl.remove(); } catch (_) {}
+            });
+        }
+
+        // 資訊單鍵模態
+        function showInfoModal(message) {
+            const html = `
+                <div class="modal fade" id="foodInfoModal" tabindex="-1" aria-labelledby="foodInfoModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="foodInfoModalLabel">提示！</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="關閉"></button>
+                            </div>
+                            <div class="modal-body">${message}</div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" data-bs-dismiss="modal">知道了</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>`;
+            const existing = document.getElementById('foodInfoModal');
+            if (existing) existing.remove();
+            document.body.insertAdjacentHTML('beforeend', html);
+            const modal = new bootstrap.Modal(document.getElementById('foodInfoModal'));
+            modal.show();
+            document.getElementById('foodInfoModal').addEventListener('hidden.bs.modal', function () {
+                try { document.getElementById('foodInfoModal').remove(); } catch (_) {}
+            }, { once: true });
+        }
+
         // Toast 提示功能
         function showToast(message, type = 'info') {
             // 確保有 toastContainer
@@ -4891,8 +5086,30 @@ function renderPickerTable(foods) {
 
         // 智能菜單生成（針對特定餐別）
         function generateSmartMenu(mealType) {
-            if (!currentNutritionResult) {
-                showToast('請先計算營養需求', 'error');
+            // 若尚未完成營養計算，或結果不完整，提示並引導
+            if (!currentNutritionResult ||
+                !currentNutritionResult.meal_distribution ||
+                !currentNutritionResult.macros) {
+                // 引導使用者先完成營養計算
+                try { showToast('請先前往「營養計算」頁面計算您的營養需求', 'error'); } catch (_) {}
+                // 改用自訂資訊模態而非瀏覽器 alert
+                showInfoModal('請先前往「營養計算」頁面計算您的營養需求');
+                try {
+                    // 切換到營養計算分頁（Bootstrap 5 Tab）
+                    const nutritionTabBtn = document.getElementById('nutrition-tab');
+                    if (nutritionTabBtn && window.bootstrap && bootstrap.Tab) {
+                        const tab = bootstrap.Tab.getOrCreateInstance(nutritionTabBtn);
+                        tab.show();
+                    } else if (nutritionTabBtn) {
+                        // 後備：直接模擬點擊
+                        nutritionTabBtn.click();
+                    }
+                    // 滾動到表單位置
+                    const form = document.getElementById('nutritionForm');
+                    if (form && typeof form.scrollIntoView === 'function') {
+                        form.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                } catch (e) { /* no-op */ }
                 return;
             }
 
@@ -6059,11 +6276,14 @@ function renderPickerTable(foods) {
                                         <h6 class="mb-0">早餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('breakfast')">
+                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('breakfast')">
                                             智慧菜單
                                         </button>
-                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('breakfast', '${dateStr}')">
+                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('breakfast', '${dateStr}')">
                                             手動新增
+                                        </button>
+                                        <button class="btn btn-sm btn-morandi-solid d-flex align-items-center" style="font-size: 12px; gap: 4px;" onclick="clearMeal('breakfast')">
+                                            清空菜單
                                         </button>
                                     </div>
                                 </div>
@@ -6081,11 +6301,14 @@ function renderPickerTable(foods) {
                                         <h6 class="mb-0">午餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('lunch')">
+                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('lunch')">
                                             智慧菜單
                                         </button>
-                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('lunch', '${dateStr}')">
+                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('lunch', '${dateStr}')">
                                             手動新增
+                                        </button>
+                                        <button class="btn btn-sm btn-morandi-solid d-flex align-items-center" style="font-size: 12px; gap: 4px;" onclick="clearMeal('lunch')">
+                                            清空菜單
                                         </button>
                                     </div>
                                 </div>
@@ -6103,11 +6326,14 @@ function renderPickerTable(foods) {
                                         <h6 class="mb-0">晚餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('dinner')">
+                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('dinner')">
                                             智慧菜單
                                         </button>
-                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('dinner', '${dateStr}')">
+                                        <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('dinner', '${dateStr}')">
                                             手動新增
+                                        </button>
+                                        <button class="btn btn-sm btn-morandi-solid d-flex align-items-center" style="font-size: 12px; gap: 4px;" onclick="clearMeal('dinner')">
+                                            清空菜單
                                         </button>
                                     </div>
                                 </div>
@@ -6169,12 +6395,12 @@ function renderPickerTable(foods) {
 
         // 刪除日期餐食
         function deleteDateMeals(dateStr) {
-            if (confirm(`確定要刪除 ${dateStr} 的所有餐食嗎？`)) {
+            showConfirmModal(`確定要刪除 ${dateStr} 的所有餐食嗎？`, () => {
                 delete mealPlans[dateStr];
                 updateCalendar();
                 document.getElementById('selectedDateInfo').style.display = 'none';
                 showToast('已刪除該日期的餐食', 'success');
-            }
+            });
         }
 
         // 上一個月

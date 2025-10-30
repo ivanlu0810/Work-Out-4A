@@ -652,43 +652,24 @@ try {
                     }
                 }
             } elseif ($month) {
-                // 月統計 - 直接使用 exercise-completion-api 的邏輯
+                // 月統計 - 使用 training_plan_exercises 的 exercise_date
                 $sql = "SELECT 
-                           DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
-                               WHEN 'monday' THEN 0
-                               WHEN 'tuesday' THEN 1
-                               WHEN 'wednesday' THEN 2
-                               WHEN 'thursday' THEN 3
-                               WHEN 'friday' THEN 4
-                               WHEN 'saturday' THEN 5
-                               WHEN 'sunday' THEN 6
-                           END DAY) as exercise_date,
-                           COUNT(*) as total_exercises,
+                           tpe.exercise_date,
+                           COUNT(DISTINCT CONCAT(tpe.exercise_date, '-', tpe.exercise_id, '-', tpe.exercise_name)) as total_exercises,
                            SUM(CASE WHEN tpc.individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
-                        FROM training_plan_completion tpc
-                        JOIN training_plans tp ON tpc.plan_id = tp.id
-                        WHERE tpc.user_id = ? 
-                        AND YEAR(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
-                            WHEN 'monday' THEN 0
-                            WHEN 'tuesday' THEN 1
-                            WHEN 'wednesday' THEN 2
-                            WHEN 'thursday' THEN 3
-                            WHEN 'friday' THEN 4
-                            WHEN 'saturday' THEN 5
-                            WHEN 'sunday' THEN 6
-                        END DAY)) = ?
-                        AND MONTH(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
-                            WHEN 'monday' THEN 0
-                            WHEN 'tuesday' THEN 1
-                            WHEN 'wednesday' THEN 2
-                            WHEN 'thursday' THEN 3
-                            WHEN 'friday' THEN 4
-                            WHEN 'saturday' THEN 5
-                            WHEN 'sunday' THEN 6
-                        END DAY)) = ?
-                        AND tpc.exercise_id IS NOT NULL
-                        GROUP BY exercise_date
-                        ORDER BY exercise_date";
+                        FROM training_plan_exercises tpe
+                        JOIN training_plans tp ON tpe.plan_id = tp.id AND tp.user_id = ?
+                        LEFT JOIN training_plan_completion tpc 
+                            ON tpe.plan_id = tpc.plan_id 
+                            AND tpe.exercise_id = tpc.exercise_id 
+                            AND tpe.day_of_week = tpc.day_of_week
+                            AND tpc.user_id = tp.user_id
+                        WHERE tpe.exercise_date IS NOT NULL
+                        AND tpe.exercise_id > 0
+                        AND YEAR(tpe.exercise_date) = ?
+                        AND MONTH(tpe.exercise_date) = ?
+                        GROUP BY tpe.exercise_date
+                        ORDER BY tpe.exercise_date";
                 $stmt = $pdo->prepare($sql);
                 $stmt->execute([$user_id, $year, $month]);
                 $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -721,32 +702,21 @@ try {
                     }
                 }
             } else {
-                // 年統計 - 使用實際訓練日期
+                // 年統計 - 使用 training_plan_exercises 的 exercise_date
                 $sql = "SELECT 
-                           MONTH(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
-                               WHEN 'monday' THEN 0
-                               WHEN 'tuesday' THEN 1
-                               WHEN 'wednesday' THEN 2
-                               WHEN 'thursday' THEN 3
-                               WHEN 'friday' THEN 4
-                               WHEN 'saturday' THEN 5
-                               WHEN 'sunday' THEN 6
-                           END DAY)) as month_num,
-                           COUNT(*) as total_exercises,
+                           MONTH(tpe.exercise_date) as month_num,
+                           COUNT(DISTINCT CONCAT(tpe.exercise_date, '-', tpe.exercise_id, '-', tpe.exercise_name)) as total_exercises,
                            SUM(CASE WHEN tpc.individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
-                        FROM training_plan_completion tpc
-                        JOIN training_plans tp ON tpc.plan_id = tp.id
-                        WHERE tpc.user_id = ? 
-                        AND YEAR(DATE_ADD(tp.week_start_date, INTERVAL CASE tpc.day_of_week 
-                            WHEN 'monday' THEN 0
-                            WHEN 'tuesday' THEN 1
-                            WHEN 'wednesday' THEN 2
-                            WHEN 'thursday' THEN 3
-                            WHEN 'friday' THEN 4
-                            WHEN 'saturday' THEN 5
-                            WHEN 'sunday' THEN 6
-                        END DAY)) = ?
-                        AND tpc.exercise_id IS NOT NULL
+                        FROM training_plan_exercises tpe
+                        JOIN training_plans tp ON tpe.plan_id = tp.id AND tp.user_id = ?
+                        LEFT JOIN training_plan_completion tpc 
+                            ON tpe.plan_id = tpc.plan_id 
+                            AND tpe.exercise_id = tpc.exercise_id 
+                            AND tpe.day_of_week = tpc.day_of_week
+                            AND tpc.user_id = tp.user_id
+                        WHERE tpe.exercise_date IS NOT NULL
+                        AND tpe.exercise_id > 0
+                        AND YEAR(tpe.exercise_date) = ?
                         GROUP BY month_num
                         ORDER BY month_num";
         $stmt = $pdo->prepare($sql);

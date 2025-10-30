@@ -1188,16 +1188,41 @@
             filteredFavorites = allFavorites.filter(exercise => {
                 const matchesSearch = !searchTerm || 
                     exercise.name.toLowerCase().includes(searchTerm) ||
-                    (exercise.target_muscle && exercise.target_muscle.toLowerCase().includes(searchTerm)) ||
+                    ((getExerciseMuscle(exercise) || '').toLowerCase().includes(searchTerm)) ||
                     (exercise.description && exercise.description.toLowerCase().includes(searchTerm));
                 
-                const matchesMuscle = !muscleFilter || 
-                    (exercise.target_muscle && exercise.target_muscle.includes(muscleFilter));
+                const matchesMuscle = !muscleFilter || matchesMuscleCategory(getExerciseMuscle(exercise), muscleFilter);
                 
                 return matchesSearch && matchesMuscle;
             });
             
             renderContent();
+        }
+
+        // 檢查動作是否屬於指定的肌肉類別
+        function matchesMuscleCategory(targetMuscle, category) {
+            if (!targetMuscle) return false;
+            
+            // 定義肌肉類別映射
+            const muscleCategoryMap = {
+                '胸肌': ['胸', '上胸', '中胸', '下胸', '胸大肌'],
+                '背肌': ['背', '背肌', '背闊肌', '闊背肌', '上背', '中背', '下背', '斜方肌', '菱形肌', '豎脊肌'],
+                '肩膀': ['肩膀', '肩膀前束', '肩膀中束', '肩膀後束', '三角肌', '三角肌前束', '三角肌中束', '三角肌後束'],
+                '手臂': ['二頭', '二頭肌', '三頭', '三頭肌', '肱二頭肌', '肱三頭肌'],
+                '腿部': ['大腿', '小腿', '股四', '股二', '臀', '腓腸', '比目魚', '內收'],
+                '核心': ['核心', '腹部', '腹', '上腹', '下腹', '側腹', '腹斜', '腹直']
+            };
+            
+            // 獲取該類別的所有關鍵字
+            const keywords = muscleCategoryMap[category] || [category];
+            
+            // 檢查 target_muscle 是否包含任何關鍵字
+            return keywords.some(keyword => targetMuscle.includes(keyword));
+        }
+
+        // 兼容不同資料來源的肌群欄位名稱
+        function getExerciseMuscle(ex) {
+            return (ex.target_muscle || ex.muscle_group || ex.muscleGroup || ex.group || '').trim();
         }
 
         // 篩選處理
