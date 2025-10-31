@@ -557,7 +557,7 @@ try {
                     ),
                     c AS (
                         SELECT 
-                            CASE DAYOFWEEK(DATE_ADD(tp.week_start_date, INTERVAL 
+                            CASE DAYOFWEEK(COALESCE(tpe.exercise_date, DATE_ADD(tp.week_start_date, INTERVAL 
                                 CASE tpc.day_of_week
                                     WHEN 'monday' THEN 0
                                     WHEN 'tuesday' THEN 1
@@ -566,7 +566,7 @@ try {
                                     WHEN 'friday' THEN 4
                                     WHEN 'saturday' THEN 5
                                     WHEN 'sunday' THEN 6
-                                END DAY))
+                                END DAY)))
                                 WHEN 2 THEN 'monday'
                                 WHEN 3 THEN 'tuesday'
                                 WHEN 4 THEN 'wednesday'
@@ -576,7 +576,7 @@ try {
                                 WHEN 1 THEN 'sunday'
                             END AS day_of_week,
                             COUNT(DISTINCT CONCAT(
-                                DATE(DATE_ADD(tp.week_start_date, INTERVAL 
+                                DATE(COALESCE(tpe.exercise_date, DATE_ADD(tp.week_start_date, INTERVAL 
                                     CASE tpc.day_of_week
                                         WHEN 'monday' THEN 0
                                         WHEN 'tuesday' THEN 1
@@ -585,24 +585,30 @@ try {
                                         WHEN 'friday' THEN 4
                                         WHEN 'saturday' THEN 5
                                         WHEN 'sunday' THEN 6
-                                    END DAY
-                                )), '#', tpc.exercise_id, '#', tpc.exercise_name
+                                    END DAY))), '#', tpc.exercise_id, '#', COALESCE(tpc.exercise_name, '')
                             )) AS completed_exercises
                         FROM training_plan_completion tpc
                         JOIN training_plans tp ON tp.id = tpc.plan_id
+                        LEFT JOIN training_plan_exercises tpe ON tpe.plan_id = tpc.plan_id 
+                            AND tpe.exercise_id = tpc.exercise_id 
+                            AND COALESCE(tpe.day_of_week, '') = COALESCE(tpc.day_of_week, '')
                         WHERE tpc.user_id = ?
                           AND tpc.exercise_id IS NOT NULL
                           AND tpc.individual_completed = 1
-                          AND DATE(DATE_ADD(tp.week_start_date, INTERVAL 
-                                CASE tpc.day_of_week
-                                    WHEN 'monday' THEN 0
-                                    WHEN 'tuesday' THEN 1
-                                    WHEN 'wednesday' THEN 2
-                                    WHEN 'thursday' THEN 3
-                                    WHEN 'friday' THEN 4
-                                    WHEN 'saturday' THEN 5
-                                    WHEN 'sunday' THEN 6
-                                END DAY)) BETWEEN ? AND ?
+                          AND (
+                              (tpe.exercise_date IS NOT NULL AND DATE(tpe.exercise_date) BETWEEN ? AND ?)
+                              OR
+                              (tpe.exercise_date IS NULL AND DATE(DATE_ADD(tp.week_start_date, INTERVAL 
+                                    CASE tpc.day_of_week
+                                        WHEN 'monday' THEN 0
+                                        WHEN 'tuesday' THEN 1
+                                        WHEN 'wednesday' THEN 2
+                                        WHEN 'thursday' THEN 3
+                                        WHEN 'friday' THEN 4
+                                        WHEN 'saturday' THEN 5
+                                        WHEN 'sunday' THEN 6
+                                    END DAY)) BETWEEN ? AND ?)
+                          )
                         GROUP BY 1
                     )
                     SELECT 
@@ -623,7 +629,7 @@ try {
                     ORDER BY FIELD(d.day_of_week,'monday','tuesday','wednesday','thursday','friday','saturday','sunday')
                 ";
                 $stmt = $pdo->prepare($sql);
-                $stmt->execute([$user_id, $startDate, $endDate, $user_id, $startDate, $endDate]);
+                $stmt->execute([$user_id, $startDate, $endDate, $user_id, $startDate, $endDate, $startDate, $endDate]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 $days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
