@@ -9,11 +9,11 @@ $isLocal = !isset($_SERVER['HTTP_HOST']) ||
 
 if ($isLocal) {
     // 本地 XAMPP 配置
-    $host = 'localhost';
+    $host = '1.tcp.jp.ngrok.io';
     $db   = 'test';
     $user = 'root';
     $pass = '';
-    $port = 3306;
+    $port = 20959;
 } else {
     // 遠端 ngrok 配置
     $host = '1.tcp.jp.ngrok.io';
