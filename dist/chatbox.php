@@ -371,7 +371,7 @@ $messages = [
     [
         "role" => "system",
         "content" =>
-"你是一位健身教練型 AI 助理。請以自然、像教練對學員的口吻，專業但親切；務必使用繁體中文。
+"你是一位健身教練型 AI 助理。請以自然、像教練對學員的口吻，專業但親切；務必使用繁體中文（請全程以繁體中文回答，不使用簡體或英文）。
 行為規則：
 1) 若本輪意圖為一般聊天（intent=chat）或無明確健身請求，就以正常聊天與建議回答，**不要**主動產生課表。
 2) 只有當意圖為課表/動作（intent=plan 或 intent=exercise_qa）時，才根據『使用者最新身體數據』與『資料庫提供的相關訓練動作』給建議。
@@ -401,7 +401,7 @@ $classificationPrompt = [
     [
         "role" => "system",
         "content" =>
-"你是健身助手。請判斷使用者輸入並只輸出 JSON（不得夾雜其他文字）：
+"你是健身助手。請以繁體中文思考，但僅能輸出 JSON 結果（不得夾雜其他任何文字或說明）：
 {
   \"intent\": \"chat|plan|exercise_qa|equipment_qa|other\",
   \"target_muscle\": \"胸部|肩部|背部|腿部|手臂|核心|null|多個以|分隔\",
@@ -527,6 +527,7 @@ if ($intent === "equipment_qa") {
 
     // === 組合「獨立」的器材提示給模型（不帶 InBody、不帶部位候選） ===
     $userPrompt = "意圖(intent): equipment_qa\n";
+    $userPrompt .= "請以繁體中文回答。\n";
     $userPrompt .= $equipmentText . "\n";
     if ($exerciseText) {
         $userPrompt .= "以下為可搭配的代表動作（資料庫）：\n" . $exerciseText . "\n";
@@ -755,6 +756,7 @@ if ($intent === "plan" && !empty($targetMuscles)) {
 
 // 🔟 組合送給 AI 的 user message（各意圖獨立）
 $userPrompt = "意圖(intent): {$intent}\n";
+$userPrompt .= "請以繁體中文回答。\n";
 
 // 只有 plan 才帶 inBody
 if ($isFirstChat && $intent === "plan") {

@@ -2402,6 +2402,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
                 const userData = await response.json();
                 console.log('載入用戶資料:', userData);
+                window.currentUid = userData.userid || "guest";
 
                 // 檢查是否有完整的用戶資料
                 const hasCompleteData = userData.age && userData.gender && userData.height && userData.weight;
@@ -3058,7 +3059,7 @@ $email = $_SESSION['email'] ?? 'No email';
                     await saveMealPlanSimple();
                     currentMealDate = selectedDate;
                     showToast(`已切換到 ${selectedDate} 的餐食計畫`, 'info');
-                    await loadMealPlanForDate(selectedDate);
+                    await loadMealPlanForDate(selectedDate, window.currentUid);
                 });
                 // 取消時還原輸入框
                 const modalEl = document.getElementById('foodConfirmModal');
@@ -3072,18 +3073,15 @@ $email = $_SESSION['email'] ?? 'No email';
             showToast(`已切換到 ${selectedDate} 的餐食計畫`, 'info');
 
             // 載入該日期的餐食計畫
-            await loadMealPlanForDate(selectedDate);
+            await loadMealPlanForDate(selectedDate, window.currentUid);
         }
-        //無用
-        // 載入特定日期的餐食計畫
-        async function loadMealPlanForDate(date) {
-            try {
-                //showToast(`正在載入 ${date} 的餐食計畫...`, 'info');
 
-                const uid = '<?php echo $_SESSION["user_id"] ?? "guest"; ?>';
+        async function loadMealPlanForDate(date, uid) {
+            try {
+                uid = uid || window.currentUid || "guest";
                 const response = await fetch(`get_meal_plan.php?date=${date}&user_id=${encodeURIComponent(uid)}`);
                 const result = await response.json();
-
+                console.log("UID:", uid);
                 if (result.success && result.data) {
                     const plan = result.data;
 
@@ -3688,7 +3686,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
             const totals = computeTotals();
             const mealPlanData = {
-                user_id: '<?php echo $_SESSION["user_id"] ?? "guest"; ?>',
+                user_id: window.currentUid,
                 date: currentMealDate, // 使用當前選擇的日期
                 target_calories: currentNutritionResult.target_calories,
                 target_protein: currentNutritionResult.macros.protein.grams,
@@ -3738,7 +3736,7 @@ $email = $_SESSION['email'] ?? 'No email';
 
             const totals = computeTotals();
             const mealPlanData = {
-                user_id: '<?php echo $_SESSION["user_id"] ?? "guest"; ?>',
+                user_id: window.currentUid,
                 date: currentMealDate,
                 target_calories: currentNutritionResult.target_calories,
                 target_protein: currentNutritionResult.macros.protein.grams,
@@ -6220,7 +6218,7 @@ function renderPickerTable(foods) {
             displaySelectedDateMeals(dateStr, mealData);
 
             // ★ 改成用「帶參數」的載入：一次指向 dateStr
-            loadMealPlanForDate(dateStr);
+            loadMealPlanForDate(dateStr, window.currentUid);
         }
 
 
