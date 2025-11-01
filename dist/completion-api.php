@@ -697,7 +697,8 @@ try {
                     $weekData[$weekNum]['completed_exercises'] += (int)$row['completed_exercises'];
                 }
                 
-                for ($i = 1; $i <= 4; $i++) {
+                // 返回按週分組的數據（用於圖表顯示）
+                for ($i = 1; $i <= 6; $i++) {  // 支持最多6週
                     if (isset($weekData[$i])) {
                         $completionData["week{$i}"] = $weekData[$i];
                     } else {
@@ -706,6 +707,19 @@ try {
                             'completed_exercises' => 0
                         ];
                     }
+                }
+                
+                // 同時返回每天的實際數據（用於準確計算天數）
+                $completionData['_dailyData'] = [];
+                foreach ($rows as $row) {
+                    $completionData['_dailyData'][] = [
+                        'date' => $row['exercise_date'],
+                        'total_exercises' => (int)$row['total_exercises'],
+                        'completed_exercises' => (int)$row['completed_exercises'],
+                        'completion_percentage' => $row['total_exercises'] > 0 
+                            ? round(($row['completed_exercises'] / $row['total_exercises']) * 100) 
+                            : 0
+                    ];
                 }
             } else {
                 // 年統計 - 使用 training_plan_exercises 的 exercise_date
@@ -728,6 +742,27 @@ try {
         $stmt = $pdo->prepare($sql);
                 $stmt->execute([$user_id, $year]);
         $rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // 為了計算實際天數，需要查詢每天的數據
+        $dailySql = "SELECT 
+                       tpe.exercise_date,
+                       COUNT(DISTINCT CONCAT(tpe.exercise_date, '-', tpe.exercise_id, '-', tpe.exercise_name)) as total_exercises,
+                       SUM(CASE WHEN tpc.individual_completed = 1 THEN 1 ELSE 0 END) as completed_exercises
+                    FROM training_plan_exercises tpe
+                    JOIN training_plans tp ON tpe.plan_id = tp.id AND tp.user_id = ?
+                    LEFT JOIN training_plan_completion tpc 
+                        ON tpe.plan_id = tpc.plan_id 
+                        AND tpe.exercise_id = tpc.exercise_id 
+                        AND tpe.day_of_week = tpc.day_of_week
+                        AND tpc.user_id = tp.user_id
+                    WHERE tpe.exercise_date IS NOT NULL
+                    AND tpe.exercise_id > 0
+                    AND YEAR(tpe.exercise_date) = ?
+                    GROUP BY tpe.exercise_date
+                    ORDER BY tpe.exercise_date";
+        $dailyStmt = $pdo->prepare($dailySql);
+        $dailyStmt->execute([$user_id, $year]);
+        $dailyRows = $dailyStmt->fetchAll(PDO::FETCH_ASSOC);
                 
                 for ($i = 1; $i <= 12; $i++) {
                     $monthData = array_filter($rows, function($row) use ($i) {
@@ -746,6 +781,20 @@ try {
                             'completed_exercises' => 0
                         ];
                     }
+                }
+                
+                // 同時返回每天的實際數據（用於準確計算年統計的天數）
+                $completionData['_dailyData'] = [];
+                foreach ($dailyRows as $row) {
+                    $completionData['_dailyData'][] = [
+                        'date' => $row['exercise_date'],
+                        'month' => (int)date('n', strtotime($row['exercise_date'])), // 月份數字（1-12）
+                        'total_exercises' => (int)$row['total_exercises'],
+                        'completed_exercises' => (int)$row['completed_exercises'],
+                        'completion_percentage' => $row['total_exercises'] > 0 
+                            ? round(($row['completed_exercises'] / $row['total_exercises']) * 100) 
+                            : 0
+                    ];
                 }
             }
             

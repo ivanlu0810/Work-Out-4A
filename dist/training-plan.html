@@ -3479,7 +3479,7 @@
                                                     </div>
                                                     <div class="col-md-3">
                                                         <div class="d-flex align-items-center h-100">
-                                                            <button class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats()">
+                                                            <button type="button" class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats(event); return false;">
                                                                 <i class="bi bi-search me-2"></i>查詢統計
                                                             </button>
                                                         </div>
@@ -3575,7 +3575,7 @@
                                                     </div>
                                                     <div class="col-md-4">
                                                         <div class="d-flex align-items-center h-100">
-                                                            <button class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats()">
+                                                            <button type="button" class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats(event); return false;">
                                                                 <i class="bi bi-search me-2"></i>查詢統計
                                                             </button>
                                                         </div>
@@ -3606,7 +3606,7 @@
                                                     <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="small" style="color: #6C757D; font-size: 0.75rem;">已完成天數</span>
-                                                            <span class="fw-semibold" id="completed-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
+                                                            <span class="fw-semibold" id="month-completed-training-days" style="color: #495057; font-size: 0.875rem;">0</span>
                                                         </div>
                                                     </div>
                                                     <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
@@ -3618,7 +3618,7 @@
                                                     <div class="stat-card rounded-2 p-2 mb-2" style="background: #FFFFFF; border: 1px solid #E9ECEF;">
                                                         <div class="d-flex justify-content-between align-items-center">
                                                             <span class="small" style="color: #6C757D; font-size: 0.75rem;">完成率</span>
-                                                            <span class="fw-semibold" id="completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
+                                                            <span class="fw-semibold" id="month-completion-rate" style="color: #495057; font-size: 0.875rem;">0%</span>
                                                         </div>
                                                     </div>
                                                 </div>
@@ -3651,7 +3651,7 @@
                                                     </div>
                                                     <div class="col-md-6">
                                                         <div class="d-flex align-items-center h-100">
-                                                            <button class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats()">
+                                                            <button type="button" class="btn btn-primary rounded-pill px-4 py-2 w-100" onclick="updateCompletionStats(event); return false;">
                                                                 <i class="bi bi-search me-2"></i>查詢統計
                                                             </button>
                                                         </div>
@@ -4422,7 +4422,13 @@
         }
 
         // 更新完成度統計
-        async function updateCompletionStats() {
+        async function updateCompletionStats(event) {
+            // 阻止事件冒泡和預設行為
+            if (event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            
             const selectedMode = document.querySelector('input[name="statsMode"]:checked').value;
             
             let year, month, week;
@@ -4516,8 +4522,8 @@
                 completionRateEl = document.getElementById('completion-rate');
             } else if (timeUnit === 'month') {
                 totalDaysEl = document.getElementById('month-total-training-days');
-                completedDaysEl = document.getElementById('completed-training-days');
-                completionRateEl = document.getElementById('completion-rate');
+                completedDaysEl = document.getElementById('month-completed-training-days');
+                completionRateEl = document.getElementById('month-completion-rate');
                 console.log('月統計元素:', { totalDaysEl, completedDaysEl, completionRateEl });
             } else if (timeUnit === 'year') {
                 totalDaysEl = document.getElementById('year-total-training-days');
@@ -4534,6 +4540,9 @@
             
             let totalDays = 0;
             let completedDays = 0;
+            // 將變數定義在外層，以便在完成率計算時使用
+            let totalExercises = 0;
+            let completedExercises = 0;
             
             if (timeUnit === 'week') {
                 // 週模式：使用傳入的 data 參數計算統計
@@ -4542,8 +4551,9 @@
                 console.log('=== 週統計計算開始 ===');
                 console.log('傳入的 data:', data);
                 
-                let totalExercises = 0;
-                let completedExercises = 0;
+                // 重置計數器
+                totalExercises = 0;
+                completedExercises = 0;
                 
                 for (const day of days) {
                     const value = data[day];
@@ -4581,60 +4591,88 @@
                     completedExercisesEl.textContent = `${completedExercises} / ${totalExercises}`;
                 }
             } else if (timeUnit === 'month') {
-                // 月模式：根據週數據計算已完成的動作數量
+                // 月模式：使用資料庫的實際每日數據來計算
                 console.log('=== 月統計計算開始 ===');
                 console.log('傳入的 data:', data);
                 
-                let totalExercises = 0;  // 總動作數
-                let completedExercises = 0;  // 已完成動作數
-                let weeksWithData = 0;  // 有數據的週數
+                // 重置計數器
+                totalExercises = 0;
+                completedExercises = 0;
+                totalDays = 0;
+                completedDays = 0;
                 
-                // 遍歷4週，累加每週的動作數
-                for (let weekIndex = 1; weekIndex <= 4; weekIndex++) {
+                // 從週數據累加動作數（用於完成動作數顯示）
+                for (let weekIndex = 1; weekIndex <= 6; weekIndex++) {
                     const weekKey = `week${weekIndex}`;
                     const weekData = data[weekKey];
-                    console.log(`第${weekIndex}週數據:`, weekData);
                     
-                    // 檢查 weekData 是否存在且不為 -1（-1 代表沒有資料）
                     if (weekData !== undefined && weekData !== null && weekData !== -1) {
-                        console.log(`第${weekIndex}週有資料:`, weekData);
-                        
-                        // 如果 weekData 是物件格式（新格式）
                         if (weekData && typeof weekData === 'object' && weekData.total_exercises !== undefined) {
-                            const weekTotal = weekData.total_exercises || 0;
-                            const weekCompleted = weekData.completed_exercises || 0;
+                            const weekTotal = Number(weekData.total_exercises) || 0;
+                            const weekCompleted = Number(weekData.completed_exercises) || 0;
                             
                             if (weekTotal > 0) {
-                                weeksWithData += 1;
-                                console.log(`第${weekIndex}週動作數: ${weekCompleted}/${weekTotal}`);
                                 totalExercises += weekTotal;
                                 completedExercises += weekCompleted;
-                                
-                                // 如果該週全部完成（100%），算作完成一週
-                                if (weekCompleted >= weekTotal && weekTotal > 0) {
-                                    // 這裡我們計算的是完成天數，可以根據週的完成度來計算
-                                    // 但更準確的做法是從資料庫獲取實際的訓練天數
-                                }
+                                console.log(`第${weekIndex}週動作數: ${weekCompleted}/${weekTotal}`);
                             }
+                        }
+                    } else if (weekIndex > 4) {
+                        // 如果連續兩週都沒有數據，停止遍歷
+                        const prevWeekKey = `week${weekIndex - 1}`;
+                        if (data[prevWeekKey] === undefined || data[prevWeekKey] === null || data[prevWeekKey] === -1) {
+                            break;
                         }
                     }
                 }
                 
-                // 總訓練天數：使用動作數來估算天數（假設每天平均6個動作）
-                const avgExercisesPerDay = 6;  // 假設每天平均6個動作
-                totalDays = weeksWithData > 0 ? Math.ceil(totalExercises / avgExercisesPerDay) : 0;
+                console.log(`累加後總數: ${completedExercises}/${totalExercises}`);
                 
-                // 已完成天數：根據完成動作數計算
-                // 簡單方法：已完成動作數 / 平均每天動作數 = 已完成天數
-                // 至少要有 1 個完成的動作才算 1 天
-                completedDays = completedExercises > 0 ? Math.max(1, Math.ceil(completedExercises / avgExercisesPerDay)) : 0;
+                // 使用資料庫的實際每日數據來計算天數（而不是估算）
+                const dailyData = data._dailyData || [];
+                console.log('每日數據:', dailyData);
+                
+                if (dailyData && dailyData.length > 0) {
+                    // 遍歷每天的實際數據
+                    dailyData.forEach(dayInfo => {
+                        const dayTotal = Number(dayInfo.total_exercises) || 0;
+                        const dayCompleted = Number(dayInfo.completed_exercises) || 0;
+                        const dayCompletionPercentage = Number(dayInfo.completion_percentage) || 0;
+                        
+                        if (dayTotal > 0) {
+                            // 有訓練動作的日期，算1天
+                            totalDays += 1;
+                            console.log(`日期 ${dayInfo.date}: ${dayCompleted}/${dayTotal} (${dayCompletionPercentage}%)`);
+                            
+                            // 如果該天完成度為100%，算完成1天
+                            if (dayCompletionPercentage >= 100) {
+                                completedDays += 1;
+                                console.log(`  ✅ 日期 ${dayInfo.date} 已完成`);
+                            }
+                        }
+                    });
+                    
+                    console.log(`從實際數據計算: 總訓練天數=${totalDays}, 已完成天數=${completedDays}`);
+                } else {
+                    // 如果沒有每日數據，使用週數據作為備用方案
+                    console.warn('沒有每日數據，使用週數據估算');
+                    // 簡單估算：根據總動作數估算天數
+                    const avgExercisesPerDay = 7;
+                    if (totalExercises > 0) {
+                        totalDays = Math.max(1, Math.ceil(totalExercises / avgExercisesPerDay));
+                        if (completedExercises > 0) {
+                            const completionRate = completedExercises / totalExercises;
+                            completedDays = Math.max(1, Math.ceil(totalDays * completionRate));
+                        }
+                    }
+                }
                 
                 console.log('統計結果:', { 
                     totalExercises, 
                     completedExercises, 
                     totalDays, 
                     completedDays,
-                    weeksWithData
+                    dailyDataCount: dailyData ? dailyData.length : 0
                 });
                 console.log('=== 月統計計算結束 ===');
                 
@@ -4644,39 +4682,84 @@
                     completedExercisesEl.textContent = `${completedExercises} / ${totalExercises}`;
                 }
             } else if (timeUnit === 'year') {
-                // 年模式：使用傳入的 data 參數計算統計
+                // 年模式：使用資料庫的實際每日數據來計算
                 console.log('=== 年統計計算開始 ===');
                 console.log('傳入的 data:', data);
                 
-                let totalExercises = 0;
-                let completedExercises = 0;
-                const avgExercisesPerDay = 6;  // 假設每天平均6個動作
+                // 重置計數器
+                totalExercises = 0;
+                completedExercises = 0;
+                totalDays = 0;
+                completedDays = 0;
                 
+                // 從每月數據累加動作數（用於完成動作數顯示）
                 for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
                     const monthKey = `month_${monthIndex}`;
                     const monthData = data[monthKey];
                     console.log(`${monthIndex}月: 數據`, monthData);
                     
                     if (monthData && typeof monthData === 'object' && monthData.total_exercises > 0) {
-                        const monthTotal = monthData.total_exercises || 0;
-                        const monthCompleted = monthData.completed_exercises || 0;
+                        const monthTotal = Number(monthData.total_exercises) || 0;
+                        const monthCompleted = Number(monthData.completed_exercises) || 0;
                         
                         totalExercises += monthTotal;
                         completedExercises += monthCompleted;
+                        console.log(`${monthIndex}月動作數: ${monthCompleted}/${monthTotal}`);
+                    }
+                }
+                
+                console.log(`累加後總數: ${completedExercises}/${totalExercises}`);
+                
+                // 使用資料庫的實際每日數據來計算天數（而不是估算）
+                const dailyData = data._dailyData || [];
+                console.log('每日數據:', dailyData);
+                
+                if (dailyData && dailyData.length > 0) {
+                    // 遍歷每天的實際數據
+                    dailyData.forEach(dayInfo => {
+                        const dayTotal = Number(dayInfo.total_exercises) || 0;
+                        const dayCompleted = Number(dayInfo.completed_exercises) || 0;
+                        const dayCompletionPercentage = Number(dayInfo.completion_percentage) || 0;
                         
-                        // 計算該月的訓練天數
-                        const monthDays = Math.ceil(monthTotal / avgExercisesPerDay);
-                        totalDays += monthDays;
+                        if (dayTotal > 0) {
+                            // 有訓練動作的日期，算1天
+                            totalDays += 1;
+                            console.log(`日期 ${dayInfo.date}: ${dayCompleted}/${dayTotal} (${dayCompletionPercentage}%)`);
+                            
+                            // 如果該天完成度為100%，算完成1天
+                            if (dayCompletionPercentage >= 100) {
+                                completedDays += 1;
+                                console.log(`  ✅ 日期 ${dayInfo.date} 已完成`);
+                            }
+                        }
+                    });
+                    
+                    console.log(`從實際數據計算: 總訓練天數=${totalDays}, 已完成天數=${completedDays}`);
+                } else {
+                    // 如果沒有每日數據，使用月數據作為備用方案（估算）
+                    console.warn('沒有每日數據，使用月數據估算');
+                    const avgExercisesPerDay = 6;
+                    
+                    for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
+                        const monthKey = `month_${monthIndex}`;
+                        const monthData = data[monthKey];
                         
-                        // 如果該月全部完成，已完成天數 = 該月天數
-                        if (monthCompleted >= monthTotal) {
-                            completedDays += monthDays;
-                        } else if (monthCompleted > 0) {
-                            // 部分完成，按比例計算完成天數
-                            // 至少要有 1 個完成的動作才算 1 天
-                            const completionRate = monthCompleted / monthTotal;
-                            const completedMonthDays = Math.ceil(monthDays * completionRate);
-                            completedDays += Math.max(1, completedMonthDays);
+                        if (monthData && typeof monthData === 'object' && monthData.total_exercises > 0) {
+                            const monthTotal = Number(monthData.total_exercises) || 0;
+                            const monthCompleted = Number(monthData.completed_exercises) || 0;
+                            
+                            // 估算該月的訓練天數
+                            const monthDays = Math.ceil(monthTotal / avgExercisesPerDay);
+                            totalDays += monthDays;
+                            
+                            // 計算該月的完成天數
+                            if (monthCompleted >= monthTotal) {
+                                completedDays += monthDays;
+                            } else if (monthCompleted > 0) {
+                                const completionRate = monthCompleted / monthTotal;
+                                const completedMonthDays = Math.ceil(monthDays * completionRate);
+                                completedDays += Math.max(1, completedMonthDays);
+                            }
                         }
                     }
                 }
@@ -4694,54 +4777,48 @@
             // 計算完成率
             let completionRate = 0;
             
+            // 在計算完成率前，先記錄當前的變數值
+            console.log('=== 開始計算完成率 ===');
+            console.log('時間單位:', timeUnit);
+            console.log('當前變數值:', { totalExercises, completedExercises });
+            
             if (timeUnit === 'year') {
-                // 年統計：使用總動作數和完成動作數計算
-                const totalExercises = Object.values(data).reduce((sum, monthData) => {
-                    return sum + (monthData.total_exercises || 0);
-                }, 0);
-                const completedExercises = Object.values(data).reduce((sum, monthData) => {
-                    return sum + (monthData.completed_exercises || 0);
-                }, 0);
-                
+                // 年統計：使用總動作數和完成動作數計算完成率（使用外層變數）
                 completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100 * 10) / 10 : 0;
                 console.log('年統計完成率計算:', { totalExercises, completedExercises, completionRate });
-            } else {
-                // 週統計和月統計：使用平均完成度計算
-                let totalCompletion = 0;
-                let daysWithData = 0;
+            } else if (timeUnit === 'week') {
+                // 週統計：使用總動作數和完成動作數計算完成率（與月、年統計一致）
+                completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
+                console.log('週統計完成率計算:', { totalExercises, completedExercises, completionRate });
+            } else if (timeUnit === 'month') {
+                // 月模式：使用總動作數和完成動作數計算完成率
+                // 直接從 DOM 元素讀取完成動作數，確保使用最新值
+                const completedExercisesEl = document.getElementById('month-completed-exercises');
+                let monthTotal = Number(totalExercises) || 0;
+                let monthCompleted = Number(completedExercises) || 0;
                 
-                if (timeUnit === 'week') {
-                    const days = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
-                    for (const day of days) {
-                        const value = data[day];
-                        if (value >= 0) {
-                            totalCompletion += value;
-                            daysWithData += 1;
-                        }
+                // 如果從 DOM 元素可以讀取到值，使用 DOM 值（更可靠）
+                if (completedExercisesEl && completedExercisesEl.textContent) {
+                    const match = completedExercisesEl.textContent.match(/(\d+)\s*\/\s*(\d+)/);
+                    if (match) {
+                        monthCompleted = Number(match[1]) || 0;
+                        monthTotal = Number(match[2]) || 0;
+                        console.log('從 DOM 元素讀取完成動作數:', { monthCompleted, monthTotal });
                     }
-                } else if (timeUnit === 'month') {
-                    // 月模式：使用總動作數和完成動作數計算完成率
-                    let totalExercises = 0;
-                    let completedExercises = 0;
-                    
-                    for (let weekIndex = 1; weekIndex <= 4; weekIndex++) {
-                        const weekKey = `week${weekIndex}`;
-                        const weekData = data[weekKey];
-                        
-                        if (weekData && typeof weekData === 'object' && weekData.total_exercises > 0) {
-                            totalExercises += weekData.total_exercises || 0;
-                            completedExercises += weekData.completed_exercises || 0;
-                        }
-                    }
-                    
-                    completionRate = totalExercises > 0 ? Math.round((completedExercises / totalExercises) * 100) : 0;
-                    console.log('月統計完成率計算:', { totalExercises, completedExercises, completionRate });
-                } else {
-                    // 週統計：使用平均完成度計算
-                    completionRate = daysWithData > 0 ? Math.round(totalCompletion / daysWithData) : 0;
-                    console.log('完成率計算:', { totalCompletion, daysWithData, completionRate });
                 }
+                
+                completionRate = monthTotal > 0 ? Math.round((monthCompleted / monthTotal) * 100) : 0;
+                console.log('月統計完成率計算:', { 
+                    totalExercises, 
+                    completedExercises,
+                    monthTotal,
+                    monthCompleted,
+                    calculation: monthTotal > 0 ? `(${monthCompleted} / ${monthTotal}) * 100 = ${(monthCompleted / monthTotal) * 100}` : '0 (totalExercises = 0)',
+                    completionRate 
+                });
             }
+            
+            console.log('=== 完成率計算結束 ===');
             
             totalDaysEl.textContent = totalDays;
             completedDaysEl.textContent = completedDays;
@@ -5039,25 +5116,44 @@
                 
                 if (result && result.success && result.data) {
                     // 處理資料庫返回的完成數據
-                    const weeks = ['week1', 'week2', 'week3', 'week4'];
+                    // 動態遍歷所有週（不只4週，可能有5週或更多）
+                    const weekKeys = Object.keys(result.data).filter(key => key.startsWith('week'));
                     
-                    for (let weekIndex = 0; weekIndex < 4; weekIndex++) {
-                        const weekKey = weeks[weekIndex];
-                        const weekData = result.data[weekKey] || {};
-                        const totalExercises = weekData.total_exercises || 0;
-                        const completedExercises = weekData.completed_exercises || 0;
+                    // 確保至少處理4週，並支持更多週
+                    for (let weekIndex = 1; weekIndex <= 6; weekIndex++) {
+                        const weekKey = `week${weekIndex}`;
+                        const weekData = result.data[weekKey];
                         
-                        console.log(`第${weekIndex + 1}週數據:`, { weekKey, totalExercises, completedExercises });
-                        
-                        if (totalExercises > 0) {
-                            // 保留物件格式，而不是轉換為百分比
-                            completionData[weekKey] = {
-                                total_exercises: totalExercises,
-                                completed_exercises: completedExercises
-                            };
+                        if (weekData) {
+                            const totalExercises = Number(weekData.total_exercises) || 0;
+                            const completedExercises = Number(weekData.completed_exercises) || 0;
+                            
+                            console.log(`第${weekIndex}週數據:`, { weekKey, totalExercises, completedExercises });
+                            
+                            if (totalExercises > 0) {
+                                // 保留物件格式，而不是轉換為百分比
+                                completionData[weekKey] = {
+                                    total_exercises: totalExercises,
+                                    completed_exercises: completedExercises
+                                };
+                            } else {
+                                completionData[weekKey] = -1; // 表示沒有訓練數據
+                            }
                         } else {
-                            completionData[weekKey] = -1; // 表示沒有訓練數據
+                            // 如果API沒有返回該週數據，檢查是否已經處理完所有週
+                            // 如果連續兩週都沒有數據，停止遍歷
+                            const prevWeekKey = `week${weekIndex - 1}`;
+                            if (weekIndex > 4 && !result.data[prevWeekKey]) {
+                                break;
+                            }
+                            completionData[weekKey] = -1;
                         }
+                    }
+                    
+                    // 保留每日實際數據（用於準確計算天數）
+                    if (result.data._dailyData) {
+                        completionData._dailyData = result.data._dailyData;
+                        console.log('每日實際數據已載入:', result.data._dailyData.length, '天');
                     }
                 } else {
                     console.log('API 沒有返回數據，嘗試查詢所有月份');
@@ -5164,6 +5260,12 @@
                     for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
                         completionData[`month_${monthIndex}`] = -1;
                     }
+                }
+                
+                // 保留每日實際數據（用於準確計算天數）
+                if (result && result.success && result.data && result.data._dailyData) {
+                    completionData._dailyData = result.data._dailyData;
+                    console.log('每日實際數據已載入:', result.data._dailyData.length, '天');
                 }
                 
                 console.log('年完成度數據:', completionData);
@@ -8247,7 +8349,7 @@
         // 更新月進度顯示
         function updateMonthProgressDisplay(progress) {
             // 檢查是否已經有手動更新的統計數據
-            const monthCompletionRateEl = document.getElementById('completion-rate');
+            const monthCompletionRateEl = document.getElementById('month-completion-rate');
             console.log('updateMonthProgressDisplay 被調用:', { 
                 element: monthCompletionRateEl, 
                 manualUpdate: monthCompletionRateEl?.dataset.manualUpdate,
