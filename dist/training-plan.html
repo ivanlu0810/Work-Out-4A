@@ -4472,11 +4472,19 @@
                 data = await loadYearCompletionData(year);
             }
             
-            console.log('載入的數據:', data);
-            console.log('=== 數據載入完成 ===');
+                console.log('載入的數據:', data);
+                console.log('=== 數據載入完成 ===');
                 
-                // 檢查是否有數據
-                const hasData = Object.values(data).some(value => value >= 0);
+                // 檢查是否有數據（需要處理物件格式）
+                const hasData = Object.values(data).some(value => {
+                    if (typeof value === 'number') {
+                        return value >= 0;
+                    } else if (typeof value === 'object' && value !== null) {
+                        // 物件格式：檢查是否有 total_exercises 且 > 0
+                        return (value.total_exercises !== undefined && value.total_exercises > 0);
+                    }
+                    return false;
+                });
                 console.log('數據檢查:', { data, hasData, values: Object.values(data) });
                 if (!hasData) {
                     showWarningMessage('所選期間沒有訓練數據');
@@ -4618,15 +4626,15 @@
                 
                 // 已完成天數：根據完成動作數計算
                 // 簡單方法：已完成動作數 / 平均每天動作數 = 已完成天數
-                completedDays = completedExercises > 0 ? Math.ceil(completedExercises / avgExercisesPerDay) : 0;
+                // 至少要有 1 個完成的動作才算 1 天
+                completedDays = completedExercises > 0 ? Math.max(1, Math.ceil(completedExercises / avgExercisesPerDay)) : 0;
                 
                 console.log('統計結果:', { 
                     totalExercises, 
                     completedExercises, 
                     totalDays, 
                     completedDays,
-                    weeksWithData,
-                    completedWeeks
+                    weeksWithData
                 });
                 console.log('=== 月統計計算結束 ===');
                 
@@ -4665,8 +4673,10 @@
                             completedDays += monthDays;
                         } else if (monthCompleted > 0) {
                             // 部分完成，按比例計算完成天數
+                            // 至少要有 1 個完成的動作才算 1 天
                             const completionRate = monthCompleted / monthTotal;
-                            completedDays += Math.ceil(monthDays * completionRate);
+                            const completedMonthDays = Math.ceil(monthDays * completionRate);
+                            completedDays += Math.max(1, completedMonthDays);
                         }
                     }
                 }
@@ -5113,9 +5123,18 @@
         // 載入年完成度數據
         async function loadYearCompletionData(year) {
             try {
+                console.log('=== loadYearCompletionData 開始 ===');
+                console.log('查詢參數:', { year });
+                
                 // 從資料庫讀取完成狀態數據
                 const response = await fetch(`completion-api.php?action=get_completion_data&year=${year}&user_id=${currentUserId || 9}`);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
                 const result = await response.json();
+                console.log('API 回應:', result);
                 
                 const completionData = {};
                 
@@ -5124,12 +5143,18 @@
                     for (let monthIndex = 1; monthIndex <= 12; monthIndex++) {
                         const monthKey = `month_${monthIndex}`;
                         const monthData = result.data[monthKey] || {};
-                        const totalExercises = monthData.total_exercises || 0;
-                        const completedExercises = monthData.completed_exercises || 0;
+                        const totalExercises = parseInt(monthData.total_exercises) || 0;
+                        const completedExercises = parseInt(monthData.completed_exercises) || 0;
+                        
+                        console.log(`${monthIndex}月數據:`, { totalExercises, completedExercises });
                         
                         if (totalExercises > 0) {
-                            const monthCompletionPercentage = Math.round((completedExercises / totalExercises) * 100);
-                            completionData[monthKey] = monthCompletionPercentage;
+                            // 保留物件格式，包含總數和完成數
+                            completionData[monthKey] = {
+                                total_exercises: totalExercises,
+                                completed_exercises: completedExercises,
+                                completion_percentage: Math.round((completedExercises / totalExercises) * 100)
+                            };
                         } else {
                             completionData[monthKey] = -1; // 表示沒有訓練數據
                         }
@@ -5142,9 +5167,11 @@
                 }
                 
                 console.log('年完成度數據:', completionData);
+                console.log('=== loadYearCompletionData 結束 ===');
                 return completionData;
             } catch (error) {
                 console.error('載入年數據失敗:', error);
+                showErrorMessage('載入年統計數據失敗：' + error.message);
                 return {};
             }
         }
@@ -5231,10 +5258,29 @@
                 });
                 colors = [morandiColors.secondary];
             } else if (timeUnit === 'year') {
-                // 年模式：顯示12個月的完成動作數量
+                // 年模式：顯示12個月的完成百分比
                 categories = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
                 chartData = categories.map((month, index) => {
-                    return data[`month_${index + 1}`] || 0;
+                    const monthKey = `month_${index + 1}`;
+                    const monthData = data[monthKey];
+                    
+                    // 如果是物件格式（包含 total_exercises 和 completed_exercises）
+                    if (monthData && typeof monthData === 'object' && monthData.total_exercises !== undefined) {
+                        const total = monthData.total_exercises || 0;
+                        const completed = monthData.completed_exercises || 0;
+                        if (total > 0) {
+                            return Math.round((completed / total) * 100);
+                        }
+                        return 0;
+                    }
+                    
+                    // 如果是數字格式（百分比）
+                    if (typeof monthData === 'number' && monthData >= 0) {
+                        return monthData;
+                    }
+                    
+                    // 如果沒有資料
+                    return 0;
                 });
                 colors = [morandiColors.accent];
             }
