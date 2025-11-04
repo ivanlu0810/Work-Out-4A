@@ -5120,6 +5120,9 @@ function renderPickerTable(foods) {
                 return;
             }
 
+            // 準備當日已用清單，避免重複同一食材過多次
+            try { if (typeof window !== 'undefined') { window.smartMenuUsed = new Set(); } } catch (_) {}
+
             // 1) 依各餐目標熱量自動生成三餐
             ['breakfast','lunch','dinner'].forEach(mt => {
                 const target = currentNutritionResult.meal_distribution[mt];
@@ -5291,9 +5294,17 @@ function renderPickerTable(foods) {
                 const excludedCategories = ['點心', '飲品', '調味料', '手搖飲', '咖啡', '速食', '台式/便當', '中式/點心', '中式/麵食', '中式/粥', '中式/餅', '日式/湯物', '日式/壽司', '日式/丼飯', '日式/咖哩', '日式/炸物', '日式/麵食', '韓式/拌飯', '韓式/點心', '韓式/炸物', '韓式/煎餅', '韓式/配菜', '港式/飯類', '港式/飲品', '港式/點心', '港式/甜品', '西式/義式', '西式/披薩', '西式/漢堡', '西式/堡類', '西式/配菜', '西式/沙拉', '速食/漢堡', '速食/炸物', '速食/早餐', '速食/麵', '便利商店', '烘焙/甜點', '早餐/餅類', '早餐/麵食', '早餐/三明治', '早餐/點心', '早餐/蛋類', '早餐/飲品', '火鍋/肉類', '火鍋/海鮮', '火鍋/豆製', '火鍋/火鍋料', '火鍋/蔬菜', '火鍋/主食', '健康餐', '甜點/糕點', '甜點/冰品', '零食/餅乾', '零食/甜食', '零食/堅果', '小吃/甜點', '家常菜', '素食/豆麩', '素食/加工', '素食/豆製', '素食/點心', '調味/醬料', '主食/米飯', '主食/穀物', '主食/根莖'];
                 function notExcluded(f) {
                     if (!f || !f.Food_Name || !f.Category) return false;
-                    if (excludedCategories.some(cat => f.Category.includes(cat))) return false;
+                    const name = String(f.Food_Name);
+                    const cat = String(f.Category);
+                    // 允許無糖飲品與堅果例外
+                    const isUnsweetenedDrink = /無糖|黑咖啡|美式咖啡|美式|綠茶|烏龍茶|紅茶|茶\(無糖\)|礦泉水|氣泡水|蘇打水|無糖豆漿/i.test(name)
+                        && !/奶茶|加糖|蜂蜜|果汁|甜|糖|可可|可樂/i.test(name);
+                    const isNut = /堅果|杏仁|核桃|腰果|花生|開心果|南瓜籽|葵瓜子/i.test(name);
+                    if (isUnsweetenedDrink) return true;
+                    if (isNut && /零食\/堅果/.test(cat)) return true;
+                    if (excludedCategories.some(c => cat.includes(c))) return false;
                     const bad = ['巧克力','蛋糕','餅乾','糖果','奶茶','可樂','汽水','炸','油炸','泡麵','速食','香腸','熱狗','培根','火腿','手搖','飲料','果汁','啤酒','酒','調味','醬','乳清蛋白粉','酪蛋白粉','奶昔','蛋白奶昔','蛋白飲'];
-                    return !bad.some(k => f.Food_Name.includes(k));
+                    return !bad.some(k => name.includes(k));
                 }
                 const valid = allFoods.filter(notExcluded);
                 const proteinPool = valid.filter(f => (f.Category === '蛋白質' || f.Category === '脂肪/蛋白質') && !/(乳清蛋白粉|酪蛋白粉|奶昔|蛋白飲|蛋白奶昔)/i.test(f.Food_Name));
@@ -5335,7 +5346,12 @@ function renderPickerTable(foods) {
                         if (need <= 0) return true;
                         const gramsNeeded = Math.ceil((need / per) * 100);
                         const cap = limitByMealAndClass(meal, macro === 'protein' ? 'protein' : macro === 'carbs' ? 'carb' : 'fat');
-                        const grams = clamp(gramsNeeded, 50, cap);
+                        let grams = clamp(gramsNeeded, 50, cap);
+                        // 堅果少量出現：若為堅果則限制最大克數
+                        if (macro === 'fat' && /堅果|杏仁|核桃|腰果|花生|開心果|南瓜籽/i.test(name)) {
+                            const nutMax = meal === 'breakfast' ? 15 : 20;
+                            grams = clamp(grams, 8, nutMax);
+                        }
                         const item = {
                             name,
                             grams,
@@ -5378,14 +5394,23 @@ function renderPickerTable(foods) {
 
         // 獲取各餐的智能菜單（使用 allFoods，帶約束的隨機生成，回傳每 100g 的營養值）
         function getSmartMenuForMeal(mealType, targetCalories) {
+            const dayUsed = (typeof window !== 'undefined' && window.smartMenuUsed instanceof Set) ? window.smartMenuUsed : null;
             const mealTarget = Math.max(250, Number(targetCalories) || 450);
-            // 可用的三大營養素目標（單位：g）；若頁面未提供則為 null
+            // 可用的三大營養素目標（單位：g）；若頁面未提供則為 null（為全日目標）
             const targetProteinG = (typeof window !== 'undefined' && window.proteinGrams && window.proteinGrams.textContent)
                 ? Number(String(window.proteinGrams.textContent).trim()) : null;
             const targetCarbG = (typeof window !== 'undefined' && window.carbGrams && window.carbGrams.textContent)
                 ? Number(String(window.carbGrams.textContent).trim()) : null;
             const targetFatG = (typeof window !== 'undefined' && window.fatGrams && window.fatGrams.textContent)
                 ? Number(String(window.fatGrams.textContent).trim()) : null;
+            // 轉換為「單餐目標」：依餐次熱量占比切分全日宏
+            const totalDailyCalories = (typeof currentNutritionResult !== 'undefined' && currentNutritionResult && Number(currentNutritionResult.target_calories))
+                ? Number(currentNutritionResult.target_calories) : null;
+            const perMealRatio = (totalDailyCalories && totalDailyCalories > 0)
+                ? Math.min(1, Math.max(0.1, mealTarget / totalDailyCalories)) : null;
+            const targetProteinPerMealG = (Number.isFinite(targetProteinG) && Number.isFinite(perMealRatio)) ? targetProteinG * perMealRatio : null;
+            const targetCarbPerMealG = (Number.isFinite(targetCarbG) && Number.isFinite(perMealRatio)) ? targetCarbG * perMealRatio : null;
+            const targetFatPerMealG = (Number.isFinite(targetFatG) && Number.isFinite(perMealRatio)) ? targetFatG * perMealRatio : null;
             //console.log('targetCalories:', targetCalories);
             //console.log('proteinGrams:', proteinGrams);
             //console.log('carbGrams:', carbGrams);
@@ -5396,7 +5421,16 @@ function renderPickerTable(foods) {
             // 先過濾掉不合適的分類
             const validFoods = allFoods.filter(f => 
                 f && f.Food_Name && f.Category && 
-                !excludedCategories.some(cat => f.Category.includes(cat))
+                (function(){
+                    const name = String(f.Food_Name);
+                    const cat = String(f.Category);
+                    const isUnsweetenedDrink = /無糖|黑咖啡|美式咖啡|美式|綠茶|烏龍茶|紅茶|茶\(無糖\)|礦泉水|氣泡水|蘇打水|無糖豆漿/i.test(name)
+                        && !/奶茶|加糖|蜂蜜|果汁|甜|糖|可可|可樂/i.test(name);
+                    const isNut = /堅果|杏仁|核桃|腰果|花生|開心果|南瓜籽|葵瓜子/i.test(name);
+                    if (isUnsweetenedDrink) return true;
+                    if (isNut && /零食\/堅果/.test(cat)) return true;
+                    return !excludedCategories.some(cat2 => cat.includes(cat2));
+                })()
             );
 
             // 根據資料庫實際分類建立各類別的食材池
@@ -5432,8 +5466,15 @@ function renderPickerTable(foods) {
             const excludeKeywordsCommon = ['巧克力', '蛋糕', '餅乾', '糖果', '奶茶', '可樂', '汽水', '炸', '油炸', '泡麵', '速食', '香腸', '熱狗', '培根', '火腿', '手搖', '飲料', '果汁', '啤酒', '酒', '調味', '醬', '雞塊', '雞排', '乳清蛋白粉', '酪蛋白粉', '奶昔', '蛋白奶昔', '蛋白飲'];
             
             function notExcluded(food) {
-                return !excludeKeywordsCommon.some(k => food.Food_Name.includes(k)) &&
-                       !excludedCategories.some(cat => food.Category.includes(cat));
+                const name = String(food.Food_Name);
+                const cat = String(food.Category);
+                const isUnsweetenedDrink = /無糖|黑咖啡|美式咖啡|美式|綠茶|烏龍茶|紅茶|茶\(無糖\)|礦泉水|氣泡水|蘇打水|無糖豆漿/i.test(name)
+                    && !/奶茶|加糖|蜂蜜|果汁|甜|糖|可可|可樂/i.test(name);
+                const isNut = /堅果|杏仁|核桃|腰果|花生|開心果|南瓜籽|葵瓜子/i.test(name);
+                if (isUnsweetenedDrink) return true;
+                if (isNut && /零食\/堅果/.test(cat)) return true;
+                return !excludeKeywordsCommon.some(k => name.includes(k)) &&
+                       !excludedCategories.some(c => cat.includes(c));
             }
 
             // 早餐適用碳水關鍵字（排除義大利麵、烏龍麵等麵類）
@@ -5459,6 +5500,8 @@ function renderPickerTable(foods) {
                     !/肝|內臟|五花|肥/i.test(f.Food_Name) &&
                     !/鮭|鯖|鱈|魚|蝦|蟹|蚵|牡蠣|花枝|章魚|魷魚|貝|蛤|海鮮/i.test(f.Food_Name)
                 );
+                // 早餐：避免豆類（如黑豆）作為主蛋白
+                proteinPool = proteinPool.filter(f => !/黑豆|紅豆|黃豆|綠豆|大豆|豆類/i.test(f.Food_Name));
                 // 早餐更偏好乳製與水果作為第三項
                 dairyPool = dairyPool.filter(f => 
                     !/巧克力|可可|調味|含糖/i.test(f.Food_Name)
@@ -5525,7 +5568,8 @@ function renderPickerTable(foods) {
                 carb: { min: mealType === 'breakfast' ? 60 : 80, max: mealType === 'breakfast' ? 220 : 200, def: mealType === 'breakfast' ? 100 : 120 },
                 veg: { min: 80, max: 200, def: 120 },
                 fruit: { min: 80, max: 150, def: 100 },
-                fat: { min: 10, max: mealType === 'breakfast' ? 25 : 35, def: mealType === 'breakfast' ? 12 : 18 },
+                // 降低脂肪的預設與上限，避免嚴重超標
+                fat: { min: 8, max: mealType === 'breakfast' ? 18 : 25, def: mealType === 'breakfast' ? 10 : 12 },
                 dairy: { min: 150, max: 300, def: 200 }
             };
 
@@ -5550,11 +5594,15 @@ function renderPickerTable(foods) {
                     structure.push(['carb']);
                 }
             }
-            const picked = [];
+            let picked = [];
             const used = new Set();
 
             structure.forEach(group => {
-                const pool = group.flatMap(g => poolOf(g)).filter(f => !used.has(f.Food_Name));
+                let pool = group.flatMap(g => poolOf(g)).filter(f => !used.has(f.Food_Name));
+                if (dayUsed) {
+                    const unused = pool.filter(f => !dayUsed.has(f.Food_Name));
+                    if (unused.length) pool = unused;
+                }
                 if (pool.length === 0) return;
                 // 初學者友善偏好：若有，優先從友善集合中挑選
                 const preferred = pool.filter(isBeginnerFriendly);
@@ -5567,9 +5615,9 @@ function renderPickerTable(foods) {
                 picked.push({ base, grams: lim.def, key });
             });
 
-            // 可能追加一項健康脂肪/蔬果，增加多樣性
+            // 可能追加一項蔬菜，增加多樣性（避免額外脂肪）
             if (mealType !== 'breakfast' && Math.random() < 0.35) {
-                const addPool = Math.random() < 0.6 ? vegPool : fatPool;
+                const addPool = vegPool;
                 const candidates = addPool.filter(f => !used.has(f.Food_Name));
                 if (candidates.length) {
                     const base = pickOne(candidates);
@@ -5577,14 +5625,7 @@ function renderPickerTable(foods) {
                     picked.push({ base, grams: (addPool === vegPool ? limits.veg.def : limits.fat.def), key: addPool === vegPool ? 'veg' : 'fat' });
                 }
             } else if (mealType === 'breakfast' && Math.random() < 0.35) {
-                // 早餐不再額外加入水果，僅可能補少量健康脂肪
-                const addPool = fatPool;
-                const candidates = addPool.filter(f => !used.has(f.Food_Name));
-                if (candidates.length) {
-                    const base = pickOne(candidates);
-                    used.add(base.Food_Name);
-                    picked.push({ base, grams: limits.fat.def, key: 'fat' });
-                }
+                // 早餐：避免額外脂肪，不額外添加
             }
 
             // 確保每餐至少 N 樣：早餐/午餐≥3；晚餐≥2
@@ -5638,8 +5679,19 @@ function renderPickerTable(foods) {
             const target = clamp(mealTarget, 200, 900);
             let scale = clamp(target / (current || 1), 0.75, 1.35);
 
+            // 先針對堅果類別限制份量
+            picked = picked.map(it => {
+                if (it.key === 'fat' && /堅果|杏仁|核桃|腰果|花生|開心果|南瓜籽/i.test(String(it.base.Food_Name))) {
+                    const nutMax = mealType === 'breakfast' ? 15 : 20;
+                    return { ...it, grams: Math.min(it.grams, nutMax) };
+                }
+                return it;
+            });
+
             let scaled = picked.map(({ base, grams, key }) => {
-                const lim = limits[key] || { min: 50, max: 200 };
+                const isNut = key === 'fat' && /堅果|杏仁|核桃|腰果|花生|開心果|南瓜籽/i.test(String(base.Food_Name));
+                const limBase = limits[key] || { min: 50, max: 200 };
+                const lim = isNut ? { min: 8, max: (mealType === 'breakfast' ? 15 : 20) } : limBase;
                 const g = clamp(grams * scale, lim.min, lim.max);
                 return { base, grams: round5(g), key };
             });
@@ -5682,7 +5734,8 @@ function renderPickerTable(foods) {
                 // 需要增加/減少多少克的該食材
                 const needGramsDelta = (diff / per100) * 100; // 目標差值換算成該食材克數
                 if (!Number.isFinite(needGramsDelta) || needGramsDelta === 0) return items;
-                const lim = limits[key] || { min: 50, max: 200 };
+                const isNut = key === 'fat' && /堅果|杏仁|核桃|腰果|花生|開心果|南瓜籽/i.test(String(item.base.Food_Name));
+                const lim = isNut ? { min: 8, max: (mealType === 'breakfast' ? 15 : 20) } : (limits[key] || { min: 50, max: 200 });
                 const newG = clamp(item.grams + needGramsDelta, lim.min, lim.max);
                 const rounded = round5(newG);
                 const next = items.slice();
@@ -5690,21 +5743,26 @@ function renderPickerTable(foods) {
                 return next;
             }
 
-            // 順序：蛋白 -> 碳水 -> 脂肪，避免相互抵銷
-            scaled = adjustTowards(scaled, 'protein', targetProteinG);
-            scaled = adjustTowards(scaled, 'carb', targetCarbG);
-            scaled = adjustTowards(scaled, 'fat', targetFatG);
+            // 順序：蛋白 -> 碳水 -> 脂肪，使用單餐目標避免超標
+            scaled = adjustTowards(scaled, 'protein', targetProteinPerMealG);
+            scaled = adjustTowards(scaled, 'carb', targetCarbPerMealG);
+            scaled = adjustTowards(scaled, 'fat', targetFatPerMealG);
 
             // 最後再校正一次總熱量到合理區間（允許更大的向下修正幅度避免嚴重超標）
             totalAfter = sumCalories(scaled);
             if (totalAfter < target * 0.95 || totalAfter > target * 1.05) {
-                const factor = clamp(target / (totalAfter || 1), 0.6, 1.15);
+                const factor = clamp(target / (totalAfter || 1), 0.6, 1.05);
                 scaled = scaled.map(it => {
                     const lim = limits[it.key] || { min: 50, max: 200 };
                     const g = clamp(it.grams * factor, lim.min, lim.max);
                     return { ...it, grams: round5(g) };
                 });
             }
+
+            // 將本餐使用的食材加入當日已用清單
+            try {
+                if (dayUsed) { scaled.forEach(({ base }) => dayUsed.add(base.Food_Name)); }
+            } catch (_) {}
 
             // 以每 100g 的營養值回傳（下游會搭配 grams 計算）
             return scaled.map(({ base, grams }) => ({
