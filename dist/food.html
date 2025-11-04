@@ -1774,6 +1774,10 @@ $email = $_SESSION['email'] ?? 'No email';
                                             <i class="bi bi-calendar-event me-2"></i>
                                             <span id="selectedDateText" class="text-truncate">選擇日期</span>
                                         </div>
+                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center flex-shrink-0 ms-2"
+                                            style="font-size: 12px; padding: 0.25rem 0.5rem; gap: 4px;" onclick="generateSmartMenuForAll()">
+                                            智慧菜單
+                                        </button>
                                         <button class="btn btn-sm btn-secondary d-flex align-items-center flex-shrink-0 ms-2"
                                             style="font-size: 12px; padding: 0.25rem 0.5rem; gap: 2px; display:none !important;" onclick="renderPlanner()">
                                             <i class="bi bi-upload"></i>更新三餐
@@ -5139,6 +5143,18 @@ function renderPickerTable(foods) {
             showToast(`已為${mealTypeName[mealType]}生成智能菜單！`, 'success');
         }
 
+        // 一鍵生成當日三餐智慧菜單
+        function generateSmartMenuForAll() {
+            try {
+                generateSmartMenu('breakfast');
+                generateSmartMenu('lunch');
+                generateSmartMenu('dinner');
+                try { showToast('已為當日生成智慧菜單', 'success'); } catch (_) {}
+            } catch (e) {
+                // 若未完成營養計算，內部函式已有導引；此處保持靜默
+            }
+        }
+
         // 獲取各餐的智能菜單（使用 allFoods，帶約束的隨機生成，回傳每 100g 的營養值）
         function getSmartMenuForMeal(mealType, targetCalories) {
             const mealTarget = Math.max(250, Number(targetCalories) || 450);
@@ -6274,9 +6290,6 @@ function renderPickerTable(foods) {
                                         <h6 class="mb-0">早餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('breakfast')">
-                                            智慧菜單
-                                        </button>
                                         <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('breakfast', '${dateStr}')">
                                             手動新增
                                         </button>
@@ -6299,9 +6312,6 @@ function renderPickerTable(foods) {
                                         <h6 class="mb-0">午餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('lunch')">
-                                            智慧菜單
-                                        </button>
                                         <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('lunch', '${dateStr}')">
                                             手動新增
                                         </button>
@@ -6324,9 +6334,6 @@ function renderPickerTable(foods) {
                                         <h6 class="mb-0">晚餐</h6>
                                     </div>
                                     <div class="btn-group btn-group-sm">
-                                        <button class="btn btn-sm btn-light-gray d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="generateSmartMenu('dinner')">
-                                            智慧菜單
-                                        </button>
                                         <button class="btn btn-sm btn-light-green d-flex align-items-center" style="font-size: 12px; gap: 4px; color: #000;" onclick="openFoodPicker('dinner', '${dateStr}')">
                                             手動新增
                                         </button>
