@@ -76,6 +76,12 @@ switch ($action) {
     case 'get_plan_id':
         getPlanId($pdo);
         break;
+    case 'get_plan_by_week_start':
+        getPlanByWeekStart($pdo);
+        break;
+    case 'create_plan':
+        createPlan($pdo);
+        break;
     default:
         http_response_code(400);
         echo json_encode(['success' => false, 'error' => '無效的操作']);
@@ -393,6 +399,105 @@ function getPlanId($pdo) {
     } catch (PDOException $e) {
         http_response_code(500);
         echo json_encode(['success' => false, 'error' => '獲取 plan_id 失敗: ' . $e->getMessage()]);
+    }
+}
+
+// 根據 week_start_date 獲取 plan_id
+function getPlanByWeekStart($pdo) {
+    $week_start_date = $_GET['week_start_date'] ?? '';
+    $user_id = $_GET['user_id'] ?? '';
+    
+    if ($week_start_date === '' || $week_start_date === null || $user_id === '' || $user_id === null) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => '缺少必要參數: week_start_date 或 user_id']);
+        return;
+    }
+    
+    try {
+        $stmt = $pdo->prepare("SELECT id, week_number, week_start_date FROM training_plans WHERE week_start_date = ? AND user_id = ? ORDER BY id DESC LIMIT 1");
+        $stmt->execute([$week_start_date, $user_id]);
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result) {
+            echo json_encode([
+                'success' => true, 
+                'plan_id' => $result['id'],
+                'week_number' => $result['week_number'],
+                'week_start_date' => $result['week_start_date']
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => '找不到對應的訓練計畫']);
+        }
+        
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => '獲取 plan_id 失敗: ' . $e->getMessage()]);
+    }
+}
+
+// 建立新的訓練計畫
+function createPlan($pdo) {
+    $input = json_decode(file_get_contents('php://input'), true);
+    
+    if (!isset($input['user_id']) || !isset($input['week_start_date'])) {
+        http_response_code(400);
+        echo json_encode(['success' => false, 'error' => '缺少必要參數: user_id 或 week_start_date']);
+        return;
+    }
+    
+    $user_id = (int)$input['user_id'];
+    $week_start_date = $input['week_start_date'];
+    $week_number = isset($input['week_number']) ? (int)$input['week_number'] : null;
+    
+    // 如果沒有提供 week_number，計算它
+    if ($week_number === null) {
+        try {
+            $date_obj = new DateTime($week_start_date);
+            $year_start = new DateTime($date_obj->format('Y') . '-01-01');
+            $week_number = ceil(($date_obj->getTimestamp() - $year_start->getTimestamp()) / (7 * 24 * 60 * 60)) + 1;
+        } catch (Exception $e) {
+            http_response_code(400);
+            echo json_encode(['success' => false, 'error' => '無效的日期格式: ' . $e->getMessage()]);
+            return;
+        }
+    }
+    
+    try {
+        // 檢查是否已存在相同的計畫
+        $stmt_check = $pdo->prepare("SELECT id FROM training_plans WHERE user_id = ? AND week_start_date = ? LIMIT 1");
+        $stmt_check->execute([$user_id, $week_start_date]);
+        $existing = $stmt_check->fetch();
+        
+        if ($existing) {
+            echo json_encode([
+                'success' => true,
+                'plan_id' => $existing['id'],
+                'week_number' => $week_number,
+                'week_start_date' => $week_start_date,
+                'message' => '計畫已存在'
+            ]);
+            return;
+        }
+        
+        // 建立新計畫
+        $sql_create_plan = "INSERT INTO training_plans (user_id, week_number, week_start_date, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())";
+        $stmt_create_plan = $pdo->prepare($sql_create_plan);
+        $stmt_create_plan->execute([$user_id, $week_number, $week_start_date]);
+        $plan_id = $pdo->lastInsertId();
+        
+        error_log("createPlan: 成功建立新訓練計畫: plan_id=$plan_id, user_id=$user_id, week_number=$week_number, week_start_date=$week_start_date");
+        
+        echo json_encode([
+            'success' => true,
+            'plan_id' => $plan_id,
+            'week_number' => $week_number,
+            'week_start_date' => $week_start_date,
+            'message' => '訓練計畫建立成功'
+        ]);
+        
+    } catch (PDOException $e) {
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => '建立計畫失敗: ' . $e->getMessage()]);
     }
 }
 
@@ -725,16 +830,13 @@ function syncCalendarExercise($pdo) {
                 $plan_id = $plan_by_week['id'];
                 $week_number = $plan_by_week['week_number'];
             } else {
-                // 不建立新計畫：僅回傳成功訊息，不做任何寫入
-                $pdo->commit();
-                echo json_encode([
-                    'success' => true,
-                    'message' => '本週沒有既有訓練計畫，已略過同步（不新增 training_plans）',
-                    'plan_id' => null,
-                    'exercises_count' => 0,
-                    'completed_count' => 0
-                ]);
-                return;
+                // 如果找不到既有計畫，自動建立一個新的訓練計畫
+                // 這樣用戶在行事曆上新增動作時，系統會自動為該週建立訓練計畫
+                $sql_create_plan = "INSERT INTO training_plans (user_id, week_number, week_start_date, created_at, updated_at) VALUES (?, ?, ?, NOW(), NOW())";
+                $stmt_create_plan = $pdo->prepare($sql_create_plan);
+                $stmt_create_plan->execute([$user_id, $week_number, $week_monday]);
+                $plan_id = $pdo->lastInsertId();
+                error_log("自動建立新的訓練計畫: plan_id=$plan_id, user_id=$user_id, week_number=$week_number, week_start_date=$week_monday");
             }
         } else {
             $plan_id = $plan_result['id'];
@@ -773,99 +875,96 @@ function syncCalendarExercise($pdo) {
             }, $fallback);
         }
 
-        // 3. 僅處理 completion 表（符合你的需求）
+        // 3. 處理 training_plan_exercises 表（新增動作時只寫入這個表）
+        // 注意：training_plan_completion 表只在完成動作時才寫入，不在新增動作時寫入
         
-        // 4. 插入個別動作的完成記錄（避免重複）
-        $sql_check_existing = "SELECT id FROM training_plan_completion WHERE plan_id = ? AND user_id = ? AND exercise_id = ? AND day_of_week = ?";
-        $stmt_check_existing = $pdo->prepare($sql_check_existing);
+        // 準備 training_plan_exercises 的 SQL
+        $sql_check_existing_tpe = "SELECT id FROM training_plan_exercises WHERE plan_id = ? AND day_of_week = ? AND exercise_date = ? AND exercise_id = ?";
+        $stmt_check_existing_tpe = $pdo->prepare($sql_check_existing_tpe);
         
-        $sql_insert_completion = "INSERT INTO training_plan_completion (plan_id, user_id, exercise_id, exercise_name, muscle_group, sets, reps, weight, individual_completed, individual_completed_at, week_number, day_of_week) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        $stmt_insert_completion = $pdo->prepare($sql_insert_completion);
+        $sql_insert_tpe = "INSERT INTO training_plan_exercises (plan_id, day_of_week, exercise_date, exercise_id, exercise_name, muscle_group, sets, reps, weight, rest_time, notes, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        $stmt_insert_tpe = $pdo->prepare($sql_insert_tpe);
         
-        $sql_update_completion = "UPDATE training_plan_completion SET exercise_name = ?, muscle_group = ?, sets = ?, reps = ?, weight = ?, individual_completed = ?, individual_completed_at = ?, updated_at = CURRENT_TIMESTAMP WHERE plan_id = ? AND user_id = ? AND exercise_id = ? AND day_of_week = ?";
-        $stmt_update_completion = $pdo->prepare($sql_update_completion);
+        $sql_update_tpe = "UPDATE training_plan_exercises SET exercise_name = ?, muscle_group = ?, sets = ?, reps = ?, weight = ?, updated_at = CURRENT_TIMESTAMP WHERE plan_id = ? AND day_of_week = ? AND exercise_date = ? AND exercise_id = ?";
+        $stmt_update_tpe = $pdo->prepare($sql_update_tpe);
+        
+        $order_index = 0;
+        $inserted_count = 0;
+        $updated_count = 0;
         
         foreach ($exercises as $exercise) {
             $exercise_id_val = isset($exercise['exercise_id']) && $exercise['exercise_id'] !== ''
                 ? (int)$exercise['exercise_id']
                 : (isset($exercise['id']) ? (int)$exercise['id'] : null);
-            // 檢查是否已存在相同的動作記錄
-            $stmt_check_existing->execute([$plan_id, $user_id, $exercise_id_val, $day_of_week]);
-            $existing_record = $stmt_check_existing->fetch(PDO::FETCH_ASSOC);
             
-            if ($existing_record && $exercise_id_val) {
-                // 更新現有記錄
-                $stmt_update_completion->execute([
-                    $exercise['name'],
-                    $exercise['muscleGroup'],
-                    $exercise['sets'],
-                    $exercise['reps'],
-                    isset($exercise['weight']) ? $exercise['weight'] : null,
-                    isset($exercise['completed']) && $exercise['completed'] ? 1 : 0,
-                    isset($exercise['completed']) && $exercise['completed'] ? date('Y-m-d H:i:s') : null,
-                    $plan_id,
-                    $user_id,
-                    $exercise_id_val,
-                    $day_of_week
-                ]);
-            } else if ($exercise_id_val) {
-                // 插入新記錄
-                $stmt_insert_completion->execute([
-                    $plan_id,
-                    $user_id,
-                    $exercise_id_val,
-                    $exercise['name'],
-                    $exercise['muscleGroup'],
-                    $exercise['sets'],
-                    $exercise['reps'],
-                    isset($exercise['weight']) ? $exercise['weight'] : null,
-                    isset($exercise['completed']) && $exercise['completed'] ? 1 : 0,
-                    isset($exercise['completed']) && $exercise['completed'] ? date('Y-m-d H:i:s') : null,
-                    $week_number,
-                    $day_of_week
-                ]);
+            if (!$exercise_id_val || $exercise_id_val <= 0) {
+                continue; // 跳過無效的動作 ID
             }
+            
+            $exercise_name = $exercise['name'] ?? $exercise['exercise_name'] ?? '';
+            $muscle_group = $exercise['muscleGroup'] ?? $exercise['muscle_group'] ?? '';
+            $sets = isset($exercise['sets']) ? (int)$exercise['sets'] : 0;
+            $reps = isset($exercise['reps']) ? (int)$exercise['reps'] : 0;
+            $weight = isset($exercise['weight']) && $exercise['weight'] !== '' ? (float)$exercise['weight'] : null;
+            $rest_time = isset($exercise['restTime']) ? $exercise['restTime'] : null;
+            $notes = isset($exercise['notes']) ? $exercise['notes'] : null;
+            $order_idx = isset($exercise['order_index']) ? (int)$exercise['order_index'] : $order_index;
+            
+            // 檢查是否已存在相同的動作記錄
+            $stmt_check_existing_tpe->execute([$plan_id, $day_of_week, $date, $exercise_id_val]);
+            $existing_tpe = $stmt_check_existing_tpe->fetch(PDO::FETCH_ASSOC);
+            
+            if ($existing_tpe) {
+                // 更新現有記錄
+                $stmt_update_tpe->execute([
+                    $exercise_name,
+                    $muscle_group,
+                    $sets,
+                    $reps,
+                    $weight,
+                    $plan_id,
+                    $day_of_week,
+                    $date,
+                    $exercise_id_val
+                ]);
+                $updated_count++;
+                error_log("syncCalendarExercise: 更新 training_plan_exercises - plan_id=$plan_id, exercise_id=$exercise_id_val, date=$date");
+            } else {
+                // 插入新記錄
+                $stmt_insert_tpe->execute([
+                    $plan_id,
+                    $day_of_week,
+                    $date,
+                    $exercise_id_val,
+                    $exercise_name,
+                    $muscle_group,
+                    $sets,
+                    $reps,
+                    $weight,
+                    $rest_time,
+                    $notes,
+                    $order_idx
+                ]);
+                $inserted_count++;
+                error_log("syncCalendarExercise: 插入 training_plan_exercises - plan_id=$plan_id, exercise_id=$exercise_id_val, date=$date, name=$exercise_name");
+            }
+            
+            $order_index++;
         }
         
-        // 4. 更新整體完成統計
+        // 統計資訊
         $total_exercises = count($exercises);
-        $completed_exercises = count(array_filter($exercises, function($ex) { return isset($ex['completed']) && $ex['completed']; }));
-        $completion_percentage = $total_exercises > 0 ? ($completed_exercises / $total_exercises) * 100 : 0;
-        
-        // 更新或插入整體完成記錄
-        $sql_upsert_overall = "INSERT INTO training_plan_completion (plan_id, user_id, exercise_id, exercise_name, muscle_group, sets, reps, weight, individual_completed, individual_completed_at, week_number, day_of_week, is_completed, completed_at, completion_percentage, total_exercises, completed_exercises) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?) ON DUPLICATE KEY UPDATE is_completed = VALUES(is_completed), completed_at = VALUES(completed_at), completion_percentage = VALUES(completion_percentage), total_exercises = VALUES(total_exercises), completed_exercises = VALUES(completed_exercises)";
-        $stmt_upsert_overall = $pdo->prepare($sql_upsert_overall);
-        
-        // 插入一個特殊的整體完成記錄（exercise_id = 0 表示整體記錄）
-        $stmt_upsert_overall->execute([
-            $plan_id,
-            $user_id,
-            0, // exercise_id = 0 表示整體記錄
-            '整體完成記錄',
-            '整體',
-            0, // sets
-            0, // reps
-            null, // weight
-            0, // individual_completed
-            null, // individual_completed_at
-            $week_number,
-            $day_of_week,
-            $completed_exercises > 0 ? 1 : 0, // is_completed
-            $completed_exercises > 0 ? date('Y-m-d H:i:s') : null, // completed_at
-            $completion_percentage,
-            $total_exercises,
-            $completed_exercises
-        ]);
         
         // 提交事務
         $pdo->commit();
         
         echo json_encode([
             'success' => true,
-            'message' => '行事曆動作同步成功',
+            'message' => '行事曆動作同步成功（已寫入 training_plan_exercises 表）',
             'plan_id' => $plan_id,
             'exercises_count' => $total_exercises,
-            'completed_count' => $completed_exercises
+            'inserted_count' => $inserted_count,
+            'updated_count' => $updated_count
         ]);
         
     } catch (Exception $e) {

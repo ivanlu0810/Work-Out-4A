@@ -8133,14 +8133,46 @@
                 }
             }
             
-            // 如果還是找不到，嘗試查找該用戶最近的計畫
+            // 方法3: 如果還是找不到，使用 week_start_date 來查找或建立計畫
             if (!planId) {
-                console.warn('找不到對應的 plan_id，嘗試使用最近的計畫');
-                // 這裡可以添加備用邏輯，但先讓它失敗以提醒用戶
+                try {
+                    console.log('方法3 - 使用 week_start_date 查找或建立計畫:', weekMondayStr);
+                    
+                    // 先嘗試用 week_start_date 查找
+                    const response3 = await fetch(`../exercise-completion-api.php?action=get_plan_by_week_start&week_start_date=${weekMondayStr}&user_id=${userId}`);
+                    const result3 = await response3.json();
+                    console.log('方法3 - get_plan_by_week_start API 回應:', result3);
+                    
+                    if (result3.success && result3.plan_id) {
+                        planId = result3.plan_id;
+                        weekNumber = result3.week_number || weekNumber;
+                    } else {
+                        // 如果找不到，自動建立一個新的訓練計畫
+                        console.log('方法3 - 找不到計畫，自動建立新計畫');
+                        const createResponse = await fetch('../exercise-completion-api.php?action=create_plan', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                user_id: userId,
+                                week_number: weekNumber,
+                                week_start_date: weekMondayStr
+                            })
+                        });
+                        const createResult = await createResponse.json();
+                        console.log('方法3 - create_plan API 回應:', createResult);
+                        
+                        if (createResult.success && createResult.plan_id) {
+                            planId = createResult.plan_id;
+                            console.log('方法3 - 成功建立新計畫，plan_id:', planId);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('方法3 失敗:', e);
+                }
             }
             
             if (!planId) {
-                throw new Error('無法獲取 planId：找不到對應該日期的訓練計畫。請先建立訓練計畫。');
+                throw new Error('無法獲取 planId：找不到對應該日期的訓練計畫，且無法自動建立。');
             }
             
             console.log('最終使用的 plan_id:', planId, 'week_number:', weekNumber);
