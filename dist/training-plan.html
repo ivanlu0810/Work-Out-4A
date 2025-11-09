@@ -9079,7 +9079,13 @@
             try {
                 console.log('開始載入行事曆資料...');
                 console.log('📌 使用當前使用者 ID:', currentUserId);
-                const response = await fetch(`../exercise-completion-api.php?action=get_calendar_data&user_id=${currentUserId}`);
+                console.log('📌 currentUserId 類型:', typeof currentUserId);
+                console.log('📌 currentUserId 值:', currentUserId);
+                
+                const apiUrl = `../exercise-completion-api.php?action=get_calendar_data&user_id=${currentUserId}`;
+                console.log('📌 API URL:', apiUrl);
+                
+                const response = await fetch(apiUrl);
                 
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
@@ -9093,9 +9099,29 @@
                     // 直接使用原始資料，不要過濾（因為不同模板有不同訓練日）
                     calendarTrainingData = result.data;
                     
+                    // 計算總動作數
+                    let totalExercises = 0;
+                    Object.keys(calendarTrainingData).forEach(dateKey => {
+                        const dayData = calendarTrainingData[dateKey];
+                        if (Array.isArray(dayData)) {
+                            totalExercises += dayData.length;
+                        }
+                    });
+                    
                     console.log('✅ 行事曆資料載入成功，共 ' + Object.keys(calendarTrainingData).length + ' 天的資料');
                     console.log('📊 API 回傳 count:', result.count);
-                    console.log('📅 有資料的日期:', Object.keys(calendarTrainingData).slice(0, 10).join(', '));
+                    console.log('📊 API 回傳 total_exercises:', result.total_exercises);
+                    console.log('📊 API 回傳 raw_exercises_count:', result.raw_exercises_count);
+                    console.log('📊 前端計算的總動作數:', totalExercises);
+                    console.log('📅 有資料的日期:', Object.keys(calendarTrainingData).slice(0, 20).join(', '));
+                    
+                    // 詳細記錄每個日期的動作數量
+                    Object.keys(calendarTrainingData).forEach(dateKey => {
+                        const dayData = calendarTrainingData[dateKey];
+                        if (Array.isArray(dayData) && dayData.length > 0) {
+                            console.log(`📅 ${dateKey}: ${dayData.length} 個動作`, dayData.map(ex => ex.name || ex.exercise_name || '未知').join(', '));
+                        }
+                    });
                     
                     // 調試：檢查相撲深蹲的完成狀態
                     Object.keys(calendarTrainingData).forEach(dateKey => {
@@ -9324,7 +9350,11 @@
             
             // 同步到資料庫
             try {
-                await syncCalendarExerciseToDatabase(targetDate, exercise);
+                await syncCalendarExerciseToDatabase(targetDate);
+                // 重新載入行事曆資料，確保與資料庫同步
+                await loadCalendarDataWithoutRendering();
+                // 更新行事曆顯示
+                updateCalendarTrainingData();
                 showSuccessMessage(`已為 ${targetDate.getMonth() + 1}月${targetDate.getDate()}日 新增 ${exerciseName} 並同步到資料庫！`);
             } catch (error) {
                 console.error('同步到資料庫失敗:', error);

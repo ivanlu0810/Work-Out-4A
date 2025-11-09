@@ -546,6 +546,43 @@ function getCalendarData($pdo) {
         $stmt_e->execute([$user_id]);
         $exercises = $stmt_e->fetchAll(PDO::FETCH_ASSOC);
         
+        // 調試：記錄讀取的動作數量
+        error_log("getCalendarData: user_id = " . $user_id);
+        error_log("getCalendarData: 從 training_plan_exercises 讀取了 " . count($exercises) . " 個動作記錄");
+        if (count($exercises) > 0) {
+            error_log("getCalendarData: 第一個動作範例: " . json_encode($exercises[0]));
+            // 統計不同日期的動作數量
+            $date_counts = [];
+            foreach ($exercises as $ex) {
+                $date = $ex['exercise_date'];
+                if (is_object($date)) {
+                    $date_key = $date->format('Y-m-d');
+                } else {
+                    $date_key = date('Y-m-d', strtotime($date));
+                }
+                if (!isset($date_counts[$date_key])) {
+                    $date_counts[$date_key] = 0;
+                }
+                $date_counts[$date_key]++;
+            }
+            error_log("getCalendarData: 日期統計: " . json_encode($date_counts));
+        } else {
+            error_log("getCalendarData: 警告！沒有讀取到任何動作記錄！");
+            // 檢查是否有該用戶的計畫
+            $check_plan_sql = "SELECT COUNT(*) as plan_count FROM training_plans WHERE user_id = ?";
+            $check_plan_stmt = $pdo->prepare($check_plan_sql);
+            $check_plan_stmt->execute([$user_id]);
+            $plan_count = $check_plan_stmt->fetch(PDO::FETCH_ASSOC);
+            error_log("getCalendarData: 該用戶的計畫數量: " . $plan_count['plan_count']);
+            
+            // 檢查是否有該用戶的動作記錄
+            $check_ex_sql = "SELECT COUNT(*) as ex_count FROM training_plan_exercises tpe JOIN training_plans tp ON tp.id = tpe.plan_id WHERE tp.user_id = ?";
+            $check_ex_stmt = $pdo->prepare($check_ex_sql);
+            $check_ex_stmt->execute([$user_id]);
+            $ex_count = $check_ex_stmt->fetch(PDO::FETCH_ASSOC);
+            error_log("getCalendarData: 該用戶的動作記錄數量: " . $ex_count['ex_count']);
+        }
+        
         // 從 training_plan_completion 讀取完成狀態（已完成的部分）
         // 讀取所有完成狀態記錄，不只 individual_completed = 1，也包括其他可能的狀態值
         $sql_from_completion = "SELECT 
@@ -755,11 +792,20 @@ function getCalendarData($pdo) {
             }
         }
         
+        // 調試：記錄最終的資料統計
+        $total_exercises_in_calendar = 0;
+        foreach ($calendar_data as $date_key => $day_exercises) {
+            $total_exercises_in_calendar += count($day_exercises);
+        }
+        error_log("getCalendarData: 最終行事曆資料 - 有資料的日期數: " . count($calendar_data) . ", 總動作數: " . $total_exercises_in_calendar);
+        
         echo json_encode([
             'success' => true,
             'data' => $calendar_data,
             'message' => '行事曆資料載入成功（從 training_plans 和 training_plan_exercises 讀取）',
-            'count' => count($calendar_data)
+            'count' => count($calendar_data),
+            'total_exercises' => $total_exercises_in_calendar,
+            'raw_exercises_count' => count($exercises)
         ]);
         
     } catch (Exception $e) {
@@ -885,7 +931,7 @@ function syncCalendarExercise($pdo) {
         $sql_insert_tpe = "INSERT INTO training_plan_exercises (plan_id, day_of_week, exercise_date, exercise_id, exercise_name, muscle_group, sets, reps, weight, rest_time, notes, order_index) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         $stmt_insert_tpe = $pdo->prepare($sql_insert_tpe);
         
-        $sql_update_tpe = "UPDATE training_plan_exercises SET exercise_name = ?, muscle_group = ?, sets = ?, reps = ?, weight = ?, updated_at = CURRENT_TIMESTAMP WHERE plan_id = ? AND day_of_week = ? AND exercise_date = ? AND exercise_id = ?";
+        $sql_update_tpe = "UPDATE training_plan_exercises SET exercise_name = ?, muscle_group = ?, sets = ?, reps = ?, weight = ? WHERE plan_id = ? AND day_of_week = ? AND exercise_date = ? AND exercise_id = ?";
         $stmt_update_tpe = $pdo->prepare($sql_update_tpe);
         
         $order_index = 0;
