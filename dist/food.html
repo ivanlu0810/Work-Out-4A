@@ -5324,6 +5324,19 @@ function renderPickerTable(foods) {
 
             const pools = buildPools();
 
+            // 將同餐內相同食材合併：若已存在則只增加 grams
+            function pushOrMerge(meal, item) {
+                if (!mealPlan[meal]) mealPlan[meal] = [];
+                const idx = mealPlan[meal].findIndex(it => it.name === item.name);
+                if (idx !== -1) {
+                    const exist = mealPlan[meal][idx];
+                    const nextG = Math.round((exist.grams || 0) + (item.grams || 0));
+                    mealPlan[meal][idx] = { ...exist, grams: nextG };
+                } else {
+                    mealPlan[meal].push(item);
+                }
+            }
+
             function addItemForMacro(macro) {
                 // 依各餐相對於目標熱量的缺口排序，優先補缺口較大的餐
                 function mealCalories(meal) {
@@ -5364,7 +5377,7 @@ function renderPickerTable(foods) {
                             carbsPer100: c,
                             fatPer100: ft
                         };
-                        mealPlan[meal].push(item);
+                        pushOrMerge(meal, item);
                         return true;
                     }
                 }
